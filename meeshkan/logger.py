@@ -1,13 +1,16 @@
 import logging
 import logging.config as config
+import os
 
 _loggers = {}
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 def get(name):
     if name in _loggers:
         return _loggers[name]
-    config.fileConfig(fname='logging.conf',
+    config.fileConfig(fname=os.path.join(dir_path, 'logging.conf'),
                       disable_existing_loggers=False)
     logger = logging.getLogger(name)
     _loggers[name] = logger
