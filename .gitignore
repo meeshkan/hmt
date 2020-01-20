@@ -1,0 +1,10 @@
+node_modules
+.venv
+.vscode
+*.pyc
+.python-version
+.vscode/
+.pytest_cache/
+.ipynb_checkpoints/
+.testmondata
+*.egg-info/
