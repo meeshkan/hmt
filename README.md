@@ -2,9 +2,11 @@
 
 Reverse engineer services with style 🤓💾🚀
 
-Full documentation coming soon.
-
 **Requires Python 3.6+**.
+
+## Usage
+
+**Documentation coming soon.**
 
 ## Development
 
@@ -13,7 +15,13 @@ Full documentation coming soon.
 1. Create virtual environment
 1. Install dependencies: `pip install --upgrade -e .[dev]`
 
-**Requires Python 3.6+**.
+### Invoking CLI
+
+Build OpenAPI schema from API recordings:
+
+```bash
+$ python -m meeshkan < resources/sample.jsonl
+```
 
 ### Tests
 
