@@ -32,12 +32,13 @@ jobs: # A basic unit of work in a run
             source $VENV_HOME_DIR/bin/activate
             pytest -s
       - run:
+          # FIXME Fix type-checking for pyright 1.1.20 https://github.com/Meeshkan/meeshkan/issues/1
           name: Install pyright and run typecheck
           command: |
             set +e
             echo 'export PATH=$(yarn global bin):$PATH' >> $BASH_ENV
             source $BASH_ENV
-            yarn global add pyright
+            yarn global add pyright@1.1.10
             export VENV_HOME_DIR=$(pipenv --venv)
             source $VENV_HOME_DIR/bin/activate
             pyright --lib
