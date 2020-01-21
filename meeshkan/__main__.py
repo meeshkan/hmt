@@ -1,5 +1,5 @@
 import click
-from .schemabuilder import build_schema_batch
+from .schemabuilder import build_schema_online
 import json
 from http_types import RequestResponseBuilder
 from .logger import get as getLogger
@@ -27,14 +27,11 @@ def build(input_file, out):
     Build OpenAPI schema from recordings.
     """
     requests = []
-    schema = {}
-    for line in input_file:
-        requests.append(RequestResponseBuilder.from_dict(
-            json.loads(line)))  # This is really dumb
-        new_schema = build_schema_batch(requests)
-        if new_schema != schema:
-            log("Updated schema:\n%s", dump(new_schema))
-        schema = new_schema
+
+    requests = (RequestResponseBuilder.from_dict(
+        json.loads(line)) for line in input_file)
+
+    schema = build_schema_online(requests)
 
     schema_yaml = cast(str, dump(schema))
     log("Result:\n%s", schema_yaml)
