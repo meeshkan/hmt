@@ -38,6 +38,8 @@ DEV = [
 
 VERSION = '0.0.0'
 
+ENTRY_POINTS = ['meeshkan = meeshkan.__main__:main']
+
 # Optional packages
 EXTRAS = {'dev': DEV}
 
@@ -122,6 +124,7 @@ setup(name=NAME,
           'Operating System :: OS Independent',
       ],
       zip_safe=False,
+      entry_points={'console_scripts': ENTRY_POINTS},
       cmdclass={'dist': BuildDistCommand,
                 'test': TestCommand,
                 'typecheck': TypeCheckCommand}

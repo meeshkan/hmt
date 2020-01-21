@@ -22,7 +22,7 @@ Reverse engineer services with style 🤓💾🚀
 Build OpenAPI schema from API recordings:
 
 ```bash
-$ python -m meeshkan < resources/sample.jsonl
+$ meeshkan < resources/sample.jsonl
 ```
 
 ### Tests
