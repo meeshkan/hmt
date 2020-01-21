@@ -17,6 +17,7 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = '\n' + f.read()
 
 REQUIRED = [
+    'click',
     'pyyaml',
     'jsonschema',
     'typing-extensions',
@@ -38,7 +39,7 @@ DEV = [
 
 VERSION = '0.0.0'
 
-ENTRY_POINTS = ['meeshkan = meeshkan.__main__:main']
+ENTRY_POINTS = ['meeshkan = meeshkan.__main__:cli']
 
 # Optional packages
 EXTRAS = {'dev': DEV}
