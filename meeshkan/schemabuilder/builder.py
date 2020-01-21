@@ -211,7 +211,7 @@ def update(schema: OpenAPIObject, request: RequestResponse) -> OpenAPIObject:
 
     if request['req']['path'] in schema_copy['paths']:
         # Path item exists for request path
-        path_item = schema_copy['paths'][request['req']['path']]
+        path_item: PathItem = schema_copy['paths'][request['req']['path']]
     else:
         path_item = PathItem(summary="Path summary",
                              description="Path description")
