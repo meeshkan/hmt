@@ -1,5 +1,7 @@
 # Meeshkan
 
+[![CircleCI](https://circleci.com/gh/Meeshkan/meeshkan.svg?style=svg)](https://circleci.com/gh/Meeshkan/meeshkan)
+
 Reverse engineer services with style 🤓💾🚀
 
 **Requires Python 3.6+**.
