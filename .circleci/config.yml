@@ -14,14 +14,14 @@ jobs: # A basic unit of work in a run
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
       - restore_cache:
           # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }-1
       - run:
           command: |
-            sudo pip install pipenv
+            sudo pip install --upgrade pipenv
             pipenv install -e .[dev]
             pipenv update
       - save_cache: # cache Python dependencies using checksum of Pipfile as the cache-key
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-1
           paths:
             - ".venv"
             - "/usr/local/bin"

@@ -1,4 +1,4 @@
-from setuptools import setup, Command
+from setuptools import setup, Command, find_packages
 from shutil import rmtree
 import os
 import sys
@@ -115,7 +115,7 @@ setup(name=NAME,
       author_email=EMAIL,
       python_requires=REQUIRES_PYTHON,
       license='MIT',
-      packages=['meeshkan'],
+      packages=find_packages(exclude=('tests',)),
       include_package_data=True,
       install_requires=REQUIRED,
       extras_require=EXTRAS,
