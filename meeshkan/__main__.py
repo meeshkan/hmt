@@ -26,8 +26,6 @@ def build(input_file, out):
     """
     Build OpenAPI schema from recordings.
     """
-    requests = []
-
     requests = (RequestResponseBuilder.from_dict(
         json.loads(line)) for line in input_file)
 
