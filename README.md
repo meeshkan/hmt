@@ -19,10 +19,26 @@ Reverse engineer services with style 🤓💾🚀
 
 ### Invoking CLI
 
-Build OpenAPI schema from API recordings:
+See all commands:
+
+```
+$ meeshkan --help
+```
+
+#### Building schemas
+
+Build OpenAPI schema from recordings:
 
 ```bash
-$ meeshkan < resources/sample.jsonl
+$ meeshkan build -i resources/sample.jsonl [-o path/to/output.yaml]
+```
+
+Use `-i -` to read from standard input.
+
+See help for `build` command:
+
+```bash
+$ meeshkan build --help
 ```
 
 ### Tests

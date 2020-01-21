@@ -1,5 +1,5 @@
 from meeshkan.schemabuilder.json_schema import to_json_schema, to_openapi_json_schema
-from .util import request_samples_dict
+from ..util import request_samples_dict
 import json
 from hamcrest import *
 

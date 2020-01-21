@@ -2,7 +2,7 @@ import copy
 from meeshkan.schemabuilder import build_schema_batch
 from meeshkan.schemabuilder.builder import BASE_SCHEMA
 from meeshkan.schemabuilder.schema import validate_openapi_object
-from .util import request_samples
+from ..util import request_samples
 from openapi_typed import OpenAPIObject, Operation, PathItem, Response, Schema
 from typeguard import check_type
 import pytest
