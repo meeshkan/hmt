@@ -26,7 +26,7 @@ def cli():
 
 @click.command()
 @click.option("-i", "--input-file", required=True, type=click.File('rb'), help="Input file. Use dash '-' to read from stdin.")
-@click.option("-o", "--out", required=False, default='out', type=click.Path(exists=False, file_okay=False, writable=True, readable=True), help="Output folder. If omitted, output is to.")
+@click.option("-o", "--out", required=False, default='out', type=click.Path(exists=False, file_okay=False, writable=True, readable=True), help="Output folder. If the folder does not exist, the parent directory must exist.")
 def build(input_file, out):
     """
     Build OpenAPI schema from recordings.
