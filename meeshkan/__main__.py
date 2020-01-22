@@ -1,22 +1,27 @@
 import click
-from .schemabuilder import build_schema_online
 import json
 from http_types import RequestResponseBuilder
-from .logger import get as getLogger
 from yaml import dump
 from typing import cast
 
+from .schemabuilder import build_schema_online
+from .config import setup
+from .logger import get as getLogger
 
-logger = getLogger(__name__)
+
+LOGGER = getLogger(__name__)
 
 
 def log(*args):
-    logger.debug(*args)
+    LOGGER.debug(*args)
 
 
 @click.group()
 def cli():
-    pass
+    """
+    Meeshkan CLI.
+    """
+    setup()  # Ensure setup is done before invoking the CLI.
 
 
 @click.command()
@@ -32,7 +37,7 @@ def build(input_file, out):
     schema = build_schema_online(requests)
 
     schema_yaml = cast(str, dump(schema))
-    log("Result:\n%s", schema_yaml)
+    log("Result: %s", json.dumps(schema))
 
     if out is not None:
         with open(out, 'wb') as f:
