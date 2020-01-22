@@ -29,6 +29,7 @@ REQUIRED = [
 
 DEV = [
     'pytest',
+    'pylint',
     'setuptools',
     'twine',
     'wheel',
