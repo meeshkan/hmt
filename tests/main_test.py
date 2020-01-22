@@ -1,27 +1,46 @@
 from meeshkan.__main__ import cli
+from meeshkan.schemabuilder.writer import read_directory
 from click.testing import CliRunner
 from .util import read_requests
-import yaml
 from hamcrest import assert_that, has_key
+from pathlib import Path
+from typing import List
 
 requests = read_requests()
 
 
-def test_cli_build():
+def write_input_file(target_file: str, requests: List[str]):
+    with open(target_file, 'w') as f:
+        for request in requests:
+            f.write(request)
+
+
+def test_build_cmd():
+    """An uber test verifying build command input and output.
+    """
     runner = CliRunner()
 
+    input_file = 'input.jsonl'
+    output_directory = 'out'
+
     with runner.isolated_filesystem():
-        with open('input.jsonl', 'w') as f:
-            for request in requests:
-                f.write(request)
+        output_directory_path = Path(output_directory)
+        # Prepare input file
+        write_input_file(input_file, requests)
 
-        result = runner.invoke(
-            cli, ['build', '-i', 'input.jsonl', '-o', 'output.yaml'])
+        assert not output_directory_path.is_dir(
+        ), "Output directory {} should not exist yet".format(output_directory)
 
-        # Smoke test output
-        with open('output.yaml', 'rb') as f:
-            as_yaml = yaml.safe_load(f)
-            assert_that(as_yaml, has_key("openapi"))
+        runner_result = runner.invoke(
+            cli, ['build', '-i', input_file, '-o', output_directory])
 
-    assert result.exit_code == 0
-    assert len(result.output) == 0
+        assert output_directory_path.is_dir(
+        ), "Output directory {} should exist".format(output_directory)
+
+        build_result = read_directory(output_directory)
+
+    # Verify result
+    assert_that(build_result, has_key('openapi'))
+
+    assert runner_result.exit_code == 0
+    assert len(runner_result.output) == 0
