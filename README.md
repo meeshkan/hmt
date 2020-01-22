@@ -68,3 +68,6 @@ Using the [Pyright extension](https://marketplace.visualstudio.com/items?itemNam
 ### Automated builds
 
 Configuration for CircleCI [build pipeline](https://app.circleci.com/github/Meeshkan/meeshkan/pipelines) can be found in [.circleci/config.yml](./.circleci/config.yml).
+
+### Input format
+The supported input format is in the [HTTP Types](https://github.com/Meeshkan/http-types) format. The libraries listed there may be used to generate input files in your language of choice.
