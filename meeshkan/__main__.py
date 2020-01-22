@@ -1,10 +1,10 @@
+from meeshkan.schemabuilder.result import BuildResult
 import click
 import json
 from http_types import RequestResponseBuilder
-from yaml import dump
-from typing import cast
 
 from .schemabuilder import build_schema_online
+from .schemabuilder.writer import write_build_result
 from .config import setup
 from .logger import get as getLogger
 
@@ -26,7 +26,7 @@ def cli():
 
 @click.command()
 @click.option("-i", "--input-file", required=True, type=click.File('rb'), help="Input file. Use dash '-' to read from stdin.")
-@click.option("-o", "--out", required=False, default=None, type=click.Path(exists=False), help="Output file. If omitted, output is written to stdout.")
+@click.option("-o", "--out", required=False, default='out', type=click.Path(exists=False, file_okay=False, writable=True, readable=True), help="Output folder. If omitted, output is to.")
 def build(input_file, out):
     """
     Build OpenAPI schema from recordings.
@@ -36,15 +36,10 @@ def build(input_file, out):
 
     schema = build_schema_online(requests)
 
-    schema_yaml = cast(str, dump(schema))
-    log("Result: %s", json.dumps(schema))
+    build_result = BuildResult(openapi=schema)
 
-    if out is not None:
-        with open(out, 'wb') as f:
-            log("Writing to: %s\n", out)
-            f.write(schema_yaml.encode())
-    else:
-        print(schema_yaml)
+    log("Result: %s", json.dumps(schema))
+    write_build_result(out, build_result)
 
 
 cli.add_command(build)  # type: ignore
