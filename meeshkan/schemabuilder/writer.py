@@ -13,7 +13,7 @@ LOGGER = getLogger(__name__)
 OPENAPI_FILENAME = 'openapi.yaml'
 
 
-def read_openapi(file: Path) -> OpenAPIObject:
+def _read_openapi(file: Path) -> OpenAPIObject:
     """Read an OpenAPI YAML from file.
 
     Arguments:
@@ -38,18 +38,18 @@ def read_directory(directory: str) -> BuildResult:
     Returns:
         BuildResult -- Build result.
     """
-    path = resolve_path(directory)
+    path = _resolve_path(directory)
 
     if not path.is_dir():
         raise FileNotFoundError("Cannot read from {}".format(str(path)))
 
     openapi_path = path / OPENAPI_FILENAME
-    openapi_object = read_openapi(openapi_path)
+    openapi_object = _read_openapi(openapi_path)
 
     return BuildResult(openapi=openapi_object)
 
 
-def ensure_dir_exists(path: Path) -> None:
+def _ensure_dir_exists(path: Path) -> None:
     """Ensure directory at `path` exists. Does NOT create parent directories.
 
     Arguments:
@@ -61,7 +61,7 @@ def ensure_dir_exists(path: Path) -> None:
     path.mkdir(parents=False, exist_ok=True)
 
 
-def resolve_path(directory: str) -> Path:
+def _resolve_path(directory: str) -> Path:
     """Return directory as absolute Path.
 
     Arguments:
@@ -81,10 +81,10 @@ def write_build_result(directory: str, result: BuildResult) -> None:
         directory {str} -- Directory where to write results, possibly relative.
         result {BuildResult} -- Builder result.
     """
-    output_dir_path = resolve_path(directory)
+    output_dir_path = _resolve_path(directory)
     LOGGER.info("Writing to folder %s.", str(output_dir_path))
 
-    ensure_dir_exists(output_dir_path)
+    _ensure_dir_exists(output_dir_path)
 
     openapi_output = output_dir_path / OPENAPI_FILENAME
 
