@@ -15,7 +15,7 @@ Reverse engineer services with style 🤓💾🚀
 ### Getting started
 
 1. Create virtual environment
-1. Install dependencies: `pip install --upgrade -e .[dev]`
+1. Install dependencies: `pip install --upgrade -e '.[dev]'`
 
 ### Invoking CLI
 
