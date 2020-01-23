@@ -65,7 +65,7 @@ Converter does not decrypt captured packages, so only files containing plain une
 
 ### Tests
 
-Run [tests/](./tests/) with `pytest`:
+Run [tests/](https://github.com/Meeshkan/meeshkan/tree/master/tests/) with `pytest`:
 
 ```bash
 pytest
@@ -73,7 +73,7 @@ pytest
 python setup.py test
 ```
 
-Configuration for `pytest` is found in [pytest.ini](./pytest.ini).
+Configuration for `pytest` is found in [pytest.ini](https://github.com/Meeshkan/meeshkan/tree/master/pytest.ini).
 
 ### Type-checking
 
@@ -89,15 +89,15 @@ Using the [Pyright extension](https://marketplace.visualstudio.com/items?itemNam
 
 ### Automated builds
 
-Configuration for CircleCI [build pipeline](https://app.circleci.com/github/Meeshkan/meeshkan/pipelines) can be found in [.circleci/config.yml](./.circleci/config.yml).
+Configuration for CircleCI [build pipeline](https://app.circleci.com/github/Meeshkan/meeshkan/pipelines) can be found in [.circleci/config.yml](https://github.com/Meeshkan/meeshkan/tree/master/.circleci/config.yml).
 
 ### Publishing package
 
-1. Bump the version in [setup.py](./setup.py) if the version is the same as in the published [package](https://pypi.org/project/meeshkan/). Commit and push.
+1. Bump the version in [setup.py](https://github.com/Meeshkan/meeshkan/tree/master/setup.py) if the version is the same as in the published [package](https://pypi.org/project/meeshkan/). Commit and push.
 1. Run `python setup.py test`, `python setup.py typecheck` and `python setup.py dist` to check everything works
-1. To build and upload the package, run `python setup.py upload`. Insert PyPI credentials to upload the pacakge to `PyPI`. The command will also run `git tag` to tag the commit as a release and push the tags to remote.
+1. To build and upload the package, run `python setup.py upload`. Insert PyPI credentials to upload the package to `PyPI`. The command will also run `git tag` to tag the commit as a release and push the tags to remote.
 
-To see what the different commands do, see `Command` classes in [setup.py](./setup.py).
+To see what the different commands do, see `Command` classes in [setup.py](https://github.com/Meeshkan/meeshkan/tree/master/setup.py).
 
 ## Contributing
 

@@ -67,7 +67,7 @@ class SetupCommand(Command):
 
 
 def build():
-    os.system(
+    return os.system(
         "{executable} setup.py sdist bdist_wheel --universal".format(executable=sys.executable))
 
 
