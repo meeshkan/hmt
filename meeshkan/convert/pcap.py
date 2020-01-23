@@ -144,15 +144,17 @@ def convert_pcap(filepath: str) -> Iterator[RequestResponsePair]:
 
     check_tshark_exists()
 
-    resolved_path = Path(filepath).resolve()
+    if filepath == '-':
+        raise NotImplementedError("File path '-' detected. Reading from stdin is not implemented yet.")
 
+    resolved_path = Path(filepath).resolve()
     if not resolved_path.is_file():
         raise FileNotFoundError("Not a file: {}".format(filepath))
 
     tshark_cmd = "tshark -r {} -Y http -E separator=, -E aggregator='\t' -E header=y -E occurrence=a -E quote=s -T fields -e tcp.stream -e _ws.col.Protocol -e http.request.method -e http.request.uri -e http.request.uri.path -e http.request.uri.query -e http.request.full_uri -e http.request.line -e http.transfer_encoding -e http.response.code -e http.response_for.uri -e http.response.line -e http.file_data".format(
         resolved_path)
 
-    # TODO Stream stdout with subprocess.Popen
+    # TODO Stream stdout with subprocess.Popen instead of reading the whole output into memory
     tshark_proc = subprocess.run(
         tshark_cmd, shell=True, stdout=subprocess.PIPE)
 

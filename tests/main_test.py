@@ -1,12 +1,13 @@
 from meeshkan.__main__ import cli
 from meeshkan.schemabuilder.writer import read_directory
 from click.testing import CliRunner
-from .util import read_requests
+from .util import read_recordings_as_strings
 from hamcrest import assert_that, has_key
 from pathlib import Path
 from typing import List
+from shutil import copyfile
 
-requests = read_requests()
+requests = read_recordings_as_strings()
 
 
 def write_input_file(target_file: str, requests: List[str]):
@@ -44,3 +45,20 @@ def test_build_cmd():
 
     assert runner_result.exit_code == 0
     assert len(runner_result.output) == 0
+
+def test_convert_cmd():
+    runner = CliRunner()
+
+    input_file = Path('resources/recordings.pcap').resolve()  # Absolute path, can be accessed in Click's "isolated filesystem"
+    output_file = 'recordings.jsonl'
+
+    with runner.isolated_filesystem():
+        
+        assert not Path(output_file).is_file(), "Expected output file {} to not exist".format(output_file)
+
+        runner_result = runner.invoke(
+            cli, ['convert', '-i', str(input_file), '-o', output_file])
+
+        assert Path(output_file).is_file(), "Expected output file {} to exist".format(output_file)
+
+        assert runner_result.exit_code == 0
