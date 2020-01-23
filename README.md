@@ -41,6 +41,14 @@ See help for `build` command:
 $ meeshkan build --help
 ```
 
+#### Converting from pcap
+
+To convert from [packet capture files](https://en.wikipedia.org/wiki/Pcap) to `http-types` recordings format, use the `convert` command:
+
+```bash
+meeshkan convert -i /path/to/file.pcap -o recordings.jsonl
+```
+
 ### Tests
 
 Run [tests/](./tests/) with `pytest`:
