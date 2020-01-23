@@ -2,6 +2,8 @@
 
 [![CircleCI](https://circleci.com/gh/Meeshkan/meeshkan.svg?style=svg)](https://circleci.com/gh/Meeshkan/meeshkan)
 [![PyPI](https://img.shields.io/pypi/dm/meeshkan.svg)](https://pypi.org/project/meeshkan/)
+[![PyPi](https://img.shields.io/pypi/pyversions/meeshkan)](https://pypi.org/project/meeshkan/)
+[![License](https://img.shields.io/pypi/l/meeshkan)](LICENSE)
 
 Reverse engineer services with style 🤓💾🚀
 
@@ -44,7 +46,7 @@ $ meeshkan build -i - < recordings.jsonl
 
 ### Converting from pcap
 
-You can convert [packet capture files](https://en.wikipedia.org/wiki/Pcap) to `http-types` recordings format using the `convert` command:
+You can convert [packet capture files](https://en.wikipedia.org/wiki/Pcap) to [HTTP Types](https://github.com/Meeshkan/http-types) format using the `convert` command:
 
 ```bash
 meeshkan convert -i /path/to/file.pcap -o recordings.jsonl
@@ -52,7 +54,7 @@ meeshkan convert -i /path/to/file.pcap -o recordings.jsonl
 
 **Executable [tshark](https://www.wireshark.org/docs/man-pages/tshark.html) must be present in your PATH.**
 
-Note that no decryption is made in the conversion so only packet capture files containing plain HTTP traffic are currently supported.
+Converter does not decrypt captured packages, so only files containing plain unencrypted HTTP traffic are currently supported.
 
 ## Development
 
