@@ -1,6 +1,6 @@
 # Meeshkan
 
-[![CircleCI](https://circleci.com/gh/Meeshkan/meeshkan.svg?style=svg)](https://circleci.com/gh/Meeshkan/meeshkan)
+[![CircleCI](https://circleci.com/gh/Meeshkan/meeshkan.svg?style=shield)](https://circleci.com/gh/Meeshkan/meeshkan)
 [![PyPI](https://img.shields.io/pypi/dm/meeshkan.svg)](https://pypi.org/project/meeshkan/)
 [![PyPi](https://img.shields.io/pypi/pyversions/meeshkan)](https://pypi.org/project/meeshkan/)
 [![License](https://img.shields.io/pypi/l/meeshkan)](LICENSE)
