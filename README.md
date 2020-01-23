@@ -49,6 +49,8 @@ To convert from [packet capture files](https://en.wikipedia.org/wiki/Pcap) to `h
 meeshkan convert -i /path/to/file.pcap -o recordings.jsonl
 ```
 
+**Executable [tshark](https://www.wireshark.org/docs/man-pages/tshark.html) must be present in your PATH.**
+
 ### Tests
 
 Run [tests/](./tests/) with `pytest`:
