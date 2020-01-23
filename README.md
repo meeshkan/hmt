@@ -88,3 +88,9 @@ Using the [Pyright extension](https://marketplace.visualstudio.com/items?itemNam
 ### Automated builds
 
 Configuration for CircleCI [build pipeline](https://app.circleci.com/github/Meeshkan/meeshkan/pipelines) can be found in [.circleci/config.yml](./.circleci/config.yml).
+
+## Contributing
+
+Thanks for wanting to contribute! Take a look at our [development guide](#development) for notes on how to develop the package locally.
+
+Please note that this project is governed by the [Unmock Community Code of Conduct](https://github.com/unmock/code-of-conduct). By participating in this project, you agree to abide by its terms.
