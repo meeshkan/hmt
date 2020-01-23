@@ -30,16 +30,26 @@ $ meeshkan --help
 Build OpenAPI schema from recordings:
 
 ```bash
-$ meeshkan build -i resources/sample.jsonl [-o path/to/output.yaml]
+$ meeshkan build -i path/to/recordings.jsonl [-o path/to/output_directory]
 ```
 
-Use `-i -` to read from standard input.
+Use dash (`-i -`) to read from standard input.
 
 See help for `build` command:
 
 ```bash
 $ meeshkan build --help
 ```
+
+#### Converting from pcap
+
+To convert from [packet capture files](https://en.wikipedia.org/wiki/Pcap) to `http-types` recordings format, use the `convert` command:
+
+```bash
+meeshkan convert -i /path/to/file.pcap -o recordings.jsonl
+```
+
+**Executable [tshark](https://www.wireshark.org/docs/man-pages/tshark.html) must be present in your PATH.**
 
 ### Tests
 

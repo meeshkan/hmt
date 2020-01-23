@@ -1,9 +1,9 @@
 from meeshkan.schemabuilder.json_schema import to_json_schema, to_openapi_json_schema
-from ..util import request_samples_dict
+from ..util import read_recordings_as_dict
 import json
 from hamcrest import *
 
-request_samples = request_samples_dict()
+request_samples = read_recordings_as_dict()
 object_sample = json.loads(request_samples[0]['res']['body'])
 
 
