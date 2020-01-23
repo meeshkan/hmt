@@ -91,6 +91,14 @@ Using the [Pyright extension](https://marketplace.visualstudio.com/items?itemNam
 
 Configuration for CircleCI [build pipeline](https://app.circleci.com/github/Meeshkan/meeshkan/pipelines) can be found in [.circleci/config.yml](./.circleci/config.yml).
 
+### Publishing package
+
+1. Bump the version in [setup.py](./setup.py) if the version is the same as in the published [package](https://pypi.org/project/meeshkan/). Commit and push.
+1. Run `python setup.py test`, `python setup.py typecheck` and `python setup.py dist` to check everything works
+1. To build and upload the package, run `python setup.py upload`. Insert PyPI credentials to upload the pacakge to `PyPI`. The command will also run `git tag` to tag the commit as a release and push the tags to remote.
+
+To see what the different commands do, see `Command` classes in [setup.py](./setup.py).
+
 ## Contributing
 
 Thanks for wanting to contribute! Take a look at our [development guide](#development) for notes on how to develop the package locally.

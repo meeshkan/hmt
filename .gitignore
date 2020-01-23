@@ -9,3 +9,5 @@ node_modules
 .testmondata
 *.egg-info/
 out/
+build/
+dist/
