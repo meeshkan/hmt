@@ -38,7 +38,7 @@ DEV = [
     'pyhamcrest'
 ]
 
-VERSION = '0.0.0'
+VERSION = '0.2.0'
 
 ENTRY_POINTS = ['meeshkan = meeshkan.__main__:cli']
 
