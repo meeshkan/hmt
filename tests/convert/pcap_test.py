@@ -1,4 +1,4 @@
-from meeshkan.transform.tshark import convert_pcap
+from meeshkan.convert.pcap import convert_pcap
 from hamcrest import assert_that, has_length, has_entry
 
 PCAP_SAMPLE = 'resources/recordings.pcap'

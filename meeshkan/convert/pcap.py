@@ -1,4 +1,4 @@
-#
+"""Code for converting pcap to RequestResponsePair JSON format."""
 
 from sys import argv
 from http_types import RequestResponsePair
