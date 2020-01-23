@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 from http_types import RequestResponsePair, RequestResponseBuilder
 
 
-def read_requests(requests_path="resources/sample.jsonl") -> List[str]:
+def read_requests(requests_path="resources/recordings.jsonl") -> List[str]:
     with open(requests_path) as f:
         return [line for line in f]
 
