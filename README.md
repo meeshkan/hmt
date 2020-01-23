@@ -30,10 +30,10 @@ $ meeshkan --help
 Build OpenAPI schema from recordings:
 
 ```bash
-$ meeshkan build -i recordings.jsonl [-o path/to/output.yaml]
+$ meeshkan build -i path/to/recordings.jsonl [-o path/to/output_directory]
 ```
 
-Use `-i -` to read from standard input.
+Use dash (`-i -`) to read from standard input.
 
 See help for `build` command:
 
