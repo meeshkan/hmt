@@ -1,16 +1,16 @@
-"""Code for converting pcap to RequestResponsePair JSON format."""
+"""Code for converting pcap to HttpExchange JSON format."""
 
 from sys import argv
-from http_types import RequestResponsePair
+from http_types import HttpExchange
 from typing import List, Optional, Any, Iterator
-from http_types.types import RequestResponsePair
+from http_types.types import HttpExchange
 from typing import Iterator
 from pathlib import Path
 import csv
 import json
 import shutil
 from typing import List, Optional, Dict, Union
-from http_types import Request, Response, RequestResponsePair
+from http_types import Request, Response, HttpExchange
 import re
 import subprocess
 from ..logger import get as getLogger
@@ -77,11 +77,11 @@ def _parse_headers(header_line: str) -> Dict[str, Union[str, List[str]]]:
                 if tupl is not None)
 
 
-# from .types import Request, Response, RequestResponse
+# from .types import Request, Response, HttpExchange
 
 
 def _request_response_parser():
-    """Create a parser for parsing tshark objects into RequestResponse.
+    """Create a parser for parsing tshark objects into HttpExchange.
 
     Raises:
         Exception: [description]
@@ -91,7 +91,7 @@ def _request_response_parser():
     """
     requests = {}
 
-    def parse_request_response_if_res(obj: Any) -> Optional[RequestResponsePair]:
+    def parse_request_response_if_res(obj: Any) -> Optional[HttpExchange]:
         """
         Handle one line of tshark dictionary.
 
@@ -112,20 +112,20 @@ def _request_response_parser():
         response = obj
         req = _request_from_tshark(request)
         res = _response_from_tshark(response)
-        req_res = RequestResponsePair(req=req, res=res)
+        req_res = HttpExchange(req=req, res=res)
         return req_res
 
     return parse_request_response_if_res
 
 
-def transform_tshark(tshark_csv: Iterator[str]) -> Iterator[RequestResponsePair]:
-    """Convert tshark-produced CSV to an iterator of RequestResponsePairs.
+def transform_tshark(tshark_csv: Iterator[str]) -> Iterator[HttpExchange]:
+    """Convert tshark-produced CSV to an iterator of HttpExchanges.
     
     Arguments:
         tshark_csv {Iterator[str]} -- Lines of CSV produced by tshark.
     
     Returns:
-        Iterator[RequestResponsePair] -- [description]
+        Iterator[HttpExchange] -- [description]
     """
     parse_request_response = _request_response_parser()
     return (req_res
@@ -140,7 +140,7 @@ def check_tshark_exists():
             "Could not find executable {} in PATH.".format(TSHARK_EXECUTABLE))
 
 
-def convert_pcap(filepath: str) -> Iterator[RequestResponsePair]:
+def convert_pcap(filepath: str) -> Iterator[HttpExchange]:
 
     check_tshark_exists()
 

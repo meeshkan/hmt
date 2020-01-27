@@ -1,5 +1,5 @@
 import copy
-from http_types import RequestResponsePair as RequestResponse
+from http_types import HttpExchange as HttpExchange
 from ..logger import get as getLogger
 from functools import reduce
 from typing import Any, List, Iterator, cast, Tuple, Optional
@@ -62,7 +62,7 @@ def infer_schema(body: str, schema: Optional[Any] = None) -> Schema:
     return cast(Schema, to_openapi_json_schema(as_json, schema))
 
 
-def update_media_type(request: RequestResponse, media_type: Optional[MediaType] = None) -> MediaType:
+def update_media_type(request: HttpExchange, media_type: Optional[MediaType] = None) -> MediaType:
     body = request['res']['body']
     if media_type is not None:
         schema_or_none = media_type['schema']
@@ -73,7 +73,7 @@ def update_media_type(request: RequestResponse, media_type: Optional[MediaType] 
     return media_type
 
 
-def content_from_body(request: RequestResponse) -> Optional[Tuple[str, MediaType]]:
+def content_from_body(request: HttpExchange) -> Optional[Tuple[str, MediaType]]:
     body = request['res']['body']
     media_type_key = get_media_type(body)
     if media_type_key is None:
@@ -82,13 +82,13 @@ def content_from_body(request: RequestResponse) -> Optional[Tuple[str, MediaType
     return (media_type_key, media_type)
 
 
-def build_response(request: RequestResponse) -> Response:
+def build_response(request: HttpExchange) -> Response:
     """Build new response object from request response pair.
 
     Response reference: https://swagger.io/specification/#responseObject
 
     Arguments:
-        request {RequestResponse} -- Request-response pair.
+        request {HttpExchange} -- Request-response pair.
 
     Returns:
         Response -- OpenAPI response object.
@@ -116,14 +116,14 @@ def build_response(request: RequestResponse) -> Response:
     )
 
 
-def update_response(response: Response, request: RequestResponse) -> Response:
+def update_response(response: Response, request: HttpExchange) -> Response:
     """Update response object. Mutates the input object.
 
     Response reference: https://swagger.io/specification/#responseObject
 
     Arguments:
         response {Response} -- Existing response object.
-        request {RequestResponse} -- Request-response pair.
+        request {HttpExchange} -- Request-response pair.
 
     Returns:
         Response -- Updated response object.
@@ -147,13 +147,13 @@ def update_response(response: Response, request: RequestResponse) -> Response:
     return response
 
 
-def build_operation(request: RequestResponse) -> Operation:
+def build_operation(request: HttpExchange) -> Operation:
     """Build new operation object from request-response pair.
 
     Operation reference: https://swagger.io/specification/#operationObject
 
     Arguments:
-        request {RequestResponse} -- Request-response pair
+        request {HttpExchange} -- Request-response pair
 
     Returns:
         Operation -- Operation object.
@@ -168,14 +168,14 @@ def build_operation(request: RequestResponse) -> Operation:
     return operation
 
 
-def update_operation(operation: Operation, request: RequestResponse) -> Operation:
+def update_operation(operation: Operation, request: HttpExchange) -> Operation:
     """Update OpenAPI operation object. Mutates the input object.
 
     Operation reference: https://swagger.io/specification/#operationObject
 
     Arguments:
         operation {Operation} -- Existing Operation object.
-        request {RequestResponse} -- Request-response pair
+        request {HttpExchange} -- Request-response pair
 
     Returns:
         Operation -- Updated operation
@@ -196,7 +196,7 @@ def update_operation(operation: Operation, request: RequestResponse) -> Operatio
     return operation
 
 
-def update(schema: OpenAPIObject, request: RequestResponse) -> OpenAPIObject:
+def update(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObject:
     """Update OpenAPI schema with a new request-response pair.
     Does not mutate the input schema.
 
@@ -236,13 +236,13 @@ BASE_SCHEMA = OpenAPIObject(openapi="3.0.0",
                             paths={})
 
 
-def build_schema_online(requests: Iterator[RequestResponse]) -> OpenAPIObject:
+def build_schema_online(requests: Iterator[HttpExchange]) -> OpenAPIObject:
     """Build OpenAPI schema by iterating request-response pairs.
 
     OpenAPI object reference: https://swagger.io/specification/#oasObject
 
     Arguments:
-        requests {Iterator[RequestResponse]} -- Iterator of request-response pairs.
+        requests {Iterator[HttpExchange]} -- Iterator of request-response pairs.
 
     Returns:
         OpenAPI -- OpenAPI object.
@@ -258,13 +258,13 @@ def build_schema_online(requests: Iterator[RequestResponse]) -> OpenAPIObject:
     return schema
 
 
-def build_schema_batch(requests: List[RequestResponse]) -> OpenAPIObject:
+def build_schema_batch(requests: List[HttpExchange]) -> OpenAPIObject:
     """Build OpenAPI schema from a list of request-response object.
 
     OpenAPI object reference: https://swagger.io/specification/#oasObject
 
     Arguments:
-        requests {List[RequestResponse]} -- List of request-response pairs.
+        requests {List[HttpExchange]} -- List of request-response pairs.
 
     Returns:
         OpenAPI -- OpenAPI object.
