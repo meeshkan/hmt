@@ -13,6 +13,7 @@ def test_path_to_regex():
 
     assert_that("/pets/32", matches_regexp(as_regex))
     assert_that("/pets/32?id=3", matches_regexp(as_regex))
+    assert_that("/pets/32#reference", matches_regexp(as_regex))
 
     assert_that("/pets/32/", not_(matches_regexp(as_regex)))
 
