@@ -24,9 +24,6 @@ def path_to_regex(path: str, **kwargs) -> Pattern[str]:
         {str} -- Pattern for path with parameters replaced by regular expressions.
     """
 
-    # Extract parameters
-    param_name = 'id'
-
     # Work on string whose regex characters are escaped ("/"" becomes "//" etc.)
     # This makes it easier to replace matches with regular expressions.
     # For example: /pets/{id} becomes \/pets\/\{id\}
