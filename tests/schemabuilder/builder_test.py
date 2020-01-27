@@ -117,5 +117,5 @@ class TestPetstoreSchemaUpdate:
         orig_path_item = PETSTORE_SCHEMA['paths']['/pets/{petId}']
         updated_path_item = updated_schema['paths']['/pets/{petId}']
 
-        # TODO Should builder update this instead of being no-op?
+        # TODO Should builder update the path item instead of being no-op?
         assert_that(updated_path_item, equal_to(orig_path_item))
