@@ -12,14 +12,14 @@ RequestPathParameters = Mapping[str, str]
 
 
 def _match_to_path(request_path: str, path: str) -> Optional[Mapping[str, Any]]:
-    """Match a request path to path
+    """Match a request path such as "/pets/32" to a variable path such as "/pets/{petId}".
 
     Arguments:
         request_path {str} -- Request path such as /pets/32
         path {str} -- Path name in OpenAPI format such as /pets/{id}
 
     Returns:
-        Optional[Mapping[str, Any]] -- None if no match, dictionary of parameter name to value otherwise.
+        Optional[Mapping[str, Any]] -- None if the paths do not match. Otherwise, return a dictionary of parameter names to values (for example: { 'petId': '32' })
     """
     path_as_regex, parameter_names = path_to_regex(path)
     match = path_as_regex.match(request_path)
@@ -29,7 +29,8 @@ def _match_to_path(request_path: str, path: str) -> Optional[Mapping[str, Any]]:
 
     captures = match.groups()
 
-    assert len(parameter_names) == len(captures)
+    assert len(parameter_names) == len(
+        captures), "Expected the number of parameter names in the path to match the number of captured parameter values"
 
     return {parameter_name: parameter_value for parameter_name, parameter_value in zip(parameter_names, captures)}
 
