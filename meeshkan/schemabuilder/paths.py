@@ -83,6 +83,6 @@ def path_to_regex(path: str) -> Tuple[Pattern[str], Tuple[str]]:
 
         escaped_path = escaped_path.replace(full_match, PATH_PARAMETER_REGEX)
 
-    regex_pattern = re.compile(r'^' + escaped_path + r'(?=\?|$)')
+    regex_pattern = re.compile(r'^' + escaped_path + r'(?:\?|$)')
 
     return (regex_pattern, param_names)
