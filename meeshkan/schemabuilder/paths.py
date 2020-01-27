@@ -4,12 +4,6 @@ from typing import Pattern, Optional, Tuple, Mapping, Any, Sequence
 
 from openapi_typed import PathItem, Paths
 
-# Al regex replacements must be capturing groups
-TYPE_TO_REGEX = {
-    'string': r"""(\w+)""",
-    'number': r"""(\d+)""",
-}
-
 # Pattern to match to in the escaped path string
 # Search for occurrences such as "{id}" or "{key-name}"
 PATH_PARAMETER_PATTERN = r"""\\{([\w-]+)\\}"""
@@ -35,7 +29,7 @@ def _match_to_path(request_path: str, path: str) -> Optional[Mapping[str, Any]]:
 
     assert len(parameter_names) == len(captures)
 
-    return {key: value for key, value in zip(parameter_names, captures)}
+    return {parameter_name: parameter_value for parameter_name, parameter_value in zip(parameter_names, captures)}
 
 
 def find_matching_path(request_path: str, paths: Paths) -> Optional[Tuple[PathItem, Mapping[str, Any]]]:
@@ -60,12 +54,15 @@ def find_matching_path(request_path: str, paths: Paths) -> Optional[Tuple[PathIt
     return None
 
 
-def path_to_regex(path: str, **kwargs) -> Tuple[Pattern[str], Tuple[str]]:
-    """Convert an OpenAPI path such as "/pets/{id}" to a regular expression.
+PATH_PARAMETER_REGEX = r"""(\w+)"""
+
+
+def path_to_regex(path: str) -> Tuple[Pattern[str], Tuple[str]]:
+    """Convert an OpenAPI path such as "/pets/{id}" to a regular expression. The returned regular expression
+    contains capturing groups for path parameters. Parameter names are returned in the second tuple.
 
     Arguments:
         path {str} -- [description]
-        kwargs: Keyword arguments listing the type of each parameter: For example: { 'id': { 'type': 'string' } }
 
     Returns:
         {} -- Tuple containing (1) pattern for path with parameters replaced by regular expressions, and (2) list of parameters with names.
@@ -81,20 +78,11 @@ def path_to_regex(path: str, **kwargs) -> Tuple[Pattern[str], Tuple[str]]:
     for match in re.finditer(PATH_PARAMETER_PATTERN, escaped_path):
         full_match = match.group(0)
         param_name = match.group(1)
-        if not param_name in kwargs:
-            raise Exception(
-                "No match for parameter %s in kwargs".format(param_name))
-
-        param_type = kwargs[param_name]['type']
-
-        if not param_type in TYPE_TO_REGEX:
-            raise Exception(
-                "Unknown type %s, cannot convert to regex".format(param_type))
-
-        type_regex = TYPE_TO_REGEX[param_type]
 
         param_names = param_names + (param_name, )
 
-        escaped_path = escaped_path.replace(full_match, type_regex)
+        escaped_path = escaped_path.replace(full_match, PATH_PARAMETER_REGEX)
 
-    return (re.compile(r'^' + escaped_path + r'$'), param_names)
+    regex_pattern = re.compile(r'^' + escaped_path + r'$')
+
+    return (regex_pattern, param_names)
