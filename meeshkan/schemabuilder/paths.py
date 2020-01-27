@@ -3,8 +3,8 @@ import re
 
 
 TYPE_TO_REGEX = {
-    'string': re.compile(r"""\w+"""),
-    'number': re.compile(r"""\d+"""),
+    'string': r"""\w+""",
+    'number': r"""\d+""",
 }
 
 
@@ -19,19 +19,28 @@ def path_to_regex(path: str, **kwargs):
     # Extract parameters
     param_name = 'id'
 
+    # Work on string whose regex characters are escaped ("/"" becomes "//" etc.)
+    # For example: /pets/{id} becomes \/pets\/\{id\}
+    escaped_path = re.escape(path)
+
+    # Pattern to match to in the escaped path string
     param_pattern = r"""\\{([\w-]+)\\}"""
 
-    return_string = re.escape(path)
-
-    for match in re.finditer(param_pattern, return_string):
+    for match in re.finditer(param_pattern, escaped_path):
         full_match = match.group(0)
         param_name = match.group(1)
         if not param_name in kwargs:
             raise Exception(
                 "No match for parameter %s in kwargs".format(param_name))
+
         param_type = kwargs[param_name]['type']
+
+        if not param_type in TYPE_TO_REGEX:
+            raise Exception(
+                "Unknown type %s, cannot convert to regex".format(param_type))
+
         type_regex = TYPE_TO_REGEX[param_type]
 
-        return_string = return_string.replace(full_match, type_regex.pattern)
+        escaped_path = escaped_path.replace(full_match, type_regex)
 
-    return re.compile(r'^' + return_string + r'$')
+    return re.compile(r'^' + escaped_path + r'$')
