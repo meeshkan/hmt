@@ -8,6 +8,10 @@ TYPE_TO_REGEX = {
     'number': r"""\d+""",
 }
 
+# Pattern to match to in the escaped path string
+# Search for occurrences such as "{id}" or "{key-name}"
+PATH_PARAMETER_PATTERN = r"""\\{([\w-]+)\\}"""
+
 
 def path_to_regex(path: str, **kwargs) -> Pattern[str]:
     """Convert an OpenAPI path such as "/pets/{id}" to a regular expression.
@@ -24,14 +28,11 @@ def path_to_regex(path: str, **kwargs) -> Pattern[str]:
     param_name = 'id'
 
     # Work on string whose regex characters are escaped ("/"" becomes "//" etc.)
+    # This makes it easier to replace matches with regular expressions.
     # For example: /pets/{id} becomes \/pets\/\{id\}
     escaped_path = re.escape(path)
 
-    # Pattern to match to in the escaped path string
-    # Search for occurrences such as "{id}" or "{key-name}"
-    param_pattern = r"""\\{([\w-]+)\\}"""
-
-    for match in re.finditer(param_pattern, escaped_path):
+    for match in re.finditer(PATH_PARAMETER_PATTERN, escaped_path):
         full_match = match.group(0)
         param_name = match.group(1)
         if not param_name in kwargs:
