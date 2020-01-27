@@ -1,5 +1,6 @@
 """Code for working with OpenAPI paths, combining and transforming them."""
 import re
+from typing import Pattern
 
 
 TYPE_TO_REGEX = {
@@ -8,12 +9,15 @@ TYPE_TO_REGEX = {
 }
 
 
-def path_to_regex(path: str, **kwargs):
+def path_to_regex(path: str, **kwargs) -> Pattern[str]:
     """Convert an OpenAPI path such as "/pets/{id}" to a regular expression.
 
     Arguments:
         path {str} -- [description]
         kwargs: Keyword arguments listing the type of each parameter: For example: { 'id': { 'type': 'string' } }
+
+    Returns:
+        {str} -- Pattern for path with parameters replaced by regular expressions.
     """
 
     # Extract parameters
@@ -24,6 +28,7 @@ def path_to_regex(path: str, **kwargs):
     escaped_path = re.escape(path)
 
     # Pattern to match to in the escaped path string
+    # Search for occurrences such as "{id}" or "{key-name}"
     param_pattern = r"""\\{([\w-]+)\\}"""
 
     for match in re.finditer(param_pattern, escaped_path):
