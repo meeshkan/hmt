@@ -1,13 +1,17 @@
 import copy
-from meeshkan.schemabuilder import build_schema_batch
+
+from http_types.types import HttpExchange, Request, Response
+from tests.schemabuilder.paths_test import PETSTORE_SCHEMA
+from meeshkan.schemabuilder import build_schema_batch, update_openapi
 from meeshkan.schemabuilder.builder import BASE_SCHEMA
 from meeshkan.schemabuilder.schema import validate_openapi_object
-from ..util import read_recordings_as_request_response
+from ..util import petstore_schema, read_recordings_as_request_response
 from openapi_typed import OpenAPIObject, Operation, PathItem, Response, Schema
 from typeguard import check_type
 import pytest
 from typing import cast
 from hamcrest import *
+import yaml
 
 requests = read_recordings_as_request_response()
 
@@ -23,6 +27,8 @@ expected_schema['paths'] = {
         )
     )
 }
+
+PETSTORE_SCHEMA = petstore_schema()
 
 
 @pytest.fixture(scope="module")
@@ -93,3 +99,23 @@ class TestSchema:
         properties = items['properties']
         assert_that(properties, has_entry('clone_url',
                                           equal_to({'type': 'string'})))
+
+
+class TestPetstoreSchemaUpdate:
+
+    req = Request(method="get", path="/pets/32", headers={},
+                  query={}, host="petstore.swagger.io", body="", protocol="https", pathname="/v1/pets/32")
+    res = Response(body="", statusCode=200, headers={})
+    exchange = HttpExchange(req=req, res=res)
+
+    def test_update(self):
+        updated_schema = update_openapi(PETSTORE_SCHEMA, self.exchange)
+        updated_schema_paths = list(updated_schema['paths'].keys())
+
+        assert_that(updated_schema_paths, equal_to(["/pets", "/pets/{petId}"]))
+
+        orig_path_item = PETSTORE_SCHEMA['paths']['/pets/{petId}']
+        updated_path_item = updated_schema['paths']['/pets/{petId}']
+
+        # TODO Should builder update this instead of being no-op?
+        assert_that(updated_path_item, equal_to(orig_path_item))
