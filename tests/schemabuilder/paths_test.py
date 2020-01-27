@@ -8,10 +8,12 @@ PETSTORE_SCHEMA = petstore_schema()
 def test_path_to_regex():
     as_regex, parameters = path_to_regex('/pets/{id}')
 
-    assert_that(as_regex.pattern, is_('^\\/pets\\/(\\w+)$'))
-    assert_that(as_regex.pattern, is_(r"""^\/pets\/(\w+)$"""))
+    # assert_that(as_regex.pattern, is_('^\\/pets\\/(\\w+)$'))
+    # assert_that(as_regex.pattern, is_(r"""^\/pets\/(\w+)$"""))
 
     assert_that("/pets/32", matches_regexp(as_regex))
+    assert_that("/pets/32?id=3", matches_regexp(as_regex))
+
     assert_that("/pets/32/", not_(matches_regexp(as_regex)))
 
     assert parameters == ('id', )

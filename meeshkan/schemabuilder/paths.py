@@ -33,7 +33,7 @@ def _match_to_path(request_path: str, path: str) -> Optional[Mapping[str, Any]]:
 
 
 def find_matching_path(request_path: str, paths: Paths) -> Optional[Tuple[PathItem, Mapping[str, Any]]]:
-    """Find path that matches the request.
+    """Find path that matches the request path.
 
     Arguments:
         request_path {str} -- Request path.
@@ -83,6 +83,6 @@ def path_to_regex(path: str) -> Tuple[Pattern[str], Tuple[str]]:
 
         escaped_path = escaped_path.replace(full_match, PATH_PARAMETER_REGEX)
 
-    regex_pattern = re.compile(r'^' + escaped_path + r'$')
+    regex_pattern = re.compile(r'^' + escaped_path + r'(?=\?|$)')
 
     return (regex_pattern, param_names)
