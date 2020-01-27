@@ -8,6 +8,8 @@ from openapi_typed import PathItem, Paths
 # Search for occurrences such as "{id}" or "{key-name}"
 PATH_PARAMETER_PATTERN = r"""\\{([\w-]+)\\}"""
 
+RequestPathParameters = Mapping[str, str]
+
 
 def _match_to_path(request_path: str, path: str) -> Optional[Mapping[str, Any]]:
     """Match a request path to path
@@ -32,7 +34,7 @@ def _match_to_path(request_path: str, path: str) -> Optional[Mapping[str, Any]]:
     return {parameter_name: parameter_value for parameter_name, parameter_value in zip(parameter_names, captures)}
 
 
-def find_matching_path(request_path: str, paths: Paths) -> Optional[Tuple[PathItem, Mapping[str, Any]]]:
+def find_matching_path(request_path: str, paths: Paths) -> Optional[Tuple[PathItem, RequestPathParameters]]:
     """Find path that matches the request path.
 
     Arguments:
