@@ -1,4 +1,4 @@
-"""Code for working with OpenAPI paths, combining and transforming them."""
+"""Code for working with OpenAPI paths, e.g., matching request path to an OpenAPI endpoint with parameter."""
 import re
 from typing import Pattern, Optional, Tuple, Mapping, Any, Sequence
 
@@ -15,7 +15,7 @@ TYPE_TO_REGEX = {
 PATH_PARAMETER_PATTERN = r"""\\{([\w-]+)\\}"""
 
 
-def match_to_path(request_path: str, path: str) -> Optional[Mapping[str, Any]]:
+def _match_to_path(request_path: str, path: str) -> Optional[Mapping[str, Any]]:
     """Match a request path to path
 
     Arguments:
@@ -50,7 +50,7 @@ def find_matching_path(request_path: str, paths: Paths) -> Optional[Tuple[PathIt
     """
 
     for path, path_item in paths.items():
-        path_match = match_to_path(request_path, path)
+        path_match = _match_to_path(request_path=request_path, path=path)
 
         if path_match is None:
             continue
