@@ -2,7 +2,7 @@ import copy
 from http_types import HttpExchange as HttpExchange
 from ..logger import get as getLogger
 from functools import reduce
-from typing import Any, List, Iterator, cast, Tuple, Optional, Union, TypeVar, Type
+from typing import Any, List, Iterator, cast, Tuple, Optional, Union, TypeVar, Type, Sequence
 from openapi_typed import Info, MediaType, OpenAPIObject, PathItem, Response, Operation, Schema, Parameter, Reference
 from typeguard import check_type  # type: ignore
 import json
@@ -10,6 +10,7 @@ from typing_extensions import Literal
 from .json_schema import to_openapi_json_schema
 from .schema import validate_openapi_object
 from .paths import find_matching_path, RequestPathParameters
+from .query import build_query, update_query
 
 logger = getLogger(__name__)
 
@@ -148,7 +149,7 @@ def update_response(response: Response, request: HttpExchange) -> Response:
     return response
 
 
-def build_operation(request: HttpExchange) -> Operation:
+def build_operation(exchange: HttpExchange) -> Operation:
     """Build new operation object from request-response pair.
 
     Operation reference: https://swagger.io/specification/#operationObject
@@ -159,13 +160,18 @@ def build_operation(request: HttpExchange) -> Operation:
     Returns:
         Operation -- Operation object.
     """
-    response = build_response(request)
-    code = str(request['res']['statusCode'])
+    response = build_response(exchange)
+    code = str(exchange['res']['statusCode'])
+
+    request_query_params = exchange['req']['query']
+    schema_query_params = build_query(request_query_params)
+
     operation = Operation(
         summary="Operation summary",
         description="Operation description",
         operationId="id",
-        responses={code: response})
+        responses={code: response},
+        parameters=schema_query_params)
     return operation
 
 
@@ -193,6 +199,12 @@ def update_operation(operation: Operation, request: HttpExchange) -> Operation:
     else:
         response = build_response(request)
 
+    existing_parameters = operation['parameters']
+    request_query_params = request['req']['query']
+    updated_parameters = update_query(
+        request_query_params, existing_parameters)
+
+    operation['parameters'] = updated_parameters
     operation['responses'][response_code] = response
     return operation
 
@@ -245,7 +257,7 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
     schema_copy = copy.deepcopy(schema)
 
     request_method = request['req']['method']
-    request_path = request['req']['path']
+    request_path = request['req']['pathname']
 
     schema_paths = schema_copy['paths']
 

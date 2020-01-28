@@ -1,5 +1,5 @@
 from meeshkan.schemabuilder.paths import path_to_regex, find_matching_path
-from hamcrest import assert_that, matches_regexp, not_, is_, equal_to, has_entry
+from hamcrest import *
 from ..util import petstore_schema
 
 PETSTORE_SCHEMA = petstore_schema()
