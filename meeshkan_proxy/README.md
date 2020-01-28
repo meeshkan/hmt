@@ -16,7 +16,7 @@ npx unmock-server
 ```
 6. Stop and start Meeshkan Proxy in mocking mode:
 ```bash
-python meeshkan_proxy/main.py mock
+python -m meeshkan_proxy mock
 ```
 7. You don't have to change anything in your client script. It should work with mocks now. You can switch between mocking, recording, accessing real APIs
 by switching Meeshkan Proxy modes.
