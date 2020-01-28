@@ -3,7 +3,7 @@
 from http_types import Query
 from openapi_typed import Parameter, Reference, Schema
 from typing import List, Union, cast, Any
-import genson
+from genson import SchemaBuilder  # type: ignore
 
 SchemaQuery = List[Union[Parameter, Reference]]
 
@@ -26,7 +26,7 @@ def build_query_param(name: str, value: Any, required: bool) -> Parameter:
         query_value = value[0]
     else:
         query_value = value
-    schema_builder = genson.SchemaBuilder()
+    schema_builder = SchemaBuilder()
     schema_builder.add_object(query_value)
     schema = cast(Schema, schema_builder.to_schema())
     return Parameter(name=name, schema=schema, required=True, **{'in': 'query'})
