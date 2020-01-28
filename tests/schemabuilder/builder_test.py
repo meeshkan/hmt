@@ -11,7 +11,6 @@ from typeguard import check_type
 import pytest
 from typing import cast
 from hamcrest import *
-import yaml
 
 requests = read_recordings_as_request_response()
 
