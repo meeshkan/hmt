@@ -119,3 +119,15 @@ class TestPetstoreSchemaUpdate:
 
         # TODO Should builder update the path item instead of being no-op?
         assert_that(updated_path_item, equal_to(orig_path_item))
+
+
+class TestQueryParameters:
+
+    req = Request(method="get", path="/pets/32?id=1&car=ferrari", headers={},
+                  query={"id": "1", "car": "ferrari"}, host="petstore.swagger.io", body="", protocol="https", pathname="/v1/pets/32")
+    res = Response(body="", statusCode=200, headers={})
+    exchange = HttpExchange(req=req, res=res)
+
+    def test_update(self):
+        schema = build_schema_batch([self.exchange])
+        assert_that(list(schema['paths'].keys()), is_(["/pets/32"]))
