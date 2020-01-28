@@ -1,8 +1,9 @@
 import copy
 from http_types import HttpExchange as HttpExchange
+from http_types.types import Query
 from ..logger import get as getLogger
 from functools import reduce
-from typing import Any, List, Iterator, cast, Tuple, Optional, Union, TypeVar, Type
+from typing import Any, List, Iterator, cast, Tuple, Optional, Union, TypeVar, Type, Sequence
 from openapi_typed import Info, MediaType, OpenAPIObject, PathItem, Response, Operation, Schema, Parameter, Reference
 from typeguard import check_type  # type: ignore
 import json
@@ -148,7 +149,11 @@ def update_response(response: Response, request: HttpExchange) -> Response:
     return response
 
 
-def build_operation(request: HttpExchange) -> Operation:
+def build_query(request_query: Query) -> List[Union[Parameter, Reference]]:
+    return []
+
+
+def build_operation(exchange: HttpExchange) -> Operation:
     """Build new operation object from request-response pair.
 
     Operation reference: https://swagger.io/specification/#operationObject
@@ -159,13 +164,18 @@ def build_operation(request: HttpExchange) -> Operation:
     Returns:
         Operation -- Operation object.
     """
-    response = build_response(request)
-    code = str(request['res']['statusCode'])
+    response = build_response(exchange)
+    code = str(exchange['res']['statusCode'])
+    query_params = exchange['req']['query']
+
+    query_parameters = build_query(query_params)
+
     operation = Operation(
         summary="Operation summary",
         description="Operation description",
         operationId="id",
-        responses={code: response})
+        responses={code: response},
+        parameters=query_parameters)
     return operation
 
 
