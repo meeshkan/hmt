@@ -26,9 +26,9 @@ def test_build_new_query():
     assert_that(query_schema, has_entry('type', 'string'))
 
 
-query_parameter = Parameter(name='key',
-                            required=False,
-                            schema={'type': 'string'}, **{'in': 'query'})
+required_query_parameter = Parameter(name='key',
+                                     required=True,
+                                     schema={'type': 'string'}, **{'in': 'query'})
 
 
 def get_query_parameter(name: str, parameters: SchemaQuery) -> Parameter:
@@ -36,9 +36,9 @@ def get_query_parameter(name: str, parameters: SchemaQuery) -> Parameter:
     return cast(Parameter, matching)
 
 
-def test_update_query():
+def test_update_query_should_update_required():
     query = req['query']
-    updated_query = update_query(query, [query_parameter])
+    updated_query = update_query(query, [required_query_parameter])
     assert_that(updated_query, has_length(3))
 
     updated_for_key = get_query_parameter("key", updated_query)

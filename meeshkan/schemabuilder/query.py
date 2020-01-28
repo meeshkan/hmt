@@ -2,23 +2,32 @@
 
 from http_types import Query
 from openapi_typed import Parameter, Reference, Schema
-from typing import List, Union, cast, Any
+from typing import List, Union, cast, Sequence
 from genson import SchemaBuilder  # type: ignore
 
 SchemaQuery = List[Union[Parameter, Reference]]
 
 
 def build_query(query: Query) -> SchemaQuery:
+    """Build a list of query parameters from request query parameters.
+
+    Arguments:
+        query {Query} -- Key-value map of query parameters and values.
+
+    Returns:
+        SchemaQuery -- OpenAPI list of parameters.
+    """
     return update_query(query, [], set_new_as_required=True)
 
 
-def build_query_param(name: str, value: Any, required: bool) -> Parameter:
-    """New query parameters are required by default.
+def build_query_param(name: str, value: Union[str, Sequence[str]], required: bool) -> Parameter:
+    """Build a new OpenAPI compatible query parameter definition from query parameter
+    name and value.
 
     Arguments:
-        name {str} -- [description]
-        value {Any} -- [description]
-
+        name {str} -- Parameter name.
+        value {Any} -- Query parameter value.
+        required {bool} -- Whether the parameter should be marked as required.
     Returns:
         Parameter -- [description]
     """
@@ -30,6 +39,15 @@ def build_query_param(name: str, value: Any, required: bool) -> Parameter:
     schema_builder.add_object(query_value)
     schema = cast(Schema, schema_builder.to_schema())
     return Parameter(name=name, schema=schema, required=True, **{'in': 'query'})
+
+
+def _update_required(param: Parameter, required: bool) -> Parameter:
+    if param['required'] == required:
+        return param
+
+    params = dict(**param)
+    params.pop('required')
+    return Parameter(**params, required=required)
 
 
 # TODO Fix types once openapi types are covariant
@@ -68,9 +86,8 @@ def update_query(query: Query, existing_query: SchemaQuery, set_new_as_required=
     shared_query_params = [
         param for param in query_params if param['name'] in shared_query_param_names]
 
-    # TODO Update missing query parameters to be optional
     missing_query_params = [
-        param for param in query_params if param['name'] in missing_query_param_names]
+        _update_required(param, required=False) for param in query_params if param['name'] in missing_query_param_names]
 
     updated_query_params = new_query_params + shared_query_params + \
         missing_query_params + non_query_params
