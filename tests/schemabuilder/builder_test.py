@@ -131,6 +131,11 @@ class TestQueryParameters:
     res = Response(body="", statusCode=200, headers={})
     exchange = HttpExchange(req=req, res=res)
 
+    req_wo_query = RequestBuilder.from_url(
+        url="https://petstore.swagger.io/v1/pets/32")
+    res = Response(body="", statusCode=200, headers={})
+    exchange_wo_query = HttpExchange(req=req_wo_query, res=res)
+
     expected_path_name = "/v1/pets/32"
 
     def test_build_with_query(self):
@@ -150,3 +155,18 @@ class TestQueryParameters:
         parameter_names = [param['name'] for param in parameters]
 
         assert_that(set(parameter_names), is_(set(['id', 'car'])))
+
+    def test_schema_update_with_query(self):
+        schema = build_schema_batch([self.exchange_wo_query])
+
+        operation = schema['paths'][self.expected_path_name]['get']
+        assert_that(operation, has_entry('parameters', []))
+
+        updated_schema = update_openapi(schema, self.exchange)
+
+        operation = updated_schema['paths'][self.expected_path_name]['get']
+        assert_that(operation, has_entry('parameters', has_length(2)))
+
+        first_query_param = operation['parameters'][0]
+
+        assert_that(first_query_param, has_entry("required", False))

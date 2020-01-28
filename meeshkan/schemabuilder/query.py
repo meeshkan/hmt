@@ -38,7 +38,7 @@ def build_query_param(name: str, value: Union[str, Sequence[str]], required: boo
     schema_builder = SchemaBuilder()
     schema_builder.add_object(query_value)
     schema = cast(Schema, schema_builder.to_schema())
-    return Parameter(name=name, schema=schema, required=True, **{'in': 'query'})
+    return Parameter(name=name, schema=schema, required=required, **{'in': 'query'})
 
 
 def _update_required(param: Parameter, required: bool) -> Parameter:

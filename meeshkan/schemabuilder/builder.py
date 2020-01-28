@@ -10,7 +10,7 @@ from typing_extensions import Literal
 from .json_schema import to_openapi_json_schema
 from .schema import validate_openapi_object
 from .paths import find_matching_path, RequestPathParameters
-from .query import build_query
+from .query import build_query, update_query
 
 logger = getLogger(__name__)
 
@@ -199,6 +199,10 @@ def update_operation(operation: Operation, request: HttpExchange) -> Operation:
     else:
         response = build_response(request)
 
+    parameters = operation['parameters']
+    updated_parameters = update_query(request['req']['query'], parameters)
+
+    operation['parameters'] = updated_parameters
     operation['responses'][response_code] = response
     return operation
 
