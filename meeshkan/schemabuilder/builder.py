@@ -245,7 +245,7 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
     schema_copy = copy.deepcopy(schema)
 
     request_method = request['req']['method']
-    request_path = request['req']['path']
+    request_path = request['req']['pathname']
 
     schema_paths = schema_copy['paths']
 
