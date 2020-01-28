@@ -1,6 +1,5 @@
 import copy
 from http_types import HttpExchange as HttpExchange
-from http_types.types import Query
 from ..logger import get as getLogger
 from functools import reduce
 from typing import Any, List, Iterator, cast, Tuple, Optional, Union, TypeVar, Type, Sequence
@@ -11,6 +10,7 @@ from typing_extensions import Literal
 from .json_schema import to_openapi_json_schema
 from .schema import validate_openapi_object
 from .paths import find_matching_path, RequestPathParameters
+from .query import build_query
 
 logger = getLogger(__name__)
 
@@ -147,10 +147,6 @@ def update_response(response: Response, request: HttpExchange) -> Response:
 
     response_content[media_type_key] = media_type
     return response
-
-
-def build_query(request_query: Query) -> List[Union[Parameter, Reference]]:
-    return []
 
 
 def build_operation(exchange: HttpExchange) -> Operation:

@@ -133,8 +133,9 @@ class TestQueryParameters:
 
     expected_path_name = "/v1/pets/32"
 
-    def test_update(self):
+    def test_build_with_query(self):
         schema = build_schema_batch([self.exchange])
+
         assert_that(list(schema['paths'].keys()),
                     is_([self.expected_path_name]))
 
@@ -145,3 +146,7 @@ class TestQueryParameters:
         parameters = operation['parameters']
 
         assert_that(parameters, has_length(2))
+
+        parameter_names = [param['name'] for param in parameters]
+
+        assert_that(set(parameter_names), is_(set(['id', 'car'])))
