@@ -2,13 +2,14 @@ import copy
 from http_types import HttpExchange as HttpExchange
 from ..logger import get as getLogger
 from functools import reduce
-from typing import Any, List, Iterator, cast, Tuple, Optional
-from openapi_typed import Info, MediaType, OpenAPIObject, PathItem, Response, Operation, Schema
+from typing import Any, List, Iterator, cast, Tuple, Optional, Union, TypeVar, Type
+from openapi_typed import Info, MediaType, OpenAPIObject, PathItem, Response, Operation, Schema, Parameter, Reference
 from typeguard import check_type  # type: ignore
 import json
 from typing_extensions import Literal
 from .json_schema import to_openapi_json_schema
 from .schema import validate_openapi_object
+from .paths import find_matching_path, RequestPathParameters
 
 logger = getLogger(__name__)
 
@@ -196,7 +197,43 @@ def update_operation(operation: Operation, request: HttpExchange) -> Operation:
     return operation
 
 
-def update(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObject:
+T = TypeVar('T')
+
+
+def verify_not_ref(item: Union[Reference, Any], expected_type: Type[T]) -> T:
+    assert not '$ref' in item, "Did not expect a reference"
+    return cast(T, item)
+
+
+def verify_path_parameters(schema_path_parameters: List[Union[Parameter, Reference]], request_path_params: RequestPathParameters) -> None:
+    """Verify that the extracted path parameters from the request match those listed in the specification.
+
+    Arguments:
+        schema_path_parameters {List[Union[Parameter, Reference]]} -- List of OpenAPI parameter objects.
+        request_path_params {RequestPathParameters} -- [description]
+    """
+    path_params_copy = dict(**request_path_params)
+
+    for parameter in schema_path_parameters:
+        param = verify_not_ref(parameter, Parameter)
+        param_in = param['in']
+        if param_in != 'path':
+            continue
+
+        parameter_name = param['name']
+        if not parameter_name in path_params_copy:
+            raise Exception(
+                "Expected to find path parameter %s in request path parameters".format(parameter_name))
+
+        del path_params_copy[parameter_name]
+
+    remaining_keys = path_params_copy.keys()
+    if len(remaining_keys) != 0:
+        raise Exception(
+            "Found {} extra path parameters: {}".format(len(remaining_keys), ', '.join(list(remaining_keys))))
+
+
+def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObject:
     """Update OpenAPI schema with a new request-response pair.
     Does not mutate the input schema.
 
@@ -207,25 +244,38 @@ def update(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObject:
     """
     schema_copy = copy.deepcopy(schema)
 
-    method = request['req']['method']
+    request_method = request['req']['method']
+    request_path = request['req']['path']
 
-    if request['req']['path'] in schema_copy['paths']:
+    schema_paths = schema_copy['paths']
+
+    path_match_result = find_matching_path(request_path, schema_paths)
+
+    if path_match_result is not None:
         # Path item exists for request path
-        path_item: PathItem = schema_copy['paths'][request['req']['path']]
+        path_item, request_path_parameters = path_match_result
     else:
         path_item = PathItem(summary="Path summary",
                              description="Path description")
-        schema_copy['paths'][request['req']['path']] = path_item
+        request_path_parameters = {}
+        schema_paths[request_path] = path_item
 
-    if method in path_item:
+    if request_method in path_item:
         # Operation exists
-        existing_operation = path_item[method]  # type: ignore
+        existing_operation = path_item[request_method]  # type: ignore
         operation = update_operation(existing_operation, request)
+
     else:
         operation = build_operation(request)
 
+    # Verify path parameters are up-to-date
+    existing_path_parameters = path_item.get(
+        'parameters', []) + operation.get('parameters', [])
+
+    verify_path_parameters(existing_path_parameters, request_path_parameters)
+
     # Needs type ignore as one cannot set variable property on typed dict
-    path_item[method] = operation  # type: ignore
+    path_item[request_method] = operation  # type: ignore
 
     return cast(OpenAPIObject, schema_copy)
 
@@ -250,7 +300,7 @@ def build_schema_online(requests: Iterator[HttpExchange]) -> OpenAPIObject:
 
     # Iterate over all request-response pairs in the iterator, starting from
     # BASE_SCHEMA
-    schema = reduce(lambda schema, req: update(
+    schema = reduce(lambda schema, req: update_openapi(
         schema, req), requests, BASE_SCHEMA)
 
     validate_openapi_object(schema)
