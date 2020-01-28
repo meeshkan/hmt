@@ -1,6 +1,6 @@
 import copy
 
-from http_types.types import HttpExchange, Request, Response
+from http_types import HttpExchange, Request, Response, RequestBuilder
 from tests.schemabuilder.paths_test import PETSTORE_SCHEMA
 from meeshkan.schemabuilder import build_schema_batch, update_openapi
 from meeshkan.schemabuilder.builder import BASE_SCHEMA
@@ -126,11 +126,22 @@ class TestPetstoreSchemaUpdate:
 
 class TestQueryParameters:
 
-    req = Request(method="get", path="/pets/32?id=1&car=ferrari", headers={},
-                  query={"id": "1", "car": "ferrari"}, host="petstore.swagger.io", body="", protocol="https", pathname="/v1/pets/32")
+    req = RequestBuilder.from_url(
+        url="https://petstore.swagger.io/v1/pets/32?id=1&car=ferrari")
     res = Response(body="", statusCode=200, headers={})
     exchange = HttpExchange(req=req, res=res)
 
+    expected_path_name = "/v1/pets/32"
+
     def test_update(self):
         schema = build_schema_batch([self.exchange])
-        assert_that(list(schema['paths'].keys()), is_(["/v1/pets/32"]))
+        assert_that(list(schema['paths'].keys()),
+                    is_([self.expected_path_name]))
+
+        operation = schema['paths'][self.expected_path_name]['get']
+
+        assert_that(operation, has_key('parameters'))
+
+        parameters = operation['parameters']
+
+        assert_that(parameters, has_length(2))
