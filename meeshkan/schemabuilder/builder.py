@@ -162,16 +162,16 @@ def build_operation(exchange: HttpExchange) -> Operation:
     """
     response = build_response(exchange)
     code = str(exchange['res']['statusCode'])
-    query_params = exchange['req']['query']
 
-    query_parameters = build_query(query_params)
+    request_query_params = exchange['req']['query']
+    schema_query_params = build_query(request_query_params)
 
     operation = Operation(
         summary="Operation summary",
         description="Operation description",
         operationId="id",
         responses={code: response},
-        parameters=query_parameters)
+        parameters=schema_query_params)
     return operation
 
 
@@ -199,8 +199,10 @@ def update_operation(operation: Operation, request: HttpExchange) -> Operation:
     else:
         response = build_response(request)
 
-    parameters = operation['parameters']
-    updated_parameters = update_query(request['req']['query'], parameters)
+    existing_parameters = operation['parameters']
+    request_query_params = request['req']['query']
+    updated_parameters = update_query(
+        request_query_params, existing_parameters)
 
     operation['parameters'] = updated_parameters
     operation['responses'][response_code] = response
