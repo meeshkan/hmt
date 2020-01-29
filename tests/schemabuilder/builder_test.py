@@ -102,26 +102,29 @@ class TestSchema:
 
 class TestPetstoreSchemaUpdate:
 
-    req = Request(method="get", path="/pets/32", headers={},
-                  query={}, host="petstore.swagger.io", body="", protocol="https", pathname="/v1/pets/32")
+    get_pets_req = RequestBuilder.from_url(
+        "https://petstore.swagger.io/v1/pets")
+    get_one_pet_req = RequestBuilder.from_url(
+        "https://petstore.swagger.io/v1/pets/32")
+
     res = Response(body="", statusCode=200, headers={})
-    exchange = HttpExchange(req=req, res=res)
 
-    def test_update(self):
-        updated_schema = update_openapi(PETSTORE_SCHEMA, self.exchange)
+    get_one_pet_exchange = HttpExchange(req=get_one_pet_req, res=res)
+    get_pets_exchange = HttpExchange(req=get_pets_req, res=res)
+
+    orig_schema_paths = list(PETSTORE_SCHEMA['paths'].keys())
+
+    def test_update_respects_path_parameter(self):
+        updated_schema = update_openapi(
+            PETSTORE_SCHEMA, self.get_one_pet_exchange)
         updated_schema_paths = list(updated_schema['paths'].keys())
+        assert_that(updated_schema_paths, is_(self.orig_schema_paths))
 
-        # FIXME This test does not work as expected
-        # until https://github.com/Meeshkan/meeshkan/issues/22 has been resolved.
-        # assert_that(updated_schema_paths, equal_to(["/pets", "/pets/{petId}"]))
-        assert_that(updated_schema_paths, equal_to(
-            ["/pets", "/pets/{petId}", "/v1/pets/32"]))
-
-        # orig_path_item = PETSTORE_SCHEMA['paths']['/pets/{petId}']
-        # updated_path_item = updated_schema['paths']['/pets/{petId}']
-
-        # TODO Should builder update the path item instead of being no-op?
-        # assert_that(updated_path_item, equal_to(orig_path_item))
+    def test_update_respects_basepath(self):
+        updated_schema = update_openapi(
+            PETSTORE_SCHEMA, self.get_pets_exchange)
+        updated_schema_paths = list(updated_schema['paths'].keys())
+        assert_that(updated_schema_paths, is_(self.orig_schema_paths))
 
 
 class TestQueryParameters:
