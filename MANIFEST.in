@@ -1,1 +1,2 @@
-include meeshkan/*.yaml
+include meeshkan/logging.yaml
+include meeshan/schemabuilder/schema.json
