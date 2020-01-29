@@ -11,6 +11,7 @@ from .json_schema import to_openapi_json_schema
 from .schema import validate_openapi_object
 from .paths import find_matching_path, RequestPathParameters
 from .query import build_query, update_query
+from .servers import normalize_path_if_matches
 
 logger = getLogger(__name__)
 
@@ -259,9 +260,20 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
     request_method = request['req']['method']
     request_path = request['req']['pathname']
 
+    schema_servers = schema.get('servers', [])
+
+    normalized_pathname_or_none = normalize_path_if_matches(
+        request['req'], schema_servers)
+
+    if normalized_pathname_or_none is None:
+        # TODO Add server, issue #13
+        normalized_pathname = request_path
+    else:
+        normalized_pathname = normalized_pathname_or_none
+
     schema_paths = schema_copy['paths']
 
-    path_match_result = find_matching_path(request_path, schema_paths)
+    path_match_result = find_matching_path(normalized_pathname, schema_paths)
 
     if path_match_result is not None:
         # Path item exists for request path
