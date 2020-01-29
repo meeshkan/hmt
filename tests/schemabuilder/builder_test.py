@@ -103,9 +103,9 @@ class TestSchema:
 class TestPetstoreSchemaUpdate:
 
     get_pets_req = RequestBuilder.from_url(
-        "https://petstore.swagger.io/v1/pets")
+        "http://petstore.swagger.io/v1/pets")
     get_one_pet_req = RequestBuilder.from_url(
-        "https://petstore.swagger.io/v1/pets/32")
+        "http://petstore.swagger.io/v1/pets/32")
 
     res = Response(body="", statusCode=200, headers={})
 
