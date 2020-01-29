@@ -6,9 +6,9 @@ from urllib.parse import urlparse
 
 def normalize_path_if_matches(request: Request, servers: List[Server]) -> Optional[str]:
     """Check if a request matches a list of server definitions.
-    If matches, return the normalized path.
+    If matches, return the request path normalized by the server URL's basepath.
 
-    For example: for server URL `https://petstore.swagger.io/v1` and request URL
+    For example: for matching server URL `https://petstore.swagger.io/v1` and request URL
     `https://petstore.swagger.io/v1/pets`, return `/pets`.
 
     Arguments:
@@ -16,7 +16,7 @@ def normalize_path_if_matches(request: Request, servers: List[Server]) -> Option
         request {Request} -- HTTP request.
 
     Returns:
-        Optional[str] -- None if no match, normalized path if matches. 
+        Optional[str] -- None if request does not match any existing servers. Request path normalized by server basepath otherwise. 
     """
 
     for server in servers:
