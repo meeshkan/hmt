@@ -100,6 +100,12 @@ class TestSchema:
                                           equal_to({'type': 'string'})))
 
 
+    def test_servers(self):
+        servers = self.schema['servers']
+        assert 1 == len(servers)
+        assert 'http://api.github.com' == servers[0]['url']
+
+
 class TestPetstoreSchemaUpdate:
 
     get_pets_req = RequestBuilder.from_url(

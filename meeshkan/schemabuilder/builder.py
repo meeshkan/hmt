@@ -1,9 +1,12 @@
 import copy
+from urllib.parse import urlunsplit
+
 from http_types import HttpExchange as HttpExchange
 from ..logger import get as getLogger
 from functools import reduce
 from typing import Any, List, Iterator, cast, Tuple, Optional, Union, TypeVar, Type, Sequence
-from openapi_typed import Info, MediaType, OpenAPIObject, PathItem, Response, Operation, Schema, Parameter, Reference
+from openapi_typed import Info, MediaType, OpenAPIObject, PathItem, Response, Operation, Schema, Parameter, Reference, \
+    Server
 from typeguard import check_type  # type: ignore
 import json
 from typing_extensions import Literal
@@ -260,13 +263,15 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
     request_method = request['req']['method']
     request_path = request['req']['pathname']
 
-    schema_servers = schema.get('servers', [])
+    if not 'servers' in schema_copy:
+        schema_copy['servers'] = []
+    schema_servers = schema_copy['servers']
 
     normalized_pathname_or_none = normalize_path_if_matches(
         request['req'], schema_servers)
 
     if normalized_pathname_or_none is None:
-        # TODO Add server, issue #13
+        schema_servers.append(Server(url=urlunsplit([request['req']['protocol'], request['req']['host'], '', '', ''])))
         normalized_pathname = request_path
     else:
         normalized_pathname = normalized_pathname_or_none
