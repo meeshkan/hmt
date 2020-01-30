@@ -69,7 +69,7 @@ def infer_schema(body: str, schema: Optional[Any] = None) -> Schema:
 
 
 def update_media_type(request: HttpExchange, media_type: Optional[MediaType] = None) -> MediaType:
-    body = request['res']['body']
+    body = request['response']['body']
     if media_type is not None:
         schema_or_none = media_type['schema']
     else:
@@ -80,7 +80,7 @@ def update_media_type(request: HttpExchange, media_type: Optional[MediaType] = N
 
 
 def content_from_body(request: HttpExchange) -> Optional[Tuple[str, MediaType]]:
-    body = request['res']['body']
+    body = request['response']['body']
     media_type_key = get_media_type(body)
     if media_type_key is None:
         return None
@@ -136,7 +136,7 @@ def update_response(response: Response, request: HttpExchange) -> Response:
     """
     # TODO Update headers and links
     response_content = response['content'] if 'content' in response else None
-    media_type_key = get_media_type(request['res']['body'])
+    media_type_key = get_media_type(request['response']['body'])
 
     # No body
     if media_type_key is None:
@@ -165,9 +165,9 @@ def build_operation(exchange: HttpExchange) -> Operation:
         Operation -- Operation object.
     """
     response = build_response(exchange)
-    code = str(exchange['res']['statusCode'])
+    code = str(exchange['response']['statusCode'])
 
-    request_query_params = exchange['req']['query']
+    request_query_params = exchange['request']['query']
     schema_query_params = build_query(request_query_params)
 
     operation = Operation(
@@ -192,7 +192,7 @@ def update_operation(operation: Operation, request: HttpExchange) -> Operation:
         Operation -- Updated operation
     """
     responses = operation['responses']
-    response_code = str(request['res']['statusCode'])
+    response_code = str(request['response']['statusCode'])
     if response_code in responses:
         # Response exists
         existing_response = responses[response_code]
@@ -204,7 +204,7 @@ def update_operation(operation: Operation, request: HttpExchange) -> Operation:
         response = build_response(request)
 
     existing_parameters = operation['parameters']
-    request_query_params = request['req']['query']
+    request_query_params = request['request']['query']
     updated_parameters = update_query(
         request_query_params, existing_parameters)
 
@@ -260,15 +260,15 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
     """
     schema_copy = copy.deepcopy(schema)
 
-    request_method = request['req']['method']
-    request_path = request['req']['pathname']
+    request_method = request['request']['method']
+    request_path = request['request']['pathname']
 
     if not 'servers' in schema_copy:
         schema_copy['servers'] = []
     schema_servers = schema_copy['servers']
 
     normalized_pathname_or_none = normalize_path_if_matches(
-        request['req'], schema_servers)
+        request['request'], schema_servers)
 
     if normalized_pathname_or_none is None:
         schema_servers.append(Server(url=urlunsplit([request['req']['protocol'], request['req']['host'], '', '', ''])))

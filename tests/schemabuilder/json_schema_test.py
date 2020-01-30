@@ -4,7 +4,7 @@ import json
 from hamcrest import *
 
 request_samples = read_recordings_as_dict()
-object_sample = json.loads(request_samples[0]['res']['body'])
+object_sample = json.loads(request_samples[0]['response']['body'])
 
 
 test_objects = [

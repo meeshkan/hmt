@@ -115,8 +115,8 @@ class TestPetstoreSchemaUpdate:
 
     res = Response(body="", statusCode=200, headers={})
 
-    get_one_pet_exchange = HttpExchange(req=get_one_pet_req, res=res)
-    get_pets_exchange = HttpExchange(req=get_pets_req, res=res)
+    get_one_pet_exchange = HttpExchange(request=get_one_pet_req, response=res)
+    get_pets_exchange = HttpExchange(request=get_pets_req, response=res)
 
     orig_schema_paths = list(PETSTORE_SCHEMA['paths'].keys())
 
@@ -138,12 +138,12 @@ class TestQueryParameters:
     req = RequestBuilder.from_url(
         url="https://petstore.swagger.io/v1/pets/32?id=1&car=ferrari")
     res = Response(body="", statusCode=200, headers={})
-    exchange = HttpExchange(req=req, res=res)
+    exchange = HttpExchange(request=req, response=res)
 
     req_wo_query = RequestBuilder.from_url(
         url="https://petstore.swagger.io/v1/pets/32")
     res = Response(body="", statusCode=200, headers={})
-    exchange_wo_query = HttpExchange(req=req_wo_query, res=res)
+    exchange_wo_query = HttpExchange(request=req_wo_query, response=res)
 
     expected_path_name = "/v1/pets/32"
 
