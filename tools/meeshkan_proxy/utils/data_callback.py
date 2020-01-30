@@ -3,9 +3,9 @@ import logging
 import os
 
 import yaml
-from http_types import Request, Response, RequestResponsePair, RequestBuilder, ResponseBuilder
+from http_types import Request, Response, HttpExchange, RequestBuilder, ResponseBuilder
 
-from meeshkan.schemabuilder.builder import BASE_SCHEMA, update
+from meeshkan.schemabuilder.builder import BASE_SCHEMA, update_openapi
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class RequestLoggingCallback():
         ResponseBuilder.validate(response)
 
         host = request['headers']['Host']
-        reqres = RequestResponsePair(req=request, res=response)
+        reqres = HttpExchange(req=request, res=response)
         if not host in self._logs:
             log_file = os.path.join(self._log_dir, '{}.jsonl'.format(host))
             if self._append and os.path.exists(log_file):
@@ -60,7 +60,7 @@ class RequestLoggingCallback():
             else:
                 self._schemas[host] = BASE_SCHEMA
 
-        self._schemas[host] = update(self._schemas[host], reqres)
+        self._schemas[host] = update_openapi(self._schemas[host], reqres)
 
         with open(schema_file, 'w') as f:
             yaml.dump(self._schemas[host], f)
