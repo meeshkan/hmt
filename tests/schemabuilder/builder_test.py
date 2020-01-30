@@ -1,8 +1,11 @@
 import copy
-from meeshkan.schemabuilder import build_schema_batch
+
+from http_types import HttpExchange, Request, Response, RequestBuilder
+from tests.schemabuilder.paths_test import PETSTORE_SCHEMA
+from meeshkan.schemabuilder import build_schema_batch, update_openapi
 from meeshkan.schemabuilder.builder import BASE_SCHEMA
 from meeshkan.schemabuilder.schema import validate_openapi_object
-from ..util import read_recordings_as_request_response
+from ..util import petstore_schema, read_recordings_as_request_response
 from openapi_typed import OpenAPIObject, Operation, PathItem, Response, Schema
 from typeguard import check_type
 import pytest
@@ -23,6 +26,8 @@ expected_schema['paths'] = {
         )
     )
 }
+
+PETSTORE_SCHEMA = petstore_schema()
 
 
 @pytest.fixture(scope="module")
@@ -93,3 +98,78 @@ class TestSchema:
         properties = items['properties']
         assert_that(properties, has_entry('clone_url',
                                           equal_to({'type': 'string'})))
+
+
+class TestPetstoreSchemaUpdate:
+
+    get_pets_req = RequestBuilder.from_url(
+        "http://petstore.swagger.io/v1/pets")
+    get_one_pet_req = RequestBuilder.from_url(
+        "http://petstore.swagger.io/v1/pets/32")
+
+    res = Response(body="", statusCode=200, headers={})
+
+    get_one_pet_exchange = HttpExchange(req=get_one_pet_req, res=res)
+    get_pets_exchange = HttpExchange(req=get_pets_req, res=res)
+
+    orig_schema_paths = list(PETSTORE_SCHEMA['paths'].keys())
+
+    def test_update_respects_path_parameter(self):
+        updated_schema = update_openapi(
+            PETSTORE_SCHEMA, self.get_one_pet_exchange)
+        updated_schema_paths = list(updated_schema['paths'].keys())
+        assert_that(updated_schema_paths, is_(self.orig_schema_paths))
+
+    def test_update_respects_basepath(self):
+        updated_schema = update_openapi(
+            PETSTORE_SCHEMA, self.get_pets_exchange)
+        updated_schema_paths = list(updated_schema['paths'].keys())
+        assert_that(updated_schema_paths, is_(self.orig_schema_paths))
+
+
+class TestQueryParameters:
+
+    req = RequestBuilder.from_url(
+        url="https://petstore.swagger.io/v1/pets/32?id=1&car=ferrari")
+    res = Response(body="", statusCode=200, headers={})
+    exchange = HttpExchange(req=req, res=res)
+
+    req_wo_query = RequestBuilder.from_url(
+        url="https://petstore.swagger.io/v1/pets/32")
+    res = Response(body="", statusCode=200, headers={})
+    exchange_wo_query = HttpExchange(req=req_wo_query, res=res)
+
+    expected_path_name = "/v1/pets/32"
+
+    def test_build_with_query(self):
+        schema = build_schema_batch([self.exchange])
+
+        assert_that(list(schema['paths'].keys()),
+                    is_([self.expected_path_name]))
+
+        operation = schema['paths'][self.expected_path_name]['get']
+
+        assert_that(operation, has_key('parameters'))
+
+        parameters = operation['parameters']
+
+        assert_that(parameters, has_length(2))
+
+        parameter_names = [param['name'] for param in parameters]
+
+        assert_that(set(parameter_names), is_(set(['id', 'car'])))
+
+    def test_schema_update_with_query(self):
+        schema = build_schema_batch([self.exchange_wo_query])
+
+        operation = schema['paths'][self.expected_path_name]['get']
+        assert_that(operation, has_entry('parameters', []))
+
+        updated_schema = update_openapi(schema, self.exchange)
+
+        operation = updated_schema['paths'][self.expected_path_name]['get']
+        assert_that(operation, has_entry('parameters', has_length(2)))
+
+        first_query_param = operation['parameters'][0]
+
+        assert_that(first_query_param, has_entry("required", False))

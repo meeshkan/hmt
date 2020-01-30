@@ -1,8 +1,10 @@
+import json
+
+import click
+from http_types import HttpExchangeBuilder
+
 from meeshkan.schemabuilder.result import BuildResult
 from meeshkan.convert.pcap import convert_pcap
-import click
-import json
-from http_types import RequestResponseBuilder
 
 from .schemabuilder import build_schema_online
 from .schemabuilder.writer import write_build_result
@@ -32,7 +34,7 @@ def build(input_file, out):
     """
     Build OpenAPI schema from recordings.
     """
-    requests = (RequestResponseBuilder.from_dict(
+    requests = (HttpExchangeBuilder.from_dict(
         json.loads(line)) for line in input_file)
 
     schema = build_schema_online(requests)
@@ -52,7 +54,8 @@ def convert(input_file, out):
     """
 
     if not input_file.endswith('.pcap'):
-        raise ValueError('Only .pcap files are accepted as input. Got: {}'.format(input_file))
+        raise ValueError(
+            'Only .pcap files are accepted as input. Got: {}'.format(input_file))
 
     request_response_pairs = convert_pcap(input_file)
 

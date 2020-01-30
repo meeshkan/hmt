@@ -21,10 +21,10 @@ REQUIRED = [
     'pyyaml',
     'jsonschema',
     'typing-extensions',
-    'openapi-typed',
+    'openapi-typed>=0.0.2',
     'typeguard>=2.7.0',
     'genson',
-    'http-types>=0.0.3'
+    'http-types>=0.0.4'
 ]
 
 DEV = [
@@ -38,7 +38,7 @@ DEV = [
     'pyhamcrest'
 ]
 
-VERSION = '0.2.0'
+VERSION = '0.2.3'
 
 ENTRY_POINTS = ['meeshkan = meeshkan.__main__:cli']
 
@@ -67,7 +67,7 @@ class SetupCommand(Command):
 
 
 def build():
-    os.system(
+    return os.system(
         "{executable} setup.py sdist bdist_wheel --universal".format(executable=sys.executable))
 
 

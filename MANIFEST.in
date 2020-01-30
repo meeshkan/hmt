@@ -1,0 +1,2 @@
+include meeshkan/logging.yaml
+include meeshkan/schemabuilder/schema.json
