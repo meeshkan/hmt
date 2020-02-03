@@ -1,7 +1,7 @@
 import json
 
 import click
-from http_types import HttpExchangeBuilder
+from http_types import HttpExchangeReader
 
 from meeshkan.schemabuilder.result import BuildResult
 from meeshkan.convert.pcap import convert_pcap
@@ -34,8 +34,7 @@ def build(input_file, out):
     """
     Build OpenAPI schema from recordings.
     """
-    requests = (HttpExchangeBuilder.from_dict(
-        json.loads(line)) for line in input_file)
+    requests = HttpExchangeReader.from_jsonl(input_file)
 
     schema = build_schema_online(requests)
 
