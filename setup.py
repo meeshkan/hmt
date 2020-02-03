@@ -24,7 +24,7 @@ REQUIRED = [
     'openapi-typed>=0.0.2',
     'typeguard>=2.7.0',
     'genson',
-    'http-types>=0.0.4'
+    'http-types>=0.0.5'
 ]
 
 DEV = [
