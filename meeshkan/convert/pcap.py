@@ -112,7 +112,7 @@ def _request_response_parser():
         response = obj
         req = _request_from_tshark(request)
         res = _response_from_tshark(response)
-        req_res = HttpExchange(req=req, res=res)
+        req_res = HttpExchange(request=req, response=res)
         return req_res
 
     return parse_request_response_if_res
