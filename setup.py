@@ -43,7 +43,10 @@ VERSION = '0.2.3'
 ENTRY_POINTS = ['meeshkan = meeshkan.__main__:cli']
 
 # Optional packages
-EXTRAS = {'dev': DEV}
+EXTRAS = {
+    'dev': DEV,
+    'kafka': ['faust']
+}
 
 
 class SetupCommand(Command):

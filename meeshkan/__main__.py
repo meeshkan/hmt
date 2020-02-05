@@ -1,7 +1,8 @@
 import json
+from meeshkan.schemabuilder.builder import BASE_SCHEMA, update_openapi
 
 import click
-from http_types import HttpExchangeReader
+from http_types import HttpExchangeBuilder, HttpExchangeReader
 
 from meeshkan.schemabuilder.result import BuildResult
 from meeshkan.convert.pcap import convert_pcap
@@ -10,7 +11,7 @@ from .schemabuilder import build_schema_online
 from .schemabuilder.writer import write_build_result
 from .config import setup
 from .logger import get as getLogger
-
+from .kafka import KafkaProcessor, KafkaProcessorConfig
 
 LOGGER = getLogger(__name__)
 
@@ -28,12 +29,35 @@ def cli():
 
 
 @click.command()
-@click.option("-i", "--input-file", required=True, type=click.File('rb'), help="Input file. Use dash '-' to read from stdin.")
+@click.option("-i", "--input-file", required=False, type=click.File('rb'), help="Input file. Use dash '-' to read from stdin.")
 @click.option("-o", "--out", required=False, default='out', type=click.Path(exists=False, file_okay=False, writable=True, readable=True), help="Output directory. If the directory does not exist, it is created if the parent directory exists.")
-def build(input_file, out):
+@click.option("-c", "--consumer", required=False, type=str, help="Consumer. For example,'kafka'")
+def build(input_file, out, consumer):
     """
     Build OpenAPI schema from recordings.
     """
+
+    if consumer is None and input_file is None:
+        raise Exception("Either --consumer or --input-file is required.")
+
+    if consumer == 'kafka':
+        schema = BASE_SCHEMA
+
+        def consume(json_exchange):
+            global schema
+            exchange = HttpExchangeBuilder.from_dict(json_exchange)
+            schema = update_openapi(schema, exchange)
+            print(schema)
+
+        config = KafkaProcessorConfig(
+            broker="localhost:9092",
+            topic="express_recordings",
+            consumer=consume)
+        processor = KafkaProcessor(config)
+
+        processor.process()
+        return
+
     requests = HttpExchangeReader.from_jsonl(input_file)
 
     schema = build_schema_online(requests)
