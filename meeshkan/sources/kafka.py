@@ -54,6 +54,11 @@ class KafkaProcessor:
 class KafkaSource(AbstractSource):
 
     def __init__(self, config: KafkaProcessorConfig):
+
+        if faust is None:
+            raise Exception(
+                "Cannot find module faust. Try `pip install meeshkan[kafka]`")
+
         self.config = config
         self.processor = KafkaProcessor(config)
         self.recording_stream = self.processor.gen.stream()
