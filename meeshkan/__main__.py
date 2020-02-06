@@ -1,5 +1,10 @@
 import asyncio
 import json
+import faust
+
+from typing import AsyncIterable, Callable, Sequence
+from http_types.types import HttpExchange
+from openapi_typed import OpenAPIObject
 from meeshkan.schemabuilder.builder import BASE_SCHEMA, update_openapi
 
 import click
@@ -29,35 +34,65 @@ def cli():
     setup()  # Ensure setup is done before invoking the CLI.
 
 
+Sink = Callable[[BuildResult], None]
+
+Source = AsyncIterable[HttpExchange]
+
+
 @click.command()
 @click.option("-i", "--input-file", required=False, type=click.File('rb'), help="Input file. Use dash '-' to read from stdin.")
 @click.option("-o", "--out", required=False, default='out', type=click.Path(exists=False, file_okay=False, writable=True, readable=True), help="Output directory. If the directory does not exist, it is created if the parent directory exists.")
-@click.option("-c", "--consumer", required=False, type=str, help="Consumer. For example,'kafka'")
-def build(input_file, out, consumer):
+@click.option("--source", required=False, type=str, help="Source to read recordings from. For example, 'kafka'")
+@click.option("--sink", required=False, type=str,  help="Sink where to write results.")
+def build(input_file, out, source, sink):
     """
     Build OpenAPI schema from recordings.
     """
 
-    if consumer is None and input_file is None:
-        raise Exception("Either --consumer or --input-file is required.")
+    if source is None and input_file is None:
+        raise Exception("Either --source or --input-file is required.")
 
-    if consumer == 'kafka':
+    sinks: Sequence[Sink] = [
+        lambda build_result: write_build_result(out, build_result)]
+
+    if source == 'kafka':
         schema = BASE_SCHEMA
 
-        def consume(json_exchange):
+        async def out_g():
             nonlocal schema
-            exchange = HttpExchangeBuilder.from_dict(json_exchange)
-            schema = update_openapi(schema, exchange)
-            print(schema)
+            json_exchange = yield schema
+            while True:
+                json_exchange = yield schema
+                exchange = HttpExchangeBuilder.from_dict(json_exchange)
+                schema = update_openapi(schema, exchange)
+                print(schema)
+
+        out_gen = out_g()
 
         config = KafkaProcessorConfig(
             broker="localhost:9092",
             topic="express_recordings",
-            consumer=consume)
+            out=out_gen)
 
         processor = KafkaProcessor(config)
 
-        KafkaProcessor.run(processor.app, loop=asyncio.get_event_loop())
+        loop = asyncio.get_event_loop()
+
+        async def run():
+            worker = faust.Worker(processor.app, loop=loop, loglevel='info')
+            # Start the output generator
+            await out_gen.asend(None)
+
+            async def start_worker(worker: faust.Worker) -> None:
+                await worker.start()
+
+            try:
+                await start_worker(worker)
+            finally:
+                worker.stop_and_shutdown()
+
+        loop.run_until_complete(run())
+
         return
 
     requests = HttpExchangeReader.from_jsonl(input_file)

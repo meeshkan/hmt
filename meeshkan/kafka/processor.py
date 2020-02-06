@@ -1,5 +1,5 @@
 import asyncio
-from typing import Callable
+from typing import AsyncIterable, Callable, Any
 
 try:
     import faust
@@ -17,11 +17,12 @@ class KafkaProcessorConfig:
     broker: str
     topic: str
     consumer: Consumer
+    out: Any
 
-    def __init__(self, broker, topic, consumer: Consumer):
+    def __init__(self, broker, topic, out):
         self.broker = broker
         self.topic = topic
-        self.consumer = consumer
+        self.out = out
 
 
 class KafkaProcessor:
@@ -31,17 +32,17 @@ class KafkaProcessor:
         self.app = faust.App('myapp', broker=options.broker)
         self._faust_topic = self.app.topic(
             options.topic, key_type=str, value_type=str)
-        self._consumer = options.consumer
+        self.out = options.out
 
-        @self.app.agent(self._faust_topic, sink=[self._consumer])
-        async def gen(recordings):
+        @self.app.agent(self._faust_topic, sink=[])
+        async def gen(recordings: AsyncIterable):
             async for recording in recordings:
                 # Or just remove the sink and do `self._consumer(recording)`...
-                yield recording
+                await self.out.asend(recording)
                 # await agen.asend(recording)  # Push to generator
 
     @staticmethod
-    def run(app: faust.App, loop: asyncio.AbstractEventLoop = asyncio.get_event_loop(), loglevel='info'):
+    def run(app: faust.App, loop: asyncio.AbstractEventLoop, loglevel='info'):
         worker = faust.Worker(app, loop=loop, loglevel=loglevel)
 
         async def start_worker(worker: faust.Worker) -> None:
@@ -55,7 +56,7 @@ class KafkaProcessor:
 
 if __name__ == '__main__':
     config = KafkaProcessorConfig(
-        broker="localhost:9092", topic="express_recordings", consumer=lambda x: print(x))
+        broker="localhost:9092", topic="express_recordings", out=None)  # TODO
     processor = KafkaProcessor(config)
 
     processor.app.main()
