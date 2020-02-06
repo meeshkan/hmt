@@ -3,7 +3,7 @@ import json
 
 from typing import Sequence
 from .types import *
-from .sources import KafkaSource
+from .sources.kafka import KafkaSource, KafkaProcessorConfig
 from meeshkan.schemabuilder.builder import build_schema_agen
 
 import click
@@ -16,7 +16,6 @@ from .schemabuilder import build_schema_online
 from .schemabuilder.writer import write_build_result
 from .config import setup
 from .logger import get as getLogger
-from .kafka import KafkaProcessor, KafkaProcessorConfig
 
 LOGGER = getLogger(__name__)
 
