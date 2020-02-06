@@ -1,5 +1,6 @@
 import asyncio
 import json
+from meeshkan.sources.file import FileSource
 
 from typing import Sequence
 from .types import *
@@ -51,7 +52,10 @@ def run_from_source(source: AbstractSource):
 
         builder_task = loop.create_task(builder_coro)
 
-        await source_task
+        if source_task is not None:
+            await source_task
+        else:
+            await builder_task
 
     try:
         loop.run_until_complete(run(loop))
@@ -62,7 +66,7 @@ def run_from_source(source: AbstractSource):
 @click.command()
 @click.option("-i", "--input-file", required=False, type=click.File('rb'), help="Input file. Use dash '-' to read from stdin.")
 @click.option("-o", "--out", required=False, default='out', type=click.Path(exists=False, file_okay=False, writable=True, readable=True), help="Output directory. If the directory does not exist, it is created if the parent directory exists.")
-@click.option("--source", required=False, type=str, help="Source to read recordings from. For example, 'kafka'")
+@click.option("--source", required=False, default='file', type=str, help="Source to read recordings from. For example, 'kafka'")
 @click.option("--sink", required=False, type=str,  help="Sink where to write results.")
 def build(input_file, out, source, sink):
     """
@@ -72,8 +76,8 @@ def build(input_file, out, source, sink):
     # TODO Support sinks
     # sinks: Sequence[Sink] = [file_sink(out)]
 
-    if source is not None and input_file is not None:
-        raise Exception("Specify either source or input-file, not both.")
+    if input_file is not None and source != "file":
+        raise Exception("Only specify input-file for --source file")
 
     if source == 'kafka':
         kafka_source = KafkaSource(config=KafkaProcessorConfig(
@@ -82,6 +86,11 @@ def build(input_file, out, source, sink):
 
         run_from_source(kafka_source)
         return
+    elif source == 'file':
+        if input_file is None:
+            raise Exception("Option --input-file for source 'file' required.")
+        file_source = FileSource(input_file)
+        run_from_source(file_source)
     elif source is not None:
         raise Exception("Unknown source {}".format(source))
     elif input_file is not None:
