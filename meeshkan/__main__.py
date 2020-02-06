@@ -72,11 +72,11 @@ def build(input_file, out, source, sink):
             async def start_worker(worker: faust.Worker) -> None:
                 await worker.start()
 
-            async_iter = processor.gen.stream()
+            recording_stream = processor.gen.stream()
 
             worker_coro = start_worker(worker)
             builder_coro = build_schema_agen(
-                async_iter.__aiter__(), lambda schema: print(schema))
+                recording_stream.__aiter__(), lambda schema: print(schema))
 
             try:
                 worker_task = loop.create_task(worker_coro)
