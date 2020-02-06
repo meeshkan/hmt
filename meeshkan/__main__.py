@@ -33,12 +33,12 @@ def cli():
     setup()  # Ensure setup is done before invoking the CLI.
 
 
-def file_sink(out: str) -> Sink:
+""" def file_sink(out: str) -> Sink:
     async def handle(results: BuildResultStream):
         async for result in results:
             write_build_result(out, result)
 
-    return handle
+    return handle """
 
 
 def run_from_source(source: AbstractSource):
@@ -48,7 +48,7 @@ def run_from_source(source: AbstractSource):
         exchange_iterable, source_task = await source.start(loop)
 
         builder_coro = build_schema_agen(
-            exchange_iterable.__aiter__(), lambda x: print(x))
+            exchange_iterable.__aiter__(), lambda x: print(x))  # TODO Add sinks
 
         builder_task = loop.create_task(builder_coro)
 
