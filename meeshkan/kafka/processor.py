@@ -1,5 +1,7 @@
 import asyncio
-from typing import AsyncIterable, Callable, Any
+from typing import AsyncIterable
+
+from http_types.utils import HttpExchangeBuilder
 
 try:
     import faust
@@ -10,13 +12,9 @@ except ImportError:
 __all__ = ["KafkaProcessorConfig", "KafkaProcessor"]
 
 
-Consumer = Callable[[str], None]
-
-
 class KafkaProcessorConfig:
     broker: str
     topic: str
-    consumer: Consumer
 
     def __init__(self, broker, topic):
         self.broker = broker
@@ -27,28 +25,19 @@ class KafkaProcessor:
 
     def __init__(self, options: KafkaProcessorConfig):
         self.options = options
-        self.app = faust.App('myapp', broker=options.broker)
+        self.app = faust.App('myapp', broker=options.broker,
+                             stream_wait_empty=False)
         self.faust_topic = self.app.topic(
             options.topic, key_type=str, value_type=str)
 
-        # self.stream = self.faust_topic.stream()
-        # self.stream.start()
+        self.stream = self.faust_topic.stream()
 
         @self.app.agent(self.faust_topic, sink=[])
         async def gen(recordings: AsyncIterable):
             async for recording in recordings:
-                # Or just remove the sink and do `self._consumer(recording)`...
-                # await self.out.asend(recording)
-                yield recording
-                # await agen.asend(recording)  # Push to generator
+                yield HttpExchangeBuilder.from_dict(recording)
+
         self.gen = gen
-
-        """ @self.app.task
-        async def get_recordings():
-            async for w in self.faust_topic.stream():
-                pass
-
-        self.get = get_recordings """
 
     @staticmethod
     def run(app: faust.App, loop: asyncio.AbstractEventLoop, loglevel='info'):

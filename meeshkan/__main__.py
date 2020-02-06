@@ -1,14 +1,14 @@
 import asyncio
+from asyncio.events import AbstractEventLoop
 import json
 import faust
 
-from typing import AsyncIterable, AsyncGenerator, Callable, Sequence
+from typing import AsyncIterable, Callable, Sequence, Awaitable, Tuple
 from http_types.types import HttpExchange
-from openapi_typed import OpenAPIObject
-from meeshkan.schemabuilder.builder import BASE_SCHEMA, build_schema_agen, update_openapi
+from meeshkan.schemabuilder.builder import build_schema_agen
 
 import click
-from http_types import HttpExchangeBuilder, HttpExchangeReader
+from http_types import HttpExchangeReader
 
 from meeshkan.schemabuilder.result import BuildResult
 from meeshkan.convert.pcap import convert_pcap
@@ -34,9 +34,54 @@ def cli():
     setup()  # Ensure setup is done before invoking the CLI.
 
 
-Sink = Callable[[BuildResult], None]
+HttpExchangeStream = AsyncIterable[HttpExchange]
+BuildResultStream = AsyncIterable[BuildResult]
 
-Source = AsyncIterable[HttpExchange]
+Source = Callable[[AbstractEventLoop], HttpExchangeStream]
+Sink = Callable[[BuildResultStream], Awaitable[None]]
+
+
+def file_sink(out: str) -> Sink:
+    async def handle(results: BuildResultStream):
+        async for result in results:
+            write_build_result(out, result)
+
+    return handle
+
+
+class AbstractSource:
+    async def start(self, loop: AbstractEventLoop) -> HttpExchangeStream:
+        raise NotImplementedError("")
+
+    def shutdown(self) -> None:
+        raise NotImplementedError("")
+
+
+class KafkaSource(AbstractSource):
+
+    def __init__(self, config: KafkaProcessorConfig):
+        self.config = config
+        self.processor = KafkaProcessor(config)
+        self.recording_stream = self.processor.gen.stream()
+        self.worker = None
+        self.worker_task = None
+
+    async def start(self, loop: AbstractEventLoop) -> Tuple[HttpExchangeStream, asyncio.Task]:
+        self.worker = faust.Worker(
+            self.processor.app, loop=loop, loglevel='info')
+
+        async def start_worker(worker: faust.Worker) -> None:
+            await worker.start()
+
+        source = self.recording_stream
+        worker_coro = start_worker(self.worker)
+        self.worker_task = loop.create_task(worker_coro)
+
+        return (source, self.worker_task)
+
+    def shutdown(self):
+        self.worker_task.cancel()
+        self.worker.stop_and_shutdown()
 
 
 @click.command()
@@ -52,40 +97,30 @@ def build(input_file, out, source, sink):
     if source is None and input_file is None:
         raise Exception("Either --source or --input-file is required.")
 
-    sinks: Sequence[Sink] = [
-        lambda build_result: write_build_result(out, build_result)]
+    sinks: Sequence[Sink] = [file_sink(out)]
 
     if source == 'kafka':
-        schema = BASE_SCHEMA
-
-        config = KafkaProcessorConfig(
-            broker="localhost:9092",
-            topic="express_recordings")
-
-        processor = KafkaProcessor(config)
 
         loop = asyncio.get_event_loop()
 
-        async def run():
-            worker = faust.Worker(processor.app, loop=loop, loglevel='info')
+        kafka_source = KafkaSource(config=KafkaProcessorConfig(
+            broker="localhost:9092",
+            topic="express_recordings"))
 
-            async def start_worker(worker: faust.Worker) -> None:
-                await worker.start()
+        async def run(loop):
+            exchange_iterable, source_task = await kafka_source.start(loop)
 
-            recording_stream = processor.gen.stream()
-
-            worker_coro = start_worker(worker)
             builder_coro = build_schema_agen(
-                recording_stream.__aiter__(), lambda schema: print(schema))
+                exchange_iterable.__aiter__(), lambda x: print(x))
 
-            try:
-                worker_task = loop.create_task(worker_coro)
-                iterate_task = loop.create_task(builder_coro)
-                await worker_task
-            finally:
-                worker.stop_and_shutdown()
+            builder_task = loop.create_task(builder_coro)
 
-        loop.run_until_complete(run())
+            await source_task
+
+        try:
+            loop.run_until_complete(run(loop))
+        finally:
+            kafka_source.shutdown()
 
         return
 

@@ -324,11 +324,13 @@ def build_schema_gen() -> Iterable[OpenAPIObject]:
         yield schema
 
 
-async def build_schema_agen(async_iter: AsyncIterator[HttpExchange], cb: Callable[[OpenAPIObject], None]) -> None:
+async def build_schema_agen(async_iter: AsyncIterator[HttpExchange], cb: Callable[[OpenAPIObject], None]):
     schema = BASE_SCHEMA
+    print("Starting task to read exchanges")
     async for exchange in async_iter:
         schema = update_openapi(schema, exchange)
-        print(schema)
+        cb(schema)
+        # yield schema
 
 
 def build_schema_online(requests: Iterator[HttpExchange]) -> OpenAPIObject:
