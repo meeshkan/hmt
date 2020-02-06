@@ -7,7 +7,6 @@ import typing
 from enum import Enum
 from urllib import parse
 from urllib.parse import urlsplit
-
 from http_types import Request, Response
 from tornado.iostream import IOStream, SSLIOStream, StreamClosedError
 
@@ -116,7 +115,7 @@ class Channel:
         path = os.path.join('/', *splits[2:])
         query = parse.parse_qs(parsed_fullpath.query)
 
-        fullpath = "{}?{}".format(path, parse.urlencode(query)) if query else path
+        fullpath = "{}?{}".format(path, parsed_fullpath.query) if query else path
 
         req_lines[0] = ' '.join((method, fullpath, protocol))
 
@@ -155,11 +154,11 @@ class Channel:
 
     def on_response_chunk(self, data: bytes):
         if len(self._response) == 0:
-            req_lines = data.decode('utf-8').split('\r\n')
-            for line in req_lines[1:]:
-                res = line.split(': ')
+            resp_lines = data.split(b'\r\n')
+            for line in resp_lines[1:]:
+                res = line.split(b': ')
                 if len(res) == 2:
-                    header, value = res
+                    header, value = res[0].decode('utf-8'), res[1].decode('utf-8')
                     if header == 'Content-Length':
                         self._content_length = int(value)
                         break
