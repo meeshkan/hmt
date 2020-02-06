@@ -1,10 +1,9 @@
 import asyncio
-from asyncio.events import AbstractEventLoop
 import json
-import faust
 
-from typing import AsyncIterable, Callable, Sequence, Awaitable, Tuple
-from http_types.types import HttpExchange
+from typing import Sequence
+from .types import *
+from .sources import KafkaSource
 from meeshkan.schemabuilder.builder import build_schema_agen
 
 import click
@@ -34,54 +33,12 @@ def cli():
     setup()  # Ensure setup is done before invoking the CLI.
 
 
-HttpExchangeStream = AsyncIterable[HttpExchange]
-BuildResultStream = AsyncIterable[BuildResult]
-
-Source = Callable[[AbstractEventLoop], HttpExchangeStream]
-Sink = Callable[[BuildResultStream], Awaitable[None]]
-
-
 def file_sink(out: str) -> Sink:
     async def handle(results: BuildResultStream):
         async for result in results:
             write_build_result(out, result)
 
     return handle
-
-
-class AbstractSource:
-    async def start(self, loop: AbstractEventLoop) -> HttpExchangeStream:
-        raise NotImplementedError("")
-
-    def shutdown(self) -> None:
-        raise NotImplementedError("")
-
-
-class KafkaSource(AbstractSource):
-
-    def __init__(self, config: KafkaProcessorConfig):
-        self.config = config
-        self.processor = KafkaProcessor(config)
-        self.recording_stream = self.processor.gen.stream()
-        self.worker = None
-        self.worker_task = None
-
-    async def start(self, loop: AbstractEventLoop) -> Tuple[HttpExchangeStream, asyncio.Task]:
-        self.worker = faust.Worker(
-            self.processor.app, loop=loop, loglevel='info')
-
-        async def start_worker(worker: faust.Worker) -> None:
-            await worker.start()
-
-        source = self.recording_stream
-        worker_coro = start_worker(self.worker)
-        self.worker_task = loop.create_task(worker_coro)
-
-        return (source, self.worker_task)
-
-    def shutdown(self):
-        self.worker_task.cancel()
-        self.worker.stop_and_shutdown()
 
 
 @click.command()
