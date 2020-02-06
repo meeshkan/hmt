@@ -4,7 +4,7 @@ from urllib.parse import urlunsplit
 from http_types import HttpExchange as HttpExchange
 from ..logger import get as getLogger
 from functools import reduce
-from typing import Any, List, Iterator, cast, Tuple, Optional, Union, TypeVar, Type, Sequence
+from typing import Any, List, Iterator, cast, Tuple, Optional, Union, TypeVar, Type, Sequence, AsyncGenerator
 from openapi_typed import Info, MediaType, OpenAPIObject, PathItem, Response, Operation, Schema, Parameter, Reference, \
     Server
 from typeguard import check_type  # type: ignore
@@ -271,7 +271,8 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
         request['request'], schema_servers)
 
     if normalized_pathname_or_none is None:
-        schema_servers.append(Server(url=urlunsplit([request['request']['protocol'], request['request']['host'], '', '', ''])))
+        schema_servers.append(Server(url=urlunsplit(
+            [request['request']['protocol'], request['request']['host'], '', '', ''])))
         normalized_pathname = request_path
     else:
         normalized_pathname = normalized_pathname_or_none
@@ -313,6 +314,14 @@ BASE_SCHEMA = OpenAPIObject(openapi="3.0.0",
                             info=Info(title="API title",
                                       description="API description", version="1.0"),
                             paths={})
+
+
+async def build_schema_async(exchanges: AsyncGenerator[HttpExchange, None]) -> OpenAPIObject:
+    schema = BASE_SCHEMA
+    async for exchange in exchanges:
+        schema = update_openapi(schema, exchange)
+
+    return schema
 
 
 def build_schema_online(requests: Iterator[HttpExchange]) -> OpenAPIObject:

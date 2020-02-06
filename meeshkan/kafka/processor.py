@@ -33,14 +33,16 @@ class KafkaProcessor:
             options.topic, key_type=str, value_type=str)
         self._consumer = options.consumer
 
-        @self.app.agent(self._faust_topic)
-        async def process(recordings):
+        @self.app.agent(self._faust_topic, sink=[self._consumer])
+        async def gen(recordings):
             async for recording in recordings:
-                self._consumer(recording)
+                # Or just remove the sink and do `self._consumer(recording)`...
+                yield recording
+                # await agen.asend(recording)  # Push to generator
 
-    def process(self):
-        loop = asyncio.get_event_loop()
-        worker = faust.Worker(self.app, loop=loop, loglevel='info')
+    @staticmethod
+    def run(app: faust.App, loop: asyncio.AbstractEventLoop = asyncio.get_event_loop(), loglevel='info'):
+        worker = faust.Worker(app, loop=loop, loglevel=loglevel)
 
         async def start_worker(worker: faust.Worker) -> None:
             await worker.start()
@@ -48,7 +50,6 @@ class KafkaProcessor:
         try:
             loop.run_until_complete(start_worker(worker))
         finally:
-            # worker.stop_and_shutdown_loop()
             worker.stop_and_shutdown()
 
 

@@ -1,3 +1,4 @@
+import asyncio
 import json
 from meeshkan.schemabuilder.builder import BASE_SCHEMA, update_openapi
 
@@ -44,7 +45,7 @@ def build(input_file, out, consumer):
         schema = BASE_SCHEMA
 
         def consume(json_exchange):
-            global schema
+            nonlocal schema
             exchange = HttpExchangeBuilder.from_dict(json_exchange)
             schema = update_openapi(schema, exchange)
             print(schema)
@@ -53,9 +54,10 @@ def build(input_file, out, consumer):
             broker="localhost:9092",
             topic="express_recordings",
             consumer=consume)
+
         processor = KafkaProcessor(config)
 
-        processor.process()
+        KafkaProcessor.run(processor.app, loop=asyncio.get_event_loop())
         return
 
     requests = HttpExchangeReader.from_jsonl(input_file)
