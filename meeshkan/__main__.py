@@ -53,7 +53,8 @@ def build(input_file, out, source, sink):
     if source is None and input_file is None:
         raise Exception("Either --source or --input-file is required.")
 
-    sinks: Sequence[Sink] = [file_sink(out)]
+    # TODO Support sinks
+    # sinks: Sequence[Sink] = [file_sink(out)]
 
     if source == 'kafka':
 
