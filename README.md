@@ -33,7 +33,7 @@ To list available commands, execute `meeshkan` or `meeshkan --help`.
 Build OpenAPI schema from recordings:
 
 ```bash
-$ meeshkan build -i path/to/recordings.jsonl [-o path/to/output_directory]
+$ meeshkan build --source file -i path/to/recordings.jsonl [-o path/to/output_directory]
 ```
 
 The supported input format for recordings is in the [HTTP Types](https://github.com/Meeshkan/http-types) JSON format. The libraries listed there may be used to generate input files in your language of choice. For an example input file, see [recordings.jsonl](https://github.com/Meeshkan/meeshkan/blob/master/resources/recordings.jsonl).
@@ -41,7 +41,17 @@ The supported input format for recordings is in the [HTTP Types](https://github.
 Use dash (`-i -`) to read from standard input:
 
 ```bash
-$ meeshkan build -i - < recordings.jsonl
+$ meeshkan build --source file -i - < recordings.jsonl
+```
+
+#### Reading from Kafka
+
+Install `kafka` bundle: `pip install meeshkan[kafka]`.
+
+Read from Kafka with `kafka.config`:
+
+```bash
+$ meeshkan build --source kafka --source-config kafka.config [-o path/to/output_directory]
 ```
 
 ### Converting from pcap
