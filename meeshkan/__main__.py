@@ -40,6 +40,25 @@ def file_sink(out: str) -> Sink:
     return handle
 
 
+def run_from_source(source: AbstractSource):
+    loop = asyncio.get_event_loop()
+
+    async def run(loop):
+        exchange_iterable, source_task = await source.start(loop)
+
+        builder_coro = build_schema_agen(
+            exchange_iterable.__aiter__(), lambda x: print(x))
+
+        builder_task = loop.create_task(builder_coro)
+
+        await source_task
+
+    try:
+        loop.run_until_complete(run(loop))
+    finally:
+        source.shutdown()
+
+
 @click.command()
 @click.option("-i", "--input-file", required=False, type=click.File('rb'), help="Input file. Use dash '-' to read from stdin.")
 @click.option("-o", "--out", required=False, default='out', type=click.Path(exists=False, file_okay=False, writable=True, readable=True), help="Output directory. If the directory does not exist, it is created if the parent directory exists.")
@@ -50,45 +69,31 @@ def build(input_file, out, source, sink):
     Build OpenAPI schema from recordings.
     """
 
-    if source is None and input_file is None:
-        raise Exception("Either --source or --input-file is required.")
-
     # TODO Support sinks
     # sinks: Sequence[Sink] = [file_sink(out)]
 
+    if source is not None and input_file is not None:
+        raise Exception("Specify either source or input-file, not both.")
+
     if source == 'kafka':
-
-        loop = asyncio.get_event_loop()
-
         kafka_source = KafkaSource(config=KafkaProcessorConfig(
             broker="localhost:9092",
             topic="express_recordings"))
 
-        async def run(loop):
-            exchange_iterable, source_task = await kafka_source.start(loop)
-
-            builder_coro = build_schema_agen(
-                exchange_iterable.__aiter__(), lambda x: print(x))
-
-            builder_task = loop.create_task(builder_coro)
-
-            await source_task
-
-        try:
-            loop.run_until_complete(run(loop))
-        finally:
-            kafka_source.shutdown()
-
+        run_from_source(kafka_source)
         return
+    elif source is not None:
+        raise Exception("Unknown source {}".format(source))
+    elif input_file is not None:
+        requests = HttpExchangeReader.from_jsonl(input_file)
+        schema = build_schema_online(requests)
 
-    requests = HttpExchangeReader.from_jsonl(input_file)
+        build_result = BuildResult(openapi=schema)
 
-    schema = build_schema_online(requests)
-
-    build_result = BuildResult(openapi=schema)
-
-    log("Result: %s", json.dumps(schema))
-    write_build_result(out, build_result)
+        log("Result: %s", json.dumps(schema))
+        write_build_result(out, build_result)
+    else:
+        raise Exception("Either --source or --input-file is required.")
 
 
 @click.command()
