@@ -26,7 +26,7 @@ class KafkaSource(AbstractSource):
         worker_coro = start_worker(self.worker)
         self.worker_task = loop.create_task(worker_coro)
 
-        return (source, self.worker_task)
+        return source, self.worker_task
 
     def shutdown(self):
         self.worker_task.cancel()
