@@ -30,16 +30,18 @@ class KafkaProcessor:
     def __init__(self, options: KafkaProcessorConfig):
         self.options = options
         self.app = faust.App('myapp', broker=options.broker)
-        self._faust_topic = self.app.topic(
+        self.faust_topic = self.app.topic(
             options.topic, key_type=str, value_type=str)
         self.out = options.out
 
-        @self.app.agent(self._faust_topic, sink=[])
+        @self.app.agent(self.faust_topic, sink=[])
         async def gen(recordings: AsyncIterable):
             async for recording in recordings:
                 # Or just remove the sink and do `self._consumer(recording)`...
-                await self.out.asend(recording)
+                # await self.out.asend(recording)
+                yield recording
                 # await agen.asend(recording)  # Push to generator
+        self.gen = gen
 
     @staticmethod
     def run(app: faust.App, loop: asyncio.AbstractEventLoop, loglevel='info'):

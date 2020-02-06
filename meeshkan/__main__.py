@@ -2,10 +2,10 @@ import asyncio
 import json
 import faust
 
-from typing import AsyncIterable, Callable, Sequence
+from typing import AsyncIterable, AsyncGenerator, Callable, Sequence
 from http_types.types import HttpExchange
 from openapi_typed import OpenAPIObject
-from meeshkan.schemabuilder.builder import BASE_SCHEMA, update_openapi
+from meeshkan.schemabuilder.builder import BASE_SCHEMA, build_schema_agen, update_openapi
 
 import click
 from http_types import HttpExchangeBuilder, HttpExchangeReader
@@ -58,21 +58,9 @@ def build(input_file, out, source, sink):
     if source == 'kafka':
         schema = BASE_SCHEMA
 
-        async def out_g():
-            nonlocal schema
-            json_exchange = yield schema
-            while True:
-                json_exchange = yield schema
-                exchange = HttpExchangeBuilder.from_dict(json_exchange)
-                schema = update_openapi(schema, exchange)
-                print(schema)
-
-        out_gen = out_g()
-
         config = KafkaProcessorConfig(
             broker="localhost:9092",
-            topic="express_recordings",
-            out=out_gen)
+            topic="express_recordings")
 
         processor = KafkaProcessor(config)
 
@@ -80,14 +68,20 @@ def build(input_file, out, source, sink):
 
         async def run():
             worker = faust.Worker(processor.app, loop=loop, loglevel='info')
-            # Start the output generator
-            await out_gen.asend(None)
 
             async def start_worker(worker: faust.Worker) -> None:
                 await worker.start()
 
+            async_iter = processor.gen.stream()
+
+            worker_coro = start_worker(worker)
+            builder_coro = build_schema_agen(
+                async_iter.__aiter__(), lambda schema: print(schema))
+
             try:
-                await start_worker(worker)
+                worker_task = loop.create_task(worker_coro)
+                iterate_task = loop.create_task(builder_coro)
+                await worker_task
             finally:
                 worker.stop_and_shutdown()
 

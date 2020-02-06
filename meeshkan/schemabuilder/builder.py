@@ -4,7 +4,7 @@ from urllib.parse import urlunsplit
 from http_types import HttpExchange as HttpExchange
 from ..logger import get as getLogger
 from functools import reduce
-from typing import Any, AsyncIterable, List, Iterator, cast, Tuple, Optional, Union, TypeVar, Type, Sequence, AsyncGenerator
+from typing import Any, AsyncIterable, List, Iterator, cast, Tuple, Optional, Union, TypeVar, Type, Sequence, AsyncGenerator, Iterable, AsyncIterator, Callable
 from openapi_typed import Info, MediaType, OpenAPIObject, PathItem, Response, Operation, Schema, Parameter, Reference, \
     Server
 from typeguard import check_type  # type: ignore
@@ -316,12 +316,19 @@ BASE_SCHEMA = OpenAPIObject(openapi="3.0.0",
                             paths={})
 
 
-async def build_schema_async(exchanges: AsyncIterable[HttpExchange]) -> OpenAPIObject:
+def build_schema_gen() -> Iterable[OpenAPIObject]:
     schema = BASE_SCHEMA
-    async for exchange in exchanges:
+    exchange = yield schema
+    while True:
         schema = update_openapi(schema, exchange)
+        yield schema
 
-    return schema
+
+async def build_schema_agen(async_iter: AsyncIterator[HttpExchange], cb: Callable[[OpenAPIObject], None]) -> None:
+    schema = BASE_SCHEMA
+    async for exchange in async_iter:
+        schema = update_openapi(schema, exchange)
+        print(schema)
 
 
 def build_schema_online(requests: Iterator[HttpExchange]) -> OpenAPIObject:
