@@ -1,16 +1,26 @@
 import logging
+import os
 
 import click
 import tornado.ioloop
+import yaml
 
 from meeshkan_proxy.proxy.proxy import RecordProxy, MockProxy
 from meeshkan_proxy.utils.data_callback import RequestLoggingCallback
 
+LOG_CONFIG = os.path.join(os.path.dirname(__file__), 'logging.yaml')
 logger = logging.getLogger(__name__)
 
 @click.group()
 def main():
-    pass
+    if os.path.exists(LOG_CONFIG):
+        with open(LOG_CONFIG) as f:
+            config = yaml.safe_load(f)
+            logging.config.dictConfig(config)
+    else:
+        logger.warning('No logging configuration provided in file %s. Using default configuratin.', LOG_CONFIG)
+
+
 
 
 @main.command()
