@@ -1,5 +1,5 @@
 import asyncio
-from . import AbstractSource
+from ..types import AbstractSource
 from typing import Tuple
 from ..kafka import KafkaProcessor, KafkaProcessorConfig
 import faust

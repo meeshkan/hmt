@@ -9,3 +9,11 @@ BuildResultStream = AsyncIterable[BuildResult]
 Source = Callable[[asyncio.events.AbstractEventLoop],
                   Tuple[HttpExchangeStream, asyncio.Task]]
 Sink = Callable[[BuildResultStream], Awaitable[None]]
+
+
+class AbstractSource:
+    async def start(self, loop: asyncio.AbstractEventLoop) -> Tuple[HttpExchangeStream, asyncio.Task]:
+        raise NotImplementedError("")
+
+    def shutdown(self) -> None:
+        raise NotImplementedError("")
