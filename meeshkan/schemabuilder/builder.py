@@ -317,22 +317,14 @@ BASE_SCHEMA = OpenAPIObject(openapi="3.0.0",
                             paths={})
 
 
-def build_schema_gen() -> Iterable[OpenAPIObject]:
-    schema = BASE_SCHEMA
-    exchange = yield schema
-    while True:
-        schema = update_openapi(schema, exchange)
-        yield schema
-
-
-async def build_schema_async(async_iter: AsyncIterable[HttpExchange]):
+async def build_schema_async(async_iter: AsyncIterable[HttpExchange]) -> AsyncIterable[BuildResult]:
     schema = BASE_SCHEMA
     async for exchange in async_iter:
         schema = update_openapi(schema, exchange)
         yield BuildResult(openapi=schema)
 
 
-def build_schema_online(requests: Iterator[HttpExchange]) -> OpenAPIObject:
+def build_schema_online(requests: Iterable[HttpExchange]) -> OpenAPIObject:
     """Build OpenAPI schema by iterating request-response pairs.
 
     OpenAPI object reference: https://swagger.io/specification/#oasObject

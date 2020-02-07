@@ -1,6 +1,6 @@
 from meeshkan.schemabuilder.result import BuildResult
 from meeshkan.schemabuilder.writer import write_build_result
-from ..types import AbstractSink
+from .abstract import AbstractSink
 
 
 class FileSystemSink(AbstractSink):

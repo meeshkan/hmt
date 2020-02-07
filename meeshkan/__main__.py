@@ -1,24 +1,17 @@
 import asyncio
 import json
-from meeshkan.sinks.file import FileSystemSink
-from meeshkan.sources.file import FileSource
-
-from typing import Sequence
-from .types import *
-from .sources import AbstractSource, KafkaSource
-from .sources.kafka import KafkaProcessorConfig
-from meeshkan.schemabuilder.builder import build_schema_async
-
 import click
-from http_types import HttpExchangeReader
+from typing import Sequence
 
-from meeshkan.schemabuilder.result import BuildResult
-from meeshkan.convert.pcap import convert_pcap
-
-from .schemabuilder import build_schema_online
-from .schemabuilder.writer import write_build_result
 from .config import setup
 from .logger import get as getLogger
+from .schemabuilder.builder import build_schema_async
+from .convert.pcap import convert_pcap
+from .sinks import AbstractSink, FileSystemSink
+from .sources import AbstractSource, KafkaSource, FileSource
+from .sources.kafka import KafkaProcessorConfig
+from .types import *
+
 
 LOGGER = getLogger(__name__)
 
@@ -41,6 +34,7 @@ async def write_to_sink(result_stream: BuildResultStream, sinks: Sequence[Abstra
             for sink in sinks:
                 sink.push(result)
     finally:
+        LOGGER.debug("Flushing all sinks")
         for sink in sinks:
             sink.flush()
 
@@ -49,19 +43,26 @@ def run_from_source(source: AbstractSource, sinks: Sequence[AbstractSink]):
     loop = asyncio.get_event_loop()
 
     async def run(loop):
-        exchange_stream, source_task = await source.start(loop)
-
-        result_stream = build_schema_async(exchange_stream)
-
+        source_stream, source_task = await source.start(loop)
+        result_stream = build_schema_async(source_stream)
         sink_task = loop.create_task(write_to_sink(result_stream, sinks))
 
-        if source_task is None:
-            await asyncio.gather(sink_task)
+        if source_task is not None:
+            # TODO Kafka source behaves a bit bad at SIG_INT: it does not raise but returns,
+            # leaving the sink task to wait for new input that never arrives. Therefore
+            # one cannot `await sink_task` here, at least not without timeout
+            await source_task
+            try:
+                await asyncio.wait_for(sink_task, timeout=3.0)
+            except asyncio.TimeoutError:
+                LOGGER.warn("Timeout on waiting for sink task to finish.")
         else:
-            await asyncio.gather(source_task, sink_task)
+            await sink_task
+
     try:
         loop.run_until_complete(run(loop))
     finally:
+        LOGGER.info("Shutting down source")
         source.shutdown()
         loop.close()
 
@@ -73,11 +74,8 @@ def run_from_source(source: AbstractSource, sinks: Sequence[AbstractSink]):
 @click.option("--sink", required=False, type=str,  help="Sink where to write results.")
 def build(input_file, out, source, sink):
     """
-    Build OpenAPI schema from recordings.
+    Build OpenAPI schema from HTTP exchanges.
     """
-
-    # TODO Support sinks
-    # sinks: Sequence[Sink] = [file_sink(out)]
 
     if input_file is not None and source != "file":
         raise Exception("Only specify input-file for --source file")
@@ -85,26 +83,18 @@ def build(input_file, out, source, sink):
     sinks = [FileSystemSink(out)]
 
     if source == 'kafka':
-        kafka_source = KafkaSource(config=KafkaProcessorConfig(
+        # TODO Kafka configuration
+        source = KafkaSource(config=KafkaProcessorConfig(
             broker="localhost:9092",
             topic="express_recordings"))
-
-        run_from_source(kafka_source, sinks=sinks)
     elif source == 'file':
         if input_file is None:
             raise Exception("Option --input-file for source 'file' required.")
-        file_source = FileSource(input_file)
-        run_from_source(file_source, sinks=sinks)
-    elif source is not None:
-        raise Exception("Unknown source {}".format(source))
-    elif input_file is not None:
-        requests = HttpExchangeReader.from_jsonl(input_file)
-        schema = build_schema_online(requests)
-        build_result = BuildResult(openapi=schema)
-        log("Result: %s", json.dumps(schema))
-        write_build_result(out, build_result)
+        source = FileSource(input_file)
     else:
-        raise Exception("Either --source or --input-file is required.")
+        raise Exception("Unknown source {}".format(source))
+
+    run_from_source(source, sinks=sinks)
 
 
 @click.command()
