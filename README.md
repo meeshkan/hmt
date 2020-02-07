@@ -46,13 +46,13 @@ $ meeshkan build --source file -i - < recordings.jsonl
 
 #### Reading from Kafka
 
-Install `kafka` bundle: `pip install meeshkan[kafka]`.
-
-Read from Kafka with `kafka.config`:
+Install `kafka` bundle: `pip install meeshkan[kafka]` and set `--source kafka`:
 
 ```bash
-$ meeshkan build --source kafka --source-config kafka.config [-o path/to/output_directory]
+$ meeshkan build --source kafka [-o path/to/output_directory]
 ```
+
+_TODO: Configuration for Kafka_
 
 ### Converting from pcap
 
