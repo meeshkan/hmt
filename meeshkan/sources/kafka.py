@@ -29,14 +29,14 @@ class KafkaProcessor:
         self.faust_topic = self.app.topic(
             options.topic, key_type=str, value_type=str)
 
-        self.stream = self.faust_topic.stream()
+        # self.stream = self.faust_topic.stream()
 
         @self.app.agent(self.faust_topic, sink=[])
         async def gen(recordings: AsyncIterable):
             async for recording in recordings:
                 yield HttpExchangeBuilder.from_dict(recording)
 
-        self.gen = gen
+        self.agent = gen
 
     @staticmethod
     def run(app: faust.App, loop: asyncio.AbstractEventLoop, loglevel='info'):
@@ -61,7 +61,7 @@ class KafkaSource(AbstractSource):
 
         self.config = config
         self.processor = KafkaProcessor(config)
-        self.recording_stream = self.processor.gen.stream()
+        self.recording_stream = self.processor.agent.stream()
         self.worker = None
         self.worker_task = None
 

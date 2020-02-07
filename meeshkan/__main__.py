@@ -41,22 +41,24 @@ def cli():
     return handle """
 
 
-def run_from_source(source: AbstractSource):
+def run_from_source(source: AbstractSource, out: str):
     loop = asyncio.get_event_loop()
 
     async def run(loop):
         exchange_iterable, source_task = await source.start(loop)
 
         builder_coro = build_schema_agen(
-            exchange_iterable.__aiter__(), lambda x: print(x))  # TODO Add sinks
+            exchange_iterable.__aiter__(), lambda x: None)  # TODO Add sinks
+        # builder_coro = build_schema_agen(
+        #     exchange_iterable.__aiter__(), lambda result: write_build_result(out, BuildResult(openapi=result)))  # TODO Add sinks
 
         builder_task = loop.create_task(builder_coro)
 
         if source_task is not None:
             await source_task
-        else:
-            await builder_task
 
+        result = await builder_task
+        write_build_result(out, BuildResult(openapi=result))
     try:
         loop.run_until_complete(run(loop))
     finally:
@@ -65,7 +67,7 @@ def run_from_source(source: AbstractSource):
 
 @click.command()
 @click.option("-i", "--input-file", required=False, type=click.File('rb'), help="Input file. Use dash '-' to read from stdin.")
-@click.option("-o", "--out", required=False, default='out', type=click.Path(exists=False, file_okay=False, writable=True, readable=True), help="Output directory. If the directory does not exist, it is created if the parent directory exists.")
+@click.option("-o", "--out", required=True, default='out', type=click.Path(exists=False, file_okay=False, writable=True, readable=True), help="Output directory. If the directory does not exist, it is created if the parent directory exists.")
 @click.option("--source", required=False, default='file', type=str, help="Source to read recordings from. For example, 'kafka'")
 @click.option("--sink", required=False, type=str,  help="Sink where to write results.")
 def build(input_file, out, source, sink):
@@ -84,13 +86,13 @@ def build(input_file, out, source, sink):
             broker="localhost:9092",
             topic="express_recordings"))
 
-        run_from_source(kafka_source)
+        run_from_source(kafka_source, out=out)
         return
     elif source == 'file':
         if input_file is None:
             raise Exception("Option --input-file for source 'file' required.")
         file_source = FileSource(input_file)
-        run_from_source(file_source)
+        run_from_source(file_source, out=out)
     elif source is not None:
         raise Exception("Unknown source {}".format(source))
     elif input_file is not None:

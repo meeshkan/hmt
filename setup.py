@@ -35,7 +35,8 @@ DEV = [
     'wheel',
     'pytest-watch',
     'pytest-testmon',
-    'pyhamcrest'
+    'pyhamcrest',
+    'pytest-asyncio'
 ]
 
 VERSION = '0.2.3'

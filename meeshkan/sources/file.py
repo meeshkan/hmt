@@ -11,7 +11,7 @@ class FileSource(AbstractSource):
         self.input_file = input_file
 
     async def start(self, loop: asyncio.events.AbstractEventLoop) -> Tuple[AsyncIterable[HttpExchange], None]:
-        print(self.input_file)
+        # print(self.input_file)
 
         async def read():
             for line in self.input_file:
