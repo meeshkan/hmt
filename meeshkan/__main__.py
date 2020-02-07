@@ -1,11 +1,13 @@
 import asyncio
 import json
+from meeshkan.sinks.file import FileSystemSink
 from meeshkan.sources.file import FileSource
 
 from typing import Sequence
 from .types import *
-from .sources.kafka import KafkaSource, KafkaProcessorConfig
-from meeshkan.schemabuilder.builder import build_schema_agen
+from .sources import AbstractSource, KafkaSource
+from .sources.kafka import KafkaProcessorConfig
+from meeshkan.schemabuilder.builder import build_schema_async
 
 import click
 from http_types import HttpExchangeReader
@@ -33,36 +35,35 @@ def cli():
     setup()  # Ensure setup is done before invoking the CLI.
 
 
-""" def file_sink(out: str) -> Sink:
-    async def handle(results: BuildResultStream):
-        async for result in results:
-            write_build_result(out, result)
+async def write_to_sink(result_stream: BuildResultStream, sinks: Sequence[AbstractSink]):
+    try:
+        async for result in result_stream:
+            for sink in sinks:
+                sink.push(result)
+    finally:
+        for sink in sinks:
+            sink.flush()
 
-    return handle """
 
-
-def run_from_source(source: AbstractSource, out: str):
+def run_from_source(source: AbstractSource, sinks: Sequence[AbstractSink]):
     loop = asyncio.get_event_loop()
 
     async def run(loop):
-        exchange_iterable, source_task = await source.start(loop)
+        exchange_stream, source_task = await source.start(loop)
 
-        builder_coro = build_schema_agen(
-            exchange_iterable.__aiter__(), lambda x: None)  # TODO Add sinks
-        # builder_coro = build_schema_agen(
-        #     exchange_iterable.__aiter__(), lambda result: write_build_result(out, BuildResult(openapi=result)))  # TODO Add sinks
+        result_stream = build_schema_async(exchange_stream)
 
-        builder_task = loop.create_task(builder_coro)
+        sink_task = loop.create_task(write_to_sink(result_stream, sinks))
 
-        if source_task is not None:
-            await source_task
-
-        result = await builder_task
-        write_build_result(out, BuildResult(openapi=result))
+        if source_task is None:
+            await asyncio.gather(sink_task)
+        else:
+            await asyncio.gather(source_task, sink_task)
     try:
         loop.run_until_complete(run(loop))
     finally:
         source.shutdown()
+        loop.close()
 
 
 @click.command()
@@ -81,26 +82,25 @@ def build(input_file, out, source, sink):
     if input_file is not None and source != "file":
         raise Exception("Only specify input-file for --source file")
 
+    sinks = [FileSystemSink(out)]
+
     if source == 'kafka':
         kafka_source = KafkaSource(config=KafkaProcessorConfig(
             broker="localhost:9092",
             topic="express_recordings"))
 
-        run_from_source(kafka_source, out=out)
-        return
+        run_from_source(kafka_source, sinks=sinks)
     elif source == 'file':
         if input_file is None:
             raise Exception("Option --input-file for source 'file' required.")
         file_source = FileSource(input_file)
-        run_from_source(file_source, out=out)
+        run_from_source(file_source, sinks=sinks)
     elif source is not None:
         raise Exception("Unknown source {}".format(source))
     elif input_file is not None:
         requests = HttpExchangeReader.from_jsonl(input_file)
         schema = build_schema_online(requests)
-
         build_result = BuildResult(openapi=schema)
-
         log("Result: %s", json.dumps(schema))
         write_build_result(out, build_result)
     else:

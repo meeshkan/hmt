@@ -1,5 +1,7 @@
+import abc
+from typing import Union, Awaitable
 import asyncio
-from typing import Callable, Awaitable, AsyncIterable, Tuple, Optional
+from typing import Callable, Awaitable, AsyncIterable, Tuple
 from http_types import HttpExchange
 from .schemabuilder.result import BuildResult
 
@@ -11,9 +13,12 @@ Source = Callable[[asyncio.events.AbstractEventLoop],
 Sink = Callable[[BuildResultStream], Awaitable[None]]
 
 
-class AbstractSource:
-    async def start(self, loop: asyncio.AbstractEventLoop) -> Tuple[HttpExchangeStream, Optional[asyncio.Task]]:
-        raise NotImplementedError("")
+class AbstractSink(abc.ABC):
 
-    def shutdown(self) -> None:
-        raise NotImplementedError("")
+    @abc.abstractmethod
+    def push(self, result: BuildResult) -> Union[Awaitable[None], None]:
+        raise NotImplementedError("Not implemented")
+
+    @abc.abstractmethod
+    def flush(self) -> Union[Awaitable[None], None]:
+        raise NotImplementedError("Not implemented")

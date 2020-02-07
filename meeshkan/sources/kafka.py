@@ -1,7 +1,7 @@
 from http_types.utils import HttpExchangeBuilder
 from typing import AsyncIterable
 import asyncio
-from ..types import AbstractSource
+from .abstract import AbstractSource
 from typing import Tuple
 import faust
 from ..types import HttpExchangeStream

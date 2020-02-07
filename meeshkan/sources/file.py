@@ -1,7 +1,7 @@
 from typing import AsyncIterable, Tuple, TextIO
 from http_types.types import HttpExchange
 from http_types.utils import HttpExchangeReader
-from ..types import AbstractSource
+from .abstract import AbstractSource
 import asyncio
 
 

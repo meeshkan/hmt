@@ -15,6 +15,7 @@ from .schema import validate_openapi_object
 from .paths import find_matching_path, RequestPathParameters
 from .query import build_query, update_query
 from .servers import normalize_path_if_matches
+from .result import BuildResult
 
 logger = getLogger(__name__)
 
@@ -324,14 +325,11 @@ def build_schema_gen() -> Iterable[OpenAPIObject]:
         yield schema
 
 
-async def build_schema_agen(async_iter: AsyncIterator[HttpExchange], cb: Callable[[OpenAPIObject], None]):
+async def build_schema_async(async_iter: AsyncIterable[HttpExchange]):
     schema = BASE_SCHEMA
-    # print("Starting task to read exchanges")
     async for exchange in async_iter:
         schema = update_openapi(schema, exchange)
-        cb(schema)
-    return schema
-    # yield schema
+        yield BuildResult(openapi=schema)
 
 
 def build_schema_online(requests: Iterator[HttpExchange]) -> OpenAPIObject:
