@@ -20,6 +20,8 @@ logger = getLogger(__name__)
 
 MediaTypeKey = Literal['application/json', 'text/plain']
 
+__all__ = ['build_schema_batch', 'build_schema_online', 'update_openapi']
+
 
 def get_media_type(body: str) -> Optional[MediaTypeKey]:
     """Determine media type (application/json, text/plain, etc.) from body.
@@ -271,7 +273,8 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
         request['request'], schema_servers)
 
     if normalized_pathname_or_none is None:
-        schema_servers.append(Server(url=urlunsplit([request['request']['protocol'], request['request']['host'], '', '', ''])))
+        schema_servers.append(Server(url=urlunsplit(
+            [request['request']['protocol'], request['request']['host'], '', '', ''])))
         normalized_pathname = request_path
     else:
         normalized_pathname = normalized_pathname_or_none

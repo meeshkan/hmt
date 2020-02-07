@@ -1,3 +1,6 @@
 """OpenAPI schema building operations. Uses request-response pairs as input.
 """
-from .builder import build_schema_batch, build_schema_online, update_openapi
+from .builder import *
+from . import builder
+
+__all__ = builder.__all__
