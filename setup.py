@@ -21,7 +21,7 @@ REQUIRED = [
     'pyyaml',
     'jsonschema',
     'typing-extensions',
-    'openapi-typed>=0.0.2',
+    'openapi-typed>=0.1.0',
     'typeguard>=2.7.0',
     'genson',
     'http-types>=0.0.5'
