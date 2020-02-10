@@ -239,11 +239,19 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
 
     schema_paths = schema_copy['paths']
 
-    path_match_result = find_matching_path(normalized_pathname, schema_paths)
+    operation_candidate = build_operation(request)
+    
+    path_match_result = find_matching_path(normalized_pathname, schema_paths, request_method, operation_candidate)
 
     if path_match_result is not None:
         # Path item exists for request path
-        path_item, request_path_parameters = path_match_result
+        path_item, request_path_parameters, new_pathname, old_pathname = path_match_result
+        if new_pathname is not old_pathname:
+            # the algorithm has updated the pathname, need to mutate
+            # the schema paths to use the new and discard the old
+            pointer_to_value = schema_paths[old_pathname]
+            del schema_paths[old_pathname]
+            schema_paths[new_pathname] = pointer_to_value
     else:
         path_item = PathItem(summary="Path summary",
                              description="Path description")
@@ -256,7 +264,7 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
         operation = update_operation(existing_operation, request)
 
     else:
-        operation = build_operation(request)
+        operation = operation_candidate
 
     # Verify path parameters are up-to-date
     existing_path_parameters = path_item.get(
