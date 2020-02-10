@@ -5,11 +5,20 @@
 [![PyPi](https://img.shields.io/pypi/pyversions/meeshkan)](https://pypi.org/project/meeshkan/)
 [![License](https://img.shields.io/pypi/l/meeshkan)](LICENSE)
 
-Reverse engineer services with style 🤓💾🚀
+Meeshkan is a library and command-line tool for reverse engineering APIs from recorded traffic.
+
+It is used at [Meeshkan](https://meeshkan.com) to build enterprise-level API sandboxes.
+
+The supported input format for HTTP recordings is the [HTTP Types](https://github.com/Meeshkan/http-types) JSON format.
+
+Meeshkan requires Python 3.6 or later for the new async/await syntax.
+
+Meeshkan is statically typed using the [pyright](https://github.com/microsoft/pyright) type checker.
 
 ## Table of Contents
 
 1. [Installation](#installation)
+1. [Python API](#python-api)
 1. [Command-line interface](#command-line-interface)
 1. [Development](#development)
 1. [Contributing](#contributing)
@@ -24,19 +33,58 @@ $ pip install meeshkan
 
 Note that `meeshkan` requires **Python 3.6+.**
 
+## Python API
+
+### Quick start
+
+```python
+from openapi_typed import OpenAPIObject
+import meeshkan
+from typing import List
+import json
+from http_types import HttpExchange, Request, Response, RequestBuilder
+
+
+def read_http_exchanges() -> List[HttpExchange]:
+    """Read HTTP exchanges from the source of your choice.
+    """
+    request: Request = RequestBuilder.from_url(
+        "https://example.org/v1", method="get", headers={})
+
+    response: Response = Response(
+        statusCode=200, body=json.dumps({"hello": "world"}), headers={})
+
+    http_exchange: HttpExchange = {'request': request, 'response': response}
+
+    return [http_exchange]
+
+
+http_exchanges = read_http_exchanges()
+
+# Build OpenAPI schema from a list of recordings
+openapi: OpenAPIObject = meeshkan.build_schema_batch(http_exchanges)
+
+# Build schema from an iterator
+openapi: OpenAPIObject = meeshkan.build_schema_online(iter(http_exchanges))
+
+# Update OpenAPI schema one `HttpExchange` at a time
+http_exchange = http_exchanges[0]
+openapi: OpenAPIObject = meeshkan.update_openapi(openapi, http_exchange)
+```
+
 ## Command-line interface
 
 To list available commands, execute `meeshkan` or `meeshkan --help`.
 
-### Building OpenAPI from recordings
+### Create OpenAPI schema from HTTP recordings
 
-Build OpenAPI schema from recordings:
+Build OpenAPI schema from a single `recordings.jsonl` file:
 
 ```bash
 $ meeshkan build --source file -i path/to/recordings.jsonl [-o path/to/output_directory]
 ```
 
-The supported input format for recordings is in the [HTTP Types](https://github.com/Meeshkan/http-types) JSON format. The libraries listed there may be used to generate input files in your language of choice. For an example input file, see [recordings.jsonl](https://github.com/Meeshkan/meeshkan/blob/master/resources/recordings.jsonl).
+The input file should be in [JSON Lines](http://jsonlines.org/) format and every line should be in [HTTP Types](https://meeshkan.github.io/http-types/) JSON format.For an example input file, see [recordings.jsonl](https://github.com/Meeshkan/meeshkan/blob/master/resources/recordings.jsonl). The libraries listed at [HTTP Types](https://meeshkan.github.io/http-types/) can be used to generate input files in your language of choice.
 
 Use dash (`-i -`) to read from standard input:
 
@@ -56,7 +104,7 @@ _TODO: Configuration for Kafka_
 
 ### Converting from pcap
 
-You can convert [packet capture files](https://en.wikipedia.org/wiki/Pcap) to [HTTP Types](https://github.com/Meeshkan/http-types) format using the `convert` command:
+You can convert [packet capture files](https://en.wikipedia.org/wiki/Pcap) to [HTTP Types](https://meeshkan.github.io/http-types/) format using the `convert` command:
 
 ```bash
 meeshkan convert -i /path/to/file.pcap -o recordings.jsonl
