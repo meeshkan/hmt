@@ -31,12 +31,14 @@ def test_match_paths():
     paths = PETSTORE_SCHEMA['paths']
     request_path = "/pets/32"
 
-    match_result = find_matching_path(request_path, paths)
+    match_result = find_matching_path(request_path, paths, "GET", {
+        'responses': {}
+    })
 
     assert match_result is not None
 
     expected_path_item = PETSTORE_SCHEMA['paths']['/pets/{petId}']
-    path_item, parameters = match_result
+    path_item, parameters, _, __ = match_result
 
     assert_that(path_item, equal_to(expected_path_item))
     assert_that(parameters, has_entry('petId', '32'))
