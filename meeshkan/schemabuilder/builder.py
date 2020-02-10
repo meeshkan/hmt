@@ -2,6 +2,7 @@ import copy
 from functools import reduce
 from typing import Any, List, Iterable, AsyncIterable, cast, Tuple, Optional, Union, TypeVar, Type
 from urllib.parse import urlunsplit
+from collections import defaultdict
 
 from http_types import HttpExchange as HttpExchange
 from openapi_typed import Info, MediaType, OpenAPIObject, PathItem, Response, Operation, Parameter, Reference, Server
@@ -109,7 +110,8 @@ def update_response(response: Response, exchange: HttpExchange) -> Response:
         media_type = build_media_type(
             exchange=exchange, type_key=media_type_key)
 
-    response_content[media_type_key] = media_type
+    response_content = {**response_content, **{media_type_key: media_type}}
+    response['content'] = response_content
     return response
 
 
