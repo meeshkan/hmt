@@ -23,18 +23,21 @@ MediaTypeKey = Literal['application/json', 'text/plain']
 MEDIA_TYPE_FOR_NON_JSON = "text/plain"
 
 
-def get_media_type(body: str) -> MediaTypeKey:
+def infer_media_type_from_nonempty(body: str) -> MediaTypeKey:
     """Determine media type (application/json, text/plain, etc.) from body.
 
     Arguments:
         body {str} -- Response body, should not be empty.
 
     Raises:
-        Exception: If body is of unexpected type.
+        Exception: If body is of unexpected type or empty.
 
     Returns:
         MediaTypeKey -- Media type such as "application/json"
     """
+
+    if body == '':
+        raise Exception("Cannot infer media type from empty body.")
 
     try:
         as_json = json.loads(body)
@@ -64,10 +67,24 @@ def update_text_schema(text_body: str, schema: Optional[Any] = None) -> Schema:
 
 
 def update_media_type(exchange: HttpExchange, type_key: MediaTypeKey, media_type: Optional[MediaType] = None) -> MediaType:
+    """Update media type.
+
+    Arguments:
+        exchange {HttpExchange} -- Http exchange
+        type_key {MediaTypeKey} -- MediaType such as "application/json"
+
+    Keyword Arguments:
+        media_type {Optional[MediaType]} -- Existing media type if exists. For example, "{ 'schema': { 'type': 'string' }}"
+
+    Raises:
+        Exception: If existing media type is unknown.
+
+    Returns:
+        MediaType -- Updated media type object.
+    """
     body = exchange['response']['body']
 
-    existing_schema = media_type.get(
-        "schema", None) if media_type is not None else None
+    existing_schema = (media_type or {}).get("schema", None)
 
     if type_key == "application/json":
         schema = update_json_schema(json.loads(body), schema=existing_schema)
@@ -93,9 +110,11 @@ def build_response_content(exchange: HttpExchange) -> Optional[Tuple[MediaTypeKe
         Optional[Tuple[str, MediaType]] -- None for empty body, tuple of media-type key and media-type otherwise.
     """
     body = exchange['response']['body']
+
     if body == '':
         return None
-    media_type_key = get_media_type(body)
+
+    media_type_key = infer_media_type_from_nonempty(body)
 
     media_type = build_media_type(exchange, type_key=media_type_key)
 
@@ -149,19 +168,19 @@ def update_response(response: Response, exchange: HttpExchange) -> Response:
         Response -- Updated response object.
     """
     # TODO Update headers and links
-
     response_body = exchange['response']['body']
 
     if response_body == '':
-        # No body
+        # No body, do not do anything
+        # TODO How to mark empty body as a possible response if non-empty responses exist
         return response
 
-    media_type_key = get_media_type(response_body)
+    media_type_key = infer_media_type_from_nonempty(response_body)
 
     response_content = response['content'] if 'content' in response else None
 
     if response_content is not None and media_type_key in response_content:
-        # Need to update media type
+        # Need to update existing media type
         existing_media_type = response_content[media_type_key]
         media_type = update_media_type(
             exchange=exchange, type_key=media_type_key, media_type=existing_media_type)
