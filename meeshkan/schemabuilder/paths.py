@@ -3,7 +3,8 @@ import re
 import random
 import string
 from deepdiff import DeepDiff
-from typing import Pattern, Optional, Tuple, Mapping, Any, Sequence
+from typing import Pattern, Optional, Tuple, Mapping, Any
+from typing_extensions import TypedDict
 
 from openapi_typed import PathItem, Paths, Operation
 
@@ -136,7 +137,13 @@ def _match_to_path(request_path: str, path: str) -> Optional[Mapping[str, Any]]:
     return {parameter_name: parameter_value for parameter_name, parameter_value in zip(parameter_names, captures)}
 
 
-def find_matching_path(request_path: str, paths: Paths, request_method: str, operation_candidate: Operation) -> Optional[Tuple[PathItem, RequestPathParameters, str, str]]:
+class MatchingPath(TypedDict):
+  path: PathItem
+  param_mapping: Mapping[str, Any]
+  new_pathname: str
+  old_pathname: str
+
+def find_matching_path(request_path: str, paths: Paths, request_method: str, operation_candidate: Operation) -> Optional[MatchingPath]:
     """Find path that matches the request path.
 
     Arguments:
@@ -146,7 +153,7 @@ def find_matching_path(request_path: str, paths: Paths, request_method: str, ope
         operation_candidate {Operation} -- An operation to match against other paths.
 
     Returns:
-        Optional[Tuple[PathItem, Mapping[str, Any], str, str]] -- PathItem, key-value pairs of found path parameters with names, the new pathname and the old pathname
+        Optional[MatchingPath] -- The matching path (if any)
     """
 
     # First pass - we find an explicit match
@@ -160,8 +167,7 @@ def find_matching_path(request_path: str, paths: Paths, request_method: str, ope
 
             if path_match is None:
                 continue
-
-            return (path_item, path_match, new_pathname, request_path)
+            return {'path': path_item, 'param_mapping': path_match, 'new_pathname': new_pathname, 'old_pathname': request_path }
 
     return None
 

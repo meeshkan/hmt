@@ -38,7 +38,7 @@ def test_match_paths():
     assert match_result is not None
 
     expected_path_item = PETSTORE_SCHEMA['paths']['/pets/{petId}']
-    path_item, parameters, _, __ = match_result
+    path_item, parameters = match_result['path'], match_result['param_mapping']
 
     assert_that(path_item, equal_to(expected_path_item))
     assert_that(parameters, has_entry('petId', '32'))
