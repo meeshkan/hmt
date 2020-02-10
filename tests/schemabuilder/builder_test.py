@@ -99,7 +99,6 @@ class TestSchema:
         assert_that(properties, has_entry('clone_url',
                                           equal_to({'type': 'string'})))
 
-
     def test_servers(self):
         servers = self.schema['servers']
         assert 1 == len(servers)
@@ -179,3 +178,20 @@ class TestQueryParameters:
         first_query_param = operation['parameters'][0]
 
         assert_that(first_query_param, has_entry("required", False))
+
+
+class TestSchemaTextBody:
+    request = RequestBuilder.from_url("https://example.com/v1")
+    response = Response(statusCode=200, body="Hello World", headers={})
+    exchange: HttpExchange = {'request': request, 'response': response}
+
+    def test_build_string_body(self):
+        schema = build_schema_batch([self.exchange])
+        response_content = schema['paths']['/v1']['get']['responses']['200']['content']
+
+        assert_that(response_content, has_key("text/plain"))
+
+        media_type = response_content["text/plain"]
+
+        assert_that(media_type, has_entry(
+            "schema", has_entry("type", "string")))

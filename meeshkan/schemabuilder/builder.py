@@ -1,92 +1,45 @@
 import copy
+from functools import reduce
 from urllib.parse import urlunsplit
 
 from http_types import HttpExchange as HttpExchange
-from ..logger import get as getLogger
-from functools import reduce
-from typing import Any, List, Iterator, cast, Tuple, Optional, Union, TypeVar, Type, Sequence
-from openapi_typed import Info, MediaType, OpenAPIObject, PathItem, Response, Operation, Schema, Parameter, Reference, \
+
+from typing import Any, List, Iterator, cast, Tuple, Optional, Union, TypeVar, Type
+from openapi_typed import Info, MediaType, OpenAPIObject, PathItem, Response, Operation, Parameter, Reference, \
     Server
 from typeguard import check_type  # type: ignore
-import json
-from typing_extensions import Literal
-from .json_schema import to_openapi_json_schema
-from .schema import validate_openapi_object
+
+from ..logger import get as getLogger
+from .media_types import infer_media_type_from_nonempty, build_media_type, update_media_type, MediaTypeKey
 from .paths import find_matching_path, RequestPathParameters
 from .query import build_query, update_query
+from .schema import validate_openapi_object
 from .servers import normalize_path_if_matches
 
-logger = getLogger(__name__)
 
-MediaTypeKey = Literal['application/json', 'text/plain']
+logger = getLogger(__name__)
 
 __all__ = ['build_schema_batch', 'build_schema_online', 'update_openapi']
 
 
-def get_media_type(body: str) -> Optional[MediaTypeKey]:
-    """Determine media type (application/json, text/plain, etc.) from body.
-    Return None for empty body.
+def build_response_content(exchange: HttpExchange) -> Optional[Tuple[MediaTypeKey, MediaType]]:
+    """Build response content schema from exchange.
 
     Arguments:
-        body {str} -- Response body
-
-    Raises:
-        Exception: If body is of unexpected type.
+        request {HttpExchange} -- Http exchange.
 
     Returns:
-        MediaTypeKey -- Media type such as "application/json"
+        Optional[Tuple[str, MediaType]] -- None for empty body, tuple of media-type key and media-type otherwise.
     """
+    body = exchange['response']['body']
 
     if body == '':
         return None
 
-    try:
-        as_json = json.loads(body)
-    except json.decoder.JSONDecodeError:
-        logger.exception(f"Failed decoding: {body}")
-        raise
+    media_type_key = infer_media_type_from_nonempty(body)
 
-    if isinstance(as_json, dict):
-        return 'application/json'
-    elif isinstance(as_json, list):
-        return 'application/json'
-    elif isinstance(as_json, str):
-        return 'text/plain'
-    else:
-        raise Exception(f"Not sure what to do with body: {body}")
+    media_type = build_media_type(exchange, type_key=media_type_key)
 
-
-SchemaType = Literal['object', 'array', 'string']
-
-
-def infer_schema(body: str, schema: Optional[Any] = None) -> Schema:
-    try:
-        as_json = json.loads(body)
-    except json.decoder.JSONDecodeError:
-        logger.exception(f"Failed decoding: {body}")
-        raise
-
-    # TODO typeguard
-    return cast(Schema, to_openapi_json_schema(as_json, schema))
-
-
-def update_media_type(request: HttpExchange, media_type: Optional[MediaType] = None) -> MediaType:
-    body = request['response']['body']
-    if media_type is not None:
-        schema_or_none = media_type['schema']
-    else:
-        schema_or_none = None
-    schema = infer_schema(body, schema=schema_or_none)
-    media_type = MediaType(schema=schema)
-    return media_type
-
-
-def content_from_body(request: HttpExchange) -> Optional[Tuple[str, MediaType]]:
-    body = request['response']['body']
-    media_type_key = get_media_type(body)
-    if media_type_key is None:
-        return None
-    media_type = update_media_type(request)
     return (media_type_key, media_type)
 
 
@@ -102,7 +55,7 @@ def build_response(request: HttpExchange) -> Response:
         Response -- OpenAPI response object.
     """
     # TODO Headers and links
-    content_or_none = content_from_body(request)
+    content_or_none = build_response_content(request)
 
     if content_or_none is None:
         return Response(
@@ -124,32 +77,38 @@ def build_response(request: HttpExchange) -> Response:
     )
 
 
-def update_response(response: Response, request: HttpExchange) -> Response:
+def update_response(response: Response, exchange: HttpExchange) -> Response:
     """Update response object. Mutates the input object.
 
     Response reference: https://swagger.io/specification/#responseObject
 
     Arguments:
         response {Response} -- Existing response object.
-        request {HttpExchange} -- Request-response pair.
+        exchange {HttpExchange} -- Request-response pair.
 
     Returns:
         Response -- Updated response object.
     """
     # TODO Update headers and links
-    response_content = response['content'] if 'content' in response else None
-    media_type_key = get_media_type(request['response']['body'])
+    response_body = exchange['response']['body']
 
-    # No body
-    if media_type_key is None:
+    if response_body == '':
+        # No body, do not do anything
+        # TODO How to mark empty body as a possible response if non-empty responses exist
         return response
 
+    media_type_key = infer_media_type_from_nonempty(response_body)
+
+    response_content = response['content'] if 'content' in response else None
+
     if response_content is not None and media_type_key in response_content:
-        # Need to update media type
+        # Need to update existing media type
         existing_media_type = response_content[media_type_key]
-        media_type = update_media_type(request, existing_media_type)
+        media_type = update_media_type(
+            exchange=exchange, type_key=media_type_key, media_type=existing_media_type)
     else:
-        media_type = update_media_type(request)
+        media_type = build_media_type(
+            exchange=exchange, type_key=media_type_key)
 
     response_content[media_type_key] = media_type
     return response
