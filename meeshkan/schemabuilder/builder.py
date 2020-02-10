@@ -5,7 +5,7 @@ from urllib.parse import urlunsplit
 from collections import defaultdict
 
 from http_types import HttpExchange as HttpExchange
-from openapi_typed import Info, MediaType, OpenAPIObject, PathItem, Response, Operation, Parameter, Reference, Server
+from openapi_typed import Info, MediaType, OpenAPIObject, PathItem, Response, Operation, Parameter, Reference, Server, Responses
 from typeguard import check_type  # type: ignore
 
 from ..logger import get as getLogger
@@ -153,7 +153,7 @@ def update_operation(operation: Operation, request: HttpExchange) -> Operation:
     Returns:
         Operation -- Updated operation
     """
-    responses = operation['responses']
+    responses = operation['responses']  # type: Responses
     response_code = str(request['response']['statusCode'])
     if response_code in responses:
         # Response exists
@@ -233,8 +233,8 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
         request['request'], schema_servers)
 
     if normalized_pathname_or_none is None:
-        schema_servers.append(Server(url=urlunsplit(
-            [request['request']['protocol'], request['request']['host'], '', '', ''])))
+        schema_copy['servers'] = [*schema_copy['servers'], Server(url=urlunsplit(
+            [request['request']['protocol'], request['request']['host'], '', '', '']))]
         normalized_pathname = request_path
     else:
         normalized_pathname = normalized_pathname_or_none
@@ -250,7 +250,7 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
         path_item = PathItem(summary="Path summary",
                              description="Path description")
         request_path_parameters = {}
-        schema_paths[request_path] = path_item
+        schema_copy['paths'] = {**schema_paths, **{request_path: path_item}}
 
     if request_method in path_item:
         # Operation exists
@@ -261,8 +261,7 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
         operation = build_operation(request)
 
     # Verify path parameters are up-to-date
-    existing_path_parameters = path_item.get(
-        'parameters', []) + operation.get('parameters', [])
+    existing_path_parameters = [*path_item.get('parameters', []), *operation.get('parameters', [])]
 
     verify_path_parameters(existing_path_parameters, request_path_parameters)
 
