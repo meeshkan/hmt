@@ -27,7 +27,15 @@ REQUIRED = [
     'http-types>=0.0.5'
 ]
 
-DEV = [
+BUNDLES = {
+    'kafka': ['faust']
+}
+
+# Requirements of all bundles
+BUNDLE_REQUIREMENTS = [dep for _, bundle_dep in BUNDLES.items()
+                       for dep in bundle_dep]
+
+DEV = BUNDLE_REQUIREMENTS + [
     'pytest',
     'pylint',
     'setuptools',
@@ -35,15 +43,15 @@ DEV = [
     'wheel',
     'pytest-watch',
     'pytest-testmon',
-    'pyhamcrest'
+    'pyhamcrest',
+    'pytest-asyncio'
 ]
 
 VERSION = '0.2.3'
 
 ENTRY_POINTS = ['meeshkan = meeshkan.__main__:cli']
 
-# Optional packages
-EXTRAS = {'dev': DEV}
+EXTRAS = dict(**BUNDLES, dev=DEV)
 
 
 class SetupCommand(Command):

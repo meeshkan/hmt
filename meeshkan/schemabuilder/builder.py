@@ -1,12 +1,10 @@
 import copy
 from functools import reduce
+from typing import Any, List, Iterable, AsyncIterable, cast, Tuple, Optional, Union, TypeVar, Type
 from urllib.parse import urlunsplit
 
 from http_types import HttpExchange as HttpExchange
-
-from typing import Any, List, Iterator, cast, Tuple, Optional, Union, TypeVar, Type
-from openapi_typed import Info, MediaType, OpenAPIObject, PathItem, Response, Operation, Parameter, Reference, \
-    Server
+from openapi_typed import Info, MediaType, OpenAPIObject, PathItem, Response, Operation, Parameter, Reference, Server
 from typeguard import check_type  # type: ignore
 
 from ..logger import get as getLogger
@@ -15,6 +13,7 @@ from .paths import find_matching_path, RequestPathParameters
 from .query import build_query, update_query
 from .schema import validate_openapi_object
 from .servers import normalize_path_if_matches
+from .result import BuildResult
 
 
 logger = getLogger(__name__)
@@ -277,7 +276,14 @@ BASE_SCHEMA = OpenAPIObject(openapi="3.0.0",
                             paths={})
 
 
-def build_schema_online(requests: Iterator[HttpExchange]) -> OpenAPIObject:
+async def build_schema_async(async_iter: AsyncIterable[HttpExchange]) -> AsyncIterable[BuildResult]:
+    schema = BASE_SCHEMA
+    async for exchange in async_iter:
+        schema = update_openapi(schema, exchange)
+        yield BuildResult(openapi=schema)
+
+
+def build_schema_online(requests: Iterable[HttpExchange]) -> OpenAPIObject:
     """Build OpenAPI schema by iterating request-response pairs.
 
     OpenAPI object reference: https://swagger.io/specification/#oasObject
