@@ -187,5 +187,11 @@ class TestSchemaTextBody:
 
     def test_build_string_body(self):
         schema = build_schema_batch([self.exchange])
-        op = schema['paths']['/v1']['get'][200]
-        assert op is not None  # TODO Better test
+        response_content = schema['paths']['/v1']['get']['responses']['200']['content']
+
+        assert_that(response_content, has_key("text/plain"))
+
+        media_type = response_content["text/plain"]
+
+        assert_that(media_type, has_entry(
+            "schema", has_entry("type", "string")))

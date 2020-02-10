@@ -20,13 +20,14 @@ logger = getLogger(__name__)
 
 MediaTypeKey = Literal['application/json', 'text/plain']
 
+MEDIA_TYPE_FOR_NON_JSON = "text/plain"
 
-def get_media_type(body: str) -> Optional[MediaTypeKey]:
+
+def get_media_type(body: str) -> MediaTypeKey:
     """Determine media type (application/json, text/plain, etc.) from body.
-    Return None for empty body.
 
     Arguments:
-        body {str} -- Response body
+        body {str} -- Response body, should not be empty.
 
     Raises:
         Exception: If body is of unexpected type.
@@ -35,18 +36,13 @@ def get_media_type(body: str) -> Optional[MediaTypeKey]:
         MediaTypeKey -- Media type such as "application/json"
     """
 
-    if body == '':
-        return None
-
     try:
         as_json = json.loads(body)
     except json.decoder.JSONDecodeError:
-        logger.exception(f"Failed decoding: {body}")
-        raise
+        logger.debug(f"Failed decoding: {body}")
+        return MEDIA_TYPE_FOR_NON_JSON
 
-    if isinstance(as_json, dict):
-        return 'application/json'
-    elif isinstance(as_json, list):
+    if isinstance(as_json, dict) or isinstance(as_json, list):
         return 'application/json'
     elif isinstance(as_json, str):
         return 'text/plain'
@@ -57,34 +53,52 @@ def get_media_type(body: str) -> Optional[MediaTypeKey]:
 SchemaType = Literal['object', 'array', 'string']
 
 
-def infer_schema(body: str, schema: Optional[Any] = None) -> Schema:
-    try:
-        as_json = json.loads(body)
-    except json.decoder.JSONDecodeError:
-        logger.exception(f"Failed decoding: {body}")
-        raise
-
+def update_json_schema(json_body: Any, schema: Optional[Any] = None) -> Schema:
     # TODO typeguard
-    return cast(Schema, to_openapi_json_schema(as_json, schema))
+    return cast(Schema, to_openapi_json_schema(json_body, schema))
 
 
-def update_media_type(request: HttpExchange, media_type: Optional[MediaType] = None) -> MediaType:
-    body = request['response']['body']
-    if media_type is not None:
-        schema_or_none = media_type['schema']
+def update_text_schema(text_body: str, schema: Optional[Any] = None) -> Schema:
+    # TODO Better updates
+    return {"type": "string"}
+
+
+def update_media_type(exchange: HttpExchange, type_key: MediaTypeKey, media_type: Optional[MediaType] = None) -> MediaType:
+    body = exchange['response']['body']
+
+    existing_schema = media_type.get(
+        "schema", None) if media_type is not None else None
+
+    if type_key == "application/json":
+        schema = update_json_schema(json.loads(body), schema=existing_schema)
+    elif type_key == "text/plain":
+        schema = update_text_schema(body, schema=existing_schema)
     else:
-        schema_or_none = None
-    schema = infer_schema(body, schema=schema_or_none)
+        raise Exception("Unknown type key")
     media_type = MediaType(schema=schema)
     return media_type
 
 
-def content_from_body(request: HttpExchange) -> Optional[Tuple[str, MediaType]]:
-    body = request['response']['body']
-    media_type_key = get_media_type(body)
-    if media_type_key is None:
+def build_media_type(exchange: HttpExchange, type_key: MediaTypeKey) -> MediaType:
+    return update_media_type(exchange=exchange, type_key=type_key, media_type=None)
+
+
+def build_response_content(exchange: HttpExchange) -> Optional[Tuple[MediaTypeKey, MediaType]]:
+    """Build response content schema from exchange.
+
+    Arguments:
+        request {HttpExchange} -- Http exchange.
+
+    Returns:
+        Optional[Tuple[str, MediaType]] -- None for empty body, tuple of media-type key and media-type otherwise.
+    """
+    body = exchange['response']['body']
+    if body == '':
         return None
-    media_type = update_media_type(request)
+    media_type_key = get_media_type(body)
+
+    media_type = build_media_type(exchange, type_key=media_type_key)
+
     return (media_type_key, media_type)
 
 
@@ -100,7 +114,7 @@ def build_response(request: HttpExchange) -> Response:
         Response -- OpenAPI response object.
     """
     # TODO Headers and links
-    content_or_none = content_from_body(request)
+    content_or_none = build_response_content(request)
 
     if content_or_none is None:
         return Response(
@@ -122,32 +136,38 @@ def build_response(request: HttpExchange) -> Response:
     )
 
 
-def update_response(response: Response, request: HttpExchange) -> Response:
+def update_response(response: Response, exchange: HttpExchange) -> Response:
     """Update response object. Mutates the input object.
 
     Response reference: https://swagger.io/specification/#responseObject
 
     Arguments:
         response {Response} -- Existing response object.
-        request {HttpExchange} -- Request-response pair.
+        exchange {HttpExchange} -- Request-response pair.
 
     Returns:
         Response -- Updated response object.
     """
     # TODO Update headers and links
-    response_content = response['content'] if 'content' in response else None
-    media_type_key = get_media_type(request['response']['body'])
 
-    # No body
-    if media_type_key is None:
+    response_body = exchange['response']['body']
+
+    if response_body == '':
+        # No body
         return response
+
+    media_type_key = get_media_type(response_body)
+
+    response_content = response['content'] if 'content' in response else None
 
     if response_content is not None and media_type_key in response_content:
         # Need to update media type
         existing_media_type = response_content[media_type_key]
-        media_type = update_media_type(request, existing_media_type)
+        media_type = update_media_type(
+            exchange=exchange, type_key=media_type_key, media_type=existing_media_type)
     else:
-        media_type = update_media_type(request)
+        media_type = build_media_type(
+            exchange=exchange, type_key=media_type_key)
 
     response_content[media_type_key] = media_type
     return response
@@ -271,7 +291,8 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
         request['request'], schema_servers)
 
     if normalized_pathname_or_none is None:
-        schema_servers.append(Server(url=urlunsplit([request['request']['protocol'], request['request']['host'], '', '', ''])))
+        schema_servers.append(Server(url=urlunsplit(
+            [request['request']['protocol'], request['request']['host'], '', '', ''])))
         normalized_pathname = request_path
     else:
         normalized_pathname = normalized_pathname_or_none
