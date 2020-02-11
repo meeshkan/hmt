@@ -15,7 +15,7 @@ PATH_PARAMETER_PATTERN = r"""\\{([\w-]+)\\}"""
 RequestPathParameters = Mapping[str, str]
 
 
-def _dumb_match_to_path(request_path: str, paths: Paths, request_method: str, operation_candidate: Operation) -> Tuple[str, Optional[Mapping[str, Any]]]:
+def _dumb_match_to_path(request_path: str, paths: Paths, request_method: str, operation_candidate: Operation) -> Tuple[str, Optional[str], Optional[Mapping[str, Any]]]:
     """An overly-simplistic, highly-experimental, probably-broken
        function that answers the question "does this path exist in the spec already?"
        For example, if there is /v1/clients/jane and we get
@@ -47,18 +47,15 @@ def _dumb_match_to_path(request_path: str, paths: Paths, request_method: str, op
         b_spl = [x for x in b.split("/") if x != '']
         # if the two lengths aren't equal, return false
         if len(a_spl) != len(b_spl):
-            print("no go 0", a_spl, b_spl)
             return False
         # if the first part of the path is not equal, return false
         # APIs almost never have a top-level wildcard
         if a_spl[0] != b_spl[0]:
-            print("no go 1", a_spl, b_spl)
             return False
         # if there are two successive non-matches, return false
         for x in range(len(a_spl) - 1):
             if a_spl[x] != b_spl[x]:
                 if a_spl[x + 1] != b_spl[x + 1]:
-                    print("no go 2", a_spl, b_spl)
                     return False
         # our naive test has passed, they could be theoretically similar...
         return True
@@ -80,9 +77,8 @@ def _dumb_match_to_path(request_path: str, paths: Paths, request_method: str, op
             raise ValueError("Incorrect use of path combination function")
         return '/' + '/'.join([a if a == b else a if a[0] == '{' else b if b[0] == '{' else '{%s}' % ''.join(random.choices(string.ascii_lowercase, k=8)) for a, b in zip(path0_split, path1_split)])
 
-    theoreticall_plausible_paths = [path for path in paths.keys() if could_these_two_paths_possibly_represent_the_same_underlying_path(path, request_path)]
-    print("Request path", request_path, "theoretically plausible", theoreticall_plausible_paths)
-    for path in theoreticall_plausible_paths:
+    theoretically_plausible_paths = [path for path in paths.keys() if could_these_two_paths_possibly_represent_the_same_underlying_path(path, request_path)]
+    for path in theoretically_plausible_paths:
         operation = paths[path][request_method]
         potential_conflicts = set(operation['responses'].keys()).intersection(set(operation_candidate['responses'].keys()))
         new_path = combine_paths_into_single_path(path, request_path)
@@ -104,7 +100,7 @@ def _dumb_match_to_path(request_path: str, paths: Paths, request_method: str, op
                 # we deem them as irreconcilably different.
                 # This is based on the Helsinki Standard of Irreconcilable Differences Between JSON Objects,
                 # ISO-2912432, which has been passed down as an oral traditoin since the dawn of time.
-                if len(sum([x.keys() for x in diff.keys()], [])) > 5:
+                if sum([len(x) for x in diff.values()], 0) > 5:
                     irreconcilably_different = True
                     break
             if irreconcilably_different:
@@ -114,8 +110,11 @@ def _dumb_match_to_path(request_path: str, paths: Paths, request_method: str, op
         matches = _match_to_path(request_path, new_path)
         if matches is None:
             raise ValueError('Algorithm conflict for path matching - got a match for %s %s, but then returned match === None' % (request_path, new_path))
-        return (new_path, matches)
-    return (request_path, None)
+        # TODO: what if there is more than 1 theoretically plausible path?
+        # in practice unlikely but possible if, for example, the spec has two conflicting
+        # paths already in it
+        return (new_path, path, matches)
+    return (request_path, None, None)
 
 def _match_to_path(request_path: str, path: str) -> Optional[Mapping[str, Any]]:
     """Match a request path such as "/pets/32" to a variable path such as "/pets/{petId}".
@@ -149,7 +148,7 @@ class MatchingPath(TypedDict):
   path: PathItem
   param_mapping: Mapping[str, Any]
   new_pathname: str
-  original_pathname: str
+  subsumable_pathname: Optional[str]
 
 def find_matching_path(request_path: str, paths: Paths, request_method: str, operation_candidate: Operation) -> Optional[MatchingPath]:
     """Find path that matches the request path.
@@ -168,14 +167,14 @@ def find_matching_path(request_path: str, paths: Paths, request_method: str, ope
     # Second pass - we construct a match if it looks like
     # two paths are in fact similar.
     for fn in [
-        lambda p, pi: (request_path, _match_to_path(request_path=request_path, path=p)),
+        lambda p, pi: (request_path, None, _match_to_path(request_path=request_path, path=p)),
         lambda p, pi: _dumb_match_to_path(request_path, paths, request_method, operation_candidate)]:
         for path, path_item in paths.items():
-            new_pathname, path_match = fn(path, path_item)
+            new_pathname, subsumable_pathname, path_match = fn(path, path_item)
 
             if path_match is None:
                 continue
-            return {'path': path_item, 'param_mapping': path_match, 'new_pathname': new_pathname, 'original_pathname': request_path }
+            return {'path': path_item, 'param_mapping': path_match, 'new_pathname': new_pathname, 'subsumable_pathname': subsumable_pathname }
 
     return None
 

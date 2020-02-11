@@ -102,6 +102,13 @@ class TestSchema:
         assert 'http://api.github.com' == servers[0]['url']
 
     def test_pokeapi_schema_valid(self):
+        # this should conflate to
+        # /pokemon
+        # /abilities/*
+        # /types/*
+        # /pokemon/*
+        # meaning that it should recognize wildcards
+        # from all these paths
         assert 4 == len(self.pokeapi_schema['paths'])
 
 class TestPetstoreSchemaUpdate:

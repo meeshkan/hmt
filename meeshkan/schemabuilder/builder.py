@@ -243,17 +243,27 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
     
     path_match_result = find_matching_path(normalized_pathname, schema_paths, request_method, operation_candidate)
 
+    schema_has_mutated = False
     if path_match_result is not None:
         # Path item exists for request path
-        path_item, request_path_parameters, new_pathname, original_pathname = path_match_result['path'], path_match_result['param_mapping'], path_match_result['new_pathname'], path_match_result['original_pathname']
-        if new_pathname != original_pathname:
+        path_item, request_path_parameters, new_pathname, subsumable_pathname = path_match_result['path'], path_match_result['param_mapping'], path_match_result['new_pathname'], path_match_result['subsumable_pathname']
+        if subsumable_pathname is not None:
             # the algorithm has updated the pathname, need to mutate
             # the schema paths to use the new and discard the old if the old exists
             # in the schema. it would not exist if we have already put a wildcard
-            if original_pathname in schema.keys():
-                pointer_to_value = schema_paths[original_pathname]
-                del schema_paths[original_pathname]
-                schema_paths[new_pathname] = pointer_to_value
+            pointer_to_value = schema_paths[subsumable_pathname]
+            del schema_paths[subsumable_pathname]
+            schema_paths[new_pathname] = pointer_to_value
+            if not ('parameters' in schema_paths[new_pathname].keys()):
+                schema_paths[new_pathname]['parameters'] = []
+            for path_param in request_path_parameters.keys():
+                if not (path_param in [x['name'] for x in schema_paths[new_pathname]['parameters'] if x['in'] == 'path']):
+                    schema_paths[new_pathname]['parameters'].append({
+                        'required': True,
+                        'in': 'path',
+                        'name': path_param,
+                    })
+            schema_has_mutated = True
     else:
         path_item = PathItem(summary="Path summary",
                              description="Path description")
@@ -268,11 +278,11 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
     else:
         operation = operation_candidate
 
-    # Verify path parameters are up-to-date
-    existing_path_parameters = path_item.get(
-        'parameters', []) + operation.get('parameters', [])
-
-    verify_path_parameters(existing_path_parameters, request_path_parameters)
+    if not schema_has_mutated:
+        # Verify path parameters are up-to-date
+        existing_path_parameters = path_item.get(
+            'parameters', []) + operation.get('parameters', [])
+        verify_path_parameters(existing_path_parameters, request_path_parameters)
 
     # Needs type ignore as one cannot set variable property on typed dict
     path_item[request_method] = operation  # type: ignore
