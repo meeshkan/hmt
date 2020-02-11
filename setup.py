@@ -1,7 +1,8 @@
-from setuptools import setup, Command, find_packages, errors
-from shutil import rmtree
 import os
 import sys
+from shutil import rmtree
+
+from setuptools import setup, Command, find_packages, errors
 
 # Package meta-data.
 NAME = 'meeshkan'
@@ -29,7 +30,8 @@ REQUIRED = [
 ]
 
 BUNDLES = {
-    'kafka': ['faust']
+    'kafka': ['faust'],
+    'proxy': ['tornado==5.1.1', 'urllib3==1.24.1']
 }
 
 # Requirements of all bundles
@@ -48,9 +50,14 @@ DEV = BUNDLE_REQUIREMENTS + [
     'pytest-asyncio'
 ]
 
+PROXY = [
+    'tornado==5.1.1',
+    'urllib3==1.24.1'
+]
+
 VERSION = '0.2.4'
 
-ENTRY_POINTS = ['meeshkan = meeshkan.__main__:cli']
+ENTRY_POINTS = ['meeshkan = meeshkan.__main__:cli', 'meeshkan_proxy = tools.meeshkan_proxy.__main__:main']
 
 EXTRAS = dict(**BUNDLES, dev=DEV)
 

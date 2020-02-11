@@ -1,5 +1,12 @@
 # API recording proxy
 
+## Installation
+The recording proxy is an additional tool provide alongside Meeshkan CLI tool. 
+To install it run:
+```bash
+pip install meeshkan[proxy]
+```
+## Usage
 1. Start it by running:
 ```bash
 python -m meeshkan_proxy record

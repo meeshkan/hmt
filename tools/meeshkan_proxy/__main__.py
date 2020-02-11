@@ -4,9 +4,8 @@ import os
 import click
 import tornado.ioloop
 import yaml
-
-from meeshkan_proxy.proxy.proxy import RecordProxy, MockProxy
-from meeshkan_proxy.utils.data_callback import RequestLoggingCallback
+from tools.meeshkan_proxy.proxy.proxy import RecordProxy, MockProxy
+from tools.meeshkan_proxy.utils.data_callback import RequestLoggingCallback
 
 LOG_CONFIG = os.path.join(os.path.dirname(__file__), 'logging.yaml')
 logger = logging.getLogger(__name__)

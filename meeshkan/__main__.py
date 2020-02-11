@@ -11,9 +11,10 @@ from .schemabuilder.schema import validate_openapi_object
 from .sinks import AbstractSink, FileSystemSink
 from .sources import AbstractSource, KafkaSource, FileSource
 from .sources.kafka import KafkaProcessorConfig
-from .types import *
 from openapi_typed import OpenAPIObject
 from yaml import safe_load
+from .meeshkan_types import *
+
 
 LOGGER = getLogger(__name__)
 
