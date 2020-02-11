@@ -10,7 +10,7 @@ from .convert.pcap import convert_pcap
 from .sinks import AbstractSink, FileSystemSink
 from .sources import AbstractSource, KafkaSource, FileSource
 from .sources.kafka import KafkaProcessorConfig
-from .types import *
+from .meeshkan_types import *
 
 
 LOGGER = getLogger(__name__)
