@@ -8,8 +8,8 @@ from enum import Enum
 from urllib import parse
 from urllib.parse import urlsplit
 from http_types import Request, Response
-from tools.meeshkan_proxy.proxy.proxy_callback import ProxyCallback
-from tools.meeshkan_proxy.utils.http_utils import split_path, response_from_bytes
+from tools.meeshkan_server.proxy.proxy_callback import ProxyCallback
+from tools.meeshkan_server.utils.http_utils import split_path, response_from_bytes
 from tornado.iostream import IOStream, SSLIOStream, StreamClosedError
 
 
