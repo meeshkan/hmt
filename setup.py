@@ -38,12 +38,17 @@ DEV = [
     'pyhamcrest'
 ]
 
+PROXY = [
+    'tornado==5.1.1',
+    'urllib3==1.24.1'
+]
+
 VERSION = '0.2.3'
 
-ENTRY_POINTS = ['meeshkan = meeshkan.__main__:cli']
+ENTRY_POINTS = ['meeshkan = meeshkan.__main__:cli', 'meeshkan_proxy = tools.meeshkan_proxy.__main__:main']
 
 # Optional packages
-EXTRAS = {'dev': DEV}
+EXTRAS = {'dev': DEV, 'proxy': PROXY}
 
 
 class SetupCommand(Command):
