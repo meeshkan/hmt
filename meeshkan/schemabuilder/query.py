@@ -2,10 +2,10 @@
 
 from http_types import Query
 from openapi_typed import Parameter, Reference, Schema
-from typing import List, Union, cast, Sequence
+from typing import Sequence, Union, cast, Sequence, List
 from genson import SchemaBuilder  # type: ignore
 
-SchemaQuery = List[Union[Parameter, Reference]]
+SchemaQuery = Sequence[Union[Parameter, Reference]]
 
 
 def build_query(query: Query) -> SchemaQuery:
