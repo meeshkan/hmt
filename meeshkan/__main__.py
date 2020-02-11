@@ -1,17 +1,19 @@
 import asyncio
 import json
 import click
-from typing import Sequence
+from typing import Sequence, cast
 
 from .config import setup
 from .logger import get as getLogger
-from .schemabuilder.builder import build_schema_async
+from .schemabuilder.builder import BASE_SCHEMA, build_schema_async
 from .convert.pcap import convert_pcap
+from .schemabuilder.schema import validate_openapi_object
 from .sinks import AbstractSink, FileSystemSink
 from .sources import AbstractSource, KafkaSource, FileSource
 from .sources.kafka import KafkaProcessorConfig
 from .types import *
-
+from openapi_typed import OpenAPIObject
+from yaml import safe_load
 
 LOGGER = getLogger(__name__)
 
@@ -39,12 +41,12 @@ async def write_to_sink(result_stream: BuildResultStream, sinks: Sequence[Abstra
             sink.flush()
 
 
-def run_from_source(source: AbstractSource, sinks: Sequence[AbstractSink]):
+def run_from_source(source: AbstractSource, starting_spec: OpenAPIObject, sinks: Sequence[AbstractSink]):
     loop = asyncio.get_event_loop()
 
     async def run(loop):
         source_stream, source_task = await source.start(loop)
-        result_stream = build_schema_async(source_stream)
+        result_stream = build_schema_async(source_stream, starting_spec)
         sink_task = loop.create_task(write_to_sink(result_stream, sinks))
 
         if source_task is not None:
@@ -70,9 +72,10 @@ def run_from_source(source: AbstractSource, sinks: Sequence[AbstractSink]):
 @click.command()
 @click.option("-i", "--input-file", required=False, type=click.File('rb'), help="Input file. Use dash '-' to read from stdin.")
 @click.option("-o", "--out", required=True, default='out', type=click.Path(exists=False, file_okay=False, writable=True, readable=True), help="Output directory. If the directory does not exist, it is created if the parent directory exists.")
+@click.option("-s", "--initial-openapi-spec", required=False, type=click.File('rb'), help="Initial OpenAPI spec.")
 @click.option("--source", required=False, default='file', type=str, help="Source to read recordings from. For example, 'kafka'")
 @click.option("--sink", required=False, type=str,  help="Sink where to write results.")
-def build(input_file, out, source, sink):
+def build(input_file, out, initial_openapi_spec, source, sink):
     """
     Build OpenAPI schema from HTTP exchanges.
     """
@@ -94,7 +97,17 @@ def build(input_file, out, source, sink):
     else:
         raise Exception("Unknown source {}".format(source))
 
-    run_from_source(source, sinks=sinks)
+    openapi_spec: OpenAPIObject = BASE_SCHEMA
+
+    if initial_openapi_spec is not None:
+        try: 
+            maybe_openapi = cast(OpenAPIObject, safe_load(initial_openapi_spec.read())) 
+            # will raise if not an API spec 
+            validate_openapi_object(maybe_openapi) 
+            openapi_spec = maybe_openapi
+        except: pass # just use the initial schema
+
+    run_from_source(source, openapi_spec, sinks=sinks)
 
 
 @click.command()
