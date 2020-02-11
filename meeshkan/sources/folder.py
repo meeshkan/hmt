@@ -18,8 +18,11 @@ class FolderSource(AbstractSource):
         # print(self.input_folder)
 
         async def read():
-            for line in self.input_folder:
-                yield HttpExchangeReader.from_json(line)
+            for f in os.listdir(self.input_folder):
+                if f[-6:] == '.jsonl':
+                    with open(os.path.join(self.input_folder, f)) as infile:
+                        for line in infile:
+                            yield HttpExchangeReader.from_json(line)
 
         return read(), None
 
