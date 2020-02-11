@@ -112,9 +112,14 @@ class TestSchema:
         # from all these paths
         paths = self.pokeapi_schema['paths'].keys()
         assert 4 == len(paths)
-        assert 1 == len([x for x in paths if re.match('\/v2\/pokemon\/\{[\w]+\}', x)])
-        assert 1 == len([x for x in paths if re.match('\/v2\/type\/\{[\w]+\}', x)])
-        assert 1 == len([x for x in paths if re.match('\/v2\/ability\/\{[\w]+\}', x)])
+        assert_that(paths, has_item("/v2/pokemon/"))
+        assert_that(paths, has_item(
+            matches_regexp(r'\/v2\/pokemon\/\{[\w]+\}')))
+        assert_that(paths, has_item(
+            matches_regexp(r'\/v2\/type\/\{[\w]+\}')))
+        assert_that(paths, has_item(
+            matches_regexp(r'\/v2\/ability\/\{[\w]+\}')))
+
 
 class TestPetstoreSchemaUpdate:
 
