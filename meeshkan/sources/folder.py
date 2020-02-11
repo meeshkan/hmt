@@ -33,10 +33,10 @@ class FolderSource(AbstractSource):
         for f in os.listdir(self.input_folder):
             try:
                 with open(os.path.join(self.input_folder, f)) as infile:
-                    maybe_openapi = safe_load(infile.read())
+                    maybe_openapi = cast(OpenAPIObject, safe_load(infile.read()))
                     # will raise if not an API spec
                     validate_openapi_object(maybe_openapi)
-                    return cast(OpenAPIObject, maybe_openapi)
+                    return maybe_openapi
             except:
                 continue
         return BASE_SCHEMA
