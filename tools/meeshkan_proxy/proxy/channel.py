@@ -8,10 +8,11 @@ from enum import Enum
 from urllib import parse
 from urllib.parse import urlsplit
 from http_types import Request, Response
+from tools.meeshkan_proxy.proxy.proxy_callback import ProxyCallback
+from tools.meeshkan_proxy.utils.http_utils import split_path, response_from_bytes
 from tornado.iostream import IOStream, SSLIOStream, StreamClosedError
 
-from meeshkan_proxy.proxy.proxy_callback import ProxyCallback
-from meeshkan_proxy.utils.http_utils import split_path, response_from_bytes
+
 
 logger = logging.getLogger(__name__)
 

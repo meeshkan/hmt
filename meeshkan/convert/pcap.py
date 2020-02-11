@@ -77,7 +77,7 @@ def _parse_headers(header_line: str) -> Dict[str, Union[str, List[str]]]:
                 if tupl is not None)
 
 
-# from .types import Request, Response, HttpExchange
+# from .meeshkan_types import Request, Response, HttpExchange
 
 
 def _request_response_parser():
