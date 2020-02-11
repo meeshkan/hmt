@@ -1,7 +1,8 @@
-from setuptools import setup, Command, find_packages, errors
-from shutil import rmtree
 import os
 import sys
+from shutil import rmtree
+
+from setuptools import setup, Command, find_packages, errors
 
 # Package meta-data.
 NAME = 'meeshkan'
@@ -18,16 +19,26 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
 
 REQUIRED = [
     'click',
+    'deepdiff',
     'pyyaml',
     'jsonschema',
     'typing-extensions',
-    'openapi-typed>=0.0.2',
+    'openapi-typed>=0.1.0',
     'typeguard>=2.7.0',
     'genson',
     'http-types>=0.0.5'
 ]
 
-DEV = [
+BUNDLES = {
+    'kafka': ['faust'],
+    'proxy': ['tornado==5.1.1', 'urllib3==1.24.1']
+}
+
+# Requirements of all bundles
+BUNDLE_REQUIREMENTS = [dep for _, bundle_dep in BUNDLES.items()
+                       for dep in bundle_dep]
+
+DEV = BUNDLE_REQUIREMENTS + [
     'pytest',
     'pylint',
     'setuptools',
@@ -35,7 +46,8 @@ DEV = [
     'wheel',
     'pytest-watch',
     'pytest-testmon',
-    'pyhamcrest'
+    'pyhamcrest',
+    'pytest-asyncio'
 ]
 
 PROXY = [
@@ -43,12 +55,11 @@ PROXY = [
     'urllib3==1.24.1'
 ]
 
-VERSION = '0.2.3'
+VERSION = '0.2.4'
 
 ENTRY_POINTS = ['meeshkan = meeshkan.__main__:cli', 'meeshkan_proxy = tools.meeshkan_proxy.__main__:main']
 
-# Optional packages
-EXTRAS = {'dev': DEV, 'proxy': PROXY}
+EXTRAS = dict(**BUNDLES, dev=DEV)
 
 
 class SetupCommand(Command):

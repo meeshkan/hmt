@@ -1,90 +1,45 @@
 import copy
+from functools import reduce
+from typing import Any, List, Iterable, AsyncIterable, cast, Tuple, Optional, Union, TypeVar, Type
 from urllib.parse import urlunsplit
+from collections import defaultdict
 
 from http_types import HttpExchange as HttpExchange
-from ..logger import get as getLogger
-from functools import reduce
-from typing import Any, List, Iterator, cast, Tuple, Optional, Union, TypeVar, Type, Sequence
-from openapi_typed import Info, MediaType, OpenAPIObject, PathItem, Response, Operation, Schema, Parameter, Reference, \
-    Server
+from openapi_typed import Info, MediaType, OpenAPIObject, PathItem, Response, Operation, Parameter, Reference, Server, Responses
 from typeguard import check_type  # type: ignore
-import json
-from typing_extensions import Literal
-from .json_schema import to_openapi_json_schema
-from .schema import validate_openapi_object
+
+from ..logger import get as getLogger
+from .media_types import infer_media_type_from_nonempty, build_media_type, update_media_type, MediaTypeKey
 from .paths import find_matching_path, RequestPathParameters
 from .query import build_query, update_query
+from .schema import validate_openapi_object
 from .servers import normalize_path_if_matches
+from .result import BuildResult
+
 
 logger = getLogger(__name__)
 
-MediaTypeKey = Literal['application/json', 'text/plain']
+__all__ = ['build_schema_batch', 'build_schema_online', 'update_openapi']
 
 
-def get_media_type(body: str) -> Optional[MediaTypeKey]:
-    """Determine media type (application/json, text/plain, etc.) from body.
-    Return None for empty body.
+def build_response_content(exchange: HttpExchange) -> Optional[Tuple[MediaTypeKey, MediaType]]:
+    """Build response content schema from exchange.
 
     Arguments:
-        body {str} -- Response body
-
-    Raises:
-        Exception: If body is of unexpected type.
+        request {HttpExchange} -- Http exchange.
 
     Returns:
-        MediaTypeKey -- Media type such as "application/json"
+        Optional[Tuple[str, MediaType]] -- None for empty body, tuple of media-type key and media-type otherwise.
     """
+    body = exchange['response']['body']
 
     if body == '':
         return None
 
-    try:
-        as_json = json.loads(body)
-    except json.decoder.JSONDecodeError:
-        logger.exception(f"Failed decoding: {body}")
-        raise
+    media_type_key = infer_media_type_from_nonempty(body)
 
-    if isinstance(as_json, dict):
-        return 'application/json'
-    elif isinstance(as_json, list):
-        return 'application/json'
-    elif isinstance(as_json, str):
-        return 'text/plain'
-    else:
-        raise Exception(f"Not sure what to do with body: {body}")
+    media_type = build_media_type(exchange, type_key=media_type_key)
 
-
-SchemaType = Literal['object', 'array', 'string']
-
-
-def infer_schema(body: str, schema: Optional[Any] = None) -> Schema:
-    try:
-        as_json = json.loads(body)
-    except json.decoder.JSONDecodeError:
-        logger.exception(f"Failed decoding: {body}")
-        raise
-
-    # TODO typeguard
-    return cast(Schema, to_openapi_json_schema(as_json, schema))
-
-
-def update_media_type(request: HttpExchange, media_type: Optional[MediaType] = None) -> MediaType:
-    body = request['response']['body']
-    if media_type is not None:
-        schema_or_none = media_type['schema']
-    else:
-        schema_or_none = None
-    schema = infer_schema(body, schema=schema_or_none)
-    media_type = MediaType(schema=schema)
-    return media_type
-
-
-def content_from_body(request: HttpExchange) -> Optional[Tuple[str, MediaType]]:
-    body = request['response']['body']
-    media_type_key = get_media_type(body)
-    if media_type_key is None:
-        return None
-    media_type = update_media_type(request)
     return (media_type_key, media_type)
 
 
@@ -100,7 +55,7 @@ def build_response(request: HttpExchange) -> Response:
         Response -- OpenAPI response object.
     """
     # TODO Headers and links
-    content_or_none = content_from_body(request)
+    content_or_none = build_response_content(request)
 
     if content_or_none is None:
         return Response(
@@ -122,34 +77,41 @@ def build_response(request: HttpExchange) -> Response:
     )
 
 
-def update_response(response: Response, request: HttpExchange) -> Response:
+def update_response(response: Response, exchange: HttpExchange) -> Response:
     """Update response object. Mutates the input object.
 
     Response reference: https://swagger.io/specification/#responseObject
 
     Arguments:
         response {Response} -- Existing response object.
-        request {HttpExchange} -- Request-response pair.
+        exchange {HttpExchange} -- Request-response pair.
 
     Returns:
         Response -- Updated response object.
     """
     # TODO Update headers and links
-    response_content = response['content'] if 'content' in response else None
-    media_type_key = get_media_type(request['response']['body'])
+    response_body = exchange['response']['body']
 
-    # No body
-    if media_type_key is None:
+    if response_body == '':
+        # No body, do not do anything
+        # TODO How to mark empty body as a possible response if non-empty responses exist
         return response
 
-    if response_content is not None and media_type_key in response_content:
-        # Need to update media type
-        existing_media_type = response_content[media_type_key]
-        media_type = update_media_type(request, existing_media_type)
-    else:
-        media_type = update_media_type(request)
+    media_type_key = infer_media_type_from_nonempty(response_body)
 
-    response_content[media_type_key] = media_type
+    response_content = response['content'] if 'content' in response else None
+
+    if response_content is not None and media_type_key in response_content:
+        # Need to update existing media type
+        existing_media_type = response_content[media_type_key]
+        media_type = update_media_type(
+            exchange=exchange, type_key=media_type_key, media_type=existing_media_type)
+    else:
+        media_type = build_media_type(
+            exchange=exchange, type_key=media_type_key)
+
+    response_content = {**response_content, **{media_type_key: media_type}}
+    response['content'] = response_content
     return response
 
 
@@ -191,7 +153,7 @@ def update_operation(operation: Operation, request: HttpExchange) -> Operation:
     Returns:
         Operation -- Updated operation
     """
-    responses = operation['responses']
+    responses = operation['responses']  # type: Responses
     response_code = str(request['response']['statusCode'])
     if response_code in responses:
         # Response exists
@@ -271,23 +233,45 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
         request['request'], schema_servers)
 
     if normalized_pathname_or_none is None:
-        schema_servers.append(Server(url=urlunsplit([request['request']['protocol'], request['request']['host'], '', '', ''])))
+        schema_copy['servers'] = [*schema_copy['servers'], Server(url=urlunsplit(
+            [request['request']['protocol'], request['request']['host'], '', '', '']))]
         normalized_pathname = request_path
     else:
         normalized_pathname = normalized_pathname_or_none
 
     schema_paths = schema_copy['paths']
 
-    path_match_result = find_matching_path(normalized_pathname, schema_paths)
+    operation_candidate = build_operation(request)
+    
+    path_match_result = find_matching_path(normalized_pathname, schema_paths, request_method, operation_candidate)
 
+    schema_has_mutated = False
     if path_match_result is not None:
         # Path item exists for request path
-        path_item, request_path_parameters = path_match_result
+        path_item, request_path_parameters, pathname_with_wildcard, pathname_to_be_replaced_with_wildcard = path_match_result['path'], path_match_result['param_mapping'], path_match_result['pathname_with_wildcard'], path_match_result['pathname_to_be_replaced_with_wildcard']
+        if pathname_to_be_replaced_with_wildcard is not None:
+            # the algorithm has updated the pathname, need to mutate
+            # the schema paths to use the new and discard the old if the old exists
+            # in the schema. it would not exist if we have already put a wildcard
+            pointer_to_value = schema_paths[pathname_to_be_replaced_with_wildcard]
+            schema_paths = { k: v for k, v in [(pathname_with_wildcard, pointer_to_value), *schema_paths.items()] if k != pathname_to_be_replaced_with_wildcard}
+            if not ('parameters' in schema_paths[pathname_with_wildcard].keys()):
+                schema_paths[pathname_with_wildcard]['parameters'] = []
+            for path_param in request_path_parameters.keys():
+                params = [cast(Parameter, x) for x in schema_paths[pathname_with_wildcard]['parameters'] if '$ref' not in x]
+                if not (path_param in [x['name'] for x in params if x['in'] == 'path']):
+                    schema_paths[pathname_with_wildcard]['parameters'] = [{
+                        'required': True,
+                        'in': 'path',
+                        'name': path_param,
+                    }, *(schema_paths[pathname_with_wildcard]['parameters'])]
+            schema_copy['paths'] = schema_paths
+            schema_has_mutated = True
     else:
         path_item = PathItem(summary="Path summary",
                              description="Path description")
         request_path_parameters = {}
-        schema_paths[request_path] = path_item
+        schema_copy['paths'] = {**schema_paths, **{request_path: path_item}}
 
     if request_method in path_item:
         # Operation exists
@@ -295,17 +279,16 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
         operation = update_operation(existing_operation, request)
 
     else:
-        operation = build_operation(request)
+        operation = operation_candidate
 
-    # Verify path parameters are up-to-date
-    existing_path_parameters = path_item.get(
-        'parameters', []) + operation.get('parameters', [])
+    if not schema_has_mutated:
+        # Verify path parameters are up-to-date
+        existing_path_parameters = [*path_item.get('parameters', []), *operation.get('parameters', [])]
 
-    verify_path_parameters(existing_path_parameters, request_path_parameters)
+        verify_path_parameters(existing_path_parameters, request_path_parameters)
 
     # Needs type ignore as one cannot set variable property on typed dict
     path_item[request_method] = operation  # type: ignore
-
     return cast(OpenAPIObject, schema_copy)
 
 
@@ -315,7 +298,14 @@ BASE_SCHEMA = OpenAPIObject(openapi="3.0.0",
                             paths={})
 
 
-def build_schema_online(requests: Iterator[HttpExchange]) -> OpenAPIObject:
+async def build_schema_async(async_iter: AsyncIterable[HttpExchange]) -> AsyncIterable[BuildResult]:
+    schema = BASE_SCHEMA
+    async for exchange in async_iter:
+        schema = update_openapi(schema, exchange)
+        yield BuildResult(openapi=schema)
+
+
+def build_schema_online(requests: Iterable[HttpExchange]) -> OpenAPIObject:
     """Build OpenAPI schema by iterating request-response pairs.
 
     OpenAPI object reference: https://swagger.io/specification/#oasObject

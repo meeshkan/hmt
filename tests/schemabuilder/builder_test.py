@@ -1,11 +1,12 @@
 import copy
 
+import re
 from http_types import HttpExchange, Request, Response, RequestBuilder
 from tests.schemabuilder.paths_test import PETSTORE_SCHEMA
 from meeshkan.schemabuilder import build_schema_batch, update_openapi
 from meeshkan.schemabuilder.builder import BASE_SCHEMA
 from meeshkan.schemabuilder.schema import validate_openapi_object
-from ..util import petstore_schema, read_recordings_as_request_response
+from ..util import petstore_schema, read_recordings_as_request_response, POKEAPI_RECORDINGS_PATH
 from openapi_typed import OpenAPIObject, Operation, PathItem, Response, Schema
 from typeguard import check_type
 import pytest
@@ -13,6 +14,7 @@ from typing import cast
 from hamcrest import *
 
 requests = read_recordings_as_request_response()
+pokeapi_requests = read_recordings_as_request_response(POKEAPI_RECORDINGS_PATH)
 
 expected_schema = copy.deepcopy(BASE_SCHEMA)
 
@@ -30,13 +32,9 @@ expected_schema['paths'] = {
 PETSTORE_SCHEMA = petstore_schema()
 
 
-@pytest.fixture(scope="module")
-def schema():
-    return build_schema_batch(requests)
-
-
 class TestSchema:
     schema = build_schema_batch(requests)
+    pokeapi_schema = build_schema_batch(pokeapi_requests)
 
     def response_schema(self):
 
@@ -99,12 +97,24 @@ class TestSchema:
         assert_that(properties, has_entry('clone_url',
                                           equal_to({'type': 'string'})))
 
-
     def test_servers(self):
         servers = self.schema['servers']
         assert 1 == len(servers)
         assert 'http://api.github.com' == servers[0]['url']
 
+    def test_pokeapi_schema_valid(self):
+        # this should conflate to
+        # /pokemon
+        # /abilities/*
+        # /types/*
+        # /pokemon/*
+        # meaning that it should recognize wildcards
+        # from all these paths
+        paths = self.pokeapi_schema['paths'].keys()
+        assert 4 == len(paths)
+        assert 1 == len([x for x in paths if re.match('\/v2\/pokemon\/\{[\w]+\}', x)])
+        assert 1 == len([x for x in paths if re.match('\/v2\/type\/\{[\w]+\}', x)])
+        assert 1 == len([x for x in paths if re.match('\/v2\/ability\/\{[\w]+\}', x)])
 
 class TestPetstoreSchemaUpdate:
 
@@ -179,3 +189,20 @@ class TestQueryParameters:
         first_query_param = operation['parameters'][0]
 
         assert_that(first_query_param, has_entry("required", False))
+
+
+class TestSchemaTextBody:
+    request = RequestBuilder.from_url("https://example.com/v1")
+    response = Response(statusCode=200, body="Hello World", headers={})
+    exchange: HttpExchange = {'request': request, 'response': response}
+
+    def test_build_string_body(self):
+        schema = build_schema_batch([self.exchange])
+        response_content = schema['paths']['/v1']['get']['responses']['200']['content']
+
+        assert_that(response_content, has_key("text/plain"))
+
+        media_type = response_content["text/plain"]
+
+        assert_that(media_type, has_entry(
+            "schema", has_entry("type", "string")))

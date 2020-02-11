@@ -33,7 +33,7 @@ def test_build_cmd():
         ), "Output directory {} should not exist yet".format(output_directory)
 
         runner_result = runner.invoke(
-            cli, ['build', '-i', input_file, '-o', output_directory])
+            cli, ['build', '-i', input_file, '-o', output_directory, '--source', 'file'])
 
         assert output_directory_path.is_dir(
         ), "Output directory {} should exist".format(output_directory)
@@ -46,19 +46,23 @@ def test_build_cmd():
     assert runner_result.exit_code == 0
     assert len(runner_result.output) == 0
 
+
 def test_convert_cmd():
     runner = CliRunner()
 
-    input_file = Path('resources/recordings.pcap').resolve()  # Absolute path, can be accessed in Click's "isolated filesystem"
+    # Absolute path, can be accessed in Click's "isolated filesystem"
+    input_file = Path('resources/recordings.pcap').resolve()
     output_file = 'recordings.jsonl'
 
     with runner.isolated_filesystem():
-        
-        assert not Path(output_file).is_file(), "Expected output file {} to not exist".format(output_file)
+
+        assert not Path(output_file).is_file(
+        ), "Expected output file {} to not exist".format(output_file)
 
         runner_result = runner.invoke(
             cli, ['convert', '-i', str(input_file), '-o', output_file])
 
-        assert Path(output_file).is_file(), "Expected output file {} to exist".format(output_file)
+        assert Path(output_file).is_file(
+        ), "Expected output file {} to exist".format(output_file)
 
         assert runner_result.exit_code == 0

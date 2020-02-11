@@ -1,10 +1,10 @@
 from openapi_typed import Server
 from http_types import Request
-from typing import List, Optional
+from typing import List, Optional, Sequence
 from urllib.parse import urlparse
 
 
-def normalize_path_if_matches(request: Request, servers: List[Server]) -> Optional[str]:
+def normalize_path_if_matches(request: Request, servers: Sequence[Server]) -> Optional[str]:
     """Check if a request matches a list of server definitions.
     If matches, return the request path normalized by the server URL's basepath.
 

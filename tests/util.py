@@ -6,11 +6,13 @@ from yaml import safe_load
 from meeshkan.schemabuilder.schema import validate_openapi_object
 
 SAMPLE_RECORDINGS_PATH = "resources/recordings.jsonl"
+POKEAPI_RECORDINGS_PATH = "resources/pokeapi.jsonl"
 PETSTORE_YAML_PATH = "resources/petstore.yaml"
 
 
+
 def read_recordings_as_strings(requests_path=SAMPLE_RECORDINGS_PATH) -> List[str]:
-    with open(requests_path) as f:
+    with open(requests_path, encoding='utf8') as f:
         return [line for line in f]
 
 
