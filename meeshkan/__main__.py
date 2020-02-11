@@ -72,7 +72,7 @@ def run_from_source(source: AbstractSource, starting_spec: OpenAPIObject, sinks:
 @click.command()
 @click.option("-i", "--input-file", required=False, type=click.File('rb'), help="Input file. Use dash '-' to read from stdin.")
 @click.option("-o", "--out", required=True, default='out', type=click.Path(exists=False, file_okay=False, writable=True, readable=True), help="Output directory. If the directory does not exist, it is created if the parent directory exists.")
-@click.option("-s", "--initial-openapi-spec", required=False, type=click.File('rb'), help="Initial OpenAPI spec.")
+@click.option("-a", "--initial-openapi-spec", required=False, type=click.File('rb'), help="Initial OpenAPI spec.")
 @click.option("--source", required=False, default='file', type=str, help="Source to read recordings from. For example, 'kafka'")
 @click.option("--sink", required=False, type=str,  help="Sink where to write results.")
 def build(input_file, out, initial_openapi_spec, source, sink):
