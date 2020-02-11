@@ -21,4 +21,4 @@ def _openapi_json_schema():
 
 
 def validate_openapi_object(instance: OpenAPIObject):
-    return validate(instance=instance, schema=_openapi_json_schema())
+    validate(instance=instance, schema=_openapi_json_schema())

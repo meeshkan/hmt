@@ -33,7 +33,7 @@ def test_build_cmd():
         ), "Output directory {} should not exist yet".format(output_directory)
 
         runner_result = runner.invoke(
-            cli, ['build', '-i', input_file, '-o', output_directory, '--source', 'file'])
+            cli, ['build', '-i', input_file, '-o', output_directory])
 
         assert output_directory_path.is_dir(
         ), "Output directory {} should exist".format(output_directory)

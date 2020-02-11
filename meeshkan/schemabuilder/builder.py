@@ -298,8 +298,8 @@ BASE_SCHEMA = OpenAPIObject(openapi="3.0.0",
                             paths={})
 
 
-async def build_schema_async(async_iter: AsyncIterable[HttpExchange]) -> AsyncIterable[BuildResult]:
-    schema = BASE_SCHEMA
+async def build_schema_async(async_iter: AsyncIterable[HttpExchange], initial_open_api_spec: OpenAPIObject) -> AsyncIterable[BuildResult]:
+    schema = initial_open_api_spec
     async for exchange in async_iter:
         schema = update_openapi(schema, exchange)
         yield BuildResult(openapi=schema)

@@ -9,6 +9,7 @@ try:
     import faust
 except ImportError:
     faust = None
+from ..schemabuilder.builder import BASE_SCHEMA
 
 
 class KafkaProcessorConfig:
@@ -81,6 +82,9 @@ class KafkaSource(AbstractSource):
     def shutdown(self):
         self.worker_task.cancel()
         self.worker.stop_and_shutdown()
+
+    def initial_openapi_spec(self):
+        return BASE_SCHEMA
 
 
 __all__ = ["KafkaProcessorConfig", "KafkaProcessor", "KafkaSource"]

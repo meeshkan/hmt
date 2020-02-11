@@ -3,6 +3,8 @@ from http_types.types import HttpExchange
 from http_types.utils import HttpExchangeReader
 from .abstract import AbstractSource
 import asyncio
+from ..schemabuilder.builder import BASE_SCHEMA
+
 
 
 class FileSource(AbstractSource):
@@ -21,3 +23,6 @@ class FileSource(AbstractSource):
 
     def shutdown(self):
         pass
+
+    def initial_openapi_spec(self):
+        return BASE_SCHEMA
