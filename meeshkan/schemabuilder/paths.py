@@ -6,7 +6,7 @@ from deepdiff import DeepDiff
 from typing import cast, Pattern, Optional, Tuple, Mapping, Any
 from typing_extensions import TypedDict
 
-from openapi_typed import PathItem, Paths, Operation
+from openapi_typed import PathItem, Paths, Operation, Responses
 
 # Pattern to match to in the escaped path string
 # Search for occurrences such as "{id}" or "{key-name}"
@@ -80,7 +80,7 @@ def _dumb_match_to_path(request_path: str, paths: Paths, request_method: str, op
     theoretically_plausible_paths = [path for path in paths.keys() if could_these_two_paths_possibly_represent_the_same_underlying_path(path, request_path)]
     for path in theoretically_plausible_paths:
         operation = cast(Operation, paths[path][request_method])
-        potential_conflicts = set(operation['responses'].keys()).intersection(set(operation_candidate['responses'].keys()))
+        potential_conflicts = set(cast(Responses, operation['responses']).keys()).intersection(set(cast(Responses, operation_candidate['responses']).keys()))
         new_path = combine_paths_into_single_path(path, request_path)
         if len(potential_conflicts) != 0:
             irreconcilably_different = False

@@ -1,5 +1,6 @@
 import copy
 
+import re
 from http_types import HttpExchange, Request, Response, RequestBuilder
 from tests.schemabuilder.paths_test import PETSTORE_SCHEMA
 from meeshkan.schemabuilder import build_schema_batch, update_openapi
@@ -109,7 +110,11 @@ class TestSchema:
         # /pokemon/*
         # meaning that it should recognize wildcards
         # from all these paths
-        assert 4 == len(self.pokeapi_schema['paths'])
+        paths = self.pokeapi_schema['paths'].keys()
+        assert 4 == len(paths)
+        assert 1 == len([x for x in paths if re.match('\/v2\/pokemon\/\{[\w]+\}', x)])
+        assert 1 == len([x for x in paths if re.match('\/v2\/type\/\{[\w]+\}', x)])
+        assert 1 == len([x for x in paths if re.match('\/v2\/ability\/\{[\w]+\}', x)])
 
 class TestPetstoreSchemaUpdate:
 

@@ -265,6 +265,7 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
                         'in': 'path',
                         'name': path_param,
                     }, *(schema_paths[new_pathname]['parameters'])]
+            schema_copy['paths'] = schema_paths
             schema_has_mutated = True
     else:
         path_item = PathItem(summary="Path summary",
@@ -288,7 +289,6 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
 
     # Needs type ignore as one cannot set variable property on typed dict
     path_item[request_method] = operation  # type: ignore
-
     return cast(OpenAPIObject, schema_copy)
 
 
