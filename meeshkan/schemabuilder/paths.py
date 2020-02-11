@@ -3,7 +3,7 @@ import re
 import random
 import string
 from deepdiff import DeepDiff
-from typing import Pattern, Optional, Tuple, Mapping, Any
+from typing import cast, Pattern, Optional, Tuple, Mapping, Any
 from typing_extensions import TypedDict
 
 from openapi_typed import PathItem, Paths, Operation
@@ -79,7 +79,7 @@ def _dumb_match_to_path(request_path: str, paths: Paths, request_method: str, op
 
     theoretically_plausible_paths = [path for path in paths.keys() if could_these_two_paths_possibly_represent_the_same_underlying_path(path, request_path)]
     for path in theoretically_plausible_paths:
-        operation = paths[path][request_method]
+        operation = cast(Operation, paths[path][request_method])
         potential_conflicts = set(operation['responses'].keys()).intersection(set(operation_candidate['responses'].keys()))
         new_path = combine_paths_into_single_path(path, request_path)
         if len(potential_conflicts) != 0:

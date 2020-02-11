@@ -254,17 +254,17 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
             # the schema paths to use the new and discard the old if the old exists
             # in the schema. it would not exist if we have already put a wildcard
             pointer_to_value = schema_paths[subsumable_pathname]
-            del schema_paths[subsumable_pathname]
-            schema_paths[new_pathname] = pointer_to_value
+            schema_paths = { k: v for k, v in [(new_pathname, pointer_to_value), *schema_paths.items()] if k != subsumable_pathname}
             if not ('parameters' in schema_paths[new_pathname].keys()):
                 schema_paths[new_pathname]['parameters'] = []
             for path_param in request_path_parameters.keys():
-                if not (path_param in [x['name'] for x in schema_paths[new_pathname]['parameters'] if x['in'] == 'path']):
-                    schema_paths[new_pathname]['parameters'].append({
+                params = [cast(Parameter, x) for x in schema_paths[new_pathname]['parameters'] if '$ref' not in x]
+                if not (path_param in [x['name'] for x in params if x['in'] == 'path']):
+                    schema_paths[new_pathname]['parameters'] = [{
                         'required': True,
                         'in': 'path',
                         'name': path_param,
-                    })
+                    }, *(schema_paths[new_pathname]['parameters'])]
             schema_has_mutated = True
     else:
         path_item = PathItem(summary="Path summary",
