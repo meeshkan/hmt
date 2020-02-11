@@ -15,7 +15,7 @@ PATH_PARAMETER_PATTERN = r"""\\{([\w-]+)\\}"""
 RequestPathParameters = Mapping[str, str]
 
 
-def _dumb_match_to_path(request_path: str, paths: Paths, request_method: str, operation_candidate: Operation) -> Optional[Tuple[str, Mapping[str, Any]]]:
+def _dumb_match_to_path(request_path: str, paths: Paths, request_method: str, operation_candidate: Operation) -> Tuple[str, Optional[Mapping[str, Any]]]:
     """An overly-simplistic, highly-experimental, probably-broken
        function that answers the question "does this path exist in the spec already?"
        For example, if there is /v1/clients/jane and we get
@@ -43,19 +43,22 @@ def _dumb_match_to_path(request_path: str, paths: Paths, request_method: str, op
         """
         if a is b:
             return True
-        a_spl = a.split("/")
-        b_spl = b.split("/")
+        a_spl = [x for x in a.split("/") if x != '']
+        b_spl = [x for x in b.split("/") if x != '']
         # if the two lengths aren't equal, return false
-        if len(a_spl) is not len(b_spl):
+        if len(a_spl) != len(b_spl):
+            print("no go 0", a_spl, b_spl)
             return False
         # if the first part of the path is not equal, return false
         # APIs almost never have a top-level wildcard
-        if a_spl[0] is not b_spl[0]:
+        if a_spl[0] != b_spl[0]:
+            print("no go 1", a_spl, b_spl)
             return False
         # if there are two successive non-matches, return false
         for x in range(len(a_spl) - 1):
-            if a_spl[x] is not b_spl[x]:
-                if a_spl[x + 1] is not b_spl[x + 1]:
+            if a_spl[x] != b_spl[x]:
+                if a_spl[x + 1] != b_spl[x + 1]:
+                    print("no go 2", a_spl, b_spl)
                     return False
         # our naive test has passed, they could be theoretically similar...
         return True
@@ -71,18 +74,19 @@ def _dumb_match_to_path(request_path: str, paths: Paths, request_method: str, op
             str -- A combined path
         """
         
-        path0_split = path0.split('/')
-        path1_split = path1.split('/')
-        if len(path0_split) is not len(path1_split):
+        path0_split = [x for x in path0.split('/') if x != '']
+        path1_split = [x for x in path1.split('/') if x != '']
+        if len(path0_split) != len(path1_split):
             raise ValueError("Incorrect use of path combination function")
-        return '/' + '/'.join([a if a is b else a if a[0] is '{' else b if b[0] is '{' else '{%s}' % ''.join(random.choices(string.ascii_lowercase, k=8)) for a, b in zip(path0_split, path1_split)])
+        return '/' + '/'.join([a if a == b else a if a[0] == '{' else b if b[0] == '{' else '{%s}' % ''.join(random.choices(string.ascii_lowercase, k=8)) for a, b in zip(path0_split, path1_split)])
 
     theoreticall_plausible_paths = [path for path in paths.keys() if could_these_two_paths_possibly_represent_the_same_underlying_path(path, request_path)]
+    print("Request path", request_path, "theoretically plausible", theoreticall_plausible_paths)
     for path in theoreticall_plausible_paths:
         operation = paths[path][request_method]
         potential_conflicts = set(operation['responses'].keys()).intersection(set(operation_candidate['responses'].keys()))
         new_path = combine_paths_into_single_path(path, request_path)
-        if len(potential_conflicts) is not 0:
+        if len(potential_conflicts) != 0:
             irreconcilably_different = False
             for potential_conflict in potential_conflicts:
                 # we look to see if potential conflicts resemble each other
@@ -109,9 +113,9 @@ def _dumb_match_to_path(request_path: str, paths: Paths, request_method: str, op
         # conflicts can be resolved, so we merge
         matches = _match_to_path(request_path, new_path)
         if matches is None:
-            raise ValueError('Algorithm conflict for path matching - got a match, but then returned match === None')
+            raise ValueError('Algorithm conflict for path matching - got a match for %s %s, but then returned match === None' % (request_path, new_path))
         return (new_path, matches)
-    return None
+    return (request_path, None)
 
 def _match_to_path(request_path: str, path: str) -> Optional[Mapping[str, Any]]:
     """Match a request path such as "/pets/32" to a variable path such as "/pets/{petId}".
@@ -123,6 +127,10 @@ def _match_to_path(request_path: str, path: str) -> Optional[Mapping[str, Any]]:
     Returns:
         Optional[Mapping[str, Any]] -- None if the paths do not match. Otherwise, return a dictionary of parameter names to values (for example: { 'petId': '32' })
     """
+    # this function won't work if
+    # requests paths have a trailing slash, so we remove it
+    if request_path[-1] == '/':
+        request_path = request_path[:-1]
     path_as_regex, parameter_names = path_to_regex(path)
     match = path_as_regex.match(request_path)
 
@@ -141,7 +149,7 @@ class MatchingPath(TypedDict):
   path: PathItem
   param_mapping: Mapping[str, Any]
   new_pathname: str
-  old_pathname: str
+  original_pathname: str
 
 def find_matching_path(request_path: str, paths: Paths, request_method: str, operation_candidate: Operation) -> Optional[MatchingPath]:
     """Find path that matches the request path.
@@ -167,7 +175,7 @@ def find_matching_path(request_path: str, paths: Paths, request_method: str, ope
 
             if path_match is None:
                 continue
-            return {'path': path_item, 'param_mapping': path_match, 'new_pathname': new_pathname, 'old_pathname': request_path }
+            return {'path': path_item, 'param_mapping': path_match, 'new_pathname': new_pathname, 'original_pathname': request_path }
 
     return None
 

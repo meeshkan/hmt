@@ -245,13 +245,15 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
 
     if path_match_result is not None:
         # Path item exists for request path
-        path_item, request_path_parameters, new_pathname, old_pathname = path_match_result['path'], path_match_result['param_mapping'], path_match_result['new_pathname'], path_match_result['old_pathname']
-        if new_pathname is not old_pathname:
+        path_item, request_path_parameters, new_pathname, original_pathname = path_match_result['path'], path_match_result['param_mapping'], path_match_result['new_pathname'], path_match_result['original_pathname']
+        if new_pathname != original_pathname:
             # the algorithm has updated the pathname, need to mutate
-            # the schema paths to use the new and discard the old
-            pointer_to_value = schema_paths[old_pathname]
-            del schema_paths[old_pathname]
-            schema_paths[new_pathname] = pointer_to_value
+            # the schema paths to use the new and discard the old if the old exists
+            # in the schema. it would not exist if we have already put a wildcard
+            if original_pathname in schema.keys():
+                pointer_to_value = schema_paths[original_pathname]
+                del schema_paths[original_pathname]
+                schema_paths[new_pathname] = pointer_to_value
     else:
         path_item = PathItem(summary="Path summary",
                              description="Path description")
