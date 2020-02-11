@@ -248,23 +248,23 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
     schema_has_mutated = False
     if path_match_result is not None:
         # Path item exists for request path
-        path_item, request_path_parameters, new_pathname, subsumable_pathname = path_match_result['path'], path_match_result['param_mapping'], path_match_result['new_pathname'], path_match_result['subsumable_pathname']
-        if subsumable_pathname is not None:
+        path_item, request_path_parameters, pathname_with_wildcard, pathname_to_be_replaced_with_wildcard = path_match_result['path'], path_match_result['param_mapping'], path_match_result['pathname_with_wildcard'], path_match_result['pathname_to_be_replaced_with_wildcard']
+        if pathname_to_be_replaced_with_wildcard is not None:
             # the algorithm has updated the pathname, need to mutate
             # the schema paths to use the new and discard the old if the old exists
             # in the schema. it would not exist if we have already put a wildcard
-            pointer_to_value = schema_paths[subsumable_pathname]
-            schema_paths = { k: v for k, v in [(new_pathname, pointer_to_value), *schema_paths.items()] if k != subsumable_pathname}
-            if not ('parameters' in schema_paths[new_pathname].keys()):
-                schema_paths[new_pathname]['parameters'] = []
+            pointer_to_value = schema_paths[pathname_to_be_replaced_with_wildcard]
+            schema_paths = { k: v for k, v in [(pathname_with_wildcard, pointer_to_value), *schema_paths.items()] if k != pathname_to_be_replaced_with_wildcard}
+            if not ('parameters' in schema_paths[pathname_with_wildcard].keys()):
+                schema_paths[pathname_with_wildcard]['parameters'] = []
             for path_param in request_path_parameters.keys():
-                params = [cast(Parameter, x) for x in schema_paths[new_pathname]['parameters'] if '$ref' not in x]
+                params = [cast(Parameter, x) for x in schema_paths[pathname_with_wildcard]['parameters'] if '$ref' not in x]
                 if not (path_param in [x['name'] for x in params if x['in'] == 'path']):
-                    schema_paths[new_pathname]['parameters'] = [{
+                    schema_paths[pathname_with_wildcard]['parameters'] = [{
                         'required': True,
                         'in': 'path',
                         'name': path_param,
-                    }, *(schema_paths[new_pathname]['parameters'])]
+                    }, *(schema_paths[pathname_with_wildcard]['parameters'])]
             schema_copy['paths'] = schema_paths
             schema_has_mutated = True
     else:

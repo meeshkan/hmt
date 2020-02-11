@@ -147,8 +147,8 @@ def _match_to_path(request_path: str, path: str) -> Optional[Mapping[str, Any]]:
 class MatchingPath(TypedDict):
   path: PathItem
   param_mapping: Mapping[str, Any]
-  new_pathname: str
-  subsumable_pathname: Optional[str]
+  pathname_with_wildcard: str
+  pathname_to_be_replaced_with_wildcard: Optional[str]
 
 def find_matching_path(request_path: str, paths: Paths, request_method: str, operation_candidate: Operation) -> Optional[MatchingPath]:
     """Find path that matches the request path.
@@ -170,11 +170,11 @@ def find_matching_path(request_path: str, paths: Paths, request_method: str, ope
         lambda p, pi: (request_path, None, _match_to_path(request_path=request_path, path=p)),
         lambda p, pi: _dumb_match_to_path(request_path, paths, request_method, operation_candidate)]:
         for path, path_item in paths.items():
-            new_pathname, subsumable_pathname, path_match = fn(path, path_item)
+            pathname_with_wildcard, pathname_to_be_replaced_with_wildcard, path_match = fn(path, path_item)
 
             if path_match is None:
                 continue
-            return {'path': path_item, 'param_mapping': path_match, 'new_pathname': new_pathname, 'subsumable_pathname': subsumable_pathname }
+            return {'path': path_item, 'param_mapping': path_match, 'pathname_with_wildcard': pathname_with_wildcard, 'pathname_to_be_replaced_with_wildcard': pathname_to_be_replaced_with_wildcard }
 
     return None
 
