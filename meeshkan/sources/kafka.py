@@ -3,7 +3,7 @@ from typing import AsyncIterable
 import asyncio
 from .abstract import AbstractSource
 from typing import Tuple
-import faust
+
 from ..types import HttpExchangeStream
 try:
     import faust
