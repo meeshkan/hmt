@@ -174,7 +174,7 @@ def get_required_request_query_or_header_parameters_internal(header: bool, l: le
         lambda a : a,
         ignore_none=True
     ).Prism(
-        lambda s : s if (s['in'] == ( "header" if header else "query")) and s['required'] else None,
+        lambda s : s if (s['in'] == ( "header" if header else "query")) and ('required' in s) and s['required'] else None,
         lambda a : a,
         ignore_none=True
     ).collect()(p) if ('schema' in parameter) and (len(schema_prism(oai)(lens.Each()).collect()([parameter['schema']])) > 0)]
@@ -189,7 +189,7 @@ def get_required_request_query_or_header_parameters(header: bool, req: Request, 
         *get_required_request_query_or_header_parameters_internal(
             header,
             pipe_odl([
-                odl(req.method.lower()),
+                odl(req['method'].lower()),
                 odl("parameters")
             ])(lens).Each(),
             oai,
@@ -202,7 +202,7 @@ def get_required_request_body_schemas(
   p: PathItem,
 ) -> List[Schema]:
     return schema_prism(oai)(pipe_odl([
-        odl(req.method.lower()),
+        odl(req['method'].lower()),
         odl("requestBody")
     ])(lens).Prism(
         lambda s : get_request_body_from_ref(oai, ref_name(s)) if is_reference(s) else s,
@@ -226,8 +226,8 @@ def keep_method_if_required_request_body_is_present(
     oai: OpenAPIObject,
 ) -> Callable[[PathItem], PathItem]:
     def _keep_method_if_required_request_body_is_present(p: PathItem) -> PathItem:
-        return p if (req.method.lower() not in p) or (len([s for s in get_required_request_body_schemas(req, oai, p) if
-                _valid_schema(req.bodyAsJson, {
+        return p if (req['method'].lower() not in p) or (len([s for s in get_required_request_body_schemas(req, oai, p) if
+                _valid_schema(req['bodyAsJson'], {
                     # TODO: this line is different than the TS implementation
                     # because I think there is a logic bug there
                     # it should look like this line as we are not sure
@@ -236,7 +236,7 @@ def keep_method_if_required_request_body_is_present(
                     # otherwise, change the TS implementation in unmock-js and delete this comment.
                     **(change_ref(s) if is_reference(s) else change_refs(s)),
                     'definitions': make_definitions_from_schema(oai),
-                })]) > 0) else omit(p, req.method.lower())
+                })]) > 0) else omit(p, req['method'].lower())
     return _keep_method_if_required_request_body_is_present
 
 def keep_method_if_required_header_parameters_are_present(
@@ -271,10 +271,10 @@ def keep_method_if_required_query_or_header_parameters_are_present(
     oai: OpenAPIObject,
     p: PathItem
 ) -> PathItem:
-    return p if (req.method.lower() not in p) or _valid_schema(
-        req.headers if header else req.query,
+    return p if (req['method'].lower() not in p) or _valid_schema(
+        req['headers'] if header else req['query'],
         _json_schema_from_required_parameters(get_required_request_query_or_header_parameters(header, req, oai, p), oai)
-    ) else omit(p, req.method.lower())
+    ) else omit(p, req['method'].lower())
 
 def maybe_add_string_schema(s: List[Union[Reference, Schema]]) -> List[Union[Reference, Schema]]:
     return [{ 'type': "string" }] if len(s) == 0 else s
@@ -483,7 +483,7 @@ def truncate_path(
   i: Request,
 ) -> str:
     return cut_path(
-        [remove_trailing_slash(urlparse(u).path) for u in match_urls(i.protocol, i.host, o)],
+        [remove_trailing_slash(urlparse(u).path) for u in match_urls(i['protocol'], i['host'], o)],
         path,
     )
 
@@ -494,25 +494,23 @@ def matcher(req: Request, r: Dict[str, OpenAPIObject]) -> Dict[str, OpenAPIObjec
                 keep_method_if_required_header_parameters_are_present(req, oai),
                 keep_method_if_required_query_parameters_are_present(req, oai),
                 keep_method_if_required_request_body_is_present(req, oai),
-            ], get_path_item_with_method(req.method.lower(), path_item))
+            ], get_path_item_with_method(req['method'].lower(), path_item))
         )({
             **oai,
             **({} if 'paths' not in oai else {
               'paths': {n: o for n, o in oai['paths'].items() if matches(
-                    truncate_path(req.pathname, oai, req),
+                    truncate_path(req['pathname'], oai, req),
                     n,
                     o,
-                    req.method,
+                    req['method'].lower(),
                     oai,
                   )}
                 })
         })
-    )({k: v for k, v in r.items() if len(match_urls(req.protocol, req.host, v)) > 0 })
+    )({k: v for k, v in r.items() if len(match_urls(req['protocol'], req['host'], v)) > 0 })
 
 def _first_or_none(l: List[C]) -> Optional[C]:
     return None if len(l) == 0 else l[0]
-
-_items_iso = (lambda a: [x for x in a.items()], lambda b: {k: v for k, v in b})
 
 def drill_down_to_operation(schema_record: Dict[str, OpenAPIObject]) -> Optional[Operation]:
     return _first_or_none(odl(0)(odl("paths")(lens.Values()).Items())[1].Iso(
