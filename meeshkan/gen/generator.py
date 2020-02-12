@@ -148,7 +148,7 @@ def change_refs(j: Schema) -> Schema:
         **({} if 'properties' not in j
             else {
                 'properties': reduce(
-                    lambda a, b: { **a, [b[0]]: change_ref(b[1]) if is_reference(b[1]) else change_refs(b[1]) },
+                    lambda a, b: { **a, b[0]: change_ref(b[1]) if is_reference(b[1]) else change_refs(b[1]) },
                     j['properties'].items(),
                     {})
             })
