@@ -148,7 +148,7 @@ class Channel:
                                 protocol=scheme,
                                 query=query,
                                 body=body,
-                                bodyAsJson="",
+                                bodyAsJson={},
                                 headers=headers)
 
         return RequestInfo(data=data, scheme=scheme, target_host=host, target_port=443 if scheme == 'https' else 80)

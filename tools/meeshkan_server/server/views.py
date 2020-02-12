@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from urllib import parse
 from urllib.parse import urlencode
 
 from http_types import RequestBuilder, Request
@@ -47,19 +48,32 @@ class MockServerView(RequestHandler):
         splits = split_path(self.request.path)
         scheme, host = splits[0], splits[1]
         path = os.path.join('/', *splits[2:])
-        fullpath = "{}?{}".format(path, urlencode(self.request.arguments)) if self.request.arguments else path
+        query = parse.parse_qs(self.request.query)
+
+        fullpath = "{}?{}".format(path, self.request.query) if query else path
 
         request = Request(Request(method=self.request.method.lower(),
                                   host=host,
                                   path=fullpath,
                                   pathname=path,
                                   protocol=scheme,
-                                  query=self.request.arguments,
+                                  query=query,
                                   body=self.request.body,
-                                  bodyAsJson="",
+                                  bodyAsJson=self._extract_json_safely(self.request.body),
                                   headers=self.request.headers))
         RequestBuilder.validate(request)
 
 
         response = self.application.mocking_service.match(request)
         self.write(response['body'])
+
+    def _extract_json_safely(self, text):
+        if text:
+            try:
+                return json.loads(text)
+            except Exception as e:
+                pass
+
+        return {}
+
+
