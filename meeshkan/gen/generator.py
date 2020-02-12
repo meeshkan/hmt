@@ -33,14 +33,14 @@ all_methods: List[str] = [
 def omit(p: Dict[X, Y], a: X) -> Dict[X, Y]:
     return { k: v for k, v in p.items() if k != a}
 
-def _iso_o(focus: str):
+def _iso_o(focus: Union[str, int]):
     return (lambda a: (None if focus not in a else a[focus], a), lambda b: b[1])
 
 _prism_o = (lambda a: a[0], lambda b: b)
 
 # TODO are these types correct??
 # C because I think the third thingee is the incoming type... maybe?
-def odl(focus: str) -> Callable[[lenses.ui.BaseUiLens[S, T, X, Y]], lenses.ui.BaseUiLens[S, T, X, Y]]:
+def odl(focus: Union[str, int]) -> Callable[[lenses.ui.BaseUiLens[S, T, X, Y]], lenses.ui.BaseUiLens[S, T, X, Y]]:
     '''Short for "optional-dict-lens, equivalent of Opional in other optics libraries
 
     Arguments:
@@ -109,10 +109,19 @@ def get_request_body_from_ref(o: OpenAPIObject, d: str) -> Optional[Schema]:
 
 internal_get_request_body_from_ref = internal_get_component(get_request_body_from_ref)
 
+def get_response_from_ref(o: OpenAPIObject, d: str) -> Optional[Schema]:
+    return get_component_from_ref(o, d, lambda a: a['responses'] if 'responses' in a else None, internal_get_response_from_ref)
+
+internal_get_response_from_ref = internal_get_component(get_response_from_ref)
+
 
 def schema_prism(oai: OpenAPIObject) -> Callable[[lenses.ui.BaseUiLens[S, T, X, Y]], lenses.ui.BaseUiLens[S, T, X, Y]]:
     def _schema_prism(l: lenses.ui.BaseUiLens[S, T, X, Y]) -> lenses.ui.BaseUiLens[S, T, X, Y]:
-        return l.Prism(lambda s: get_schema_from_ref(oai, s['$ref'].split('/')[3]) if is_reference(s) else s, lambda a: a)
+        return l.Prism(
+            lambda s: get_schema_from_ref(oai, s['$ref'].split('/')[3]) if is_reference(s) else s,
+            lambda a: a,
+            ignore_none=True
+        )
     return _schema_prism
 
 def change_ref(j: Reference) -> Reference:
@@ -162,10 +171,12 @@ def get_path_item_with_method(m: str, p: PathItem) -> PathItem:
 def get_required_request_query_or_header_parameters_internal(header: bool, l: lenses.ui.BaseUiLens[S, T, X, Y], oai: OpenAPIObject, p: PathItem) -> List[Parameter]:
     return [{ **parameter, 'schema': (change_ref(parameter['schema']) if is_reference(parameter['schema']) else change_refs(parameter['schema'])) if 'schema' in parameter else { 'type': "string" } } for parameter in l.Prism(
         lambda s: get_parameter_from_ref(oai, s['$ref'].split("/")[3]) if is_reference(s) else s,
-        lambda a : a
+        lambda a : a,
+        ignore_none=True
     ).Prism(
         lambda s : s if (s['in'] == ( "header" if header else "query")) and s['required'] else None,
-        lambda a : a
+        lambda a : a,
+        ignore_none=True
     ).collect()(p) if ('schema' in parameter) and (len(schema_prism(oai)(lens.Each()).collect()([parameter['schema']])) > 0)]
 
 def get_required_request_query_or_header_parameters(header: bool, req: Request, oai: OpenAPIObject, p: PathItem) -> List[Parameter]:
@@ -194,11 +205,13 @@ def get_required_request_body_schemas(
         odl(req.method.lower()),
         odl("requestBody")
     ])(lens).Prism(
-        lambda s : get_request_body_from_ref(oai, s['$ref'].split("/")[3]) if is_reference(s) else s, lambda a: a
+        lambda s : get_request_body_from_ref(oai, s['$ref'].split("/")[3]) if is_reference(s) else s,
+        lambda a: a,
+        ignore_none=True
     ).Iso(*_iso_o("content")).Prism(
-        *_prism_o, ignore_none = True
+        *_prism_o, ignore_none=True
     ).Values().Iso(*_iso_o("schema")).Prism(
-        *_prism_o, ignore_none = True
+        *_prism_o, ignore_none=True
     )).collect()(p)
 
 def _valid_schema(to_validate: Any, schema: Any) -> bool:
@@ -276,7 +289,9 @@ def internal_get_parameter_schemas(
     oas: OpenAPIObject,
 ) -> List[Schema]:
     return t.Prism(
-        lambda i: discern_name(get_parameter_from_ref(oas, ref_name(i)), vname) if is_reference(i) else discern_name(i, vname)
+        lambda i: discern_name(get_parameter_from_ref(oas, ref_name(i)), vname) if is_reference(i) else discern_name(i, vname),
+        lambda a: a,
+        ignore_none=True
     ).Iso(*_iso_o("schema")).Prism(
         *_prism_o, ignore_none = True
     ).collect()(path_item)
@@ -420,9 +435,6 @@ def get_first_method_internal(
 def get_first_method(p: PathItem) -> Optional[Tuple[str, Operation]]:
   return get_first_method_internal(all_methods, p)
 
-def operation_optional(l: lenses.ui.BaseUiLens[S, T, X, Y]) -> lenses.ui.BaseUiLens[S, T, X, Y]:
-    return l.Iso(lambda a: (get_first_method(a), a), lambda b: b[1]).Prism(*_prism_o, ignore_none=True)
-
 def get_header_from_ref(
     o: OpenAPIObject,
     d: str
@@ -453,8 +465,11 @@ def use_if_header(
                 p['schema']
     )
 
-def parameter_schema(o: OpenAPIObject, l: lenses.ui.BaseUiLens[S, T, X, Y]) -> lenses.ui.BaseUiLens[S, T, X, Y]:
-    return l.Iso(lambda a: (use_if_header(o, a), a), lambda b: b[1]).Prism(*_prism_o, ignore_none=True)
+def parameter_schema(o: OpenAPIObject) -> Callable[[lenses.ui.BaseUiLens[S, T, X, Y]], lenses.ui.BaseUiLens[S, T, X, Y]]:
+    def _parameter_schema(l: lenses.ui.BaseUiLens[S, T, X, Y]) -> lenses.ui.BaseUiLens[S, T, X, Y]:
+        return l.Iso(lambda a: (use_if_header(o, a), a), lambda b: b[1]).Prism(lambda a: a[0], lambda b: b, ignore_none=True)
+    return _parameter_schema
+
 
 def cut_path(paths: List[str], path: str) -> str:
     return path if len(paths) == 0 else path[len(paths[0]):] if path[:len(paths[0])] == paths[0] else cut_path(paths[1:], path)
@@ -462,7 +477,7 @@ def cut_path(paths: List[str], path: str) -> str:
 def remove_trailing_slash(s: str) -> str:
     return s if len(s) == 0 else s[:-1] if s[-1] == "/" else s
 
-def truncatePath(
+def truncate_path(
   path: str,
   o: OpenAPIObject,
   i: Request,
@@ -471,3 +486,89 @@ def truncatePath(
         [remove_trailing_slash(urlparse(u).path) for u in match_urls(i.protocol, i.host, o)],
         path,
     )
+
+def matcher(req: Request, r: Dict[str, OpenAPIObject]) -> Dict[str, OpenAPIObject]:
+    return lens.Values().modify(
+        lambda oai: odl("paths")(lens).Values().modify(
+            lambda path_item: reduce(lambda a, b: b(a), [
+                keep_method_if_required_header_parameters_are_present(req, oai),
+                keep_method_if_required_query_parameters_are_present(req, oai),
+                keep_method_if_required_request_body_is_present(req, oai),
+            ], get_path_item_with_method(req.method.lower(), path_item))
+        )({
+            **oai,
+            **({} if 'paths' not in oai else {
+              'paths': {n: o for n, o in oai['paths'].items() if matches(
+                    truncate_path(req.pathname, oai, req),
+                    n,
+                    o,
+                    req.method,
+                    oai,
+                  )}
+                })
+        })
+    )({k: v for k, v in r.items() if len(match_urls(req.protocol, req.host, v)) > 0 })
+
+def _first_or_none(l: List[C]) -> Optional[C]:
+    return None if len(l) == 0 else l[0]
+
+_items_iso = (lambda a: [x for x in a.items()], lambda b: {k: v for k, v in b})
+
+def drill_down_to_operation(schema_record: Dict[str, OpenAPIObject]) -> Optional[Operation]:
+    return _first_or_none(odl(0)(odl("paths")(lens.Values()).Items())[1].Iso(
+        lambda a: (get_first_method(a), a), lambda b: b[1]
+    ).Prism(*_prism_o, ignore_none=True)[1].collect()(schema_record))
+
+def is_parameter(s: Any) -> bool:
+    return s is not None and 'in' in s and 'name' in s
+
+def headers_schemas_from_operation(schema: OpenAPIObject, operation: Operation) -> List[Schema]:
+    return odl("parameters")(lens).Each().Prism(
+        lambda s: s if is_parameter(s) else get_parameter_from_ref(schema, ref_name(s)) if is_reference(s) else None,
+        lambda a: a
+    ).Iso(
+        lambda a: (use_if_header(schema, a), a),
+        lambda b: b[1]
+    ).Prism(*_prism_o, ignore_none=True).collect()(operation)
+
+# TODO: this is pretty impovrished compared to unmock JS
+# can we make it better
+def is_response(a: Any) -> bool:
+    return (a is not None) and ('description' in a) and (True if 'content' not in a else type(a['content']) == type({}))
+
+def make_lens_to_response_starting_from_operation(
+    schema: OpenAPIObject,
+    code: str,
+    l: lenses.ui.BaseUiLens[S, T, X, Y] = lens
+) -> lenses.ui.BaseUiLens[S, T, X, Y]:
+    return odl("responses")(l).Prism(
+        lambda s: s if is_response(s) else 
+            get_response_from_ref(schema, ref_name(s)) if is_reference(s) else
+            None,
+        lambda a: a
+    )
+
+def string_header(n: str, o: Optional[Header]) -> Optional[Tuple[str, Header]]:
+    return None if o is None else (n, o)
+
+def header_schemas_from_response(
+  schema: OpenAPIObject,
+  operation: Operation,
+  code: str
+) -> List[Schema]:
+  return parameter_schema(schema)(odl("headers")(make_lens_to_response_starting_from_operation(schema, code)).Items().Prism(
+      lambda a: string_header(a[0], get_header_from_ref(schema, ref_name(a[1]))) if is_reference(a[1]) else (a[0], a[1]),
+      lambda a: a
+  ).Iso(
+      lambda a: { **a[1], 'name': a[0], 'in': 'header' },
+      lambda a: (a['name'], a)
+  )).collect()(operation)
+
+def body_from_response(
+  schema: OpenAPIObject,
+  operation: Operation,
+  code: str
+) -> Optional[Union[Reference, Schema]]:
+  return _first_or_none(odl("schema")(odl(0)(odl("content")(
+      make_lens_to_response_starting_from_operation(schema, code)
+    ).Items())[1]).collect()([operation]))

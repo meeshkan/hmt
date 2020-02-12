@@ -1,5 +1,5 @@
-from meeshkan.gen.generator import match_urls, get_path_item_with_method
-from openapi_typed import PathItem
+from meeshkan.gen.generator import match_urls, ref_name, get_path_item_with_method, matches
+from openapi_typed import PathItem, OpenAPIObject
 
 def test_match_urls():
     assert ["https://api.foo.com"] == match_urls("https", "api.foo.com", {
@@ -45,3 +45,30 @@ def test_get_path_item_with_method():
     'post': { 'responses': { '101': { 'description': "hello" } } },
     'description': "foo",
   }
+
+def test_matcher():
+  bfoo = {
+    'parameters': [
+      {
+        'in': "path",
+        'name': "foo",
+        'schema': { 'type': "string", 'pattern': "^[abc]+$" },
+      },
+    ],
+  };
+  oai: OpenAPIObject = {
+    'openapi': "",
+    'info': { 'title': "", 'version': "" },
+    'paths': {
+      "/b/{foo}": bfoo,
+    },
+  }
+  assert matches("/a/b", "/a/b", bfoo, "get", oai)
+  assert not matches("/a/", "/a/b", bfoo, "get", oai)
+  assert not matches("/a/b", "/a", bfoo, "get", oai)
+  assert matches("/a/b/c", "/a/{fewfwef}/c", bfoo, "get", oai)
+  assert matches("/b/ccaaca", "/b/{foo}", bfoo, "get", oai)
+  assert not matches("/b/ccaacda", "/b/{foo}", bfoo, "get", oai)
+
+def test_ref_name():
+  assert "Foo" == ref_name({ '$ref': "#/components/schemas/Foo" })
