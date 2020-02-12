@@ -36,7 +36,7 @@ def omit(p: Dict[X, Y], a: X) -> Dict[X, Y]:
 def _iso_o(focus: Union[str, int]):
     return (lambda a: (None if focus not in a else a[focus], a), lambda b: b[1])
 
-_prism_o = (lambda a: a[0], lambda b: b)
+_prism_o = (lambda a: a, lambda b: b)
 
 # TODO are these types correct??
 # C because I think the third thingee is the incoming type... maybe?
@@ -50,7 +50,7 @@ def odl(focus: Union[str, int]) -> Callable[[lenses.ui.BaseUiLens[S, T, X, Y]], 
         Callable[[lenses.ui.BaseUiLens[S, T, X, Y]], lenses.ui.BaseUiLens[S, T, X, Y]] -- A callable that consumes a lens, useful for piping
     '''
     def _odl(l: lenses.ui.BaseUiLens[S, T, X, Y]) -> lenses.ui.BaseUiLens[S, T, X, Y]:
-        return l.Iso(*_iso_o(focus)).Prism(*_prism_o, ignore_none = True)
+        return l.Iso(*_iso_o(focus))[0].Prism(*_prism_o, ignore_none = True)
     return _odl
 
 def pipe_odl(args: List[Callable[[lenses.ui.BaseUiLens[S, T, X, Y]], lenses.ui.BaseUiLens[S, T, X, Y]]]) -> Callable[[lenses.ui.BaseUiLens[S, T, X, Y]], lenses.ui.BaseUiLens[S, T, X, Y]]:
@@ -208,9 +208,9 @@ def get_required_request_body_schemas(
         lambda s : get_request_body_from_ref(oai, ref_name(s)) if is_reference(s) else s,
         lambda a: a,
         ignore_none=True
-    ).Iso(*_iso_o("content")).Prism(
+    ).Iso(*_iso_o("content"))[0].Prism(
         *_prism_o, ignore_none=True
-    ).Values().Iso(*_iso_o("schema")).Prism(
+    ).Values().Iso(*_iso_o("schema"))[0].Prism(
         *_prism_o, ignore_none=True
     )).collect()(p)
 
@@ -292,7 +292,7 @@ def internal_get_parameter_schemas(
         lambda i: discern_name(get_parameter_from_ref(oas, ref_name(i)), vname) if is_reference(i) else discern_name(i, vname),
         lambda a: a,
         ignore_none=True
-    ).Iso(*_iso_o("schema")).Prism(
+    ).Iso(*_iso_o("schema"))[0].Prism(
         *_prism_o, ignore_none = True
     ).collect()(path_item)
 
@@ -467,7 +467,7 @@ def use_if_header(
 
 def parameter_schema(o: OpenAPIObject) -> Callable[[lenses.ui.BaseUiLens[S, T, X, Y]], lenses.ui.BaseUiLens[S, T, X, Y]]:
     def _parameter_schema(l: lenses.ui.BaseUiLens[S, T, X, Y]) -> lenses.ui.BaseUiLens[S, T, X, Y]:
-        return l.Iso(lambda a: (use_if_header(o, a), a), lambda b: b[1]).Prism(lambda a: a[0], lambda b: b, ignore_none=True)
+        return l.Iso(lambda a: (use_if_header(o, a), a), lambda b: b[1])[0].Prism(*_prism_o, ignore_none=True)
     return _parameter_schema
 
 
@@ -515,7 +515,7 @@ def _first_or_none(l: List[C]) -> Optional[C]:
 def drill_down_to_operation(schema_record: Dict[str, OpenAPIObject]) -> Optional[Operation]:
     return _first_or_none(odl(0)(odl("paths")(lens.Values()).Items())[1].Iso(
         lambda a: (get_first_method(a), a), lambda b: b[1]
-    ).Prism(*_prism_o, ignore_none=True)[1].collect()(schema_record))
+    )[0].Prism(*_prism_o, ignore_none=True)[1].collect()(schema_record))
 
 def is_parameter(s: Any) -> bool:
     return s is not None and 'in' in s and 'name' in s
@@ -523,11 +523,12 @@ def is_parameter(s: Any) -> bool:
 def headers_schemas_from_operation(schema: OpenAPIObject, operation: Operation) -> List[Schema]:
     return odl("parameters")(lens).Each().Prism(
         lambda s: s if is_parameter(s) else get_parameter_from_ref(schema, ref_name(s)) if is_reference(s) else None,
-        lambda a: a
+        lambda a: a,
+        ignore_none=True
     ).Iso(
         lambda a: (use_if_header(schema, a), a),
         lambda b: b[1]
-    ).Prism(*_prism_o, ignore_none=True).collect()(operation)
+    )[0].Prism(*_prism_o, ignore_none=True).collect()(operation)
 
 # TODO: this is pretty impovrished compared to unmock JS
 # can we make it better
@@ -543,7 +544,8 @@ def make_lens_to_response_starting_from_operation(
         lambda s: s if is_response(s) else 
             get_response_from_ref(schema, ref_name(s)) if is_reference(s) else
             None,
-        lambda a: a
+        lambda a: a,
+        ignore_none=True
     )
 
 def string_header(n: str, o: Optional[Header]) -> Optional[Tuple[str, Header]]:
@@ -556,7 +558,8 @@ def header_schemas_from_response(
 ) -> List[Schema]:
   return parameter_schema(schema)(odl("headers")(make_lens_to_response_starting_from_operation(schema, code)).Items().Prism(
       lambda a: string_header(a[0], get_header_from_ref(schema, ref_name(a[1]))) if is_reference(a[1]) else (a[0], a[1]),
-      lambda a: a
+      lambda a: a,
+      ignore_none=True
   ).Iso(
       lambda a: { **a[1], 'name': a[0], 'in': 'header' },
       lambda a: (a['name'], a)
