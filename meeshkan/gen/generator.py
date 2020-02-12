@@ -118,7 +118,7 @@ internal_get_response_from_ref = internal_get_component(get_response_from_ref)
 def schema_prism(oai: OpenAPIObject) -> Callable[[lenses.ui.BaseUiLens[S, T, X, Y]], lenses.ui.BaseUiLens[S, T, X, Y]]:
     def _schema_prism(l: lenses.ui.BaseUiLens[S, T, X, Y]) -> lenses.ui.BaseUiLens[S, T, X, Y]:
         return l.Prism(
-            lambda s: get_schema_from_ref(oai, s['$ref'].split('/')[3]) if is_reference(s) else s,
+            lambda s: get_schema_from_ref(oai, ref_name(s)) if is_reference(s) else s,
             lambda a: a,
             ignore_none=True
         )
@@ -126,7 +126,7 @@ def schema_prism(oai: OpenAPIObject) -> Callable[[lenses.ui.BaseUiLens[S, T, X, 
 
 def change_ref(j: Reference) -> Reference:
     return {
-        '$ref': '#/definitions/%s' % j['$ref'].split("/")[3],
+        '$ref': '#/definitions/%s' % ref_name(j),
     }
 
 def change_refs(j: Schema) -> Schema:
@@ -170,7 +170,7 @@ def get_path_item_with_method(m: str, p: PathItem) -> PathItem:
 
 def get_required_request_query_or_header_parameters_internal(header: bool, l: lenses.ui.BaseUiLens[S, T, X, Y], oai: OpenAPIObject, p: PathItem) -> List[Parameter]:
     return [{ **parameter, 'schema': (change_ref(parameter['schema']) if is_reference(parameter['schema']) else change_refs(parameter['schema'])) if 'schema' in parameter else { 'type': "string" } } for parameter in l.Prism(
-        lambda s: get_parameter_from_ref(oai, s['$ref'].split("/")[3]) if is_reference(s) else s,
+        lambda s: get_parameter_from_ref(oai, ref_name(s)) if is_reference(s) else s,
         lambda a : a,
         ignore_none=True
     ).Prism(
@@ -205,7 +205,7 @@ def get_required_request_body_schemas(
         odl(req.method.lower()),
         odl("requestBody")
     ])(lens).Prism(
-        lambda s : get_request_body_from_ref(oai, s['$ref'].split("/")[3]) if is_reference(s) else s,
+        lambda s : get_request_body_from_ref(oai, ref_name(s)) if is_reference(s) else s,
         lambda a: a,
         ignore_none=True
     ).Iso(*_iso_o("content")).Prism(
