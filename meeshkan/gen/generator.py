@@ -81,7 +81,7 @@ def get_component_from_ref(o: OpenAPIObject, d: str, accessor: Callable[[Compone
         lambda a: a if a is None else accessor(a)
     ).F(
         lambda a: a if a is None else getter(o, a[d])
-    ).get(o)
+    ).get()(o)
 
 def is_reference(a: Any) -> bool:
     return '$ref' in a
@@ -460,7 +460,7 @@ def use_if_header(
 ) -> Optional[Tuple[str, Schema]]:
     return None if p['in'] != "header" else use_if_header_last_mile(
         p,
-        { type: "string" } if ('schema' not in p) or (p['schema'] is None) else
+        { 'type': "string" } if ('schema' not in p) or (p['schema'] is None) else
             get_schema_from_ref(o, ref_name(p['schema'])) if is_reference(p['schema']) else
                 p['schema']
     )

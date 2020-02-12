@@ -1,4 +1,4 @@
-from meeshkan.gen.generator import match_urls, ref_name, get_path_item_with_method, matches
+from meeshkan.gen.generator import match_urls, use_if_header, ref_name, get_path_item_with_method, matches
 from openapi_typed import PathItem, OpenAPIObject
 
 def test_match_urls():
@@ -72,3 +72,30 @@ def test_matcher():
 
 def test_ref_name():
   assert "Foo" == ref_name({ '$ref': "#/components/schemas/Foo" })
+
+baseO: OpenAPIObject = {
+  'openapi': "hello",
+  'info': { 'title': "", 'version': "" },
+  'servers': [{ 'url': "https://hello.api.com" }],
+  'paths': {},
+};
+
+def test_use_if_header():
+  assert use_if_header(baseO, { 'name': "foo", 'in': "query" }) is None
+  assert use_if_header(baseO, { 'name': "foo", 'in': "header" }) == ("foo", { 'type': "string" })
+  assert use_if_header(baseO, {
+      'name': "foo",
+      'in': "header",
+      'schema': { 'type': "number" },
+  }) == ("foo", { 'type': "number" })
+  assert use_if_header(
+      {
+        **baseO,
+        'components': { 'schemas': { 'Foo': { 'type': "boolean" } } },
+      },
+      {
+        'name': "foo",
+        'in': "header",
+        'schema': { '$ref': "#/components/schemas/Foo" },
+      },
+    ) == ("foo", { 'type': "boolean" })
