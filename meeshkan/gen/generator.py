@@ -572,36 +572,58 @@ def body_from_response(
 ########################
 #### FAKER
 ########################
+import random
+from faker import Faker
+fkr = Faker()
+_LO = -99999999
+_HI = 99999999
 
 def fake_object(schema: Any, top_schema: Any) -> Any:
-    return {}
+    addls = {} if 'additionalProperties' not in schema else {k:v for k,v in [(fkr.name(), random.random() if schema['additionalProperties'] == True else faker(schema['additionalProperties'], top_schema)) for x in range(random.randint(0, 50))]}
+    properties = [] if 'properties' not in schema['properties'] else schema['properties'].keys()
+    random.shuffle(properties)
+    properties = properties[:random.randint(0, len(properties) - 1)]
+    properties = list(set(([] if 'required' not in schema else schema['required']) + properties))
+    return {
+        **addls,
+        **{ k: v for k,v in [(p, faker(schema['properties'][p], top_schema)) for p in properties]}
+    }
 
 def fake_array(schema: Any, top_schema: Any) -> Any:
-    return []
+    mn = _LO if 'minItems' not in schema else schema['minItems']
+    mx = _HI if 'maxItems' not in schema else schema['maxItems']
+    return [faker(x, top_schema) for x in schema['items']] if type(schema['items']) is type([]) else [faker(schema['items'], top_schema) for x in range(random.randint(mn, mx))]
 
 def fake_any_of(schema: Any, top_schema: Any) -> Any:
-    return []
+    return faker(random.choice(schema["anyOf"]), top_schema)
 
 def fake_all_of(schema: Any, top_schema: Any) -> Any:
-    return []
+    return reduce(lambda a, b: { **a, **b}, [faker(x, top_schema) for x in schema["allOf"]], {})
 
 def fake_one_of(schema: Any, top_schema: Any) -> Any:
-    return []
+    return faker(random.choice(schema["oneOf"]), top_schema)
 
+# TODO - make this work
 def fake_not(schema: Any, top_schema: Any) -> Any:
-    return []
+    return {}
 
+# TODO - make this not suck
 def fake_string(schema: Any) -> str:
-    return ""
+    return fkr.name()
 
+# TODO: add exclusiveMinimum and exclusiveMaximum
 def fake_integer(schema: Any) -> int:
-    return 0
+    mn = _LO if 'minimum' not in schema else schema['minimum']
+    mx = _HI if 'maximum' not in schema else schema['maximum']
+    return random.randint(mn, mx)
 
 def fake_null(schema: Any) -> None:
     return None
 
 def fake_number(schema: Any) -> float:
-    return 0.0
+    mn = _LO if 'minimum' not in schema else schema['minimum']
+    mx = _HI if 'maximum' not in schema else schema['maximum']
+    return (random.random() * (mx - mn)) + mn
 
 def faker(schema: Any, top_schema: Any) -> Any:
     return fake_object(

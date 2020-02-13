@@ -23,6 +23,7 @@ REQUIRED = [
     'lenses',
     'pyyaml',
     'jsonschema',
+    'faker',
     'typing-extensions',
     'openapi-typed>=0.1.0',
     'typeguard>=2.7.0',
