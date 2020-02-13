@@ -298,14 +298,14 @@ BASE_SCHEMA = OpenAPIObject(openapi="3.0.0",
                             paths={})
 
 
-async def build_schema_async(async_iter: AsyncIterable[HttpExchange]) -> AsyncIterable[BuildResult]:
-    schema = BASE_SCHEMA
+async def build_schema_async(async_iter: AsyncIterable[HttpExchange], starting_spec: OpenAPIObject) -> AsyncIterable[BuildResult]:
+    schema = starting_spec
     async for exchange in async_iter:
         schema = update_openapi(schema, exchange)
         yield BuildResult(openapi=schema)
 
 
-def build_schema_online(requests: Iterable[HttpExchange]) -> OpenAPIObject:
+def build_schema_online(requests: Iterable[HttpExchange], base_schema: OpenAPIObject = BASE_SCHEMA) -> OpenAPIObject:
     """Build OpenAPI schema by iterating request-response pairs.
 
     OpenAPI object reference: https://swagger.io/specification/#oasObject
@@ -320,14 +320,14 @@ def build_schema_online(requests: Iterable[HttpExchange]) -> OpenAPIObject:
     # Iterate over all request-response pairs in the iterator, starting from
     # BASE_SCHEMA
     schema = reduce(lambda schema, req: update_openapi(
-        schema, req), requests, BASE_SCHEMA)
+        schema, req), requests, base_schema)
 
     validate_openapi_object(schema)
 
     return schema
 
 
-def build_schema_batch(requests: List[HttpExchange]) -> OpenAPIObject:
+def build_schema_batch(requests: List[HttpExchange], base_schema: OpenAPIObject = BASE_SCHEMA) -> OpenAPIObject:
     """Build OpenAPI schema from a list of request-response object.
 
     OpenAPI object reference: https://swagger.io/specification/#oasObject
@@ -338,4 +338,4 @@ def build_schema_batch(requests: List[HttpExchange]) -> OpenAPIObject:
     Returns:
         OpenAPI -- OpenAPI object.
     """
-    return build_schema_online(iter(requests))
+    return build_schema_online(iter(requests), base_schema=base_schema)
