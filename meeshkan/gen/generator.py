@@ -34,7 +34,7 @@ all_methods: List[str] = [
   "trace",
 ]
 
-def omit(p: Dict[X, Y], a: X) -> Dict[X, Y]:
+def omit(p: C, a: str) -> C:
     return { k: v for k, v in p.items() if k != a}
 
 _prism_o = (lambda a: a, lambda b: b)
