@@ -6,7 +6,7 @@ import jsonschema
 import json
 import re
 from http_types import Request
-from typing import List, Tuple, TypeVar, Callable, Optional, Dict, Union, Any
+from typing import Sequence, Tuple, TypeVar, Callable, Optional, Mapping, Union, Any
 from openapi_typed import OpenAPIObject, Header, Operation, Parameter, Components, Reference, Schema, PathItem
 from urllib.parse import urlparse
 
@@ -23,7 +23,7 @@ def pp(c: C) -> C:
     print("LOOK", c)
     return c
 
-all_methods: List[str] = [
+all_methods: Sequence[str] = [
   "get",
   "post",
   "put",
@@ -53,7 +53,7 @@ def odl(focus: Union[str, int]) -> lenses.ui.BaseUiLens[S, T, X, Y]:
     return lens.Items().Filter(lambda a: a[0] == focus)[1]
     
 
-def match_urls(protocol: str, host: str, o: OpenAPIObject) -> List[str]:
+def match_urls(protocol: str, host: str, o: OpenAPIObject) -> Sequence[str]:
     """Finds server URLs that match a given protocol and host.
 
     Arguments:
@@ -69,7 +69,7 @@ def match_urls(protocol: str, host: str, o: OpenAPIObject) -> List[str]:
         if (urlparse(server['url']).scheme == protocol)
             and  (urlparse(server['url']).netloc == host)] if 'servers' in o else []
 
-def get_component_from_ref(o: OpenAPIObject, d: str, accessor: Callable[[Components], Optional[Dict[str, Union[Reference, C]]]], getter: Callable[[OpenAPIObject, Union[C, Reference]], Optional[C]]) -> Optional[C]:
+def get_component_from_ref(o: OpenAPIObject, d: str, accessor: Callable[[Components], Optional[Mapping[str, Union[Reference, C]]]], getter: Callable[[OpenAPIObject, Union[C, Reference]], Optional[C]]) -> Optional[C]:
     return lens.F(
         lambda a: a['components'] if 'components' in a else None
     ).F(
@@ -147,10 +147,10 @@ def change_refs(j: Schema) -> Schema:
             })
     }
 
-def make_definitions_from_schema(o: OpenAPIObject) -> Dict[str, Schema]:
+def make_definitions_from_schema(o: OpenAPIObject) -> Mapping[str, Schema]:
   return reduce(lambda a, b: { **a, b[0]: change_ref(b[1]) if is_reference(b[1]) else change_refs(b[1]) }, o['components']['schemas'], {}) if ('components' in o) and ('schemas' in o['components']) else {}
 
-def find_relevant_path(m: str, a: List[str], p: PathItem) -> PathItem:
+def find_relevant_path(m: str, a: Sequence[str], p: PathItem) -> PathItem:
   return p if len(a) == 0 else find_relevant_path(
         m,
         a[1:],
@@ -161,7 +161,7 @@ def find_relevant_path(m: str, a: List[str], p: PathItem) -> PathItem:
 def get_path_item_with_method(m: str, p: PathItem) -> PathItem:
     return find_relevant_path(m, all_methods, p)
 
-def get_required_request_query_or_header_parameters_internal(header: bool, l: lenses.ui.BaseUiLens[S, T, X, Y], oai: OpenAPIObject, p: PathItem) -> List[Parameter]:
+def get_required_request_query_or_header_parameters_internal(header: bool, l: lenses.ui.BaseUiLens[S, T, X, Y], oai: OpenAPIObject, p: PathItem) -> Sequence[Parameter]:
     return [{ **parameter, 'schema': (change_ref(parameter['schema']) if is_reference(parameter['schema']) else change_refs(parameter['schema'])) if 'schema' in parameter else { 'type': "string" } } for parameter in l.Prism(
         lambda s: get_parameter_from_ref(oai, ref_name(s)) if is_reference(s) else s,
         lambda a : a,
@@ -172,7 +172,7 @@ def get_required_request_query_or_header_parameters_internal(header: bool, l: le
         ignore_none=True
     ).collect()(p) if ('schema' in parameter) and (len(lens.Each().add_lens(schema_prism(oai)).collect()([parameter['schema']])) > 0)]
 
-def get_required_request_query_or_header_parameters(header: bool, req: Request, oai: OpenAPIObject, p: PathItem) -> List[Parameter]:
+def get_required_request_query_or_header_parameters(header: bool, req: Request, oai: OpenAPIObject, p: PathItem) -> Sequence[Parameter]:
     return [
         *get_required_request_query_or_header_parameters_internal(
             header,
@@ -192,7 +192,7 @@ def get_required_request_body_schemas(
   req: Request,
   oai: OpenAPIObject,
   p: PathItem,
-) -> List[Schema]:
+) -> Sequence[Schema]:
     return odl(req['method'].lower()).add_lens(
         odl("requestBody")
     ).Prism(
@@ -246,7 +246,7 @@ def keep_method_if_required_query_parameters_are_present(
         return keep_method_if_required_query_or_header_parameters_are_present(False, req, oai, p)
     return _keep_method_if_required_query_parameters_are_present
 
-def _json_schema_from_required_parameters(parameters: List[Parameter], oai: OpenAPIObject) -> Any:
+def _json_schema_from_required_parameters(parameters: Sequence[Parameter], oai: OpenAPIObject) -> Any:
     return {
         'type': 'object',
         'properties': {param['name']: param['schema'] for param in parameters},
@@ -267,7 +267,7 @@ def keep_method_if_required_query_or_header_parameters_are_present(
         _json_schema_from_required_parameters(get_required_request_query_or_header_parameters(header, req, oai, p), oai)
     ) else omit(p, req['method'].lower())
 
-def maybe_add_string_schema(s: List[Union[Reference, Schema]]) -> List[Union[Reference, Schema]]:
+def maybe_add_string_schema(s: Sequence[Union[Reference, Schema]]) -> Sequence[Union[Reference, Schema]]:
     return [{ 'type': "string" }] if len(s) == 0 else s
 
 def discern_name(o: Optional[Parameter], n: str) -> Optional[Parameter]:
@@ -278,7 +278,7 @@ def internal_get_parameter_schemas(
     vname: str,
     path_item: PathItem,
     oas: OpenAPIObject,
-) -> List[Schema]:
+) -> Sequence[Schema]:
     return t.Prism(
         lambda i: discern_name(get_parameter_from_ref(oas, ref_name(i)), vname) if is_reference(i) else discern_name(i, vname),
         lambda a: a,
@@ -292,7 +292,7 @@ def path_item_path_parameter_schemas(
     vname: str,
     path_item: PathItem,
     oas: OpenAPIObject,
-) -> List[Schema]:
+) -> Sequence[Schema]:
     return internal_get_parameter_schemas(
         odl('parameters').Each(),
         vname,
@@ -305,7 +305,7 @@ def operation_path_parameter_schemas(
   path_item: PathItem,
   operation: str,
   oas: OpenAPIObject,
-) -> List[Schema]:
+) -> Sequence[Schema]:
     return internal_get_parameter_schemas(
         odl(
             operation.lower()
@@ -322,7 +322,7 @@ def get_matching_parameters(
   path_item: PathItem,
   operation: str,
   oas: OpenAPIObject,
-) -> List[Schema]:
+) -> Sequence[Schema]:
     return maybe_add_string_schema([
         *path_item_path_parameter_schemas(vname, path_item, oas),
         *operation_path_parameter_schemas(vname, path_item, operation, oas)
@@ -370,8 +370,8 @@ path_param_regex = re.compile(r'^\{[^}]+\}')
 # what we want is
 # lengths_are_equal AND (empty OR ((first_elt_equal OR (matches_regex AND matches_schema)) AND recursion))
 def matches_internal(
-    path: List[str],
-    path_item_key: List[str],
+    path: Sequence[str],
+    path_item_key: Sequence[str],
     path_item: PathItem,
     operation: str,
     o: OpenAPIObject,
@@ -413,13 +413,13 @@ def matches(
 def get_first_method_internal_2(
   p: PathItem,
   n: str,
-  m: List[str],
+  m: Sequence[str],
   o: Optional[Operation],
 ) ->  Optional[Tuple[str, Operation]]:
     return (n, o) if o is not None else get_first_method_internal(m, p)
 
 def get_first_method_internal(
-  m: List[str],
+  m: Sequence[str],
   p: PathItem,
 ) -> Optional[Tuple[str, Operation]]:
     return None if len(m) == 0 else get_first_method_internal_2(p, m[0], m[1:], p[m[0]] if m[0] in p else None)
@@ -461,7 +461,7 @@ def parameter_schema(o: OpenAPIObject) -> lenses.ui.BaseUiLens[S, T, X, Y]:
     return lens.Iso(lambda a: (use_if_header(o, a), a), lambda b: b[1])[0].Prism(*_prism_o, ignore_none=True)
 
 
-def cut_path(paths: List[str], path: str) -> str:
+def cut_path(paths: Sequence[str], path: str) -> str:
     return path if len(paths) == 0 else path[len(paths[0]):] if path[:len(paths[0])] == paths[0] else cut_path(paths[1:], path)
 
 def remove_trailing_slash(s: str) -> str:
@@ -477,7 +477,7 @@ def truncate_path(
         path,
     )
 
-def matcher(req: Request, r: Dict[str, OpenAPIObject]) -> Dict[str, OpenAPIObject]:
+def matcher(req: Request, r: Mapping[str, OpenAPIObject]) -> Mapping[str, OpenAPIObject]:
     return lens.Values().modify(
         lambda oai: odl("paths").Values().modify(
             lambda path_item: reduce(lambda a, b: b(a), [
@@ -499,13 +499,13 @@ def matcher(req: Request, r: Dict[str, OpenAPIObject]) -> Dict[str, OpenAPIObjec
         })
     )({k: v for k, v in r.items() if len(match_urls(req['protocol'], req['host'], v)) > 0 })
 
-def _first_or_none(l: List[C]) -> Optional[C]:
+def _first_or_none(l: Sequence[C]) -> Optional[C]:
     return None if len(l) == 0 else l[0]
 
 def is_parameter(s: Any) -> bool:
     return s is not None and 'in' in s and 'name' in s
 
-def headers_schemas_from_operation(schema: OpenAPIObject, operation: Operation) -> List[Schema]:
+def headers_schemas_from_operation(schema: OpenAPIObject, operation: Operation) -> Sequence[Schema]:
     return odl("parameters").Each().Prism(
         lambda s: s if is_parameter(s) else get_parameter_from_ref(schema, ref_name(s)) if is_reference(s) else None,
         lambda a: a,
@@ -540,7 +540,7 @@ def header_schemas_from_response(
   schema: OpenAPIObject,
   operation: Operation,
   code: str
-) -> List[Schema]:
+) -> Sequence[Schema]:
     return make_lens_to_response_starting_from_operation(
       schema, code
     ).add_lens(odl("headers")).Items().Prism(
