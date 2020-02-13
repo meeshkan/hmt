@@ -205,7 +205,7 @@ def get_required_request_body_schemas(
         odl("schema")
     ).add_lens(schema_prism(oai)).collect()(p)
 
-def _valid_schema(to_validate: Any, schema: Any) -> bool:
+def valid_schema(to_validate: Any, schema: Any) -> bool:
     try:
         jsonschema.validate(to_validate, schema)
         return True
@@ -218,7 +218,7 @@ def keep_method_if_required_request_body_is_present(
 ) -> Callable[[PathItem], PathItem]:
     def _keep_method_if_required_request_body_is_present(p: PathItem) -> PathItem:
         return p if (req['method'].lower() not in p) or (len([s for s in get_required_request_body_schemas(req, oai, p) if
-                not _valid_schema(req['bodyAsJson'], {
+                not valid_schema(req['bodyAsJson'], {
                     # TODO: this line is different than the TS implementation
                     # because I think there is a logic bug there
                     # it should look like this line as we are not sure
@@ -262,7 +262,7 @@ def keep_method_if_required_query_or_header_parameters_are_present(
     oai: OpenAPIObject,
     p: PathItem
 ) -> PathItem:
-    return p if (req['method'].lower() not in p) or _valid_schema(
+    return p if (req['method'].lower() not in p) or valid_schema(
         req['headers'] if header else req['query'],
         _json_schema_from_required_parameters(get_required_request_query_or_header_parameters(header, req, oai, p), oai)
     ) else omit(p, req['method'].lower())
@@ -356,7 +356,7 @@ def path_parameter_match(
     return reduce(lambda q, r: q and reduce(
         lambda a, b:
           a or
-          _valid_schema(b, {
+          valid_schema(b, {
             **r,
             'definitions': make_definitions_from_schema(oas),
           }),
@@ -582,7 +582,7 @@ def fake_object(schema: Any, top_schema: Any) -> Any:
     addls = {} if 'additionalProperties' not in schema else {k:v for k,v in [(fkr.name(), random.random() if schema['additionalProperties'] == True else faker(schema['additionalProperties'], top_schema)) for x in range(random.randint(0, 50))]}
     properties = [] if 'properties' not in schema['properties'] else schema['properties'].keys()
     random.shuffle(properties)
-    properties = properties[:random.randint(0, len(properties) - 1)]
+    properties = [] if len(properties) == 0 else properties[:random.randint(0, len(properties) - 1)]
     properties = list(set(([] if 'required' not in schema else schema['required']) + properties))
     return {
         **addls,
@@ -590,8 +590,8 @@ def fake_object(schema: Any, top_schema: Any) -> Any:
     }
 
 def fake_array(schema: Any, top_schema: Any) -> Any:
-    mn = _LO if 'minItems' not in schema else schema['minItems']
-    mx = _HI if 'maxItems' not in schema else schema['maxItems']
+    mn = 0 if 'minItems' not in schema else schema['minItems']
+    mx = 100 if 'maxItems' not in schema else schema['maxItems']
     return [faker(x, top_schema) for x in schema['items']] if type(schema['items']) is type([]) else [faker(schema['items'], top_schema) for x in range(random.randint(mn, mx))]
 
 def fake_any_of(schema: Any, top_schema: Any) -> Any:
@@ -609,13 +609,17 @@ def fake_not(schema: Any, top_schema: Any) -> Any:
 
 # TODO - make this not suck
 def fake_string(schema: Any) -> str:
-    return fkr.name()
+    return random.choice(schema['enum']) if 'enum' in schema else fkr.name()
 
 # TODO: add exclusiveMinimum and exclusiveMaximum
 def fake_integer(schema: Any) -> int:
     mn = _LO if 'minimum' not in schema else schema['minimum']
     mx = _HI if 'maximum' not in schema else schema['maximum']
-    return random.randint(mn, mx)
+    return random.choice(schema['enum']) if 'enum' in schema else random.randint(mn, mx)
+
+def fake_ref(schema: Any, top_schema):
+    name = schema.split('/')[2]
+    return faker(top_schema['definitions'][name], top_schema)
 
 def fake_null(schema: Any) -> None:
     return None
@@ -623,7 +627,7 @@ def fake_null(schema: Any) -> None:
 def fake_number(schema: Any) -> float:
     mn = _LO if 'minimum' not in schema else schema['minimum']
     mx = _HI if 'maximum' not in schema else schema['maximum']
-    return (random.random() * (mx - mn)) + mn
+    return random.choice(schema['enum']) if 'enum' in schema else (random.random() * (mx - mn)) + mn
 
 def faker(schema: Any, top_schema: Any) -> Any:
     return fake_object(
@@ -638,7 +642,9 @@ def faker(schema: Any, top_schema: Any) -> Any:
         schema, top_schema
     ) if "oneOf" in schema else fake_not(
         schema, top_schema
-    ) if "not" in schema else fake_string(
+    ) if "not" in schema else fake_ref(
+        schema, top_schema
+    ) if "$ref" in schema else fake_string(
         schema
     ) if schema["type"] == "string" else fake_integer(
         schema
