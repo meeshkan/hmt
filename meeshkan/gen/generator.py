@@ -502,18 +502,6 @@ def matcher(req: Request, r: Dict[str, OpenAPIObject]) -> Dict[str, OpenAPIObjec
 def _first_or_none(l: List[C]) -> Optional[C]:
     return None if len(l) == 0 else l[0]
 
-def drill_down_to_operation(schema_record: Dict[str, OpenAPIObject]) -> Optional[Operation]:
-    return _first_or_none(
-        lens.Values().add_lens(
-            odl("paths")
-        ).Items().add_lens(
-            odl(0)
-        )[1].Iso(
-            lambda a: (get_first_method(a), a), lambda b: b[1]
-        )[0].Prism(
-            *_prism_o, ignore_none=True
-        )[1].collect()(schema_record))
-
 def is_parameter(s: Any) -> bool:
     return s is not None and 'in' in s and 'name' in s
 
@@ -579,3 +567,61 @@ def body_from_response(
     )[1].add_lens(
         odl("schema")
     ).collect()([operation]))
+
+
+########################
+#### FAKER
+########################
+
+def fake_object(schema: Any, top_schema: Any) -> Any:
+    return {}
+
+def fake_array(schema: Any, top_schema: Any) -> Any:
+    return []
+
+def fake_any_of(schema: Any, top_schema: Any) -> Any:
+    return []
+
+def fake_all_of(schema: Any, top_schema: Any) -> Any:
+    return []
+
+def fake_one_of(schema: Any, top_schema: Any) -> Any:
+    return []
+
+def fake_not(schema: Any, top_schema: Any) -> Any:
+    return []
+
+def fake_string(schema: Any) -> str:
+    return ""
+
+def fake_integer(schema: Any) -> int:
+    return 0
+
+def fake_null(schema: Any) -> None:
+    return None
+
+def fake_number(schema: Any) -> float:
+    return 0.0
+
+def faker(schema: Any, top_schema: Any) -> Any:
+    return fake_object(
+        schema, top_schema
+    ) if ("type" not in schema) or (schema["type"] == "object") else fake_array(
+        schema, top_schema
+    ) if schema["type"] == "array" else fake_any_of(
+        schema, top_schema
+    ) if "anyOf" in schema else fake_all_of(
+        schema, top_schema
+    ) if "allOf" in schema else fake_one_of(
+        schema, top_schema
+    ) if "oneOf" in schema else fake_not(
+        schema, top_schema
+    ) if "not" in schema else fake_string(
+        schema
+    ) if schema["type"] == "string" else fake_integer(
+        schema
+    ) if schema["type"] == "integer" else fake_null(
+        schema
+    ) if schema["type"] == "null" else fake_number(
+        schema
+    ) if schema["type"] == "number" else {}
