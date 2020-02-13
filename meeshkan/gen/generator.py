@@ -19,6 +19,10 @@ X = TypeVar('X')
 Y = TypeVar('Y')
 Z = TypeVar('Z')
 
+def pp(c: C) -> C:
+    print("LOOK", c)
+    return c
+
 all_methods: List[str] = [
   "get",
   "post",
@@ -33,9 +37,6 @@ all_methods: List[str] = [
 def omit(p: Dict[X, Y], a: X) -> Dict[X, Y]:
     return { k: v for k, v in p.items() if k != a}
 
-def _iso_o(focus: Union[str, int]):
-    return (lambda a: (None if focus not in a else a[focus], a), lambda b: b[1])
-
 _prism_o = (lambda a: a, lambda b: b)
 
 # TODO are these types correct??
@@ -49,7 +50,8 @@ def odl(focus: Union[str, int]) -> lenses.ui.BaseUiLens[S, T, X, Y]:
     Returns:
         lenses.ui.BaseUiLens[S, T, X, Y] -- A lens that creates the equivalent of an optional
     '''
-    return lens.Iso(*_iso_o(focus))[0].Prism(*_prism_o, ignore_none = True)
+    return lens.Items().Filter(lambda a: a[0] == focus)[1]
+    
 
 def match_urls(protocol: str, host: str, o: OpenAPIObject) -> List[str]:
     """Finds server URLs that match a given protocol and host.
@@ -107,7 +109,7 @@ def get_response_from_ref(o: OpenAPIObject, d: str) -> Optional[Schema]:
 
 internal_get_response_from_ref = internal_get_component(get_response_from_ref)
 
-#MIKE odl
+
 def schema_prism(oai: OpenAPIObject) -> lenses.ui.BaseUiLens[S, T, X, Y]:
     return lens.Prism(
         lambda s: get_schema_from_ref(oai, ref_name(s)) if is_reference(s) else s,
@@ -197,10 +199,10 @@ def get_required_request_body_schemas(
         lambda s : get_request_body_from_ref(oai, ref_name(s)) if is_reference(s) else s,
         lambda a: a,
         ignore_none=True
-    ).Iso(*_iso_o("content"))[0].Prism(
-        *_prism_o, ignore_none=True
-    ).Values().Iso(*_iso_o("schema"))[0].Prism(
-        *_prism_o, ignore_none=True
+    ).add_lens(
+        odl("content")
+    ).Values().add_lens(
+        odl("schema")
     ).add_lens(schema_prism(oai)).collect()(p)
 
 def _valid_schema(to_validate: Any, schema: Any) -> bool:
@@ -216,7 +218,7 @@ def keep_method_if_required_request_body_is_present(
 ) -> Callable[[PathItem], PathItem]:
     def _keep_method_if_required_request_body_is_present(p: PathItem) -> PathItem:
         return p if (req['method'].lower() not in p) or (len([s for s in get_required_request_body_schemas(req, oai, p) if
-                _valid_schema(req['bodyAsJson'], {
+                not _valid_schema(req['bodyAsJson'], {
                     # TODO: this line is different than the TS implementation
                     # because I think there is a logic bug there
                     # it should look like this line as we are not sure
@@ -225,7 +227,7 @@ def keep_method_if_required_request_body_is_present(
                     # otherwise, change the TS implementation in unmock-js and delete this comment.
                     **(change_ref(s) if is_reference(s) else change_refs(s)),
                     'definitions': make_definitions_from_schema(oai),
-                })]) > 0) else omit(p, req['method'].lower())
+                })]) == 0) else omit(p, req['method'].lower())
     return _keep_method_if_required_request_body_is_present
 
 def keep_method_if_required_header_parameters_are_present(
@@ -281,8 +283,8 @@ def internal_get_parameter_schemas(
         lambda i: discern_name(get_parameter_from_ref(oas, ref_name(i)), vname) if is_reference(i) else discern_name(i, vname),
         lambda a: a,
         ignore_none=True
-    ).Iso(*_iso_o("schema"))[0].Prism(
-        *_prism_o, ignore_none = True
+    ).add_lens(
+        odl("schema")
     ).collect()(path_item)
 
 
@@ -454,8 +456,6 @@ def use_if_header(
             get_schema_from_ref(o, ref_name(p['schema'])) if is_reference(p['schema']) else
                 p['schema']
     )
-
-#MIKE parameter_schema
 
 def parameter_schema(o: OpenAPIObject) -> lenses.ui.BaseUiLens[S, T, X, Y]:
     return lens.Iso(lambda a: (use_if_header(o, a), a), lambda b: b[1])[0].Prism(*_prism_o, ignore_none=True)
