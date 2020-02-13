@@ -25,10 +25,10 @@ python -m meeshkan_proxy mock
 by switching Meeshkan Proxy modes.
 ## Common command-line arguments
 Following commands are similar for both mock and record modes:
-* port TEXT           Server port
-* log_dir TEXT        API calls logs directory
-* schema_dir TEXT     Directory with OpenAPI schemas
-* help                Full help on command line arguments
+* port -          Server port
+* log_dir  -      API calls logs directory
+* schema_dir   -  Directory with OpenAPI schemas
+* help       -         Full help on command line arguments
 
 ## Mocking modes
 You may launch meeshkan mocking server in different modes providing mode argument, i.e.:
@@ -52,7 +52,7 @@ tools.meeshkan_server.server.callbacks.callback. Each callback is mapped to an e
 ```python
 from tools.meeshkan_server.server.callbacks import callback
 
-@callback('api.imgur.com', 'post', '/counter')
+@callback('meeshkan.com', 'post', '/counter')
 def counter_callback(request_body, response_body, storage):
     if 'set' in request_body:
         storage['called'] = request_body['set']
@@ -80,7 +80,7 @@ You may also provide a format to a callback decorator. The default format is 'js
 ```python
 from tools.meeshkan_server.server.callbacks import callback
 
-@callback('api.imgur.com', 'post', '/counter', format='text')
+@callback('meeshkan.com', 'post', '/counter', format='text')
 def counter_callback(request_body, response_body, storage):
     response_body = 'Response body should be a string'
     return response_body
@@ -91,7 +91,7 @@ full http_types.Response structure instead of body.
 from tools.meeshkan_server.server.callbacks import callback
 from http_types import Response
 
-@callback('api.imgur.com', 'post', '/counter', response='full')
+@callback('meeshkan.com', 'post', '/counter', response='full')
 def counter_callback(request_body, response_body, storage):
     return Response(statusCode=500, bodyAsJson={'message': 'Not ok'},
                                 headers={'x-custom-header': 'some value'})
