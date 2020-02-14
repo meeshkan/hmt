@@ -8,10 +8,11 @@ def initiate(request_body, response_body, storage):
     storage[response_body['paymentId']] = request_body
     return response_body
 
+
 @callback('sandbox.apis.op-palvelut.fi', 'post', '/v1/payments/confirm', format='json')
 def confirm(request_body, response_body, storage):
     payment_info = storage[response_body['paymentId']]
-    storage[payment_info['receiverIban']] = storage.get(payment_info['receiverIban'], 0) +payment_info['amount']
+    storage[payment_info['receiverIban']] = storage.get(payment_info['receiverIban'], 0) + payment_info['amount']
     storage[payment_info['payerIban']] = storage.get(payment_info['payerIban'], 0) - payment_info['amount']
     return response_body
 

@@ -29,6 +29,7 @@ Following commands are similar for both mock and record modes:
 * log_dir  -      API calls logs directory
 * schema_dir   -  Directory with OpenAPI schemas
 * help       -         Full help on command line arguments
+* admin_port - Admin server port
 
 ## Mocking modes
 You may launch meeshkan mocking server in different modes providing mode argument, i.e.:
@@ -96,3 +97,17 @@ def counter_callback(request_body, response_body, storage):
     return Response(statusCode=500, bodyAsJson={'message': 'Not ok'},
                                 headers={'x-custom-header': 'some value'})
 ```
+## Admin server
+The admin server works under the http://[host]:[admin_port]/admin endpoint. It allows to manage the Meeshkan server 
+in runtime using provided REST API.
+### Reset storage
+Reset state of embedded storage.
+
+* **URL**
+
+/storage
+
+* **Method:**
+  
+`DELETE` 
+
