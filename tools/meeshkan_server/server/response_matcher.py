@@ -1,3 +1,4 @@
+import copy
 import glob
 import json
 import logging
@@ -34,12 +35,17 @@ class ReplayResponseMatcher(ResponseMatcher):
 
     def get_response(self, request: Request) -> Response:
         if request['host'] in self._recordings:
-            return next((x['response'] for x in self._recordings[request['host']] if self._match(x['request'], request)),
-                        self.default)
+            host_recordings = self._recordings[request['host']]
+            suitable = [x for x in host_recordings
+                        if x['request']['method'] == request['method'] and
+                        x['request']['pathname'] == request['pathname']]
+            default = suitable[0]['response'] if len(suitable) > 0 else self.default
+            return copy.deepcopy(next((x['response'] for x in suitable if self._exact_match(x['request'], request)), default))
         else:
             return self.default
 
-    def _match(self, recording, real):
+
+    def _exact_match(self, recording, real):
         if recording['method'] != real['method']:
             return False
 

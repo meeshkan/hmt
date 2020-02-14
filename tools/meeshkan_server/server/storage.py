@@ -1,4 +1,6 @@
+import logging
 
+logger = logging.getLogger(__name__)
 
 class StorageManager:
     def __init__(self):
@@ -16,6 +18,7 @@ class StorageManager:
         self._default.clear()
         for storage in self._storages.values():
             storage.clear()
+        logger.debug('Storage cleared')
 
 
 storage_manager = StorageManager()
