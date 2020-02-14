@@ -20,8 +20,10 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
 REQUIRED = [
     'click',
     'deepdiff',
+    'lenses',
     'pyyaml',
     'jsonschema',
+    'faker',
     'typing-extensions',
     'openapi-typed>=0.1.0',
     'typeguard>=2.7.0',
