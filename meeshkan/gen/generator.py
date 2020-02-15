@@ -152,8 +152,11 @@ def change_refs(j: Schema) -> Schema:
             else { 'items': change_refs(cast(Schema, j['items'])) }),
         **({} if 'properties' not in j
             else {
-                'properties': { k: change_ref(cast(Reference, v)) if is_reference(v) else change_refs(cast(Schema, v)) for k, v in j['properties'].items() }
-            }),
+                'properties': reduce(
+                    lambda a, b: { **a, b[0]: change_ref(cast(Reference, b[1])) if is_reference(b[1]) else change_refs(cast(Schema, b[1]))},
+                    j['properties'].items(),
+                    {})
+           }),
         **(reduce(
             lambda a, b: { **a, **b },
             [{} if x not in j else { x: [change_ref(cast(Reference, y)) if is_reference(y) else change_refs(cast(Schema, y)) for y in j[x]] } for x in ['anyOf', 'allOf', 'oneOf']],
