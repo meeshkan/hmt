@@ -12,7 +12,7 @@ from tools.meeshkan_server.admin.views import StorageView
 from tools.meeshkan_server.proxy.proxy import RecordProxy
 from tools.meeshkan_server.server.callbacks import callback_manager
 from tools.meeshkan_server.server.mocking_service import MockingService
-from tools.meeshkan_server.server.response_matcher import ReplayResponseMatcher
+from tools.meeshkan_server.server.response_matcher import ReplayResponseMatcher, GeneratedResponseMatcher
 from tools.meeshkan_server.server.views import MockServerView
 from tools.meeshkan_server.utils.data_callback import RequestLoggingCallback
 
@@ -52,6 +52,21 @@ def record(port, admin_port, log_dir, schema_dir):
         server.listen(port)
         tornado.ioloop.IOLoop.instance().start()
 
+def make_mocking_app(callback_path, mode, log_dir, schema_dir):
+    app = Application([
+        (r'/.*', MockServerView)
+    ])
+    callback_manager.load(callback_path)
+
+    if mode == 'replay':
+        matcher = ReplayResponseMatcher(log_dir)
+    elif mode == 'gen':
+        matcher = GeneratedResponseMatcher(schema_dir)
+    else:
+        raise NotImplementedError('Only replay matcher is available')
+
+    app.mocking_service = MockingService(matcher)
+    return app
 
 @main.command()
 @click.option('--callback_path', default="./callbacks", help='Directory with configured callbacks')
@@ -62,17 +77,7 @@ def record(port, admin_port, log_dir, schema_dir):
 @click.option('--mode', default="replay", help='Matching mode')
 def mock(port, admin_port, log_dir, schema_dir, callback_path, mode):
     start_admin(admin_port)
-    app = Application([
-        (r'/.*', MockServerView)
-    ])
-    callback_manager.load(callback_path)
-
-    if mode == 'replay':
-        matcher = ReplayResponseMatcher(log_dir)
-    else:
-        raise NotImplementedError('Only replay matcher is available')
-
-    app.mocking_service = MockingService(matcher)
+    app = make_mocking_app(callback_path, mode, log_dir, schema_dir)
     http_server = HTTPServer(app)
     http_server.listen(port)
     logger.info('Mock server is listening on http://localhost:%s', port)

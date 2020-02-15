@@ -19,6 +19,9 @@ X = TypeVar('X')
 Y = TypeVar('Y')
 Z = TypeVar('Z')
 
+__all__ = ['matcher', 'faker', 'change_ref', 'change_refs']
+
+
 def pp(c: C) -> C:
     print("LOOK", c)
     return c

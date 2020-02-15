@@ -43,6 +43,7 @@ BUNDLE_REQUIREMENTS = [dep for _, bundle_dep in BUNDLES.items()
 DEV = BUNDLE_REQUIREMENTS + [
     'pytest',
     'pylint',
+    'pytest-tornado',
     'setuptools',
     'twine',
     'wheel',
