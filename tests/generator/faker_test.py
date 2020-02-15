@@ -23,7 +23,7 @@ def test_faker_1():
     }
   }
 }
-    res = faker(schema, schema)
+    res = faker(schema, schema, 0)
     assert valid_schema(res, schema)
 
 def test_faker_2():
@@ -48,7 +48,7 @@ def test_faker_2():
     }
   }
 }
-    res = faker(schema, schema)
+    res = faker(schema, schema, 0)
     assert valid_schema(res, schema)
 
 def test_faker_3():
@@ -72,7 +72,7 @@ def test_faker_3():
     }
   }
 }
-    res = faker(schema, schema)
+    res = faker(schema, schema, 0)
     assert valid_schema(res, schema)
 
 def test_faker_4():
@@ -110,5 +110,5 @@ def test_faker_4():
     }
   }
 }
-    res = faker(schema, schema)
+    res = faker(schema, schema, 0)
     assert valid_schema(res, schema)
