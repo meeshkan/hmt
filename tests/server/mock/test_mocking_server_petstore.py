@@ -5,7 +5,7 @@ import json
 
 @pytest.fixture
 def app():
-    return make_mocking_app('tests/server/mock/callbacks', 'gen', 'tests/server/mock/recordings', 'tests/server/mock/schemas')
+    return make_mocking_app('tests/server/mock/callbacks', 'gen', 'tests/server/mock/recordings', 'tests/server/mock/petstore_schema')
 
 @pytest.mark.gen_test
 def test_mocking_server_pets(http_client, base_url):

@@ -79,7 +79,7 @@ class GeneratedResponseMatcher(ResponseMatcher):
             logging.info('Multiple schema support not implemented yet - coming soon!')
         if len(schemas) == 0:
             logging.info('Could not find a valid schema. Schemas must have the extension .yaml or .yml.')
-        with open(os.path.join(schema_dir, schemas[0])) as schema_file:
+        with open(os.path.join(schema_dir, schemas[0]), encoding='utf8') as schema_file:
             self._schema = yaml.safe_load(schema_file.read())
 
 
@@ -124,7 +124,7 @@ class GeneratedResponseMatcher(ResponseMatcher):
             }
             return {
                 'statusCode': statusCode,
-                'body': json.dumps(faker(to_fake, to_fake)),
+                'body': json.dumps(faker(to_fake, to_fake, 0)),
                 'headers': { **headers, "Content-Type": "application/json" }
             }
         if "text/plain" in mime_types:
