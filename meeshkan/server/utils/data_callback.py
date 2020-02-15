@@ -5,7 +5,7 @@ import os
 import yaml
 from http_types import Request, Response, HttpExchange, RequestBuilder, ResponseBuilder
 
-from meeshkan.schemabuilder.builder import BASE_SCHEMA, update_openapi
+from ...schemabuilder.builder import BASE_SCHEMA, update_openapi
 
 logger = logging.getLogger(__name__)
 

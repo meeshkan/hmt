@@ -3,8 +3,8 @@ import logging
 import importlib.util
 
 from http_types import Request, Response
-from tools.meeshkan_server.server.callbacks import callback_manager
-from tools.meeshkan_server.server.response_matcher import ResponseMatcher
+from .callbacks import callback_manager
+from .response_matcher import ResponseMatcher
 
 logger = logging.getLogger(__name__)
 

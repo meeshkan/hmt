@@ -5,7 +5,7 @@ import json
 import logging
 import os
 
-from tools.meeshkan_server.server.storage import storage_manager
+from .storage import storage_manager
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +42,7 @@ class CallbackManager:
             logging.debug('Loading callbacks from %s to %s module', file, module_name)
             spec = importlib.util.spec_from_file_location(module_name, file)
             callbacks = importlib.util.module_from_spec(spec)
+            # TODO - apparently this no longer exists. replace?
             spec.loader.exec_module(callbacks)
 
         logging.info('Loaded %d callbacks', len(self._callbacks))

@@ -14,6 +14,7 @@ from .sources.kafka import KafkaProcessorConfig
 from openapi_typed import OpenAPIObject
 from yaml import safe_load
 from .meeshkan_types import *
+from .server.commands import record, mock
 
 
 LOGGER = getLogger(__name__)
@@ -138,6 +139,8 @@ def convert(input_file, out):
 
 cli.add_command(build)  # type: ignore
 cli.add_command(convert)  # type: ignore
+cli.add_command(record) # type: ignore
+cli.add_command(mock) # type: ignore
 
 if __name__ == '__main__':
     cli()

@@ -28,12 +28,15 @@ REQUIRED = [
     'openapi-typed>=0.1.0',
     'typeguard>=2.7.0',
     'genson',
-    'http-types>=0.0.5'
+    'http-types>=0.0.5',
+    # kafka
+    'faust',
+    # server
+    'tornado==5.1.1',
+    'urllib3==1.24.1'
 ]
 
 BUNDLES = {
-    'kafka': ['faust'],
-    'server': ['tornado==5.1.1', 'urllib3==1.24.1']
 }
 
 # Requirements of all bundles
@@ -55,7 +58,7 @@ DEV = BUNDLE_REQUIREMENTS + [
 
 VERSION = '0.2.5'
 
-ENTRY_POINTS = ['meeshkan = meeshkan.__main__:cli', 'meeshkan_server = tools.meeshkan_server.__main__:main']
+ENTRY_POINTS = ['meeshkan = meeshkan.__main__:cli']
 
 EXTRAS = dict(**BUNDLES, dev=DEV)
 

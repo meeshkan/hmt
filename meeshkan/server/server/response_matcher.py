@@ -6,7 +6,7 @@ import os
 import yaml
 import random
 from faker import Faker
-from meeshkan.gen.generator import matcher, faker, change_ref, change_refs
+from ...gen.generator import matcher, faker, change_ref, change_refs
 fkr = Faker()
 
 from http_types import Request, Response

@@ -19,7 +19,10 @@ Meeshkan is statically typed using the [pyright](https://github.com/microsoft/py
 
 1. [Installation](#installation)
 1. [Python API](#python-api)
-1. [Command-line interface](#command-line-interface)
+1. [Builder](#builder)
+1. [Mocking](#mocking)
+1. [Recording](#recording)
+1. [Converting](#converting)
 1. [Development](#development)
 1. [Contributing](#contributing)
 
@@ -72,15 +75,12 @@ http_exchange = http_exchanges[0]
 openapi: OpenAPIObject = meeshkan.update_openapi(openapi, http_exchange)
 ```
 
-## Command-line interface
+## Builder
 
-To list available commands, execute `meeshkan` or `meeshkan --help`.
-
-### Create OpenAPI schema from HTTP recordings
-
-Build OpenAPI schema from a single `recordings.jsonl` file:
+Using the Meeshkan CLI, you can build OpenAPI schema from a single `recordings.jsonl` file:
 
 ```bash
+$ pip install meeshkan # if not done yet
 $ meeshkan build --source file -i path/to/recordings.jsonl [-o path/to/output_directory]
 ```
 
@@ -92,7 +92,7 @@ Use dash (`-i -`) to read from standard input:
 $ meeshkan build --source file -i - < recordings.jsonl
 ```
 
-#### Reading from Kafka
+### Reading from Kafka
 
 Install `kafka` bundle: `pip install meeshkan[kafka]` and set `--source kafka`:
 
@@ -101,6 +101,61 @@ $ meeshkan build --source kafka [-o path/to/output_directory]
 ```
 
 _TODO: Configuration for Kafka_
+
+## Mocking
+
+You can use an existing OpenAPI spec, an OpenAPI spec you've built using `meeshkan build`, and recordings to create a mock server using Meeshkan.
+
+```bash
+$ pip install meeshkan # if not installed yet
+$ meeshkan mock
+```
+
+### Common command-line arguments
+
+The following commands are available in mock mode:
+
+| Argument     | Description | Default |
+| ------------ | ----------- | ------- |
+| `port`       | Server port | 8000    |
+| `admin_port` | Admin port  | 8999    |
+| `log_dir`    | The directory containing `.jsonl` files for mocking directly from recorded fixtures | `logs` |
+| `schema_dir` | The directory containing `.yml` or `.yaml` OpenAPI specs used for mocking, including ones built using `meeshkan build` | `__unmock__` |
+| `mode`       | The recording mode (see below) | `replay` |
+
+### Mocking modes
+You may launch meeshkan mocking server in different modes providing mode argument, i.e.:
+```bash
+meeshkan mock --mode replay
+```
+Supported modes are:
+* replay - replay recorded scenarios. If a request doesn't match any recorded data, a mock will return an error message/
+* gen - generate random data according to a schema on each request. It is suitable to test some corner cases and validate
+clients on accordance with OpenAPI schema
+* mixed - mixed mode. Return recorded data when possible. Otherwise generate random data.
+
+## Recording
+
+In addition to the builder, Meeshkan provides a recorder that can capture API traffic using a proxy and, like the builder, automatically assembles it into an OpenAPI schema in addition to storing the raw recordings.
+
+```bash
+$ pip install meeshkan # if not installed yet
+$ meeshkan record
+```
+
+This starts Meeshkan as a proxy on the default port of `8000`.  For example, with curl, you can use Meeshkan as a proxy like so.
+
+```bash
+$ curl -u http://localhost:8000 http://api.example.com
+```
+
+Now you should have the `logs` folder with jsonl files and the `__unmock__` folder with ready openapi schemes. 
+
+For more advanced information about recording, including custom middleware, see the [server documentation](./meeshkan/server/SERVER.md).
+
+## Converting
+
+Meeshkan provides utilities to convert from certain popular recording formats to the `.jsonl` format.
 
 ### Converting from pcap
 
