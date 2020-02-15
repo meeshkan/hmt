@@ -51,7 +51,7 @@ class MockServerView(RequestHandler):
                                   query=query,
                                   body=self.request.body,
                                   bodyAsJson=self._extract_json_safely(self.request.body),
-                                  headers=self.request.headers))
+                                  headers={k:v for k,v in self.request.headers.get_all()}))
         RequestBuilder.validate(request)
 
 

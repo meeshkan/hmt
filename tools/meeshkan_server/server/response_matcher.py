@@ -98,7 +98,7 @@ class GeneratedResponseMatcher(ResponseMatcher):
             raise match_error('Could not find a valid path', request)
         if request['method'] not in [x for x in match['_']['paths'].values()][0].keys():
             raise match_error('Could not find the appropriate method', request)
-        method = [x for x in match['_']['paths'].values()][0][request.method]
+        method = [x for x in match['_']['paths'].values()][0][request['method']]
         if 'responses' not in method:
             raise match_error('Could not find any responses', request)
         potential_responses = [r for r in method['responses'].items()]
@@ -109,7 +109,7 @@ class GeneratedResponseMatcher(ResponseMatcher):
         headers = {}
         if 'headers' in response:
             logging.info('Meeshkan cannot generate response headers yet. Coming soon!')
-        statusCode = int(response[0])
+        statusCode = int(response[0] if response[0] != 'default' else 400)
         if ('content' not in response[1]) or len(response[1]['content'].items()) == 0:
             return { 'statusCode': statusCode, 'body': "", 'headers': headers}
         mime_types = response[1]['content'].keys()
@@ -120,15 +120,19 @@ class GeneratedResponseMatcher(ResponseMatcher):
             schema = content['schema']
             to_fake = {
                 **(change_ref(schema) if '$ref' in schema else change_refs(schema)),
-                'definitions': { k: change_ref(v) if '$ref' in v else change_refs(v) for k,v in (match['_']['components']['schemas'] if '_' in match and 'components' in match['_'] and 'schemas' in match['_']['components'] else {})}
+                'definitions': { k: change_ref(v) if '$ref' in v else change_refs(v) for k,v in (match['_']['components']['schemas'].items() if '_' in match and 'components' in match['_'] and 'schemas' in match['_']['components'] else [])}
             }
             return {
                 'statusCode': statusCode,
-                'body': faker(to_fake, to_fake),
-                'headers': headers
+                'body': json.dumps(faker(to_fake, to_fake)),
+                'headers': { **headers, "Content-Type": "application/json" }
             }
         if "text/plain" in mime_types:
-            return { 'statusCode': statusCode, 'body': fkr.sentence(), 'headers': headers}
+            return {
+                'statusCode': statusCode,
+                'body': fkr.sentence(),
+                'headers': { **headers, "Content-Type": "text/plain" }
+            }
         raise match_error('Could not produce content for these mime types %s' % str(mime_types), request)
 
 

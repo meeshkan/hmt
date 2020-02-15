@@ -22,9 +22,9 @@ Z = TypeVar('Z')
 __all__ = ['matcher', 'faker', 'change_ref', 'change_refs']
 
 
-def pp(c: C) -> C:
-    print("LOOK", c)
-    return c
+#def pp(s, c: C) -> C:
+#    print(s, c)
+#    return c
 
 all_methods: Sequence[str] = [
   "get",
@@ -225,7 +225,8 @@ def valid_schema(to_validate: Any, schema: Any) -> bool:
     try:
         jsonschema.validate(to_validate, schema)
         return True
-    except:
+    except Exception as e:
+        print(e)
         return False
 
 def keep_method_if_required_request_body_is_present(
@@ -597,7 +598,7 @@ _HI = 99999999
 
 def fake_object(schema: Any, top_schema: Any) -> Any:
     addls = {} if 'additionalProperties' not in schema else {k:v for k,v in [(fkr.name(), random.random() if schema['additionalProperties'] == True else faker(schema['additionalProperties'], top_schema)) for x in range(random.randint(0, 50))]}
-    properties = [] if 'properties' not in schema['properties'] else schema['properties'].keys()
+    properties = [] if 'properties' not in schema else [x for x in schema['properties'].keys()]
     random.shuffle(properties)
     properties = [] if len(properties) == 0 else properties[:random.randint(0, len(properties) - 1)]
     properties = list(set(([] if 'required' not in schema else schema['required']) + properties))
@@ -635,7 +636,7 @@ def fake_integer(schema: Any) -> int:
     return random.choice(schema['enum']) if 'enum' in schema else random.randint(mn, mx)
 
 def fake_ref(schema: Any, top_schema):
-    name = schema.split('/')[2]
+    name = schema['$ref'].split('/')[2]
     return faker(top_schema['definitions'][name], top_schema)
 
 def fake_null(schema: Any) -> None:
@@ -647,11 +648,9 @@ def fake_number(schema: Any) -> float:
     return random.choice(schema['enum']) if 'enum' in schema else (random.random() * (mx - mn)) + mn
 
 def faker(schema: Any, top_schema: Any) -> Any:
-    return fake_object(
+    return fake_array(
         schema, top_schema
-    ) if ("type" not in schema) or (schema["type"] == "object") else fake_array(
-        schema, top_schema
-    ) if schema["type"] == "array" else fake_any_of(
+    ) if ('type' in schema) and (schema["type"] == "array") else fake_any_of(
         schema, top_schema
     ) if "anyOf" in schema else fake_all_of(
         schema, top_schema
@@ -661,7 +660,9 @@ def faker(schema: Any, top_schema: Any) -> Any:
         schema, top_schema
     ) if "not" in schema else fake_ref(
         schema, top_schema
-    ) if "$ref" in schema else fake_string(
+    ) if "$ref" in schema else fake_object(
+        schema, top_schema
+    ) if ("type" not in schema) or (schema["type"] == "object") else fake_string(
         schema
     ) if schema["type"] == "string" else fake_integer(
         schema
