@@ -12,7 +12,7 @@ from tools.meeshkan_server.admin.views import StorageView
 from tools.meeshkan_server.proxy.proxy import RecordProxy
 from tools.meeshkan_server.server.callbacks import callback_manager
 from tools.meeshkan_server.server.mocking_service import MockingService
-from tools.meeshkan_server.server.response_matcher import ReplayResponseMatcher, GeneratedResponseMatcher
+from tools.meeshkan_server.server.response_matcher import MixedResponseMatcher, ReplayResponseMatcher, GeneratedResponseMatcher
 from tools.meeshkan_server.server.views import MockServerView
 from tools.meeshkan_server.utils.data_callback import RequestLoggingCallback
 
@@ -62,6 +62,8 @@ def make_mocking_app(callback_path, mode, log_dir, schema_dir):
         matcher = ReplayResponseMatcher(log_dir)
     elif mode == 'gen':
         matcher = GeneratedResponseMatcher(schema_dir)
+    elif mode == 'mixed':
+        matcher = MixedResponseMatcher(log_dir, schema_dir)
     else:
         raise NotImplementedError('Only replay matcher is available')
 
