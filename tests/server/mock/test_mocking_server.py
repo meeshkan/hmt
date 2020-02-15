@@ -18,7 +18,7 @@ def test_mocking_server_pets(http_client, base_url):
 
 @pytest.mark.gen_test
 def test_mocking_server_pet(http_client, base_url):
-    response = yield http_client.fetch(base_url+'/pets/foo')
+    response = yield http_client.fetch(base_url+'/pets/42')
     assert response.code == 200
     rb = json.loads(response.body)
     assert type(rb) == type({})
