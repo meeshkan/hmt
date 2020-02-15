@@ -1,8 +1,8 @@
 import logging
 
 from http_types import Request, Response
-from tools.meeshkan_server.proxy.channel import MockChannel, Channel
-from tools.meeshkan_server.proxy.proxy_callback import ProxyCallback
+from .channel import MockChannel, Channel
+from .proxy_callback import ProxyCallback
 
 logger = logging.getLogger(__name__)
 

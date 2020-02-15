@@ -1,1 +1,1 @@
-from .__main__ import make_mocking_app
+from .commands import make_mocking_app
