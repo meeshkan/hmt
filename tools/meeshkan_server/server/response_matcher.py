@@ -17,9 +17,8 @@ class ResponseMatcher:
     def get_response(self, requst: Request) -> Response:
         raise NotImplementedError()
 
-    @property
-    def default(self):
-        json_resp = {'message': 'Nothing matches your request'}
+    def default_response(self, msg):
+        json_resp = {'message': msg}
         return Response(statusCode=500, body=json.dumps(json_resp), bodyAsJson=json_resp,
                         headers={})
 
@@ -44,10 +43,10 @@ class ReplayResponseMatcher(ResponseMatcher):
             suitable = [x for x in host_recordings
                         if x['request']['method'] == request['method'] and
                         x['request']['pathname'] == request['pathname']]
-            default = suitable[0]['response'] if len(suitable) > 0 else self.default
+            default = suitable[0]['response'] if len(suitable) > 0 else self.default_response('Nothing matches your request')
             return copy.deepcopy(next((x['response'] for x in suitable if self._exact_match(x['request'], request)), default))
         else:
-            return self.default
+            return self.default_response('Nothing matches your request')
 
 
     def _exact_match(self, recording, real):
@@ -64,12 +63,6 @@ class ReplayResponseMatcher(ResponseMatcher):
             return False
 
         return True
-
-class MatchError(ValueError): pass
-
-def match_error(msg: str, request: Request):
-    return MatchError('%s for path=%s, method=%s' % (msg, request['pathname'], request['method']))
-
 class GeneratedResponseMatcher(ResponseMatcher):
     def __init__(self, schema_dir):
         if not os.path.exists(schema_dir):
@@ -82,6 +75,9 @@ class GeneratedResponseMatcher(ResponseMatcher):
         with open(os.path.join(schema_dir, schemas[0]), encoding='utf8') as schema_file:
             self._schema = yaml.safe_load(schema_file.read())
 
+    def match_error(self, msg: str, request: Request):
+        self.default_response('%s for path=%s, method=%s' % (msg, request['pathname'], request['method']))
+
 
     def get_response(self, request: Request) -> Response:
         # mutate schema to include current hostname in servers
@@ -91,20 +87,20 @@ class GeneratedResponseMatcher(ResponseMatcher):
         self._schema['servers'].append({'url': '%s://%s' % (request['protocol'], request['host'])})
         match = matcher(request, {'_': self._schema })
         if '_' not in match:
-            raise match_error('Could not find a valid OpenAPI schema', request)
+            return self.match_error('Could not find a valid OpenAPI schema', request)
         if 'paths' not in match['_']:
-            raise match_error('Could not find a valid path', request)
+            return self.match_error('Could not find a valid path', request)
         if len(match['_']['paths'].items()) == 0:
-            raise match_error('Could not find a valid path', request)
+            return self.match_error('Could not find a valid path', request)
         if request['method'] not in [x for x in match['_']['paths'].values()][0].keys():
-            raise match_error('Could not find the appropriate method', request)
+            return self.match_error('Could not find the appropriate method', request)
         method = [x for x in match['_']['paths'].values()][0][request['method']]
         if 'responses' not in method:
-            raise match_error('Could not find any responses', request)
+            return self.match_error('Could not find any responses', request)
         potential_responses = [r for r in method['responses'].items()]
         random.shuffle(potential_responses)
         if len(potential_responses) == 0:
-            raise match_error('Could not find any responses', request)
+            return self.match_error('Could not find any responses', request)
         response = potential_responses[0]
         headers = {}
         if 'headers' in response:
@@ -116,7 +112,7 @@ class GeneratedResponseMatcher(ResponseMatcher):
         if "application/json" in mime_types:
             content = response[1]['content']['application/json']
             if 'schema' not in content:
-                raise match_error('Could not find schema', request)
+                return self.match_error('Could not find schema', request)
             schema = content['schema']
             to_fake = {
                 **(change_ref(schema) if '$ref' in schema else change_refs(schema)),
@@ -133,13 +129,16 @@ class GeneratedResponseMatcher(ResponseMatcher):
                 'body': fkr.sentence(),
                 'headers': { **headers, "Content-Type": "text/plain" }
             }
-        raise match_error('Could not produce content for these mime types %s' % str(mime_types), request)
+        return self.match_error('Could not produce content for these mime types %s' % str(mime_types), request)
 
 
 class MixedResponseMatcher(ResponseMatcher):
     def __init__(self, logs_dir, schema_dir):
         self._replay_matcher = ReplayResponseMatcher(logs_dir)
-        self._generated_match = GeneratedResponseMatcher(schema_dir)
+        self._generated_matcher = GeneratedResponseMatcher(schema_dir)
 
-    def get_response(self, requst: Request) -> Response:
-        pass
+    def get_response(self, request: Request) -> Response:
+        replay = self._replay_matcher.get_response(request)
+        if replay.statusCode == 500:
+            return self._generated_matcher.get_response(request)
+        return replay
