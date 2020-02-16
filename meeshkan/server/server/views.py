@@ -42,8 +42,16 @@ class MockServerView(RequestHandler):
         query = parse.parse_qs(self.request.query)
 
         fullpath = "{}?{}".format(self.request.path, self.request.query) if query else self.request.path
-        method = cast(HttpMethod, self.request.method.lower())
-        request = Request(method=method,
+                # ignoring type due to this error
+        '''
+          46:34 - error: Argument of type 'str' cannot be assigned to parameter 'method' of type 'Literal['connect', 'head', 'trace', 'options', 'delete', 'patch', 'post', 'put', 'get']'
+          'str' cannot be assigned to 'Literal['connect']'
+          'str' cannot be assigned to 'Literal['head']'
+          'str' cannot be assigned to 'Literal['trace']'
+          'str' cannot be assigned to 'Literal['options']'
+          'str' cannot be assigned to 'Literal['delete']'
+        '''
+        request = Request(method=cast(HttpMethod, self.request.method.lower()), # type: ignore
                                   host=self.request.host,
                                   path=fullpath,
                                   pathname=self.request.path,

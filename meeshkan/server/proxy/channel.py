@@ -142,8 +142,16 @@ class Channel:
         body = '\r\n'.join(body)
 
         data = '\r\n'.join(req_lines).encode('utf-8')
-        method: HttpMethod = typing.cast(HttpMethod, method.lower())
-        self._request = Request(method=method,
+        # ignoring type due to this error
+        '''
+          46:34 - error: Argument of type 'str' cannot be assigned to parameter 'method' of type 'Literal['connect', 'head', 'trace', 'options', 'delete', 'patch', 'post', 'put', 'get']'
+          'str' cannot be assigned to 'Literal['connect']'
+          'str' cannot be assigned to 'Literal['head']'
+          'str' cannot be assigned to 'Literal['trace']'
+          'str' cannot be assigned to 'Literal['options']'
+          'str' cannot be assigned to 'Literal['delete']'
+        '''
+        self._request = Request(method=typing.cast(HttpMethod, method.lower()), # type: ignore
                                 host=host,
                                 path=fullpath,
                                 pathname=path,
