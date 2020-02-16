@@ -41,7 +41,7 @@ class ReplayResponseMatcher(ResponseMatcher):
                     if host not in self._recordings:
                         self._recordings[host] = []
                     self._recordings[host].append(l)
-
+        for host in self._recordings.keys():
             logger.debug('Loaded %d recordings for %s', len(self._recordings[host]), host)
 
     def get_response(self, request: Request) -> Response:
