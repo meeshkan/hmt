@@ -142,8 +142,8 @@ class Channel:
         body = '\r\n'.join(body)
 
         data = '\r\n'.join(req_lines).encode('utf-8')
-
-        self._request = Request(method=typing.cast(HttpMethod, method.lower()),
+        method: HttpMethod = typing.cast(HttpMethod, method.lower())
+        self._request = Request(method=method,
                                 host=host,
                                 path=fullpath,
                                 pathname=path,

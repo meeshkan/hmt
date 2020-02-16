@@ -42,8 +42,8 @@ class MockServerView(RequestHandler):
         query = parse.parse_qs(self.request.query)
 
         fullpath = "{}?{}".format(self.request.path, self.request.query) if query else self.request.path
-
-        request = Request(method=cast(HttpMethod, self.request.method.lower()),
+        method = cast(HttpMethod, self.request.method.lower())
+        request = Request(method=method,
                                   host=self.request.host,
                                   path=fullpath,
                                   pathname=self.request.path,
