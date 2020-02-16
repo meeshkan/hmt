@@ -6,7 +6,7 @@ import json
 
 @pytest.fixture
 def app():
-    return make_mocking_app('tests/server/mock/callbacks/opbank/callbacks', 'replay', '', '')
+    return make_mocking_app('tests/server/mock/callbacks/opbank/callbacks', 'replay', 'tests/server/mock/callbacks/opbank/recordings', '')
 
 ACCOUNTS_HEADERS = {
     'Host': 'sandbox.apis.op-palvelut.fi',
@@ -63,10 +63,6 @@ def confirm_payment(payment_id, http_client: AsyncHTTPClient, base_url: str):
     return  json.loads(response)
 '''
 
-# skipping for now, as there are some hardcoded values
-# for account balances that suggest that maybe there is
-# a fixture that we are missing here
-@pytest.mark.skip()
 @pytest.mark.gen_test
 def test_opbank(http_client: AsyncHTTPClient, base_url: str):
     # eventually, we will want to test the line below
@@ -128,7 +124,7 @@ def test_opbank(http_client: AsyncHTTPClient, base_url: str):
         'paymentId': payment_id
     }
     url = base_url + '/v1/payments/confirm'
-    req = HTTPRequest(url, headers=PAYMENTS_HEADERS, body=json.dumps(body))
+    req = HTTPRequest(url, method="POST", headers=PAYMENTS_HEADERS, body=json.dumps(body))
     yield http_client.fetch(req)
 
     ### get accounts

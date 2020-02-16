@@ -34,18 +34,24 @@ class ReplayResponseMatcher(ResponseMatcher):
 
         self._recordings = dict()
         for file in glob.glob(os.path.join(logs_dir, '*.jsonl')):
-            host = os.path.splitext(os.path.basename(file))[0]
             with open(file) as f:
-                self._recordings[host] = [json.loads(line) for line in f.readlines()]
+                for line in f.readlines():
+                    l = json.loads(line)
+                    host = l['request']['host']
+                    if host not in self._recordings:
+                        self._recordings[host] = []
+                    self._recordings[host].append(l)
 
             logger.debug('Loaded %d recordings for %s', len(self._recordings[host]), host)
 
     def get_response(self, request: Request) -> Response:
+        print("HOST", request["host"], self._recordings.keys())
         if request['host'] in self._recordings:
             host_recordings = self._recordings[request['host']]
             suitable = [x for x in host_recordings
-                        if x['request']['method'] == request['method'] and
+                        if x['request']['method'].lower() == request['method'].lower() and
                         x['request']['pathname'] == request['pathname']]
+            print("SUITABLE", suitable)
             default = suitable[0]['response'] if len(suitable) > 0 else self.default_response('Nothing matches your request')
             return copy.deepcopy(next((x['response'] for x in suitable if self._exact_match(x['request'], request)), default))
         else:
@@ -59,11 +65,20 @@ class ReplayResponseMatcher(ResponseMatcher):
         if recording['pathname'] != real['pathname']:
             return False
 
-        if recording['query'] != real['query']:
-            return False
+        if 'query' in recording:
+            if 'query' in real:
+                if recording['query'] != real['query']:
+                    return False
+            else:
+                return False
 
-        if recording['bodyAsJson'] != real['bodyAsJson']:
-            return False
+        if 'bodyAsJson' in recording:
+            if 'bodyAsJson' in real:
+                if recording['bodyAsJson'] != real['bodyAsJson']:
+                    return False
+            else:
+                return False
+
 
         return True
 class GeneratedResponseMatcher(ResponseMatcher):
