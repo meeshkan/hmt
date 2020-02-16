@@ -42,8 +42,11 @@ def record(port, admin_port, log_dir, schema_dir):
         server.listen(port)
         tornado.ioloop.IOLoop.instance().start()
 
+class MeeshkanApplication(Application):
+    mocking_service: MockingService
+
 def make_mocking_app(callback_path, mode, log_dir, schema_dir):
-    app = Application([
+    app = MeeshkanApplication([
         (r'/.*', MockServerView)
     ])
     callback_manager.load(callback_path)

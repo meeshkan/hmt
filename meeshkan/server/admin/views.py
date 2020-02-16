@@ -6,8 +6,7 @@ from urllib.parse import urlencode
 
 from http_types import RequestBuilder, Request
 
-from tools.meeshkan_server.server.storage import storage_manager
-from tools.meeshkan_server.utils.http_utils import split_path
+from ..server.storage import storage_manager
 from tornado.web import RequestHandler
 
 logger = logging.getLogger(__name__)

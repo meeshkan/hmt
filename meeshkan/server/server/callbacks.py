@@ -37,13 +37,16 @@ class CallbackManager:
         if not os.path.exists(path):
             logger.debug("Callback configuration path doesn't exist %s", path)
 
-        for file in glob.glob(os.path.join(path, '*.py')):
-            module_name = 'callbacks.{}'.format(os.path.splitext(os.path.basename(file))[0])
-            logging.debug('Loading callbacks from %s to %s module', file, module_name)
-            spec = importlib.util.spec_from_file_location(module_name, file)
+        for f in glob.glob(os.path.join(path, '*.py')):
+            module_name = 'callbacks.{}'.format(os.path.splitext(os.path.basename(f))[0])
+            logging.debug('Loading callbacks from %s to %s module', f, module_name)
+            # from https://stackoverflow.com/questions/19009932/import-arbitrary-python-source-file-python-3-3
+            spec = importlib.util.spec_from_file_location(module_name, f)
             callbacks = importlib.util.module_from_spec(spec)
-            # TODO - apparently this no longer exists. replace?
-            spec.loader.exec_module(callbacks)
+            # even though this is an accepted response, the line below
+            # triggers a typing error. ignore types for now, but should
+            # investigate why the type does not work
+            spec.loader.exec_module(callbacks) # type: ignore
 
         logging.info('Loaded %d callbacks', len(self._callbacks))
 

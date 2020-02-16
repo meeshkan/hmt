@@ -9,6 +9,7 @@ from .response_matcher import ResponseMatcher
 logger = logging.getLogger(__name__)
 
 class MockingService:
+    _response_matcher: ResponseMatcher
     def __init__(self, response_matcher: ResponseMatcher):
         self._response_matcher = response_matcher
 

@@ -6,7 +6,10 @@ import os
 import yaml
 import random
 from faker import Faker
+from typing import cast, Mapping, Union, Sequence
+from openapi_typed import OpenAPIObject, Reference, Schema
 from ...gen.generator import matcher, faker, change_ref, change_refs
+from http_types import Response, HttpMethod
 fkr = Faker()
 
 from http_types import Request, Response
@@ -64,19 +67,23 @@ class ReplayResponseMatcher(ResponseMatcher):
 
         return True
 class GeneratedResponseMatcher(ResponseMatcher):
+    _schema: OpenAPIObject
     def __init__(self, schema_dir):
+        schemas = []
         if not os.path.exists(schema_dir):
             logging.info('OpenAPI schema directory not found %s', schema_dir)
-        schemas = [s for s in os.listdir(schema_dir) if s.endswith('yml') or s.endswith('yaml')]
+        else:
+            schemas = [s for s in os.listdir(schema_dir) if s.endswith('yml') or s.endswith('yaml')]
         if len(schemas) > 1:
             logging.info('Multiple schema support not implemented yet - coming soon!')
         if len(schemas) == 0:
             logging.info('Could not find a valid schema. Schemas must have the extension .yaml or .yml.')
         with open(os.path.join(schema_dir, schemas[0]), encoding='utf8') as schema_file:
-            self._schema = yaml.safe_load(schema_file.read())
+            # TODO: validate schema?
+            self._schema = cast(OpenAPIObject, yaml.safe_load(schema_file.read()))
 
-    def match_error(self, msg: str, request: Request):
-        self.default_response('%s for path=%s, method=%s' % (msg, request['pathname'], request['method']))
+    def match_error(self, msg: str, request: Request) -> Response:
+        return self.default_response('%s for path=%s, method=%s' % (msg, request['pathname'], request['method']))
 
 
     def get_response(self, request: Request) -> Response:
@@ -84,7 +91,10 @@ class GeneratedResponseMatcher(ResponseMatcher):
         # this is a hack - should be more versatile than this in future
         if 'servers' not in self._schema:
             self._schema['servers'] = []
-        self._schema['servers'].append({'url': '%s://%s' % (request['protocol'], request['host'])})
+        self._schema['servers'] = [
+            *self._schema['servers'],
+            {'url': '%s://%s' % (request['protocol'], request['host'])}
+        ]
         match = matcher(request, {'_': self._schema })
         if '_' not in match:
             return self.match_error('Could not find a valid OpenAPI schema', request)
@@ -94,7 +104,7 @@ class GeneratedResponseMatcher(ResponseMatcher):
             return self.match_error('Could not find a valid path', request)
         if request['method'] not in [x for x in match['_']['paths'].values()][0].keys():
             return self.match_error('Could not find the appropriate method', request)
-        method = [x for x in match['_']['paths'].values()][0][request['method']]
+        method = [x for x in match['_']['paths'].values()][0][cast(HttpMethod, request['method'])]
         if 'responses' not in method:
             return self.match_error('Could not find any responses', request)
         potential_responses = [r for r in method['responses'].items()]
@@ -107,7 +117,7 @@ class GeneratedResponseMatcher(ResponseMatcher):
             logging.info('Meeshkan cannot generate response headers yet. Coming soon!')
         statusCode = int(response[0] if response[0] != 'default' else 400)
         if ('content' not in response[1]) or len(response[1]['content'].items()) == 0:
-            return { 'statusCode': statusCode, 'body': "", 'headers': headers}
+            return Response(statusCode=statusCode, body="", headers=headers)
         mime_types = response[1]['content'].keys()
         if "application/json" in mime_types:
             content = response[1]['content']['application/json']
@@ -116,19 +126,21 @@ class GeneratedResponseMatcher(ResponseMatcher):
             schema = content['schema']
             to_fake = {
                 **(change_ref(schema) if '$ref' in schema else change_refs(schema)),
-                'definitions': { k: change_ref(v) if '$ref' in v else change_refs(v) for k,v in (match['_']['components']['schemas'].items() if '_' in match and 'components' in match['_'] and 'schemas' in match['_']['components'] else [])}
+                'definitions': { k: change_ref(cast(Reference, v)) if '$ref' in v else change_refs(cast(Schema, v)) for k,v in (match['_']['components']['schemas'].items() if '_' in match and 'components' in match['_'] and 'schemas' in match['_']['components'] else [])}
             }
-            return {
-                'statusCode': statusCode,
-                'body': json.dumps(faker(to_fake, to_fake, 0)),
-                'headers': { **headers, "Content-Type": "application/json" }
-            }
+            return Response(
+                statusCode=statusCode,
+                body=json.dumps(faker(to_fake, to_fake, 0)),
+                # TODO: can this be accomplished without a cast?
+                headers=cast(Mapping[str, Union[str, Sequence[str]]], { **headers, "Content-Type": "application/json" })
+            )
         if "text/plain" in mime_types:
-            return {
-                'statusCode': statusCode,
-                'body': fkr.sentence(),
-                'headers': { **headers, "Content-Type": "text/plain" }
-            }
+            return Response(
+                statusCode=statusCode,
+                body=fkr.sentence(),
+                # TODO: can this be accomplished without a cast?
+                headers=cast(Mapping[str, Union[str, Sequence[str]]], { **headers, "Content-Type": "text/plain" })
+            )
         return self.match_error('Could not produce content for these mime types %s' % str(mime_types), request)
 
 
@@ -139,6 +151,6 @@ class MixedResponseMatcher(ResponseMatcher):
 
     def get_response(self, request: Request) -> Response:
         replay = self._replay_matcher.get_response(request)
-        if replay.statusCode == 500:
+        if replay['statusCode'] == 500:
             return self._generated_matcher.get_response(request)
         return replay

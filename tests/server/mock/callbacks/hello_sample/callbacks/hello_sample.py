@@ -1,4 +1,4 @@
-from tools.meeshkan_server.server.callbacks import callback
+from meeshkan.server.server.callbacks import callback
 
 
 @callback('api.imgur.com', 'get', '/hello', format='plain')

@@ -2,6 +2,7 @@ import os
 from http.client import HTTPResponse
 from http.server import BaseHTTPRequestHandler
 from io import BytesIO
+from socket import socket
 
 import urllib3
 
@@ -14,7 +15,7 @@ def split_path(path):
     return splits[::-1]
 
 
-class BytesIOSocket:
+class BytesIOSocket(socket):
     def __init__(self, content):
         self.handle = BytesIO(content)
 
@@ -22,7 +23,7 @@ class BytesIOSocket:
         return self.handle
 
 
-def response_from_bytes(data) -> HTTPResponse:
+def response_from_bytes(data) -> urllib3.HTTPResponse:
     sock = BytesIOSocket(data)
 
     response = HTTPResponse(sock)

@@ -2,9 +2,9 @@ import json
 import logging
 import os
 from urllib import parse
-from urllib.parse import urlencode
+from typing import cast
 
-from http_types import RequestBuilder, Request
+from http_types import RequestBuilder, Request, HttpMethod
 # from ..utils.http_utils import split_path
 from tornado.web import RequestHandler
 
@@ -43,7 +43,7 @@ class MockServerView(RequestHandler):
 
         fullpath = "{}?{}".format(self.request.path, self.request.query) if query else self.request.path
 
-        request = Request(Request(method=self.request.method.lower(),
+        request = Request(method=cast(HttpMethod, self.request.method.lower()),
                                   host=self.request.host,
                                   path=fullpath,
                                   pathname=self.request.path,
@@ -51,7 +51,7 @@ class MockServerView(RequestHandler):
                                   query=query,
                                   body=self.request.body,
                                   bodyAsJson=self._extract_json_safely(self.request.body),
-                                  headers={k:v for k,v in self.request.headers.get_all()}))
+                                  headers={k:v for k,v in self.request.headers.get_all()})
         RequestBuilder.validate(request)
 
 

@@ -2,6 +2,7 @@ import json
 import logging
 import os
 
+from typing import cast
 import yaml
 from http_types import Request, Response, HttpExchange, RequestBuilder, ResponseBuilder
 
@@ -16,6 +17,8 @@ class DataCallback:
 
 
 class RequestLoggingCallback():
+    _log_dir: str
+    _schema_dir: str
     def __init__(self, recording=False, log_dir=None, schema_dir=None, append=True):
         self._recording = recording
         self._append = append
@@ -47,7 +50,7 @@ class RequestLoggingCallback():
         self._logs[host].write(json.dumps(reqres))
         self._logs[host].write('\n')
 
-        schema_dir = os.path.join(self._schema_dir, host)
+        schema_dir = os.path.join(self._schema_dir, cast(str, host))
         if not os.path.exists(schema_dir):
             os.makedirs(schema_dir)
 

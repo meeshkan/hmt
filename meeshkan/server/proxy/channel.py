@@ -7,7 +7,7 @@ import typing
 from enum import Enum
 from urllib import parse
 from urllib.parse import urlsplit
-from http_types import Request, Response
+from http_types import Request, Response, HttpMethod
 from .proxy_callback import ProxyCallback
 from ..utils.http_utils import split_path, response_from_bytes
 from tornado.iostream import IOStream, SSLIOStream, StreamClosedError
@@ -121,7 +121,9 @@ class Channel:
         req_lines[0] = ' '.join((method, fullpath, protocol))
 
         headers = {}
+        cur_id: int = 0
         for line_id, line in enumerate(req_lines[1:]):
+            cur_id = line_id
             if not line:
                 break
             else:
@@ -132,16 +134,16 @@ class Channel:
                 headers[header] = value
 
         body = []
-        for body_line in range(line_id + 2, len(req_lines)):
+        # TODO: @Nikolay, is cur_id correct?
+        for body_line in range(cur_id + 2, len(req_lines)):
             if req_lines[body_line]:
                 body.append(req_lines[body_line])
 
         body = '\r\n'.join(body)
 
-        data = '\r\n'.join(req_lines)
-        data = data.encode('utf-8')
+        data = '\r\n'.join(req_lines).encode('utf-8')
 
-        self._request = Request(method=method.lower(),
+        self._request = Request(method=typing.cast(HttpMethod, method.lower()),
                                 host=host,
                                 path=fullpath,
                                 pathname=path,
@@ -178,7 +180,8 @@ class Channel:
 
                 resp = b''.join(self._response)
                 resp = response_from_bytes(resp)
-                body = resp.data.decode('utf-8')
+                # TODO: is this correct?
+                body = resp.read().decode('utf-8')
 
                 resp = Response(statusCode=resp.status, body=body, bodyAsJson=json.loads(body),
                                 headers=dict(resp.getheaders()))
@@ -227,14 +230,14 @@ class Channel:
         if self._client_stream.state == ConnectionState.CLOSED:
             self.remove_channel()
         else:
-            self._client_stream.write(None)
+            self._client_stream.write(b'')
 
     def on_client_close(self):
         self._client_stream.close()
         if self._server_stream is None or self._server_stream.state == ConnectionState.CLOSED:
             self.remove_channel()
         else:
-            self._server_stream.write(None)
+            self._server_stream.write(b'')
 
     @property
     def server_state(self):

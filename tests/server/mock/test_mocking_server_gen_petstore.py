@@ -1,4 +1,4 @@
-from tools.meeshkan_server import make_mocking_app
+from meeshkan.server import make_mocking_app
 
 import pytest
 import json
