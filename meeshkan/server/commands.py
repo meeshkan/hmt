@@ -13,7 +13,7 @@ from .admin.views import StorageView
 from .proxy.proxy import RecordProxy
 from .server.callbacks import callback_manager
 from .server.mocking_service import MockingService
-from .server.response_matcher import MixedResponseMatcher, ReplayResponseMatcher, GeneratedResponseMatcher
+from .server.response_matcher import ResponseMatcher
 from .server.views import MockServerView
 from .utils.data_callback import RequestLoggingCallback
 
@@ -48,20 +48,13 @@ class MeeshkanApplication(Application):
     mocking_service: MockingService
     router: Routing
 
-def make_mocking_app(callback_path, mode, log_dir, schema_dir, path_routing):
+def make_mocking_app(callback_path, schema_dir, path_routing):
     app = MeeshkanApplication([
         (r'/.*', MockServerView)
     ])
     callback_manager.load(callback_path)
 
-    if mode == 'replay':
-        matcher = ReplayResponseMatcher(log_dir)
-    elif mode == 'gen':
-        matcher = GeneratedResponseMatcher(schema_dir)
-    elif mode == 'mixed':
-        matcher = MixedResponseMatcher(log_dir, schema_dir)
-    else:
-        raise NotImplementedError('Only replay matcher is available')
+    matcher = ResponseMatcher(schema_dir)
 
     app.mocking_service = MockingService(matcher)
     app.router = PathRouting() if path_routing else HeaderRouting()
@@ -71,13 +64,11 @@ def make_mocking_app(callback_path, mode, log_dir, schema_dir, path_routing):
 @click.option('--callback_path', default="./callbacks", help='Directory with configured callbacks')
 @click.option('--admin_port', default="8888", help='Admin server port')
 @click.option('--port', default="8000", help='Server port')
-@click.option('--log_dir', default="./logs", help='API calls logs direcotry')
-@click.option('--schema_dir', default="./__unmock__", help='Directory with OpenAPI schemas')
+@click.option('-s', '--schema_dir', default="./__unmock__", help='Directory with OpenAPI schemas')
 @click.option('--path_routing', is_flag=True, help='Whether to use a path based routing to a target host')
-@click.option('--mode', default="replay", help='Matching mode')
-def mock(port, admin_port, log_dir, schema_dir, callback_path, path_routing, mode):
+def mock(port, admin_port, schema_dir, callback_path, path_routing):
     start_admin(admin_port)
-    app = make_mocking_app(callback_path, mode, log_dir, schema_dir, path_routing)
+    app = make_mocking_app(callback_path, schema_dir, path_routing)
     http_server = HTTPServer(app)
     http_server.listen(port)
     logger.info('Mock server is listening on http://localhost:%s', port)
