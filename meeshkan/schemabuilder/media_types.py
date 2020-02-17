@@ -1,8 +1,9 @@
 
 """Code for building and inferring media types (application/json, text/plain, etc.) from HTTP exchanges."""
+from .update_mode import UpdateMode
 from http_types import HttpExchange as HttpExchange
 from ..logger import get as getLogger
-from typing import Any, cast, Optional
+from typing import Any, Sequence, cast, Optional
 from openapi_typed import MediaType, Schema
 import json
 from typing_extensions import Literal
@@ -16,14 +17,25 @@ MediaTypeKey = Literal['application/json', 'text/plain']
 MEDIA_TYPE_FOR_NON_JSON = "text/plain"
 
 
-def update_json_schema(json_body: Any, schema: Optional[Any] = None) -> Schema:
+def update_json_schema(json_body: Any, mode: UpdateMode, schema: Optional[Any] = None) -> Schema:
     # TODO typeguard
-    return cast(Schema, to_openapi_json_schema(json_body, schema))
+    return cast(Schema, to_openapi_json_schema(json_body, mode, schema))
 
+def nondup(i: Sequence[Any]) -> Sequence[Any]:
+    '''Removes duplicates from list'''
+    return [json.loads(y) for y in list(set([json.dumps(x) for x in i]))]
 
-def update_text_schema(text_body: str, schema: Optional[Any] = None) -> Schema:
+def update_text_schema(text_body: str, mode: UpdateMode, schema: Optional[Any] = None) -> Schema:
     # TODO Better updates
-    return {"type": "string"}
+    generic = { "type": "string" }
+    specific = {"type": "string", "enum":[text_body]}
+    return generic if mode == UpdateMode.GEN else {
+        "oneOf": nondup([
+            specific,
+            generic,
+            schema if 'oneOf' not in schema else schema['oneOf']
+        ])
+    } if mode == UpdateMode.ALL else specific
 
 
 def infer_media_type_from_nonempty(body: str) -> MediaTypeKey:
@@ -57,7 +69,7 @@ def infer_media_type_from_nonempty(body: str) -> MediaTypeKey:
         raise Exception(f"Not sure what to do with body: {body}")
 
 
-def update_media_type(exchange: HttpExchange, type_key: MediaTypeKey, media_type: Optional[MediaType] = None) -> MediaType:
+def update_media_type(exchange: HttpExchange, mode: UpdateMode, type_key: MediaTypeKey, media_type: Optional[MediaType] = None) -> MediaType:
     """Update media type.
 
     Arguments:
@@ -78,14 +90,14 @@ def update_media_type(exchange: HttpExchange, type_key: MediaTypeKey, media_type
     existing_schema = (media_type or {}).get("schema", None)
 
     if type_key == "application/json":
-        schema = update_json_schema(json.loads(body), schema=existing_schema)
+        schema = update_json_schema(json.loads(body), mode, schema=existing_schema)
     elif type_key == "text/plain":
-        schema = update_text_schema(body, schema=existing_schema)
+        schema = update_text_schema(body, mode, schema=existing_schema)
     else:
         raise Exception("Unknown type key")
     media_type = MediaType(schema=schema)
     return media_type
 
 
-def build_media_type(exchange: HttpExchange, type_key: MediaTypeKey) -> MediaType:
-    return update_media_type(exchange=exchange, type_key=type_key, media_type=None)
+def build_media_type(exchange: HttpExchange, mode: UpdateMode, type_key: MediaTypeKey) -> MediaType:
+    return update_media_type(exchange=exchange, mode=mode, type_key=type_key, media_type=None)

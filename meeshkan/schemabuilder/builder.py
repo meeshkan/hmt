@@ -1,4 +1,5 @@
 import copy
+from .update_mode import UpdateMode
 from functools import reduce
 from typing import Any, List, Iterable, AsyncIterable, cast, Tuple, Optional, Union, TypeVar, Type
 from urllib.parse import urlunsplit
@@ -21,8 +22,7 @@ logger = getLogger(__name__)
 
 __all__ = ['build_schema_batch', 'build_schema_online', 'update_openapi']
 
-
-def build_response_content(exchange: HttpExchange) -> Optional[Tuple[MediaTypeKey, MediaType]]:
+def build_response_content(exchange: HttpExchange, mode: UpdateMode) -> Optional[Tuple[MediaTypeKey, MediaType]]:
     """Build response content schema from exchange.
 
     Arguments:
@@ -38,12 +38,12 @@ def build_response_content(exchange: HttpExchange) -> Optional[Tuple[MediaTypeKe
 
     media_type_key = infer_media_type_from_nonempty(body)
 
-    media_type = build_media_type(exchange, type_key=media_type_key)
+    media_type = build_media_type(exchange, mode, type_key=media_type_key)
 
     return (media_type_key, media_type)
 
 
-def build_response(request: HttpExchange) -> Response:
+def build_response(request: HttpExchange, mode: UpdateMode) -> Response:
     """Build new response object from request response pair.
 
     Response reference: https://swagger.io/specification/#responseObject
@@ -55,7 +55,7 @@ def build_response(request: HttpExchange) -> Response:
         Response -- OpenAPI response object.
     """
     # TODO Headers and links
-    content_or_none = build_response_content(request)
+    content_or_none = build_response_content(request, mode)
 
     if content_or_none is None:
         return Response(
@@ -77,7 +77,7 @@ def build_response(request: HttpExchange) -> Response:
     )
 
 
-def update_response(response: Response, exchange: HttpExchange) -> Response:
+def update_response(response: Response, mode: UpdateMode, exchange: HttpExchange) -> Response:
     """Update response object. Mutates the input object.
 
     Response reference: https://swagger.io/specification/#responseObject
@@ -105,17 +105,17 @@ def update_response(response: Response, exchange: HttpExchange) -> Response:
         # Need to update existing media type
         existing_media_type = response_content[media_type_key]
         media_type = update_media_type(
-            exchange=exchange, type_key=media_type_key, media_type=existing_media_type)
+            exchange=exchange, mode=mode, type_key=media_type_key, media_type=existing_media_type)
     else:
         media_type = build_media_type(
-            exchange=exchange, type_key=media_type_key)
+            exchange=exchange, mode=mode, type_key=media_type_key)
 
     response_content = {**response_content, **{media_type_key: media_type}}
     response['content'] = response_content
     return response
 
 
-def build_operation(exchange: HttpExchange) -> Operation:
+def build_operation(exchange: HttpExchange, mode: UpdateMode) -> Operation:
     """Build new operation object from request-response pair.
 
     Operation reference: https://swagger.io/specification/#operationObject
@@ -126,7 +126,7 @@ def build_operation(exchange: HttpExchange) -> Operation:
     Returns:
         Operation -- Operation object.
     """
-    response = build_response(exchange)
+    response = build_response(exchange, mode)
     code = str(exchange['response']['statusCode'])
 
     request_query_params = exchange['request']['query']
@@ -141,7 +141,7 @@ def build_operation(exchange: HttpExchange) -> Operation:
     return operation
 
 
-def update_operation(operation: Operation, request: HttpExchange) -> Operation:
+def update_operation(operation: Operation, request: HttpExchange, mode: UpdateMode) -> Operation:
     """Update OpenAPI operation object. Mutates the input object.
 
     Operation reference: https://swagger.io/specification/#operationObject
@@ -161,12 +161,13 @@ def update_operation(operation: Operation, request: HttpExchange) -> Operation:
         # Ensure response is Response and not Reference
         # check_type('existing_response', existing_response, Response)
         existing_response = cast(Response, existing_response)
-        response = update_response(existing_response, request)
+        response = update_response(existing_response, mode, request)
     else:
-        response = build_response(request)
+        response = build_response(request, mode)
 
     existing_parameters = operation['parameters']
     request_query_params = request['request']['query']
+    # TODO: should we use the mode to update the query?
     updated_parameters = update_query(
         request_query_params, existing_parameters)
 
@@ -201,7 +202,7 @@ def verify_path_parameters(schema_path_parameters: List[Union[Parameter, Referen
         parameter_name = param['name']
         if not parameter_name in path_params_copy:
             raise Exception(
-                "Expected to find path parameter %s in request path parameters".format(parameter_name))
+                "Expected to find path parameter %s in request path parameters" % parameter_name)
 
         del path_params_copy[parameter_name]
 
@@ -210,8 +211,7 @@ def verify_path_parameters(schema_path_parameters: List[Union[Parameter, Referen
         raise Exception(
             "Found {} extra path parameters: {}".format(len(remaining_keys), ', '.join(list(remaining_keys))))
 
-
-def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObject:
+def update_openapi(schema: OpenAPIObject, request: HttpExchange, mode: UpdateMode) -> OpenAPIObject:
     """Update OpenAPI schema with a new request-response pair.
     Does not mutate the input schema.
 
@@ -241,7 +241,7 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
 
     schema_paths = schema_copy['paths']
 
-    operation_candidate = build_operation(request)
+    operation_candidate = build_operation(request, mode)
     
     path_match_result = find_matching_path(normalized_pathname, schema_paths, request_method, operation_candidate)
 
@@ -249,12 +249,13 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
     if path_match_result is not None:
         # Path item exists for request path
         path_item, request_path_parameters, pathname_with_wildcard, pathname_to_be_replaced_with_wildcard = path_match_result['path'], path_match_result['param_mapping'], path_match_result['pathname_with_wildcard'], path_match_result['pathname_to_be_replaced_with_wildcard']
-        if pathname_to_be_replaced_with_wildcard is not None:
+        # Create a wildcard if the mode is not replay/mixed
+        if (pathname_to_be_replaced_with_wildcard is not None) and (mode != UpdateMode.REPLAY) and (mode != UpdateMode.MIXED):
             # the algorithm has updated the pathname, need to mutate
             # the schema paths to use the new and discard the old if the old exists
             # in the schema. it would not exist if we have already put a wildcard
             pointer_to_value = schema_paths[pathname_to_be_replaced_with_wildcard]
-            schema_paths = { k: v for k, v in [(pathname_with_wildcard, pointer_to_value), *schema_paths.items()] if k != pathname_to_be_replaced_with_wildcard}
+            schema_paths = { k: v for k, v in [(pathname_with_wildcard, pointer_to_value), *schema_paths.items()] if k != pathname_to_be_replaced_with_wildcard }
             if not ('parameters' in schema_paths[pathname_with_wildcard].keys()):
                 schema_paths[pathname_with_wildcard]['parameters'] = []
             for path_param in request_path_parameters.keys():
@@ -276,7 +277,7 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange) -> OpenAPIObjec
     if request_method in path_item:
         # Operation exists
         existing_operation = path_item[request_method]  # type: ignore
-        operation = update_operation(existing_operation, request)
+        operation = update_operation(existing_operation, request, mode)
 
     else:
         operation = operation_candidate
@@ -298,14 +299,14 @@ BASE_SCHEMA = OpenAPIObject(openapi="3.0.0",
                             paths={})
 
 
-async def build_schema_async(async_iter: AsyncIterable[HttpExchange], starting_spec: OpenAPIObject) -> AsyncIterable[BuildResult]:
+async def build_schema_async(async_iter: AsyncIterable[HttpExchange],  mode: UpdateMode, starting_spec: OpenAPIObject) -> AsyncIterable[BuildResult]:
     schema = starting_spec
     async for exchange in async_iter:
-        schema = update_openapi(schema, exchange)
+        schema = update_openapi(schema, exchange, mode)
         yield BuildResult(openapi=schema)
 
 
-def build_schema_online(requests: Iterable[HttpExchange], base_schema: OpenAPIObject = BASE_SCHEMA) -> OpenAPIObject:
+def build_schema_online(requests: Iterable[HttpExchange], mode: UpdateMode, base_schema: OpenAPIObject = BASE_SCHEMA) -> OpenAPIObject:
     """Build OpenAPI schema by iterating request-response pairs.
 
     OpenAPI object reference: https://swagger.io/specification/#oasObject
@@ -320,14 +321,14 @@ def build_schema_online(requests: Iterable[HttpExchange], base_schema: OpenAPIOb
     # Iterate over all request-response pairs in the iterator, starting from
     # BASE_SCHEMA
     schema = reduce(lambda schema, req: update_openapi(
-        schema, req), requests, base_schema)
+        schema, req, mode), requests, base_schema)
 
     validate_openapi_object(schema)
 
     return schema
 
 
-def build_schema_batch(requests: List[HttpExchange], base_schema: OpenAPIObject = BASE_SCHEMA) -> OpenAPIObject:
+def build_schema_batch(requests: List[HttpExchange], mode: UpdateMode, base_schema: OpenAPIObject = BASE_SCHEMA) -> OpenAPIObject:
     """Build OpenAPI schema from a list of request-response object.
 
     OpenAPI object reference: https://swagger.io/specification/#oasObject
@@ -338,4 +339,4 @@ def build_schema_batch(requests: List[HttpExchange], base_schema: OpenAPIObject 
     Returns:
         OpenAPI -- OpenAPI object.
     """
-    return build_schema_online(iter(requests), base_schema=base_schema)
+    return build_schema_online(iter(requests), mode, base_schema=base_schema)

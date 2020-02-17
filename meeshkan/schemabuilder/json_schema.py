@@ -1,4 +1,5 @@
 import copy
+from .update_mode import UpdateMode
 from genson import SchemaBuilder  # type: ignore
 
 
@@ -18,7 +19,7 @@ def _to_openapi_compatible(schema):
     return schema
 
 
-def to_json_schema(obj, schema=None):
+def to_json_schema(obj, mode: UpdateMode, schema=None):
     """Create JSON schema based on an object.
 
     Arguments:
@@ -30,15 +31,27 @@ def to_json_schema(obj, schema=None):
     Returns:
         [dict] -- New or updated schema.
     """
-    builder = SchemaBuilder()
-    if schema is not None:
-        builder.add_schema(schema)
-    builder.add_object(obj)
-    schema = builder.to_schema()
-    return schema
+    if mode == UpdateMode.GEN:
+        builder = SchemaBuilder()
+        if schema is not None:
+            builder.add_schema(schema)
+        builder.add_object(obj)
+        schema = builder.to_schema()
+        return schema
+    elif schema is None:
+        builder = SchemaBuilder()
+        builder.add_object(obj)
+        schema = builder.to_schema()
+        return schema
+    else:
+        builder = SchemaBuilder()
+        builder.add_object(obj)
+        s = builder.to_schema()
+        return { 'oneOf': [s, schema]}
 
 
-def to_openapi_json_schema(obj, schema=None):
+
+def to_openapi_json_schema(obj, mode: UpdateMode, schema=None):
     """Create OpenAPI-compatible JSON schema from object.
 
     https://swagger.io/docs/specification/data-models/keywords/
@@ -52,6 +65,6 @@ def to_openapi_json_schema(obj, schema=None):
     Returns:
         [type] -- [description]
     """
-    schema = to_json_schema(obj, schema)
+    schema = to_json_schema(obj, mode, schema)
     openapi_compatible_schema = _to_openapi_compatible(schema)
     return openapi_compatible_schema
