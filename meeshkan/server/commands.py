@@ -34,7 +34,8 @@ def start_admin(port):
 @click.option('--admin_port', default="8888", help='Admin server port')
 @click.option('--log_dir', default="./logs", help='API calls logs direcotry')
 @click.option('--schema_dir', default="./__unmock__", help='Directory with OpenAPI schemas')
-def record(port, admin_port, log_dir, schema_dir):
+@click.option('--path_routing', default=True, help='Whether to use a path based routing to a target host')
+def record(port, admin_port, log_dir, path_routing, schema_dir):
     start_admin(admin_port)
     logger.info('Starting Meeshkan proxy in recording mode on http://localhost:%s', port)
     with RequestLoggingCallback(recording=True, log_dir=log_dir, schema_dir=schema_dir) as callback:
@@ -69,8 +70,9 @@ def make_mocking_app(callback_path, mode, log_dir, schema_dir):
 @click.option('--port', default="8000", help='Server port')
 @click.option('--log_dir', default="./logs", help='API calls logs direcotry')
 @click.option('--schema_dir', default="./__unmock__", help='Directory with OpenAPI schemas')
+@click.option('--path_routing', default=True, help='Whether to use a path based routing to a target host')
 @click.option('--mode', default="replay", help='Matching mode')
-def mock(port, admin_port, log_dir, schema_dir, callback_path, mode):
+def mock(port, admin_port, log_dir, schema_dir, callback_path, path_routing, mode):
     start_admin(admin_port)
     app = make_mocking_app(callback_path, mode, log_dir, schema_dir)
     http_server = HTTPServer(app)
