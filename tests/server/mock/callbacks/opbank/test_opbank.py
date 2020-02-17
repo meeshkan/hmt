@@ -6,7 +6,7 @@ import json
 
 @pytest.fixture
 def app():
-    return make_mocking_app('tests/server/mock/callbacks/opbank/callbacks', 'replay', 'tests/server/mock/callbacks/opbank/recordings', '')
+    return make_mocking_app('tests/server/mock/callbacks/opbank/callbacks', '/dev/null')
 
 ACCOUNTS_HEADERS = {
     'Host': 'sandbox.apis.op-palvelut.fi',
