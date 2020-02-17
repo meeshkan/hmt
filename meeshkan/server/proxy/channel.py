@@ -8,6 +8,8 @@ from enum import Enum
 from urllib import parse
 from urllib.parse import urlsplit
 from http_types import Request, Response, HttpMethod
+
+from meeshkan.server.utils.routing import Routing
 from .proxy_callback import ProxyCallback
 from ..utils.http_utils import split_path, response_from_bytes
 from tornado.iostream import IOStream, SSLIOStream, StreamClosedError
@@ -94,8 +96,9 @@ class StreamWrapper:
 
 
 class Channel:
-    def __init__(self, proxy_callback: ProxyCallback, stream: IOStream, client_address: tuple):
+    def __init__(self, proxy_callback: ProxyCallback, stream: IOStream, client_address: tuple, router: Routing):
         self._proxy_calback = proxy_callback
+        self._router = router
 
         self._client_stream = StreamWrapper(stream, self.on_client_close, False)
         self._client_stream.on_connect(self.on_client_read)
@@ -111,37 +114,41 @@ class Channel:
         req_lines = data.decode('utf-8').split('\r\n')
         method, fullpath, protocol = req_lines[0].split(' ')
         parsed_fullpath = parse.urlparse(fullpath)
-        splits = split_path(parsed_fullpath.path)
-        scheme, host = splits[0], splits[1]
-        path = os.path.join('/', *splits[2:])
         query = parse.parse_qs(parsed_fullpath.query)
 
-        fullpath = "{}?{}".format(path, parsed_fullpath.query) if query else path
-
-        req_lines[0] = ' '.join((method, fullpath, protocol))
-
         headers = {}
-        cur_id: int = 0
-        for line_id, line in enumerate(req_lines[1:]):
-            cur_id = line_id
+        host_line: int = 0
+        body_start: int = 0
+        last_line: int = 1
+        for line in req_lines[1:]:
+            last_line += 1
             if not line:
                 break
             else:
                 header, value = line.split(': ')
                 if header == 'Host':
-                    value = host
-                    req_lines[line_id + 1] = 'Host: {}'.format(host)
+                    host_line = last_line
                 headers[header] = value
 
+
+        body_start = last_line + 1
         body = []
         # TODO: @Nikolay, is cur_id correct?
-        for body_line in range(cur_id + 2, len(req_lines)):
+        for body_line in range(body_start, len(req_lines)):
             if req_lines[body_line]:
                 body.append(req_lines[body_line])
 
         body = '\r\n'.join(body)
 
+        route_info = self._router.route(parsed_fullpath.path, headers)
+        fullpath = "{}?{}".format(route_info.path, parsed_fullpath.query) if query else route_info.path
+
+        req_lines[0] = ' '.join((method, fullpath, protocol))
+        req_lines[host_line] = 'Host: {}'.format(route_info.host)
+        headers['Host'] = route_info.host
+
         data = '\r\n'.join(req_lines).encode('utf-8')
+
         # ignoring type due to this error
         '''
           46:34 - error: Argument of type 'str' cannot be assigned to parameter 'method' of type 'Literal['connect', 'head', 'trace', 'options', 'delete', 'patch', 'post', 'put', 'get']'
@@ -152,16 +159,16 @@ class Channel:
           'str' cannot be assigned to 'Literal['delete']'
         '''
         self._request = Request(method=typing.cast(HttpMethod, method.lower()), # type: ignore
-                                host=host,
+                                host=route_info.host,
                                 path=fullpath,
-                                pathname=path,
-                                protocol=scheme,
+                                pathname=route_info.path,
+                                protocol=route_info.scheme,
                                 query=query,
                                 body=body,
                                 bodyAsJson=json.loads(body) if body else {},
                                 headers=headers)
 
-        return RequestInfo(data=data, scheme=scheme, target_host=host, target_port=443 if scheme == 'https' else 80)
+        return RequestInfo(data=data, scheme=route_info.scheme, target_host=route_info.hostname, target_port=route_info.port)
 
     def on_response_chunk(self, data: bytes):
         if len(self._response) == 0:
@@ -256,16 +263,3 @@ class Channel:
         return self._client_stream.state
 
 
-class MockChannel(Channel):
-    def __init__(self, proxy_callback: ProxyCallback, stream: IOStream,
-                 client_address: tuple, mock_address: str):
-        super().__init__(proxy_callback, stream, client_address)
-        url = urlsplit(mock_address)
-        self._mock_host = url.hostname
-        self._mock_port = url.port
-        self._mock_scheme = url.scheme
-
-    def on_request(self, data: bytes) -> RequestInfo:
-        request_info = super().on_request(data)
-        return RequestInfo(data=request_info.data, target_host=self._mock_host, target_port=self._mock_port,
-                           scheme=self._mock_scheme)
