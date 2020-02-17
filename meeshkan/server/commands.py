@@ -8,6 +8,7 @@ from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.web import Application
 
+from meeshkan.server.utils.routing import PathRouting, HeaderRouting, Routing
 from .admin.views import StorageView
 from .proxy.proxy import RecordProxy
 from .server.callbacks import callback_manager
@@ -34,19 +35,20 @@ def start_admin(port):
 @click.option('--admin_port', default="8888", help='Admin server port')
 @click.option('--log_dir', default="./logs", help='API calls logs direcotry')
 @click.option('--schema_dir', default="./__unmock__", help='Directory with OpenAPI schemas')
-@click.option('--path_routing', default=True, help='Whether to use a path based routing to a target host')
+@click.option('--path_routing', is_flag=True, help='Whether to use a path based routing to a target host')
 def record(port, admin_port, log_dir, path_routing, schema_dir):
     start_admin(admin_port)
     logger.info('Starting Meeshkan proxy in recording mode on http://localhost:%s', port)
     with RequestLoggingCallback(recording=True, log_dir=log_dir, schema_dir=schema_dir) as callback:
-        server = RecordProxy(callback)
+        server = RecordProxy(callback, PathRouting() if path_routing else HeaderRouting())
         server.listen(port)
         tornado.ioloop.IOLoop.instance().start()
 
 class MeeshkanApplication(Application):
     mocking_service: MockingService
+    router: Routing
 
-def make_mocking_app(callback_path, mode, log_dir, schema_dir):
+def make_mocking_app(callback_path, mode, log_dir, schema_dir, path_routing):
     app = MeeshkanApplication([
         (r'/.*', MockServerView)
     ])
@@ -62,6 +64,7 @@ def make_mocking_app(callback_path, mode, log_dir, schema_dir):
         raise NotImplementedError('Only replay matcher is available')
 
     app.mocking_service = MockingService(matcher)
+    app.router = PathRouting() if path_routing else HeaderRouting()
     return app
 
 @click.command()
@@ -70,11 +73,11 @@ def make_mocking_app(callback_path, mode, log_dir, schema_dir):
 @click.option('--port', default="8000", help='Server port')
 @click.option('--log_dir', default="./logs", help='API calls logs direcotry')
 @click.option('--schema_dir', default="./__unmock__", help='Directory with OpenAPI schemas')
-@click.option('--path_routing', default=True, help='Whether to use a path based routing to a target host')
+@click.option('--path_routing', is_flag=True, help='Whether to use a path based routing to a target host')
 @click.option('--mode', default="replay", help='Matching mode')
 def mock(port, admin_port, log_dir, schema_dir, callback_path, path_routing, mode):
     start_admin(admin_port)
-    app = make_mocking_app(callback_path, mode, log_dir, schema_dir)
+    app = make_mocking_app(callback_path, mode, log_dir, schema_dir, path_routing)
     http_server = HTTPServer(app)
     http_server.listen(port)
     logger.info('Mock server is listening on http://localhost:%s', port)

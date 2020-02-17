@@ -39,9 +39,14 @@ class MockServerView(RequestHandler):
         self._serve()
 
     def _serve(self):
-        query = parse.parse_qs(self.request.query)
+        headers = {k:v for k,v in self.request.headers.get_all()}
+        route_info = self.application.router.route(self.request.path, headers)
+        headers['Host'] = route_info.host
 
-        fullpath = "{}?{}".format(self.request.path, self.request.query) if query else self.request.path
+        query = parse.parse_qs(self.request.query)
+        fullpath = "{}?{}".format(route_info.path, self.request.query) if query else route_info.path
+
+
                 # ignoring type due to this error
         '''
           46:34 - error: Argument of type 'str' cannot be assigned to parameter 'method' of type 'Literal['connect', 'head', 'trace', 'options', 'delete', 'patch', 'post', 'put', 'get']'
@@ -52,14 +57,14 @@ class MockServerView(RequestHandler):
           'str' cannot be assigned to 'Literal['delete']'
         '''
         request = Request(method=cast(HttpMethod, self.request.method.lower()), # type: ignore
-                                  host=self.request.host,
+                                  host=route_info.host,
                                   path=fullpath,
-                                  pathname=self.request.path,
-                                  protocol=self.request.protocol,
+                                  pathname=route_info.path,
+                                  protocol=route_info.scheme,
                                   query=query,
                                   body=self.request.body,
                                   bodyAsJson=self._extract_json_safely(self.request.body),
-                                  headers={k:v for k,v in self.request.headers.get_all()})
+                                  headers=headers)
         RequestBuilder.validate(request)
 
 
