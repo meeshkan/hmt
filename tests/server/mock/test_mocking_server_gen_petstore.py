@@ -6,7 +6,7 @@ import json
 
 @pytest.fixture
 def app():
-    return make_mocking_app('tests/server/mock/callbacks', 'tests/server/mock/petstore_schema')
+    return make_mocking_app('tests/server/mock/callbacks', 'tests/server/mock/petstore_schema', False)
 
 URL = 'petstore.swagger.io'
 

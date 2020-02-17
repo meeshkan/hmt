@@ -18,6 +18,25 @@ def _to_openapi_compatible(schema):
     del schema['$schema']
     return schema
 
+def to_const(obj):
+    if type(obj) == type(''):
+        return { 'type': 'string', 'enum': [obj] }
+    if type(obj) == type(0):
+        return { 'type': 'integer', 'enum': [obj] }
+    if type(obj) == type(0.0):
+        return { 'type': 'number', 'enum': [obj] }
+    if obj is None:
+        return { 'type': 'null' }
+    if type(obj) == type(True):
+        return { 'type': 'boolean', 'enum': [obj] }
+    if type(obj) == type([]):
+        return { 'type': 'array', 'items': [to_const(x) for x in obj] }
+    return {
+        'type': 'object',
+        'properties': { k: to_const(v) for k, v in obj.items() },
+        'required': [x for x in obj.keys()]
+    }
+
 
 def to_json_schema(obj, mode: UpdateMode, schema=None):
     """Create JSON schema based on an object.
@@ -39,15 +58,9 @@ def to_json_schema(obj, mode: UpdateMode, schema=None):
         schema = builder.to_schema()
         return schema
     elif schema is None:
-        builder = SchemaBuilder()
-        builder.add_object(obj)
-        schema = builder.to_schema()
-        return schema
+        { 'oneOf': to_const(obj) }
     else:
-        builder = SchemaBuilder()
-        builder.add_object(obj)
-        s = builder.to_schema()
-        return { 'oneOf': [s, schema]}
+        return { 'oneOf': [to_const(obj), schema]}
 
 
 

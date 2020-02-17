@@ -5,7 +5,7 @@ import json
 
 @pytest.fixture
 def app():
-    return make_mocking_app('tests/server/mock/callbacks', 'tests/server/mock/stripe_schema')
+    return make_mocking_app('tests/server/mock/callbacks', 'tests/server/mock/stripe_schema', False)
 
 
 @pytest.mark.gen_test

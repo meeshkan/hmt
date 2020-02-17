@@ -29,7 +29,7 @@ class PathRouting(Routing):
     def route(self, path: str, headers: typing.Dict, inbound_scheme='http') -> RoutingInfo:
         splits = split_path(path)
         url = urllib.parse.urlsplit('{}//{}'.format(splits[0], splits[1]))
-        path = os.path.join('/', *splits[2:])
+        path = '/' + '/'.join(splits[2:])
         return RoutingInfo(path=path, host=splits[1], hostname=url.hostname, port=get_port(url.scheme, url.port),
                            scheme=url.scheme)
 

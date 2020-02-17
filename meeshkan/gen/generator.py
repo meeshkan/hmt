@@ -640,7 +640,7 @@ def fake_string(schema: Any) -> str:
     return random.choice(schema['enum']) if 'enum' in schema else fkr.name()
 
 def fake_boolean(schema: Any) -> bool:
-    return True if random.random() > 0.5 else False
+    return random.choice(schema['enum']) if 'enum' in schema else True if random.random() > 0.5 else False
 
 # TODO: add exclusiveMinimum and exclusiveMaximum
 def fake_integer(schema: Any) -> int:
