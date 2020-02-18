@@ -27,14 +27,14 @@ def nondup(i: Sequence[Any]) -> Sequence[Any]:
 
 def update_text_schema(text_body: str, mode: UpdateMode, schema: Optional[Any] = None) -> Schema:
     # TODO Better updates
-    generic = { "type": "string" }
-    specific = {"type": "string", "enum":[text_body]}
-    return generic if mode == UpdateMode.GEN else {
+    generic = cast(Schema, { "type": "string" })
+    specific = cast(Schema, {"type": "string", "enum":[text_body]})
+    return generic if mode == UpdateMode.GEN else cast(Schema, {
         "oneOf": nondup([
             specific,
             schema if 'oneOf' not in schema else schema['oneOf']
         ])
-    }
+    })
 
 
 def infer_media_type_from_nonempty(body: str) -> MediaTypeKey:

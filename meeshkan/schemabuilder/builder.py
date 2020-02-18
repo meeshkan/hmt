@@ -1,13 +1,13 @@
 import copy
 from .update_mode import UpdateMode
 from functools import reduce
-from typing import Any, List, Iterable, AsyncIterable, cast, Tuple, Optional, Union, TypeVar, Type
+from typing import Any, List, Sequence, Iterable, AsyncIterable, cast, Tuple, Optional, Union, TypeVar, Type, Mapping
 from urllib.parse import urlunsplit
 from collections import defaultdict
 import json
 
 from http_types import HttpExchange as HttpExchange
-from openapi_typed import Info, MediaType, OpenAPIObject, PathItem, Response, Operation, Parameter, Reference, Server, Responses
+from openapi_typed import Info, Header, MediaType, OpenAPIObject, PathItem, Response, Operation, Parameter, Reference, Server, Responses
 from typeguard import check_type  # type: ignore
 
 from ..logger import get as getLogger
@@ -104,7 +104,7 @@ def update_response(response: Response, mode: UpdateMode, exchange: HttpExchange
     ### HEADERS
     ################
     response_headers = response.get('headers', None)
-    useable_headers = {} if response_headers is None else { k: v for k,v in response_headers if k not in ['content-type', 'content-length', 'Content-Type', 'Content-Length']}
+    useable_headers = {} if response_headers is None else { k: v for k,v in cast(Mapping[str, str], response_headers).items() if k not in ['content-type', 'content-length', 'Content-Type', 'Content-Length']}
     has_headers = len(useable_headers) > 0
     if response_headers is None and has_headers:
         response['headers'] = {}
@@ -117,7 +117,7 @@ def update_response(response: Response, mode: UpdateMode, exchange: HttpExchange
     #############
     ### CONTENT
     #############
-    response_content = response.get('content', None)
+    response_content = response['content'] if 'content' in response else None
     if response_content is not None and media_type_key in response_content:
         # Need to update existing media type
         existing_media_type = response_content[media_type_key]
@@ -193,7 +193,8 @@ def update_operation(operation: Operation, request: HttpExchange, mode: UpdateMo
     # we do that using json
     updated_parameters = [json.loads(y) for y in set([json.dumps(x) for x in [*ParamBuilder('query').update(request_query_params,
             mode, existing_parameters),
-        *ParamBuilder('header').update(request_header_params,
+            # TODO: can we avoid the cast below? it is pretty hackish
+        *ParamBuilder('header').update(cast(Mapping[str, Union[str, Sequence[str]]], request_header_params),
             mode, existing_parameters)]])]
 
     operation['parameters'] = updated_parameters

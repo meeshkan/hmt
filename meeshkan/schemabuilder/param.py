@@ -1,5 +1,6 @@
 """Code for working with parameters."""
 
+from functools import reduce
 from meeshkan.schemabuilder.json_schema import to_const
 from meeshkan.schemabuilder.update_mode import UpdateMode
 from openapi_typed import Parameter, Reference, Schema
@@ -11,9 +12,9 @@ SchemaParameters = Sequence[Union[Parameter, Reference]]
 # TODO: this won't work for anything other than simple schema
 # maybe make more robust?
 def unnest(d: List[Schema]) -> List[Schema]:
-    return sum([
-        [x] if 'oneOf' not in x else unnest(x['oneOf']) for x in d
-    ], [])
+    return cast(List[Schema], reduce(lambda a, b: [*a, *b],
+        [[x] if 'oneOf' not in x else unnest(cast(List[Schema], x['oneOf'])) for x in d
+    ], []))
     
 
 # TODO: extended this for all paramaters, but need to verify that
@@ -22,10 +23,10 @@ def unnest(d: List[Schema]) -> List[Schema]:
 class ParamBuilder:
     def __init__(self, _in: str):
         if _in not in ['header', 'query']:
-            raise ValueError('A parameter cannot have an `in` value of %s.' % s)
+            raise ValueError('A parameter cannot have an `in` value of %s.' % _in)
         self._in = _in
 
-    def build(self, params: Mapping[str, str], mode: UpdateMode) -> SchemaParameters:
+    def build(self, params: Mapping[str, Union[str, Sequence[str]]], mode: UpdateMode) -> SchemaParameters:
         """Build a list of parameters from request parameters.
 
         Arguments:
@@ -76,7 +77,7 @@ class ParamBuilder:
 
 
     # TODO Fix types once openapi types are covariant
-    def update(self, incoming_params: Mapping[str, str], mode: UpdateMode, existing: SchemaParameters, set_new_as_required=False) -> SchemaParameters:
+    def update(self, incoming_params: Mapping[str, Union[str, Sequence[str]]], mode: UpdateMode, existing: SchemaParameters, set_new_as_required=False) -> SchemaParameters:
         non_params: List[Parameter] = [
             param for param in existing if param['in'] != self._in]  # type: ignore
 
@@ -118,6 +119,11 @@ class ParamBuilder:
         missing_params = [
             self._update_required(param, required=False) for param in params if param['name'] in missing_param_names]
 
-        updated_params = new_params + shared_params + \
-            missing_params + non_params
+        # TODO: make sure cast is valid
+        updated_params = [
+            *new_params,
+            *shared_params,
+            *missing_params,
+            *non_params
+        ]
         return cast(SchemaParameters, updated_params)
