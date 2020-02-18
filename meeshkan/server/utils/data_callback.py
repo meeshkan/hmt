@@ -1,5 +1,6 @@
 import json
 import logging
+from meeshkan.schemabuilder.update_mode import UpdateMode
 import os
 
 from typing import cast
@@ -63,7 +64,8 @@ class RequestLoggingCallback():
             else:
                 self._schemas[host] = BASE_SCHEMA
 
-        self._schemas[host] = update_openapi(self._schemas[host], reqres)
+        # TODO: is hardcoded update mode correct?
+        self._schemas[host] = update_openapi(self._schemas[host], reqres, UpdateMode.GEN)
 
         with open(schema_file, 'w') as f:
             yaml.dump(self._schemas[host], f)
