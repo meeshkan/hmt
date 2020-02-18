@@ -32,7 +32,7 @@ class ResponseMatcher:
         self._schemas = { k: v for k, v in specs}
 
     def match_error(self, msg: str, req: Request) -> Response:
-        return self.default_response('%s. Here is the full request: %s.' % (msg, json.dumps(req, indent=2)))
+        return self.default_response('%s. Here is the full request: host=%s, path=%s, method=%s.' % (msg, req['host'], req['path'], req['method']))
 
     def default_response(self, msg):
         json_resp = {'message': msg}
@@ -69,7 +69,7 @@ class ResponseMatcher:
         headers = {}
         if 'headers' in response:
             # TODO: can't handle references yet, need to fix
-            headers = { k: (faker(v['schema'], v['schema'], 0) if 'schema' in v else '***') for k,v in headers.items() }
+            headers = {} # { k: (faker(v['schema'], v['schema'], 0) if 'schema' in v else '***') for k,v in headers.items() }
         statusCode = int(response[0] if response[0] != 'default' else 400)
         if ('content' not in response[1]) or len(response[1]['content'].items()) == 0:
             return Response(statusCode=statusCode, body="", headers=headers)
