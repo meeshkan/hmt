@@ -1,1 +1,0 @@
-from .__main__ import make_mocking_app

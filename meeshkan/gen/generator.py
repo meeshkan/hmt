@@ -184,7 +184,7 @@ def get_required_request_query_or_header_parameters_internal(header: bool, l: le
     # TODO: really dirty cast
     # is this even the case
     # copied from unmock, but need to investigate
-    return cast(Sequence[Parameter], [{ **parameter, 'schema': (change_ref(cast(Reference, parameter['schema'])) if is_reference(parameter['schema']) else change_refs(cast(Schema, parameter['schema']))) if 'schema' in parameter else cast(Schema, { 'type': "string" }) } for parameter in l.Prism(
+    return cast(Sequence[Parameter], [{ **parameter, 'name': parameter['name'] if not header else parameter['name'].lower(), 'schema': (change_ref(cast(Reference, parameter['schema'])) if is_reference(parameter['schema']) else change_refs(cast(Schema, parameter['schema']))) if 'schema' in parameter else cast(Schema, { 'type': "string" }) } for parameter in l.Prism(
         lambda s: get_parameter_from_ref(oai, ref_name(s)) if is_reference(s) else s,
         lambda a : a,
         ignore_none=True
@@ -240,7 +240,7 @@ def keep_method_if_required_request_body_is_present(
     oai: OpenAPIObject,
 ) -> Callable[[PathItem], PathItem]:
     def _keep_method_if_required_request_body_is_present(p: PathItem) -> PathItem:
-        return p if (req['method'].lower() not in p) or (len([s for s in get_required_request_body_schemas(req, oai, p) if
+        out = p if (req['method'].lower() not in p) or (len([s for s in get_required_request_body_schemas(req, oai, p) if
                 not valid_schema(req['bodyAsJson'], {
                     # TODO: this line is different than the TS implementation
                     # because I think there is a logic bug there
@@ -251,6 +251,7 @@ def keep_method_if_required_request_body_is_present(
                     **(change_ref(cast(Reference, s)) if is_reference(s) else change_refs(cast(Schema, s))),
                     'definitions': make_definitions_from_schema(oai),
                 })]) == 0) else omit(p, req['method'].lower())
+        return out
     return _keep_method_if_required_request_body_is_present
 
 def keep_method_if_required_header_parameters_are_present(
@@ -258,7 +259,8 @@ def keep_method_if_required_header_parameters_are_present(
     oai: OpenAPIObject,
 ) -> Callable[[PathItem], PathItem]:
     def _keep_method_if_required_header_parameters_are_present(p: PathItem) -> PathItem:
-        return keep_method_if_required_query_or_header_parameters_are_present(True, req, oai, p)
+        out = keep_method_if_required_query_or_header_parameters_are_present(True, req, oai, p)
+        return out
     return _keep_method_if_required_header_parameters_are_present
 
 def keep_method_if_required_query_parameters_are_present(
@@ -286,7 +288,7 @@ def keep_method_if_required_query_or_header_parameters_are_present(
     p: PathItem
 ) -> PathItem:
     return p if (req['method'].lower() not in p) or valid_schema(
-        req['headers'] if header else req['query'],
+        { k.lower(): v for k, v in req['headers'].items() } if header else req['query'],
         _json_schema_from_required_parameters(get_required_request_query_or_header_parameters(header, req, oai, p), oai)
     ) else omit(p, req['method'].lower())
 
@@ -640,7 +642,7 @@ def fake_string(schema: Any) -> str:
     return random.choice(schema['enum']) if 'enum' in schema else fkr.name()
 
 def fake_boolean(schema: Any) -> bool:
-    return True if random.random() > 0.5 else False
+    return random.choice(schema['enum']) if 'enum' in schema else True if random.random() > 0.5 else False
 
 # TODO: add exclusiveMinimum and exclusiveMaximum
 def fake_integer(schema: Any) -> int:

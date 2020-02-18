@@ -1,4 +1,5 @@
 from meeshkan.schemabuilder.json_schema import to_json_schema, to_openapi_json_schema
+from meeshkan.schemabuilder.update_mode import UpdateMode
 from ..util import read_recordings_as_dict
 import json
 from hamcrest import *
@@ -18,7 +19,7 @@ test_objects = [
 
 
 def test_to_schema_from_array():
-    schema = to_json_schema(object_sample, schema=None)
+    schema = to_json_schema(object_sample, UpdateMode.GEN, schema=None)
     assert_that(schema, has_key("$schema"))
     assert_that(schema, has_entry(
         "$schema", starts_with('http://json-schema.org/schema#')))
@@ -27,7 +28,7 @@ def test_to_schema_from_array():
 
 
 def test_schema_with_array():
-    schema = to_json_schema(test_objects[0], schema=None)
+    schema = to_json_schema(test_objects[0], UpdateMode.GEN, schema=None)
     assert_that(schema, has_entry("items", instance_of(dict)))
     items = schema['items']
     assert isinstance(items, dict)  # typeguard
@@ -40,8 +41,8 @@ def test_schema_with_array():
 
 
 def test_updating_schema_removes_required():
-    schema = to_json_schema(test_objects[0], schema=None)
-    schema = to_json_schema(test_objects[1], schema=schema)
+    schema = to_json_schema(test_objects[0], UpdateMode.GEN, schema=None)
+    schema = to_json_schema(test_objects[1], UpdateMode.GEN, schema=schema)
     items = schema['items']
     assert isinstance(items, dict)  # typeguard
     assert_that(items, has_entry('required', []))
@@ -49,5 +50,5 @@ def test_updating_schema_removes_required():
 
 
 def test_openapi_compatible_schema():
-    schema = to_openapi_json_schema(test_objects[0], schema=None)
+    schema = to_openapi_json_schema(test_objects[0], UpdateMode.GEN, schema=None)
     assert_that(schema, not_(has_key("$schema")))

@@ -1,0 +1,40 @@
+import json
+from unittest.mock import Mock
+
+import pytest
+from http_types import Response
+from tornado.httpclient import HTTPRequest
+
+from meeshkan.server import make_mocking_app
+from meeshkan.server.utils.routing import HeaderRouting
+
+
+@pytest.fixture
+def app():
+    return make_mocking_app('tests/server/mock/callbacks', 'tests/server/mock/petstore_schema',
+                            HeaderRouting())
+
+
+@pytest.mark.gen_test
+def test_mocking_server_customers(http_client, base_url, app):
+    response = Response(statusCode=200, body='{"message": "hello"}', bodyAsJson=json.loads('{"message": "hello"}'),
+                        headers={})
+    app.response_matcher.get_response = Mock(return_value=response)
+
+    req = HTTPRequest(base_url + '/pets', headers={
+        'Host': 'petstore.swagger.io'
+    })
+    http_response = yield http_client.fetch(req)
+    assert 200 == http_response.code
+    rb = json.loads(http_response.body)
+    assert {'message': "hello"} == rb
+
+    assert len(app.response_matcher.get_response.call_args_list) == 1
+    request = app.response_matcher.get_response.call_args_list[0][0][0]
+    assert 'get' == request['method']
+    assert 'http' == request['protocol']
+    assert '/pets' == request['pathname']
+    assert '/pets' == request['path']
+    assert {} == request['query']
+    assert 'petstore.swagger.io' == request['host']
+    assert 'petstore.swagger.io' == request['headers']['Host']

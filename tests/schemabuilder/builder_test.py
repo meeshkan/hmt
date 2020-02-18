@@ -1,5 +1,6 @@
 import copy
-
+from meeshkan.schemabuilder.update_mode import UpdateMode
+import json
 import re
 from http_types import HttpExchange, Request, Response, RequestBuilder
 from tests.schemabuilder.paths_test import PETSTORE_SCHEMA
@@ -33,8 +34,8 @@ PETSTORE_SCHEMA = petstore_schema()
 
 
 class TestSchema:
-    schema = build_schema_batch(requests)
-    pokeapi_schema = build_schema_batch(pokeapi_requests)
+    schema = build_schema_batch(requests, UpdateMode.GEN)
+    pokeapi_schema = build_schema_batch(pokeapi_requests, UpdateMode.GEN)
 
     def response_schema(self):
 
@@ -137,13 +138,13 @@ class TestPetstoreSchemaUpdate:
 
     def test_update_respects_path_parameter(self):
         updated_schema = update_openapi(
-            PETSTORE_SCHEMA, self.get_one_pet_exchange)
+            PETSTORE_SCHEMA, self.get_one_pet_exchange, UpdateMode.GEN)
         updated_schema_paths = list(updated_schema['paths'].keys())
         assert_that(updated_schema_paths, is_(self.orig_schema_paths))
 
     def test_update_respects_basepath(self):
         updated_schema = update_openapi(
-            PETSTORE_SCHEMA, self.get_pets_exchange)
+            PETSTORE_SCHEMA, self.get_pets_exchange, UpdateMode.GEN)
         updated_schema_paths = list(updated_schema['paths'].keys())
         assert_that(updated_schema_paths, is_(self.orig_schema_paths))
 
@@ -163,7 +164,7 @@ class TestQueryParameters:
     expected_path_name = "/v1/pets/32"
 
     def test_build_with_query(self):
-        schema = build_schema_batch([self.exchange])
+        schema = build_schema_batch([self.exchange], UpdateMode.GEN)
 
         assert_that(list(schema['paths'].keys()),
                     is_([self.expected_path_name]))
@@ -181,12 +182,12 @@ class TestQueryParameters:
         assert_that(set(parameter_names), is_(set(['id', 'car'])))
 
     def test_schema_update_with_query(self):
-        schema = build_schema_batch([self.exchange_wo_query])
+        schema = build_schema_batch([self.exchange_wo_query], UpdateMode.GEN)
 
         operation = schema['paths'][self.expected_path_name]['get']
         assert_that(operation, has_entry('parameters', []))
 
-        updated_schema = update_openapi(schema, self.exchange)
+        updated_schema = update_openapi(schema, self.exchange, UpdateMode.GEN)
 
         operation = updated_schema['paths'][self.expected_path_name]['get']
         assert_that(operation, has_entry('parameters', has_length(2)))
@@ -202,7 +203,7 @@ class TestSchemaTextBody:
     exchange: HttpExchange = {'request': request, 'response': response}
 
     def test_build_string_body(self):
-        schema = build_schema_batch([self.exchange])
+        schema = build_schema_batch([self.exchange], UpdateMode.GEN)
         response_content = schema['paths']['/v1']['get']['responses']['200']['content']
 
         assert_that(response_content, has_key("text/plain"))
@@ -211,3 +212,15 @@ class TestSchemaTextBody:
 
         assert_that(media_type, has_entry(
             "schema", has_entry("type", "string")))
+
+class TestShemaInReplayMode:
+
+    def test_schema_in_replay_mode(self):
+        reqs = []
+        with open('tests/server/mock/callbacks/opbank/recordings/recording.jsonl','r') as rr: 
+            reqs = rr.read().split('\n')
+
+        reqs = [json.loads(r) for r in reqs if r != '']
+        r = build_schema_batch(reqs, UpdateMode.REPLAY)
+        # this schema has four recordings, of which two correspond to /v1/payments/confirm
+        assert 2 == len(r['paths']['/v1/payments/confirm']['post']['responses']['201']['content']['application/json']['schema']['oneOf'])

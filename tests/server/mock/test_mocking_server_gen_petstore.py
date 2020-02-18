@@ -1,15 +1,24 @@
-from tools.meeshkan_server import make_mocking_app
+from meeshkan.server import make_mocking_app
+from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 
 import pytest
 import json
 
+from meeshkan.server.utils.routing import HeaderRouting
+
+
 @pytest.fixture
 def app():
-    return make_mocking_app('tests/server/mock/callbacks', 'gen', 'tests/server/mock/recordings', 'tests/server/mock/petstore_schema')
+    return make_mocking_app('tests/server/mock/callbacks', 'tests/server/mock/petstore_schema', HeaderRouting())
+
+URL = 'petstore.swagger.io'
 
 @pytest.mark.gen_test
 def test_mocking_server_pets(http_client, base_url):
-    response = yield http_client.fetch(base_url+'/pets')
+    req = HTTPRequest(base_url+'/pets', headers={
+        'Host': 'petstore.swagger.io'
+    })
+    response = yield http_client.fetch(req)
     assert response.code == 200
     rb = json.loads(response.body)
     assert type(rb) == type([])
@@ -18,7 +27,10 @@ def test_mocking_server_pets(http_client, base_url):
 
 @pytest.mark.gen_test
 def test_mocking_server_pet(http_client, base_url):
-    response = yield http_client.fetch(base_url+'/pets/42')
+    req = HTTPRequest(base_url+'/pets/42', headers={
+        'Host': 'petstore.swagger.io'
+    })
+    response = yield http_client.fetch(req)
     assert response.code == 200
     rb = json.loads(response.body)
     assert type(rb) == type({})

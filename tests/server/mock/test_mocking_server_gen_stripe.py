@@ -1,11 +1,14 @@
-from tools.meeshkan_server import make_mocking_app
+from meeshkan.server import make_mocking_app
 
 import pytest
 import json
 
+from meeshkan.server.utils.routing import HeaderRouting
+
+
 @pytest.fixture
 def app():
-    return make_mocking_app('tests/server/mock/callbacks', 'gen', 'tests/server/mock/recordings', 'tests/server/mock/stripe_schema')
+    return make_mocking_app('tests/server/mock/callbacks', 'tests/server/mock/stripe_schema', HeaderRouting())
 
 
 @pytest.mark.gen_test
