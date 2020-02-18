@@ -8,7 +8,7 @@ from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.web import Application
 
-from meeshkan.server.utils.routing import PathRouting, HeaderRouting, Routing
+from .utils.routing import PathRouting, HeaderRouting, Routing
 from .admin.views import StorageView
 from .proxy.proxy import RecordProxy
 from .server.callbacks import callback_manager

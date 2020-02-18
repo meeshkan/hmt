@@ -18,7 +18,6 @@ def test_build_new_query():
 
     assert_that(query_parameter, has_entry('name', 'id'))
     assert_that(query_parameter, has_entry('in', 'query'))
-    assert_that(query_parameter, has_entry('required', True))
 
     assert_that(query_parameter, has_key("schema"))
 

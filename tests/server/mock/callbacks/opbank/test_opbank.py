@@ -3,10 +3,11 @@ from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 
 import pytest
 import json
+from meeshkan.server.utils.routing import HeaderRouting
 
 @pytest.fixture
 def app():
-    return make_mocking_app('tests/server/mock/callbacks/opbank/callbacks', 'tests/server/mock/callbacks/opbank/schemas', False)
+    return make_mocking_app('tests/server/mock/callbacks/opbank/callbacks', 'tests/server/mock/callbacks/opbank/schemas', HeaderRouting())
 
 ACCOUNTS_HEADERS = {
     'Host': 'sandbox.apis.op-palvelut.fi',
