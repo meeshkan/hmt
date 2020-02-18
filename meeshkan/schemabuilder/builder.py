@@ -10,9 +10,9 @@ from openapi_typed import Info, MediaType, OpenAPIObject, PathItem, Response, Op
 from typeguard import check_type  # type: ignore
 
 from ..logger import get as getLogger
-from .media_types import infer_media_type_from_nonempty, build_media_type, update_media_type, MediaTypeKey
+from .media_types import infer_media_type_from_nonempty, build_media_type, update_media_type, MediaTypeKey, update_text_schema
 from .paths import find_matching_path, RequestPathParameters
-from .query import build_query, update_query
+from .param import ParamBuilder
 from .schema import validate_openapi_object
 from .servers import normalize_path_if_matches
 from .result import BuildResult
@@ -99,8 +99,24 @@ def update_response(response: Response, mode: UpdateMode, exchange: HttpExchange
 
     media_type_key = infer_media_type_from_nonempty(response_body)
 
-    response_content = response['content'] if 'content' in response else None
+    ################
+    ### HEADERS
+    ################
+    response_headers = response.get('headers', None)
+    useable_headers = {} if response_headers is None else { k: v for k,v in response_headers if k not in ['content-type', 'content-length', 'Content-Type', 'Content-Length']}
+    has_headers = len(useable_headers) > 0
+    if response_headers is None and has_headers:
+        response['headers'] = {}
+    if has_headers:
+        response['headers'] = {
+            **response['headers'],
+            **{ k: update_text_schema(v, mode, schema=response['headers'].get(k, None)) for k, v in useable_headers.items() }
+        }
 
+    #############
+    ### CONTENT
+    #############
+    response_content = response.get('content', None)
     if response_content is not None and media_type_key in response_content:
         # Need to update existing media type
         existing_media_type = response_content[media_type_key]
@@ -129,15 +145,17 @@ def build_operation(exchange: HttpExchange, mode: UpdateMode) -> Operation:
     response = build_response(exchange, mode)
     code = str(exchange['response']['statusCode'])
 
-    request_query_params = exchange['request']['query']
-    schema_query_params = build_query(request_query_params)
+    request_query_params = exchange['request'].get('query', {})
+    request_header_params = exchange['request'].get('headers', {})
+    schema_query_params = ParamBuilder('query').build(request_query_params, mode)
+    schema_header_params = ParamBuilder('header').build(request_header_params, mode)
 
     operation = Operation(
         summary="Operation summary",
         description="Operation description",
         operationId="id",
         responses={code: response},
-        parameters=schema_query_params)
+        parameters=[*schema_query_params, *schema_header_params])
     return operation
 
 
@@ -166,10 +184,12 @@ def update_operation(operation: Operation, request: HttpExchange, mode: UpdateMo
         response = build_response(request, mode)
 
     existing_parameters = operation['parameters']
-    request_query_params = request['request']['query']
-    # TODO: should we use the mode to update the query?
-    updated_parameters = update_query(
-        request_query_params, existing_parameters)
+    request_query_params = request['request'].get('query', {})
+    request_header_params = request['request'].get('header', {})
+    updated_parameters = [*ParamBuilder('query').update(request_query_params,
+            mode, existing_parameters),
+        *ParamBuilder('header').update(request_header_params,
+            mode, existing_parameters)]
 
     operation['parameters'] = updated_parameters
     operation['responses'][response_code] = response
@@ -184,33 +204,6 @@ def verify_not_ref(item: Union[Reference, Any], expected_type: Type[T]) -> T:
     return cast(T, item)
 
 
-def verify_path_parameters(schema_path_parameters: List[Union[Parameter, Reference]], request_path_params: RequestPathParameters) -> None:
-    """Verify that the extracted path parameters from the request match those listed in the specification.
-
-    Arguments:
-        schema_path_parameters {List[Union[Parameter, Reference]]} -- List of OpenAPI parameter objects.
-        request_path_params {RequestPathParameters} -- [description]
-    """
-    path_params_copy = dict(**request_path_params)
-
-    for parameter in schema_path_parameters:
-        param = verify_not_ref(parameter, Parameter)
-        param_in = param['in']
-        if param_in != 'path':
-            continue
-
-        parameter_name = param['name']
-        if not parameter_name in path_params_copy:
-            raise Exception(
-                "Expected to find path parameter %s in request path parameters" % parameter_name)
-
-        del path_params_copy[parameter_name]
-
-    remaining_keys = path_params_copy.keys()
-    if len(remaining_keys) != 0:
-        raise Exception(
-            "Found {} extra path parameters: {}".format(len(remaining_keys), ', '.join(list(remaining_keys))))
-
 def update_openapi(schema: OpenAPIObject, request: HttpExchange, mode: UpdateMode) -> OpenAPIObject:
     """Update OpenAPI schema with a new request-response pair.
     Does not mutate the input schema.
@@ -221,7 +214,6 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange, mode: UpdateMod
         OpenAPI -- Updated schema
     """
     schema_copy = copy.deepcopy(schema)
-
     request_method = request['request']['method']
     request_path = request['request']['pathname']
 
@@ -240,12 +232,12 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange, mode: UpdateMod
         normalized_pathname = normalized_pathname_or_none
 
     schema_paths = schema_copy['paths']
-
     operation_candidate = build_operation(request, mode)
     
     path_match_result = find_matching_path(normalized_pathname, schema_paths, request_method, operation_candidate)
 
-    schema_has_mutated = False
+    request_path_parameters = {}
+
     if path_match_result is not None:
         # Path item exists for request path
         path_item, request_path_parameters, pathname_with_wildcard, pathname_to_be_replaced_with_wildcard = path_match_result['path'], path_match_result['param_mapping'], path_match_result['pathname_with_wildcard'], path_match_result['pathname_to_be_replaced_with_wildcard']
@@ -267,13 +259,12 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange, mode: UpdateMod
                         'name': path_param,
                     }, *(schema_paths[pathname_with_wildcard]['parameters'])]
             schema_copy['paths'] = schema_paths
-            schema_has_mutated = True
     else:
         path_item = PathItem(summary="Path summary",
                              description="Path description")
         request_path_parameters = {}
         schema_copy['paths'] = {**schema_paths, **{request_path: path_item}}
-
+    
     if request_method in path_item:
         # Operation exists
         existing_operation = path_item[request_method]  # type: ignore
@@ -281,12 +272,6 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange, mode: UpdateMod
 
     else:
         operation = operation_candidate
-
-    if not schema_has_mutated:
-        # Verify path parameters are up-to-date
-        existing_path_parameters = [*path_item.get('parameters', []), *operation.get('parameters', [])]
-
-        verify_path_parameters(existing_path_parameters, request_path_parameters)
 
     # Needs type ignore as one cannot set variable property on typed dict
     path_item[request_method] = operation  # type: ignore

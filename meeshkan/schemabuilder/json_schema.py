@@ -15,7 +15,8 @@ def _to_openapi_compatible(schema):
         Modified schema
     """
     schema = copy.deepcopy(schema)
-    del schema['$schema']
+    if '$schema' in schema:
+        del schema['$schema']
     return schema
 
 def to_const(obj):
@@ -58,7 +59,7 @@ def to_json_schema(obj, mode: UpdateMode, schema=None):
         schema = builder.to_schema()
         return schema
     elif schema is None:
-        { 'oneOf': to_const(obj) }
+        return { 'oneOf': [to_const(obj)] }
     else:
         return { 'oneOf': [to_const(obj), schema]}
 

@@ -32,10 +32,9 @@ def update_text_schema(text_body: str, mode: UpdateMode, schema: Optional[Any] =
     return generic if mode == UpdateMode.GEN else {
         "oneOf": nondup([
             specific,
-            generic,
             schema if 'oneOf' not in schema else schema['oneOf']
         ])
-    } if mode == UpdateMode.ALL else specific
+    }
 
 
 def infer_media_type_from_nonempty(body: str) -> MediaTypeKey:
@@ -86,7 +85,6 @@ def update_media_type(exchange: HttpExchange, mode: UpdateMode, type_key: MediaT
         MediaType -- Updated media type object.
     """
     body = exchange['response']['body']
-
     existing_schema = (media_type or {}).get("schema", None)
 
     if type_key == "application/json":
