@@ -7,13 +7,9 @@
 
 Meeshkan is a library and command-line tool for reverse engineering APIs from recorded traffic.
 
-It is used at [Meeshkan](https://meeshkan.com) to build enterprise-level API sandboxes.
-
 The supported input format for HTTP recordings is the [HTTP Types](https://meeshkan.github.io/http-types/) JSON format.
 
 Meeshkan requires Python 3.6 or later for the new async/await syntax.
-
-Meeshkan is statically typed using the [pyright](https://github.com/microsoft/pyright) type checker.
 
 ## Table of Contents
 
