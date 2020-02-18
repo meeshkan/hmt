@@ -4,9 +4,12 @@ from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 import pytest
 import json
 
+from meeshkan.server.utils.routing import HeaderRouting
+
+
 @pytest.fixture
 def app():
-    return make_mocking_app('tests/server/mock/callbacks', 'tests/server/mock/petstore_schema', False)
+    return make_mocking_app('tests/server/mock/callbacks', 'tests/server/mock/petstore_schema', HeaderRouting())
 
 URL = 'petstore.swagger.io'
 

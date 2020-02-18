@@ -119,7 +119,7 @@ class Channel:
         headers = {}
         host_line: int = 0
         body_start: int = 0
-        last_line: int = 1
+        last_line: int = 0
         for line in req_lines[1:]:
             last_line += 1
             if not line:
@@ -196,7 +196,7 @@ class Channel:
                 resp = b''.join(self._response)
                 resp = response_from_bytes(resp)
                 # TODO: is this correct?
-                body = resp.read().decode('utf-8')
+                body = resp.data.decode('utf-8')
 
                 resp = Response(statusCode=resp.status, body=body, bodyAsJson=json.loads(body),
                                 headers=dict(resp.getheaders()))

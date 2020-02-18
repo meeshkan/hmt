@@ -48,7 +48,7 @@ class MeeshkanApplication(Application):
     mocking_service: MockingService
     router: Routing
 
-def make_mocking_app(callback_path, schema_dir, path_routing):
+def make_mocking_app(callback_path, schema_dir, router):
     app = MeeshkanApplication([
         (r'/.*', MockServerView)
     ])
@@ -57,7 +57,7 @@ def make_mocking_app(callback_path, schema_dir, path_routing):
     matcher = ResponseMatcher(schema_dir)
 
     app.mocking_service = MockingService(matcher)
-    app.router = PathRouting() if path_routing else HeaderRouting()
+    app.router = router
     return app
 
 @click.command()
@@ -68,7 +68,7 @@ def make_mocking_app(callback_path, schema_dir, path_routing):
 @click.option('--path_routing', is_flag=True, help='Whether to use a path based routing to a target host')
 def mock(port, admin_port, schema_dir, callback_path, path_routing):
     start_admin(admin_port)
-    app = make_mocking_app(callback_path, schema_dir, path_routing)
+    app = make_mocking_app(callback_path, schema_dir, PathRouting() if path_routing else HeaderRouting())
     http_server = HTTPServer(app)
     http_server.listen(port)
     logger.info('Mock server is listening on http://localhost:%s', port)
