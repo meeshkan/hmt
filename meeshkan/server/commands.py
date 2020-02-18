@@ -36,6 +36,9 @@ def start_admin(port):
 @click.option('--schema_dir', default="./__unmock__", help='Directory with OpenAPI schemas')
 @click.option('--path_routing', is_flag=True, help='Whether to use a path based routing to a target host')
 def record(port, admin_port, log_dir, path_routing, schema_dir):
+    """
+    Record http traffic to http-types format.
+    """
     start_admin(admin_port)
     logger.info('Starting Meeshkan proxy in recording mode on http://localhost:%s', port)
     with RequestLoggingCallback(recording=True, log_dir=log_dir, schema_dir=schema_dir) as callback:
@@ -66,6 +69,9 @@ def make_mocking_app(callback_path, schema_dir, router):
 @click.option('-s', '--schema_dir', default="./__unmock__", help='Directory with OpenAPI schemas')
 @click.option('--path_routing', is_flag=True, help='Whether to use a path based routing to a target host')
 def mock(port, admin_port, schema_dir, callback_path, path_routing):
+    """
+    Create a mock of an OpenAPI schema.
+    """
     start_admin(admin_port)
     app = make_mocking_app(callback_path, schema_dir, PathRouting() if path_routing else HeaderRouting())
     http_server = HTTPServer(app)
