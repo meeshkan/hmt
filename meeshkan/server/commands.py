@@ -34,12 +34,12 @@ def start_admin(port):
 @click.option('--admin_port', default="8888", help='Admin server port')
 @click.option('--log_dir', default="./logs", help='API calls logs direcotry')
 @click.option('--schema_dir', default="./__unmock__", help='Directory with OpenAPI schemas')
-@click.option('--path_routing', is_flag=True, help='Whether to use a path based routing to a target host')
-def record(port, admin_port, log_dir, path_routing, schema_dir):
+@click.option('--header_routing', is_flag=True, help='Whether to use a header based routing to a target host')
+def record(port, admin_port, log_dir, header_routing, schema_dir):
     start_admin(admin_port)
     logger.info('Starting Meeshkan proxy in recording mode on http://localhost:%s', port)
     with RequestLoggingCallback(recording=True, log_dir=log_dir, schema_dir=schema_dir) as callback:
-        server = RecordProxy(callback, PathRouting() if path_routing else HeaderRouting())
+        server = RecordProxy(callback, HeaderRouting() if header_routing else PathRouting())
         server.listen(port)
         tornado.ioloop.IOLoop.instance().start()
 
@@ -53,8 +53,6 @@ def make_mocking_app(callback_path, schema_dir, router):
     ])
     callback_manager.load(callback_path)
 
-    matcher = ResponseMatcher(schema_dir)
-
     app.response_matcher = ResponseMatcher(schema_dir)
     app.router = router
     return app
@@ -64,10 +62,10 @@ def make_mocking_app(callback_path, schema_dir, router):
 @click.option('--admin_port', default="8888", help='Admin server port')
 @click.option('--port', default="8000", help='Server port')
 @click.option('-s', '--schema_dir', default="./__unmock__", help='Directory with OpenAPI schemas')
-@click.option('--path_routing', is_flag=True, help='Whether to use a path based routing to a target host')
-def mock(port, admin_port, schema_dir, callback_path, path_routing):
+@click.option('--header_routing', is_flag=True, help='Whether to use a path based routing to a target host')
+def mock(port, admin_port, schema_dir, callback_path, header_routing):
     start_admin(admin_port)
-    app = make_mocking_app(callback_path, schema_dir, PathRouting() if path_routing else HeaderRouting())
+    app = make_mocking_app(callback_path, schema_dir, HeaderRouting() if header_routing else PathRouting())
     http_server = HTTPServer(app)
     http_server.listen(port)
     logger.info('Mock server is listening on http://localhost:%s', port)
