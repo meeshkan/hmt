@@ -326,7 +326,7 @@ def build_schema_online(requests: Iterable[HttpExchange], mode: UpdateMode, base
     return schema
 
 
-def build_schema_batch(requests: List[HttpExchange], mode: UpdateMode, base_schema: OpenAPIObject = BASE_SCHEMA) -> OpenAPIObject:
+def build_schema_batch(requests: List[HttpExchange], mode: UpdateMode = UpdateMode.GEN, base_schema: OpenAPIObject = BASE_SCHEMA) -> OpenAPIObject:
     """Build OpenAPI schema from a list of request-response object.
 
     OpenAPI object reference: https://swagger.io/specification/#oasObject

@@ -2,5 +2,7 @@
 """
 from .builder import *
 from . import builder
+from .update_mode import *
+from . import update_mode
 
-__all__ = builder.__all__
+__all__ = [*builder.__all__, *update_mode.__all__]
