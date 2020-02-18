@@ -36,7 +36,9 @@ class ParamBuilder:
             SchemaParameters -- OpenAPI list of parameters.
         """
         existing = []
-        return self.update(params, mode, existing, set_new_as_required=True)
+        # as a defualt, we set nothing new to required
+        # can change later if there is a compelling reason
+        return self.update(params, mode, existing, set_new_as_required=False)
 
 
     def build_param(self, name: str, value: Union[str, Sequence[str]], required: bool, mode: UpdateMode) -> Parameter:

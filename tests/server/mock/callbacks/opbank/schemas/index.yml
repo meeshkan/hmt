@@ -1,0 +1,250 @@
+description: API description
+title: API title
+version: '1.0'
+openapi: 3.0.0
+paths:
+  /accounts/v3/accounts:
+    description: Path description
+    get:
+      description: Operation description
+      operationId: id
+      parameters:
+      - in: header
+        name: x-api-key
+        required: true
+        schema:
+          type: string
+      - in: header
+        name: x-session-id
+        required: true
+        schema:
+          type: string
+      - in: header
+        name: x-authorization
+        required: true
+        schema:
+          type: string
+      - in: header
+        name: x-request-id
+        required: true
+        schema:
+          type: string
+      - in: header
+        name: authorization
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - properties:
+                    accounts:
+                      items:
+                      - properties:
+                          balance:
+                            enum:
+                            - 2215.81
+                            type: number
+                          identifier:
+                            enum:
+                            - FI3959986920207073
+                            type: string
+                        required:
+                        - identifier
+                        - balance
+                        type: object
+                      - properties:
+                          balance:
+                            enum:
+                            - 0
+                            type: integer
+                          identifier:
+                            enum:
+                            - FI2350009421535899
+                            type: string
+                        required:
+                        - identifier
+                        - balance
+                        type: object
+                      type: array
+                  required:
+                  - accounts
+                  type: object
+          description: Response description
+          headers: {}
+          links: {}
+      summary: Operation summary
+    summary: Path summary
+  /v1/payments/confirm:
+    description: Path description
+    post:
+      description: Operation description
+      operationId: id
+      parameters:
+      - in: header
+        name: x-authorization
+        required: true
+        schema:
+          oneOf:
+          - enum:
+            - 6c18c234b1b18b1d97c7043e2e41135c293d0da9
+            type: string
+      - in: header
+        name: x-session-id
+        required: false
+        schema:
+          oneOf:
+          - enum:
+            - '12345'
+            type: string
+      - in: header
+        name: Host
+        required: true
+        schema:
+          oneOf:
+          - enum:
+            - sandbox.apis.op-palvelut.fi
+            type: string
+      - in: header
+        name: Host
+        required: false
+        schema:
+          oneOf:
+          - enum:
+            - sandbox.apis.op-palvelut.fi
+            type: string
+      - in: header
+        name: x-session-id
+        required: true
+        schema:
+          oneOf:
+          - enum:
+            - '12345'
+            type: string
+      - in: header
+        name: x-request-id
+        required: false
+        schema:
+          oneOf:
+          - enum:
+            - '12345'
+            type: string
+      - in: header
+        name: x-request-id
+        required: true
+        schema:
+          oneOf:
+          - enum:
+            - '12345'
+            type: string
+      - in: header
+        name: x-authorization
+        required: false
+        schema:
+          oneOf:
+          - enum:
+            - 6c18c234b1b18b1d97c7043e2e41135c293d0da9
+            type: string
+      - in: header
+        name: x-api-key
+        required: false
+        schema:
+          oneOf:
+          - enum:
+            - ZoStul8nNuwq1SYCzSrLcO1wAj4Tyf7x
+            type: string
+      - in: header
+        name: x-api-key
+        required: true
+        schema:
+          oneOf:
+          - enum:
+            - ZoStul8nNuwq1SYCzSrLcO1wAj4Tyf7x
+            type: string
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - properties:
+                    paymentId:
+                      type: string
+                      enum: [foo]
+                  required: [paymentId]
+                  type: object
+          description: Response description
+          headers: {}
+          links: {}
+      summary: Operation summary
+    summary: Path summary
+  /v1/payments/initiate:
+    description: Path description
+    post:
+      description: Operation description
+      operationId: id
+      parameters:
+      - in: header
+        name: Host
+        required: true
+        schema:
+          oneOf:
+          - enum:
+            - sandbox.apis.op-palvelut.fi
+            type: string
+      - in: header
+        name: x-api-key
+        required: true
+        schema:
+          oneOf:
+          - enum:
+            - ZoStul8nNuwq1SYCzSrLcO1wAj4Tyf7x
+            type: string
+      - in: header
+        name: x-session-id
+        required: true
+        schema:
+          oneOf:
+          - enum:
+            - '12345'
+            type: string
+      - in: header
+        name: x-authorization
+        required: true
+        schema:
+          oneOf:
+          - enum:
+            - 6c18c234b1b18b1d97c7043e2e41135c293d0da9
+            type: string
+      - in: header
+        name: x-request-id
+        required: true
+        schema:
+          oneOf:
+          - enum:
+            - '12345'
+            type: string
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - properties:
+                    paymentId:
+                      enum:
+                      - foo
+                      type: string
+                  required:
+                  - paymentId
+                  type: object
+          description: Response description
+          headers: {}
+          links: {}
+      summary: Operation summary
+    summary: Path summary
+servers:
+- url: http://sandbox.apis.op-palvelut.fi

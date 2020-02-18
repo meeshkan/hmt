@@ -79,9 +79,11 @@ class ResponseMatcher:
                 **(change_ref(schema) if '$ref' in schema else change_refs(schema)),
                 'definitions': { k: change_ref(cast(Reference, v)) if '$ref' in v else change_refs(cast(Schema, v)) for k,v in (match[name]['components']['schemas'].items() if name in match and 'components' in match[name] and 'schemas' in match[name]['components'] else [])}
             }
+            bodyAsJson = faker(to_fake, to_fake, 0)
             return Response(
                 statusCode=statusCode,
-                body=json.dumps(faker(to_fake, to_fake, 0)),
+                body=json.dumps(bodyAsJson),
+                bodyAsJson=bodyAsJson,
                 # TODO: can this be accomplished without a cast?
                 headers=cast(Mapping[str, Union[str, Sequence[str]]], { **headers, "Content-Type": "application/json" })
             )

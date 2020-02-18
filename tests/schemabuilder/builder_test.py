@@ -1,6 +1,6 @@
 import copy
 from meeshkan.schemabuilder.update_mode import UpdateMode
-
+import json
 import re
 from http_types import HttpExchange, Request, Response, RequestBuilder
 from tests.schemabuilder.paths_test import PETSTORE_SCHEMA
@@ -212,3 +212,15 @@ class TestSchemaTextBody:
 
         assert_that(media_type, has_entry(
             "schema", has_entry("type", "string")))
+
+class TestShemaInReplayMode:
+
+    def test_schema_in_replay_mode(self):
+        reqs = []
+        with open('tests/server/mock/callbacks/opbank/recordings/recording.jsonl','r') as rr: 
+            reqs = rr.read().split('\n')
+
+        reqs = [json.loads(r) for r in reqs if r != '']
+        r = build_schema_batch(reqs, UpdateMode.REPLAY)
+        # this schema has four recordings, of which two correspond to /v1/payments/confirm
+        assert 2 == len(r['paths']['/v1/payments/confirm']['post']['responses']['201']['content']['application/json']['schema']['oneOf'])

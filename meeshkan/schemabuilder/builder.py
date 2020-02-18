@@ -229,7 +229,6 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange, mode: UpdateMod
 
     normalized_pathname_or_none = normalize_path_if_matches(
         request['request'], schema_servers)
-
     if normalized_pathname_or_none is None:
         schema_copy['servers'] = [*schema_copy['servers'], Server(url=urlunsplit(
             [request['request']['protocol'], request['request']['host'], '', '', '']))]
@@ -239,7 +238,6 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange, mode: UpdateMod
 
     schema_paths = schema_copy['paths']
     operation_candidate = build_operation(request, mode)
-    
     path_match_result = find_matching_path(normalized_pathname, schema_paths, request_method, operation_candidate)
 
     request_path_parameters = {}
@@ -248,29 +246,38 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange, mode: UpdateMod
         # Path item exists for request path
         path_item, request_path_parameters, pathname_with_wildcard, pathname_to_be_replaced_with_wildcard = path_match_result['path'], path_match_result['param_mapping'], path_match_result['pathname_with_wildcard'], path_match_result['pathname_to_be_replaced_with_wildcard']
         # Create a wildcard if the mode is not replay/mixed
-        if (pathname_to_be_replaced_with_wildcard is not None) and (mode != UpdateMode.REPLAY) and (mode != UpdateMode.MIXED):
-            # the algorithm has updated the pathname, need to mutate
-            # the schema paths to use the new and discard the old if the old exists
-            # in the schema. it would not exist if we have already put a wildcard
-            pointer_to_value = schema_paths[pathname_to_be_replaced_with_wildcard]
-            schema_paths = { k: v for k, v in [(pathname_with_wildcard, pointer_to_value), *schema_paths.items()] if k != pathname_to_be_replaced_with_wildcard }
-            if not ('parameters' in schema_paths[pathname_with_wildcard].keys()):
-                schema_paths[pathname_with_wildcard]['parameters'] = []
-            for path_param in request_path_parameters.keys():
-                params = [cast(Parameter, x) for x in schema_paths[pathname_with_wildcard]['parameters'] if '$ref' not in x]
-                if not (path_param in [x['name'] for x in params if x['in'] == 'path']):
-                    schema_paths[pathname_with_wildcard]['parameters'] = [{
-                        'required': True,
-                        'in': 'path',
-                        'name': path_param,
-                    }, *(schema_paths[pathname_with_wildcard]['parameters'])]
-            schema_copy['paths'] = schema_paths
+        if (pathname_to_be_replaced_with_wildcard is not None):
+            if mode == UpdateMode.GEN:
+                # the algorithm has updated the pathname, need to mutate
+                # the schema paths to use the new and discard the old if the old exists
+                # in the schema. it would not exist if we have already put a wildcard
+                pointer_to_value = schema_paths[pathname_to_be_replaced_with_wildcard]
+                schema_paths = { k: v for k, v in [(pathname_with_wildcard, pointer_to_value), *schema_paths.items()] if k != pathname_to_be_replaced_with_wildcard }
+                if not ('parameters' in schema_paths[pathname_with_wildcard].keys()):
+                    schema_paths[pathname_with_wildcard]['parameters'] = []
+                for path_param in request_path_parameters.keys():
+                    params = [cast(Parameter, x) for x in schema_paths[pathname_with_wildcard]['parameters'] if '$ref' not in x]
+                    if not (path_param in [x['name'] for x in params if x['in'] == 'path']):
+                        schema_paths[pathname_with_wildcard]['parameters'] = [{
+                            'required': True,
+                            'in': 'path',
+                            'name': path_param,
+                        }, *(schema_paths[pathname_with_wildcard]['parameters'])]
+                schema_copy['paths'] = schema_paths
+            else:
+                # we are using recordings, so we shouldn't overwrite anything
+                # we only add if it is not there yet
+                if request_path not in schema_paths:
+                    # TODO: merge with liens below?
+                    path_item = PathItem(summary="Path summary",
+                             description="Path description")
+                    request_path_parameters = {}
+                    schema_copy['paths'] = {**schema_paths, **{request_path: path_item}}
     else:
         path_item = PathItem(summary="Path summary",
                              description="Path description")
         request_path_parameters = {}
         schema_copy['paths'] = {**schema_paths, **{request_path: path_item}}
-    
     if request_method in path_item:
         # Operation exists
         existing_operation = path_item[request_method]  # type: ignore
