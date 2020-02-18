@@ -43,7 +43,7 @@ class HeaderRouting(Routing):
 
 class StaticRouting(Routing):
     def __init__(self, target_address):
-        self._url = urllib.parse.urlsplit('//{}'.format(target_address))
+        self._url = urllib.parse.urlsplit(target_address)
         self._host = '{}:{}'.format(self._url.hostname, self._url.port) if self._url.port else self._url.hostname
 
     def route(self, path: str, headers: typing.Dict, inbound_scheme='http') -> RoutingInfo:
