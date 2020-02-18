@@ -4,6 +4,7 @@ from functools import reduce
 from typing import Any, List, Iterable, AsyncIterable, cast, Tuple, Optional, Union, TypeVar, Type
 from urllib.parse import urlunsplit
 from collections import defaultdict
+import json
 
 from http_types import HttpExchange as HttpExchange
 from openapi_typed import Info, MediaType, OpenAPIObject, PathItem, Response, Operation, Parameter, Reference, Server, Responses
@@ -148,6 +149,7 @@ def build_operation(exchange: HttpExchange, mode: UpdateMode) -> Operation:
     request_query_params = exchange['request'].get('query', {})
     request_header_params = exchange['request'].get('headers', {})
     schema_query_params = ParamBuilder('query').build(request_query_params, mode)
+    # TODO: unfreeze
     schema_header_params = ParamBuilder('header').build(request_header_params, mode)
 
     operation = Operation(
@@ -186,10 +188,13 @@ def update_operation(operation: Operation, request: HttpExchange, mode: UpdateMo
     existing_parameters = operation['parameters']
     request_query_params = request['request'].get('query', {})
     request_header_params = request['request'].get('header', {})
-    updated_parameters = [*ParamBuilder('query').update(request_query_params,
+    ## HACK
+    # because update returns a full list, we need to merge
+    # we do that using json
+    updated_parameters = [json.loads(y) for y in set([json.dumps(x) for x in [*ParamBuilder('query').update(request_query_params,
             mode, existing_parameters),
         *ParamBuilder('header').update(request_header_params,
-            mode, existing_parameters)]
+            mode, existing_parameters)]])]
 
     operation['parameters'] = updated_parameters
     operation['responses'][response_code] = response

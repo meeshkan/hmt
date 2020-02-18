@@ -21,6 +21,8 @@ def unnest(d: List[Schema]) -> List[Schema]:
 
 class ParamBuilder:
     def __init__(self, _in: str):
+        if _in not in ['header', 'query']:
+            raise ValueError('A parameter cannot have an `in` value of %s.' % s)
         self._in = _in
 
     def build(self, params: Mapping[str, str], mode: UpdateMode) -> SchemaParameters:
@@ -32,7 +34,8 @@ class ParamBuilder:
         Returns:
             SchemaParameters -- OpenAPI list of parameters.
         """
-        return self.update(params, mode, [], set_new_as_required=True)
+        existing = []
+        return self.update(params, mode, existing, set_new_as_required=True)
 
 
     def build_param(self, name: str, value: Union[str, Sequence[str]], required: bool, mode: UpdateMode) -> Parameter:
@@ -53,7 +56,7 @@ class ParamBuilder:
         else:
             value = value
         out = {}
-        if True or (mode == UpdateMode.GEN):
+        if (mode == UpdateMode.GEN):
             schema_builder = SchemaBuilder()
             schema_builder.add_object(value)
             out = schema_builder.to_schema()
@@ -74,7 +77,6 @@ class ParamBuilder:
 
     # TODO Fix types once openapi types are covariant
     def update(self, incoming_params: Mapping[str, str], mode: UpdateMode, existing: SchemaParameters, set_new_as_required=False) -> SchemaParameters:
-
         non_params: List[Parameter] = [
             param for param in existing if param['in'] != self._in]  # type: ignore
 
@@ -107,7 +109,7 @@ class ParamBuilder:
 
         # TODO Update shared incoming_params parameter schema
         shared_params = [
-            param if True or (mode == UpdateMode.GEN) else {
+            param if (mode == UpdateMode.GEN) else {
                 # use constants
                 **param,
                 'schema': {'oneOf': unnest([param['schema'], to_const(incoming_params[param['name']])])}
@@ -118,5 +120,4 @@ class ParamBuilder:
 
         updated_params = new_params + shared_params + \
             missing_params + non_params
-
         return cast(SchemaParameters, updated_params)
