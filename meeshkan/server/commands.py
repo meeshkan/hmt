@@ -33,8 +33,8 @@ def start_admin(port):
 @click.option('--port', default="8000", help='Server port')
 @click.option('--admin_port', default="8888", help='Admin server port')
 @click.option('--log_dir', default="./logs", help='API calls logs direcotry')
-@click.option('--schema_dir', default="./__unmock__", help='Directory with OpenAPI schemas')
 @click.option('--header_routing', is_flag=True, help='Whether to use a header based routing to a target host')
+@click.option('--schema_dir', default="./__unmock__", help='Directory with OpenAPI schemas')
 def record(port, admin_port, log_dir, header_routing, schema_dir):
     """
     Record http traffic to http-types format.
