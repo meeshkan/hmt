@@ -92,6 +92,19 @@ Use dash (`-i -`) to read from standard input:
 $ meeshkan build --source file -i - < recordings.jsonl
 ```
 
+### Building modes
+You can use a mode flag to indicate how the OpenAPI spec should be built, ie:
+
+```bash
+meeshkan build --mode gen -i path/to/recordings.jsonl
+```
+
+Supported modes are:
+* gen [default] - infer a schema from the recorded data
+* replay - replay the recorded data based on exact matching
+
+The OpenAPI schemas can be manually edited to mix the two modes.
+
 ### Reading from Kafka
 
 Install `kafka` bundle: `pip install meeshkan[kafka]` and set `--source kafka`:
@@ -121,18 +134,6 @@ The following commands are available in mock mode:
 | `admin_port` | Admin port  | 8999    |
 | `log_dir`    | The directory containing `.jsonl` files for mocking directly from recorded fixtures | `logs` |
 | `schema_dir` | The directory containing `.yml` or `.yaml` OpenAPI specs used for mocking, including ones built using `meeshkan build` | `__unmock__` |
-| `mode`       | The recording mode (see below) | `replay` |
-
-### Mocking modes
-You may launch meeshkan mocking server in different modes providing mode argument, i.e.:
-```bash
-meeshkan mock --mode replay
-```
-Supported modes are:
-* replay - replay recorded scenarios. If a request doesn't match any recorded data, a mock will return an error message/
-* gen - generate random data according to a schema on each request. It is suitable to test some corner cases and validate
-clients on accordance with OpenAPI schema
-* mixed - mixed mode. Return recorded data when possible. Otherwise generate random data.
 
 ## Recording
 
