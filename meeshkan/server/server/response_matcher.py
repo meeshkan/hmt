@@ -31,8 +31,8 @@ class ResponseMatcher:
                 specs = [*specs, (schema, cast(OpenAPIObject, yaml.safe_load(schema_file.read())))]
         self._schemas = { k: v for k, v in specs}
 
-    def match_error(self, msg: str, request: Request) -> Response:
-        return self.default_response('%s for path=%s, method=%s' % (msg, request['pathname'], request['method']))
+    def match_error(self, msg: str, req: Request) -> Response:
+        return self.default_response('%s. Here is the full request: %s.' % (msg, json.dumps(req, indent=2)))
 
     def default_response(self, msg):
         json_resp = {'message': msg}
@@ -45,27 +45,31 @@ class ResponseMatcher:
         # this is a hack - should be more versatile than this in future
         match = matcher(request, self._schemas)
         if len(match) == 0:
-            return self.match_error('Could not find a valid OpenAPI schema', request)
+            return self.match_error('Could not find a open API schema for the host %s.' % request['host'], request)
         match_keys = [x for x in match.keys()]
         random.shuffle(match_keys)
         name = match_keys[0]
+        path_error = 'Could not find a path %s on hostname %s.' % (request['path'], request['host'])
+        method_error = 'Could not find a method %s for path %s on hostname %s.' % (request['method'], request['path'], request['host'])
         if 'paths' not in match[name]:
-            return self.match_error('Could not find a valid path', request)
+            return self.match_error(path_error, request)
         if len(match[name]['paths'].items()) == 0:
-            return self.match_error('Could not find a valid path', request)
+            return self.match_error(path_error, request)
         if request['method'] not in [x for x in match[name]['paths'].values()][0].keys():
-            return self.match_error('Could not find the appropriate method', request)
+            return self.match_error(method_error, request)
         method = [x for x in match[name]['paths'].values()][0][cast(HttpMethod, request['method'])]
+        responses_error = 'While a stub for a specification exists for this endpoint, it contains no responses. That usually means the schema is corrupt or it has been constrained too much (ie asking for a 201 response when it only has 200 and 400).'
         if 'responses' not in method:
-            return self.match_error('Could not find any responses', request)
+            return self.match_error(responses_error, request)
         potential_responses = [r for r in method['responses'].items()]
         random.shuffle(potential_responses)
         if len(potential_responses) == 0:
-            return self.match_error('Could not find any responses', request)
+            return self.match_error(responses_error, request)
         response = potential_responses[0]
         headers = {}
         if 'headers' in response:
-            logging.info('Meeshkan cannot generate response headers yet. Coming soon!')
+            # TODO: can't handle references yet, need to fix
+            headers = { k: (faker(v['schema'], v['schema'], 0) if 'schema' in v else '***') for k,v in headers.items() }
         statusCode = int(response[0] if response[0] != 'default' else 400)
         if ('content' not in response[1]) or len(response[1]['content'].items()) == 0:
             return Response(statusCode=statusCode, body="", headers=headers)
