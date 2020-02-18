@@ -52,6 +52,7 @@ def make_mocking_app(callback_path, schema_dir, router):
         (r'/.*', MockServerView)
     ])
     callback_manager.load(callback_path)
+
     app.response_matcher = ResponseMatcher(schema_dir)
     app.router = router
     return app
