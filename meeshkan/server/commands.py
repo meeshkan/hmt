@@ -66,7 +66,7 @@ def make_mocking_app(callback_path, schema_dir, router):
 @click.option('--port', default="8000", help='Server port')
 @click.option('-s', '--schema_dir', default="./__unmock__", help='Directory with OpenAPI schemas')
 @click.option('--header_routing', is_flag=True, help='Whether to use a path based routing to a target host')
-def mock(port, admin_port, schema_dir, callback_path, header_routing):
+def mock(callback_path, admin_port, port, schema_dir, header_routing):
     start_admin(admin_port)
     app = make_mocking_app(callback_path, schema_dir, HeaderRouting() if header_routing else PathRouting())
     http_server = HTTPServer(app)
