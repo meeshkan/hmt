@@ -7,13 +7,13 @@ This document describes some advanced usage features of the server. For basic us
 ## Defining callbacks
 A directory containing callbacks can be provided in callback_path argument. The default is:
 ```bash
-python -m meeshkan_proxy mock --callback_path ./callbacks
+meeshkan mock --callback_path ./callbacks
 
 ```
 A directory can contain multiple Python scripts. A callback is a function with decorated as 
 tools.meeshkan_server.server.callbacks.callback. Each callback is mapped to an endpoint by providing an HTTP method, a host, and a path.
 ```python
-from tools.meeshkan_server.server.callbacks import callback
+from meeshkan.server.server.callbacks import callback
 
 @callback('meeshkan.com', 'post', '/counter')
 def counter_callback(request_body, response_body, storage):
@@ -41,7 +41,7 @@ Storage is global storage that follows dict syntax. It can storage a global stat
 
 You may also provide a format to a callback decorator. The default format is 'json'. If you provide 'text' you'll get strings in request_body and response_body.
 ```python
-from tools.meeshkan_server.server.callbacks import callback
+from meeshkan.server.server.callbacks import callback
 
 @callback('meeshkan.com', 'post', '/counter', format='text')
 def counter_callback(request_body, response_body, storage):
@@ -51,7 +51,7 @@ def counter_callback(request_body, response_body, storage):
 If you have to modify response headers you may provide response type value 'full'. In that case callback should return
 full http_types.Response structure instead of body.
 ```python
-from tools.meeshkan_server.server.callbacks import callback
+from meeshkan.server.server.callbacks import callback
 from http_types import Response
 
 @callback('meeshkan.com', 'post', '/counter', response='full')

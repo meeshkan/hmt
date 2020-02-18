@@ -143,12 +143,12 @@ $ pip install meeshkan # if not installed yet
 $ meeshkan record
 ```
 
-This starts Meeshkan as a proxy on the default port of `8000`.  For example, with curl, you can use Meeshkan as a proxy like so.
+This starts Meeshkan as a reverse proxy on the default port of `8000`.  For example, with curl, you can use Meeshkan as a proxy like so.
 
 ```bash
-$ curl -u http://localhost:8000 http://api.example.com
+$ curl http://localhost:8000/http://api.example.com
 ```
-
+By default the recording proxy uses the first path items to navigate to a target host.
 Now you should have the `logs` folder with jsonl files and the `__unmock__` folder with ready openapi schemes. 
 
 For more advanced information about recording, including custom middleware, see the [server documentation](./meeshkan/server/SERVER.md).
