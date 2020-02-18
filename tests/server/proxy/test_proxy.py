@@ -1,7 +1,9 @@
 import json
+import urllib.parse
 from unittest.mock import Mock
 
 import pytest
+from http_types import Request, Response
 from tornado.testing import bind_unused_port
 
 from meeshkan.server import make_mocking_app
@@ -17,7 +19,7 @@ def app():
 
 
 @pytest.mark.gen_test
-async def test_proxy(http_client, base_url, mocker):
+def test_proxy(http_client, base_url):
     server = None
     data_callback = Mock(spec=DataCallback)
     try:
@@ -35,4 +37,35 @@ async def test_proxy(http_client, base_url, mocker):
 
     yield http_client.close()
 
-    data_callback.log.assert_called_once()
+    class RequestMatcher:
+        def __eq__(self, other: Request):
+            return other['method'] == 'get' and \
+                   other['pathname'] == '/pets' and \
+                   other['path'] == '/pets' and \
+                   other['query'] == {}
+
+    class ResponseMatcher:
+        def __eq__(self, other: Response):
+            return
+
+    # data_callback.log.assert_called_with(RequestMatcher(), ResponseMatcher())
+
+    assert len(data_callback.log.call_args_list) == 1
+
+    base_url_sp = urllib.parse.urlsplit(base_url)
+    host = '{}:{}'.format(base_url_sp.hostname, base_url_sp.port)
+
+    request = data_callback.log.call_args_list[0][0][0]
+    assert 'get' == request['method']
+    assert 'http' == request['protocol']
+    assert '/pets' == request['pathname']
+    assert '/pets' == request['path']
+    assert {} == request['query']
+    assert host == request['host']
+    assert host == request['headers']['Host']
+
+    response = data_callback.log.call_args_list[0][0][1]
+    assert 200 == response['statusCode']
+    assert isinstance(response['bodyAsJson'], list)
+    assert isinstance(response['body'], str)
+    assert len(response['body']) > 0

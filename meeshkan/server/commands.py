@@ -12,7 +12,6 @@ from .utils.routing import PathRouting, HeaderRouting, Routing
 from .admin.views import StorageView
 from .proxy.proxy import RecordProxy
 from .server.callbacks import callback_manager
-from .server.mocking_service import MockingService
 from .server.response_matcher import ResponseMatcher
 from .server.views import MockServerView
 from .utils.data_callback import RequestLoggingCallback
@@ -45,7 +44,7 @@ def record(port, admin_port, log_dir, path_routing, schema_dir):
         tornado.ioloop.IOLoop.instance().start()
 
 class MeeshkanApplication(Application):
-    mocking_service: MockingService
+    response_matcher: ResponseMatcher
     router: Routing
 
 def make_mocking_app(callback_path, schema_dir, router):
@@ -56,7 +55,7 @@ def make_mocking_app(callback_path, schema_dir, router):
 
     matcher = ResponseMatcher(schema_dir)
 
-    app.mocking_service = MockingService(matcher)
+    app.response_matcher = ResponseMatcher(schema_dir)
     app.router = router
     return app
 

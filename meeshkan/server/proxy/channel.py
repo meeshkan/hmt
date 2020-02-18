@@ -59,7 +59,7 @@ class StreamWrapper:
             self._queue.append(data)
 
     def _do_write(self, data):
-        if data is None:
+        if not data:
             self._state = ConnectionState.CLOSED
             try:
                 self._stream.close()
@@ -195,7 +195,6 @@ class Channel:
 
                 resp = b''.join(self._response)
                 resp = response_from_bytes(resp)
-                # TODO: is this correct?
                 body = resp.data.decode('utf-8')
 
                 resp = Response(statusCode=resp.status, body=body, bodyAsJson=json.loads(body),
