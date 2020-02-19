@@ -7,7 +7,7 @@ from hamcrest import *
 exchanges = read_recordings_as_request_response()
 
 kafkaProcessorConfig = KafkaProcessorConfig(
-    broker="localhost:9092", topic="example")
+    broker="'kafka://localhost:9092", topic="example")
 
 
 @pytest.fixture()
