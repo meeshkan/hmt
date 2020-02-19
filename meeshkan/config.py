@@ -61,7 +61,10 @@ def _setup_logging(log_config: Path = LOG_CONFIG_FILE, silent: bool = False) -> 
         return config
 
     config = prepare_filenames(config_orig)
-    logging.config.dictConfig(config)
+    # for some reason, pyright fails with "'config' is not a known member of module"
+    # even though this is an officially documented member of logging
+    # for now we ignore the type
+    logging.config.dictConfig(config) # type: ignore
     if silent:
         _remove_non_file_handlers()
 

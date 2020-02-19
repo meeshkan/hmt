@@ -55,7 +55,7 @@ def infer_media_type_from_nonempty(body: str) -> MediaTypeKey:
 
     try:
         as_json = json.loads(body)
-    except json.decoder.JSONDecodeError:
+    except json.JSONDecodeError:
         logger.debug(f"Failed decoding: {body}")
         # TODO Handle application/xml etc.
         return MEDIA_TYPE_FOR_NON_JSON
