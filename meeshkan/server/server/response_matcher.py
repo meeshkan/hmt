@@ -2,6 +2,7 @@ import copy
 import glob
 import json
 import logging
+from meeshkan.server.server.rest import rest_middleware_manager
 import os
 import yaml
 import random
@@ -41,9 +42,10 @@ class ResponseMatcher:
 
 
     def get_response(self, request: Request) -> Response:
-        # mutate schema to include current hostname in servers
-        # this is a hack - should be more versatile than this in future
-        match = matcher(request, self._schemas)
+        # TODO: tight coupling here
+        # try to decouple...
+        schemas = rest_middleware_manager.spew(request, self._schemas)
+        match = matcher(request, schemas)
         if len(match) == 0:
             return self.match_error('Could not find a open API schema for the host %s.' % request['host'], request)
         match_keys = [x for x in match.keys()]

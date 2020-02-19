@@ -9,7 +9,7 @@ from tornado.ioloop import IOLoop
 from tornado.web import Application
 
 from .utils.routing import PathRouting, HeaderRouting, Routing
-from .admin.views import StorageView
+from .admin.views import RestMiddlewareView, RestMiddlewaresView, StorageView
 from .proxy.proxy import RecordProxy
 from .server.callbacks import callback_manager
 from .server.response_matcher import ResponseMatcher
@@ -19,10 +19,15 @@ from .utils.data_callback import RequestLoggingCallback
 LOG_CONFIG = os.path.join(os.path.dirname(__file__), 'logging.yaml')
 logger = logging.getLogger(__name__)
 
-def start_admin(port):
-    app = Application([
-        (r'/admin/storage', StorageView)
+def make_admin_app():
+    return Application([
+        (r'/admin/storage', StorageView),
+        (r'/admin/rest_middleware', RestMiddlewaresView),
+        (r'/admin/rest_middleware/(.+)', RestMiddlewareView),
     ])
+
+def start_admin(port):
+    app = make_admin_app()
     http_server = HTTPServer(app)
     http_server.listen(port)
     logger.info('Starting admin endpont on http://localhost:%s/admin', port)
