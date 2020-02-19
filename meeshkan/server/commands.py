@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
 def make_admin_app():
     return Application([
         (r'/admin/storage', StorageView),
-        (r'/admin/rest_middleware', RestMiddlewaresView),
-        (r'/admin/rest_middleware/(.+)', RestMiddlewareView),
+        (r'/admin/middleware/rest/pregen', RestMiddlewaresView),
+        (r'/admin/middleware/rest/pregen/(.+)', RestMiddlewareView),
     ])
 
 def start_admin(port):
