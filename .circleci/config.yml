@@ -60,4 +60,4 @@ jobs: # A basic unit of work in a run
   test-3.8:
     <<: *test-template
     docker:
-      - image: circleci/python:3.8.0a1-stretch
+      - image: circleci/python:3.8.1-buster
