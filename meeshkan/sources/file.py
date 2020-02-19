@@ -10,7 +10,7 @@ class FileSource(AbstractSource):
     def __init__(self, input_file: TextIO):
         self.input_file = input_file
 
-    async def start(self, loop: asyncio.events.AbstractEventLoop) -> Tuple[AsyncIterable[HttpExchange], None]:
+    async def start(self, loop: asyncio.AbstractEventLoop) -> Tuple[AsyncIterable[HttpExchange], None]:
         # print(self.input_file)
 
         async def read():
