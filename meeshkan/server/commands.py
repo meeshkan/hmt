@@ -7,7 +7,7 @@ from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.web import Application
 
-from meeshkan import UpdateMode
+from meeshkan.schemabuilder.update_mode import UpdateMode
 from .admin.views import StorageView
 from .proxy.proxy import RecordProxy
 from .server.callbacks import callback_manager

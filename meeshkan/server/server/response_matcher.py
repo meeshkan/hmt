@@ -1,5 +1,3 @@
-import copy
-import glob
 import json
 import logging
 import os
@@ -8,8 +6,8 @@ import random
 from faker import Faker
 from typing import cast, Mapping, Union, Sequence, Tuple
 from openapi_typed import OpenAPIObject, Reference, Schema
-from ...gen.generator import match_urls, matcher, faker, change_ref, change_refs
-from http_types import Response, HttpMethod
+from ...gen.generator import matcher, faker, change_ref, change_refs
+from http_types import HttpMethod
 fkr = Faker()
 
 from http_types import Request, Response

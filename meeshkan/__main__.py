@@ -1,9 +1,8 @@
-import asyncio
 import json
-from meeshkan.schemabuilder.update_mode import UpdateMode
 import click
 from typing import Sequence, cast
 
+from meeshkan.schemabuilder.update_mode import UpdateMode
 from .config import setup
 from .logger import get as getLogger
 from .schemabuilder.builder import BASE_SCHEMA, build_schema_async
