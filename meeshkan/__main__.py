@@ -74,9 +74,13 @@ def run_from_source(source: AbstractSource, mode: UpdateMode, starting_spec: Ope
 
 @click.command()
 @click.option("-i", "--input-file", required=False, type=click.File('rb'), help="Input file. Use dash '-' to read from stdin.")
-@click.option("-o", "--out", required=True, default='out', type=click.Path(exists=False, file_okay=False, writable=True, readable=True), help="Output directory. If the directory does not exist, it is created if the parent directory exists.")
+#TODO Isn't it a too complicated instruction? Probably, we want to change behavior to os.makedirs()
+@click.option("-o", "--out", required=True, default='out',
+              type=click.Path(exists=False, file_okay=False, writable=True, readable=True),
+              help="Output directory. If the directory does not exist, it is created if the parent directory exists.")
 @click.option("-a", "--initial-openapi-spec", required=False, type=click.File('rb'), help="Initial OpenAPI spec.")
-@click.option("-m", "--mode", required=False, default='gen', type=str , help="Spec building mode (replay, gen, mixed).")
+@click.option("-m", "--mode", type=click.Choice(['GEN', 'REPLAY', 'MIXED'], case_sensitive=False),
+              default='GEN', help="Spec building mode.")
 @click.option("--source", required=False, default='file', type=str, help="Source to read recordings from. For example, 'kafka'")
 @click.option("--sink", required=False, type=str,  help="Sink where to write results.")
 def build(input_file, out, initial_openapi_spec, mode, source, sink):
@@ -110,12 +114,16 @@ def build(input_file, out, initial_openapi_spec, mode, source, sink):
             validate_openapi_object(maybe_openapi) 
             openapi_spec = maybe_openapi
         except: pass # just use the initial schema
-    run_from_source(source, UpdateMode.GEN if mode == 'gen' else UpdateMode.REPLAY if mode == 'replay' else UpdateMode.MIXED, openapi_spec, sinks=sinks)
+    run_from_source(source, UpdateMode[mode.upper()], openapi_spec, sinks=sinks)
 
 
 @click.command()
-@click.option("-i", "--input-file", required=True, type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True, allow_dash=True), help="Path to a packet capture file.")
-@click.option("-o", "--out", required=False, default='recordings.jsonl', type=click.Path(exists=False, file_okay=True, dir_okay=False, writable=True, allow_dash=True), help="Output file.")
+@click.option("-i", "--input-file", required=True,
+              type=click.Path(exists=True, file_okay=True, dir_okay=False,
+                              readable=True, allow_dash=True), help="Path to a packet capture file.")
+@click.option("-o", "--out", required=False, default='recordings.jsonl',
+              type=click.Path(exists=False, file_okay=True, dir_okay=False,
+                              writable=True, allow_dash=True), help="Output file.")
 def convert(input_file, out):
     """
     Convert recordings from PCAP to JSONL format.
