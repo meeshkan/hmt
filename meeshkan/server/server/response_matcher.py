@@ -55,7 +55,7 @@ class ResponseMatcher:
             return self.match_error(path_error, request)
         if request['method'] not in [x for x in match[name]['paths'].values()][0].keys():
             return self.match_error(method_error, request)
-        method = [x for x in match[name]['paths'].values()][0][cast(HttpMethod, request['method'])]
+        method = [x for x in match[name]['paths'].values()][0][str(request['method'])]
         responses_error = 'While a stub for a specification exists for this endpoint, it contains no responses. That usually means the schema is corrupt or it has been constrained too much (ie asking for a 201 response when it only has 200 and 400).'
         if 'responses' not in method:
             return self.match_error(responses_error, request)
