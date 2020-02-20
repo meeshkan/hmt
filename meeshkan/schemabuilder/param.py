@@ -115,7 +115,7 @@ class ParamBuilder:
             param if (mode == UpdateMode.GEN) else {
                 # use constants
                 **param,
-                'schema': {'oneOf': unnest([param['schema'], to_const(incoming_params[param['name']])])}
+                'schema': {'oneOf': unnest(cast(List[Schema], [param['schema'], to_const(incoming_params[param['name']])]))}
             } for param in params if param['name'] in shared_param_names]
 
         missing_params = [

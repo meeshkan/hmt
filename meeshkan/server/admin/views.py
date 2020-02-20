@@ -1,13 +1,8 @@
-import json
 import logging
-import os
-from urllib import parse
-from urllib.parse import urlencode
 
-from http_types import RequestBuilder, Request
+from tornado.web import RequestHandler
 
 from ..server.storage import storage_manager
-from tornado.web import RequestHandler
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +15,3 @@ class StorageView(RequestHandler):
 
     def delete(self, **kwargs):
         storage_manager.clear()
-
-
-
