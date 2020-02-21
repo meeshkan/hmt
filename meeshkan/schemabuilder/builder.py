@@ -7,7 +7,7 @@ from collections import defaultdict
 import json
 
 from http_types import HttpExchange as HttpExchange
-from openapi_typed import Info, Header, MediaType, OpenAPIObject, PathItem, Response, Operation, Parameter, Reference, Server, Responses
+from openapi_typed_2 import Info, Header, MediaType, OpenAPIObject, PathItem, Response, Operation, Parameter, Reference, Server, Responses
 from typeguard import check_type  # type: ignore
 
 from ..logger import get as getLogger
@@ -103,21 +103,21 @@ def update_response(response: Response, mode: UpdateMode, exchange: HttpExchange
     ################
     ### HEADERS
     ################
-    response_headers = response.get('headers', None)
+    response_headers = response.headers
     useable_headers = {} if response_headers is None else { k: v for k,v in cast(Mapping[str, str], response_headers).items() if k not in ['content-type', 'content-length', 'Content-Type', 'Content-Length']}
     has_headers = len(useable_headers) > 0
     if response_headers is None and has_headers:
-        response['headers'] = {}
+        response.headers = {}
     if has_headers:
-        response['headers'] = {
-            **response['headers'],
-            **{ k: update_text_schema(v, mode, schema=response['headers'].get(k, None)) for k, v in useable_headers.items() }
+        response.headers = {
+            **response.headers,
+            **{ k: update_text_schema(v, mode, schema=response.headers.get(k, None)) for k, v in useable_headers.items() }
         }
 
     #############
     ### CONTENT
     #############
-    response_content = response['content'] if 'content' in response else None
+    response_content = response.content
     if response_content is not None and media_type_key in response_content:
         # Need to update existing media type
         existing_media_type = response_content[media_type_key]
@@ -128,7 +128,7 @@ def update_response(response: Response, mode: UpdateMode, exchange: HttpExchange
             exchange=exchange, mode=mode, type_key=media_type_key)
 
     response_content = {**response_content, **{media_type_key: media_type}}
-    response['content'] = response_content
+    response.content = response_content
     return response
 
 
@@ -185,7 +185,7 @@ def update_operation(operation: Operation, request: HttpExchange, mode: UpdateMo
     else:
         response = build_response(request, mode)
 
-    existing_parameters = operation['parameters']
+    existing_parameters = operation.parameters
     request_query_params = request['request'].get('query', {})
     request_header_params = request['request'].get('header', {})
     ## HACK
@@ -197,8 +197,8 @@ def update_operation(operation: Operation, request: HttpExchange, mode: UpdateMo
         *ParamBuilder('header').update(cast(Mapping[str, Union[str, Sequence[str]]], request_header_params),
             mode, existing_parameters)]])]
 
-    operation['parameters'] = updated_parameters
-    operation['responses'][response_code] = response
+    operation.parameters = updated_parameters
+    operation.responses[response_code] = response
     return operation
 
 
@@ -210,7 +210,7 @@ def verify_not_ref(item: Union[Reference, Any], expected_type: Type[T]) -> T:
     return cast(T, item)
 
 
-def update_openapi(schema: OpenAPIObject, request: HttpExchange, mode: UpdateMode) -> OpenAPIObject:
+def update_openapi(schema: OpenAPIObject, exchange: HttpExchange, mode: UpdateMode) -> OpenAPIObject:
     """Update OpenAPI schema with a new request-response pair.
     Does not mutate the input schema.
 
@@ -220,24 +220,24 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange, mode: UpdateMod
         OpenAPI -- Updated schema
     """
     schema_copy = copy.deepcopy(schema)
-    request_method = request['request']['method']
-    request_path = request['request']['pathname']
+    request_method = exchange['request']['method']
+    request_path = exchange['request']['pathname']
 
-    if not 'servers' in schema_copy:
-        schema_copy['servers'] = []
-    schema_servers = schema_copy['servers']
+    if schema_copy.servers is None:
+        schema_copy.servers = []
+    schema_servers = schema_copy.servers
 
     normalized_pathname_or_none = normalize_path_if_matches(
-        request['request'], schema_servers)
+        exchange['request'], schema_servers)
     if normalized_pathname_or_none is None:
-        schema_copy['servers'] = [*schema_copy['servers'], Server(url=urlunsplit(
-            [request['request']['protocol'], request['request']['host'], '', '', '']))]
+        schema_copy.servers = [*schema_copy.servers, Server(url=urlunsplit(
+            [exchange['request']['protocol'], exchange['request']['host'], '', '', '']))]
         normalized_pathname = request_path
     else:
         normalized_pathname = normalized_pathname_or_none
 
-    schema_paths = schema_copy['paths']
-    operation_candidate = build_operation(request, mode)
+    schema_paths = schema_copy.paths
+    operation_candidate = build_operation(exchange, mode)
     path_match_result = find_matching_path(normalized_pathname, schema_paths, request_method, operation_candidate)
 
     request_path_parameters = {}
@@ -253,17 +253,17 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange, mode: UpdateMod
                 # in the schema. it would not exist if we have already put a wildcard
                 pointer_to_value = schema_paths[pathname_to_be_replaced_with_wildcard]
                 schema_paths = { k: v for k, v in [(pathname_with_wildcard, pointer_to_value), *schema_paths.items()] if k != pathname_to_be_replaced_with_wildcard }
-                if not ('parameters' in schema_paths[pathname_with_wildcard].keys()):
-                    schema_paths[pathname_with_wildcard]['parameters'] = []
+                if  schema_paths[pathname_with_wildcard].parameters is None:
+                    schema_paths[pathname_with_wildcard].parameters= []
                 for path_param in request_path_parameters.keys():
                     params = [cast(Parameter, x) for x in schema_paths[pathname_with_wildcard]['parameters'] if '$ref' not in x]
-                    if not (path_param in [x['name'] for x in params if x['in'] == 'path']):
-                        schema_paths[pathname_with_wildcard]['parameters'] = [{
-                            'required': True,
-                            'in': 'path',
-                            'name': path_param,
-                        }, *(schema_paths[pathname_with_wildcard]['parameters'])]
-                schema_copy['paths'] = schema_paths
+                    if not (path_param in [x.name for x in params if x._in == 'path']):
+                        schema_paths[pathname_with_wildcard].parameters = [Parameter(
+                            required=True,
+                            _in='path',
+                            name=path_param,
+                        ), *(schema_paths[pathname_with_wildcard].parameters)]
+                schema_copy.paths = schema_paths
             else:
                 # we are using recordings, so we shouldn't overwrite anything
                 # we only add if it is not there yet
@@ -272,16 +272,16 @@ def update_openapi(schema: OpenAPIObject, request: HttpExchange, mode: UpdateMod
                     path_item = PathItem(summary="Path summary",
                              description="Path description")
                     request_path_parameters = {}
-                    schema_copy['paths'] = {**schema_paths, **{request_path: path_item}}
+                    schema_copy.paths = {**schema_paths, **{request_path: path_item}}
     else:
         path_item = PathItem(summary="Path summary",
                              description="Path description")
         request_path_parameters = {}
-        schema_copy['paths'] = {**schema_paths, **{request_path: path_item}}
+        schema_copy.paths = {**schema_paths, **{request_path: path_item}}
     if request_method in path_item:
         # Operation exists
         existing_operation = path_item[request_method]  # type: ignore
-        operation = update_operation(existing_operation, request, mode)
+        operation = update_operation(existing_operation, exchange, mode)
 
     else:
         operation = operation_candidate
