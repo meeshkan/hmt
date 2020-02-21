@@ -7,7 +7,9 @@ from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.web import Application
 
-from meeshkan.schemabuilder.update_mode import UpdateMode
+from .utils.routing import PathRouting, HeaderRouting, Routing
+from .admin.views import RestMiddlewareView, RestMiddlewaresView, StorageView
+from ..schemabuilder.update_mode import UpdateMode
 from .admin.views import StorageView
 from .proxy.proxy import RecordProxy
 from .server.callbacks import callback_manager
@@ -19,11 +21,15 @@ from .utils.routing import PathRouting, HeaderRouting, Routing
 LOG_CONFIG = os.path.join(os.path.dirname(__file__), 'logging.yaml')
 logger = logging.getLogger(__name__)
 
+def make_admin_app():
+    return Application([
+        (r'/admin/storage', StorageView),
+        (r'/admin/middleware/rest/pregen', RestMiddlewaresView),
+        (r'/admin/middleware/rest/pregen/(.+)', RestMiddlewareView),
+    ])
 
 def start_admin(port):
-    app = Application([
-        (r'/admin/storage', StorageView)
-    ])
+    app = make_admin_app()
     http_server = HTTPServer(app)
     http_server.listen(port)
     logger.info('Starting admin endpont on http://localhost:%s/admin', port)
