@@ -198,7 +198,7 @@ class Channel:
                 body = resp.data.decode('utf-8')
 
                 resp = Response(statusCode=resp.status, body=body, bodyAsJson=json.loads(body),
-                                headers=dict(resp.getheaders()))
+                                headers=dict(resp.getheaders()), timestamp=None)
 
                 self._proxy_calback.on_request_complete(self._request, resp)
 

@@ -1,6 +1,6 @@
 import logging
 from typing import Mapping
-from openapi_typed import OpenAPIObject
+from openapi_typed_2 import OpenAPIObject
 from http_types import Request, Response
 import requests
 import json
@@ -28,7 +28,7 @@ class RestMiddlewareManager:
     
     def spew(self, request: Request, schemas: Mapping[str, OpenAPIObject]):
         _request = copy.deepcopy(request)
-        _request['body'] = str(_request['body'])
+        _request.body = str(_request.body)
         cur_schemas = schemas
         for endpoint in self._endpoints:
             res = requests.post(endpoint, data=json.dumps({'request': _request, 'schemas': cur_schemas }))

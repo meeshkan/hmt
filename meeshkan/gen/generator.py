@@ -9,6 +9,7 @@ from http_types import Request
 from typing import cast, Sequence, Tuple, TypeVar, Callable, Optional, Mapping, Union, Any
 from openapi_typed_2 import OpenAPIObject, Responses, MediaType, Response, RequestBody, Header, Operation, Parameter, Components, Reference, Schema, PathItem
 from urllib.parse import urlparse
+from ..schemabuilder.defaults import _SCHEMA_DEFAULT
 
 C = TypeVar('C') 
 D = TypeVar('D')
@@ -162,7 +163,7 @@ def get_component_from_ref(o: OpenAPIObject, d: str, accessor: Callable[[Compone
     ).get()(o)
 
 def ref_name(r: Reference) -> str:
-    return r['$ref'].split("/")[3]
+    return r._ref.split("/")[3]
 
 def internal_get_component(f: Callable[[OpenAPIObject, str], Optional[C]]) -> Callable[[OpenAPIObject, Union[C,  Reference]], Optional[C]]:
     def _internal_get_component(o: OpenAPIObject, i: Union[C,  Reference]) -> Optional[C]:
@@ -205,9 +206,10 @@ def schema_prism(oai: OpenAPIObject) -> lenses.ui.BaseUiLens[S, T, X, Y]:
     )
 
 def change_ref(j: Reference) -> Reference:
-    return {
-        '$ref': '#/definitions/%s' % ref_name(j),
-    }
+    return Reference(
+        _x=None,
+        _ref='#/definitions/%s' % ref_name(j),
+    )
 
 def change_refs(j: Schema) -> Schema:
     return Schema(**j,
@@ -250,7 +252,7 @@ def get_required_request_query_or_header_parameters_internal(header: bool, l: le
     return [Parameter(
                 **parameter,
                 name=parameter.name if not header else parameter.name.lower(),
-                schema=change_ref(parameter.schema) if isinstance(parameter.schema, Schema) else change_refs(parameter.schema) if parameter.schema is not None else Schema(type='string')
+                schema=change_ref(parameter.schema) if isinstance(parameter.schema, Schema) else change_refs(parameter.schema) if parameter.schema is not None else Schema(**_SCHEMA_DEFAULT, _type='string')
             ) for parameter in l.Prism(
         lambda s: get_parameter_from_ref(oai, ref_name(s)) if isinstance(s, Reference) else s,
         lambda a : a,
@@ -270,7 +272,7 @@ def get_required_request_query_or_header_parameters(header: bool, req: Request, 
             p),
         *get_required_request_query_or_header_parameters_internal(
             header,
-            operation_o(req['method'].lower()).add_lens(
+            operation_o(req.method.value).add_lens(
                 parameters_o
             ).Each(),
             oai,
@@ -281,8 +283,8 @@ def get_required_request_body_schemas(
   req: Request,
   oai: OpenAPIObject,
   p: PathItem,
-) -> Sequence[Schema]:
-    return operation_o(req['method'].lower()).add_lens(
+) -> Sequence[Union[Reference, Schema]]:
+    return operation_o(req.method.value).add_lens(
         request_body_o
     ).Prism(
         lambda s : get_request_body_from_ref(oai, ref_name(s)) if isinstance(s, Reference) else s,
@@ -307,8 +309,8 @@ def keep_method_if_required_request_body_is_present(
     oai: OpenAPIObject,
 ) -> Callable[[PathItem], PathItem]:
     def _keep_method_if_required_request_body_is_present(p: PathItem) -> PathItem:
-        out = p if (req['method'].lower() not in p) or (len([s for s in get_required_request_body_schemas(req, oai, p) if
-                not valid_schema(req['bodyAsJson'], {
+        out = p if (req.method.value not in p) or (len([s for s in get_required_request_body_schemas(req, oai, p) if
+                not valid_schema(req.bodyAsJson if req.bodyAsJson else json.loads(req.body), {
                     # TODO: this line is different than the TS implementation
                     # because I think there is a logic bug there
                     # it should look like this line as we are not sure
@@ -317,7 +319,7 @@ def keep_method_if_required_request_body_is_present(
                     # otherwise, change the TS implementation in unmock-js and delete this comment.
                     **(change_ref(s) if isinstance(s, Reference) else change_refs(s)),
                     'definitions': make_definitions_from_schema(oai),
-                })]) == 0) else omit(p, req['method'].lower())
+                })]) == 0) else omit(p, req.method.value)
         return out
     return _keep_method_if_required_request_body_is_present
 
@@ -341,8 +343,8 @@ def keep_method_if_required_query_parameters_are_present(
 def _json_schema_from_required_parameters(parameters: Sequence[Parameter], oai: OpenAPIObject) -> Any:
     return {
         'type': 'object',
-        'properties': {param['name']: param['schema'] for param in parameters},
-        'required': [param['name'] for param in parameters if ('required' in param) and param['required']],
+        'properties': {param.name: param.schema for param in parameters},
+        'required': [param.name for param in parameters if param.required],
         'additionalProperties': True,
         'definitions': make_definitions_from_schema(oai),
     }
@@ -354,13 +356,13 @@ def keep_method_if_required_query_or_header_parameters_are_present(
     oai: OpenAPIObject,
     p: PathItem
 ) -> PathItem:
-    return p if (req['method'].lower() not in p) or valid_schema(
-        { k.lower(): v for k, v in req['headers'].items() } if header else req['query'],
+    return p if (req.method.value not in p) or valid_schema(
+        { k.lower(): v for k, v in req.headers.items() } if header else req.query,
         _json_schema_from_required_parameters(get_required_request_query_or_header_parameters(header, req, oai, p), oai)
-    ) else omit(p, req['method'].lower())
+    ) else omit(p, req.method.value)
 
 def maybe_add_string_schema(s: Sequence[Union[Reference, Schema]]) -> Sequence[Union[Reference, Schema]]:
-    return [Schema(type="string")] if len(s) == 0 else s
+    return [Schema(**_SCHEMA_DEFAULT, _type="string")] if len(s) == 0 else s
 
 def discern_name(o: Optional[Parameter], n: str) -> Optional[Parameter]:
     return o if (o is None) or ((o.name == n) and (o._in == 'path')) else None
@@ -510,11 +512,30 @@ def get_first_method_internal_2(
 ) ->  Optional[Tuple[str, Operation]]:
     return (n, o) if o is not None else get_first_method_internal(m, p)
 
+def get_operation_from_str(p: PathItem, op: str) -> Optional[Operation]:
+    if op == "get":
+        return p.get
+    elif op == "post":
+        return p.post
+    elif op == "put":
+        return p.put
+    elif op == "delete":
+        return p.delete
+    elif op == "head":
+        return p.head
+    elif op == "options":
+        return p.options
+    elif op == "trace":
+        return p.trace
+    else:
+        return p.patch
+    
+
 def get_first_method_internal(
   m: Sequence[str],
   p: PathItem,
 ) -> Optional[Tuple[str, Operation]]:
-    return None if len(m) == 0 else get_first_method_internal_2(p, m[0], m[1:], p[m[0]] if m[0] in p else None)
+    return None if len(m) == 0 else get_first_method_internal_2(p, m[0], m[1:], get_operation_from_str(p, m[0]))
 
 def get_first_method(p: PathItem) -> Optional[Tuple[str, Operation]]:
   return get_first_method_internal(all_methods, p)
@@ -537,7 +558,7 @@ def use_if_header_last_mile(
   p: Parameter,
   r: Optional[Schema],
 ) -> Optional[Tuple[str, Schema]]:
-  return None if r is None else (p.name, r if r is not None else Schema(type="string"))
+  return None if r is None else (p.name, r if r is not None else Schema(**_SCHEMA_DEFAULT, _type="string"))
 
 def use_if_header(
   o: OpenAPIObject,
@@ -545,7 +566,7 @@ def use_if_header(
 ) -> Optional[Tuple[str, Schema]]:
     return None if p._in != "header" else use_if_header_last_mile(
         p,
-        Schema(type="string") if p.schema is None else
+        Schema(**_SCHEMA_DEFAULT, _type="string") if p.schema is None else
             get_schema_from_ref(o, ref_name(p.schema)) if isinstance(p.schema, Reference) else
                 p.schema
     )
@@ -566,30 +587,38 @@ def truncate_path(
   i: Request,
 ) -> str:
     return cut_path(
-        [remove_trailing_slash(urlparse(u).path) for u in match_urls(i['protocol'], i['host'], o)],
+        [remove_trailing_slash(urlparse(u).path) for u in match_urls(i.protocol.value, i.host, o)],
         path,
     )
 
 def matcher(req: Request, r: Mapping[str, OpenAPIObject]) -> Mapping[str, OpenAPIObject]:
-    return lens.Values().modify(
-        lambda oai: paths_o.Values().modify(
-            lambda path_item: reduce(lambda a, b: b(a), [
-                keep_method_if_required_header_parameters_are_present(req, oai),
-                keep_method_if_required_query_parameters_are_present(req, oai),
-                keep_method_if_required_request_body_is_present(req, oai),
-            ], get_path_item_with_method(req['method'].lower(), path_item))
+    def _path_item_modifier(oai: OpenAPIObject) -> Callable[[PathItem], PathItem]:
+        def __path_item_modifier(path_item: PathItem) -> PathItem:
+            return reduce(lambda a, b: b(a), [
+                    keep_method_if_required_header_parameters_are_present(req, oai),
+                    keep_method_if_required_query_parameters_are_present(req, oai),
+                    keep_method_if_required_request_body_is_present(req, oai),
+                ], get_path_item_with_method(req.method.value, path_item))
+        return __path_item_modifier
+    def _oai_modifier(oai: OpenAPIObject) -> OpenAPIObject:
+        return paths_o.Values().modify(
+            _path_item_modifier
         )(OpenAPIObject(
             **oai,
-            paths=None if oai.paths is None else {n: o for n, o in oai.paths.items() if matches(
-                    truncate_path(req['pathname'], oai, req),
+            paths={n: o for n, o in oai.paths.items() if matches(
+                    truncate_path(req.pathname, oai, req),
                     n,
                     o,
-                    req['method'].lower(),
+                    req.method.value,
                     oai,
                   )}
                 )
         )
-    )({k: v for k, v in r.items() if len(match_urls(req['protocol'], req['host'], v)) > 0 })
+    return lens.Values().modify(
+        _oai_modifier
+    )({
+        k: v for k, v in r.items() if len(match_urls(req.protocol.value, req.host, v)) > 0
+    })
 
 def _first_or_none(l: Sequence[C]) -> Optional[C]:
     return None if len(l) == 0 else l[0]

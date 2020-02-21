@@ -7,11 +7,10 @@ from .config import setup
 from .logger import get as getLogger
 from .schemabuilder.builder import BASE_SCHEMA, build_schema_async
 from .convert.pcap import convert_pcap
-from .schemabuilder.schema import validate_openapi_object
 from .sinks import AbstractSink, FileSystemSink
 from .sources import AbstractSource, KafkaSource, FileSource
 from .sources.kafka import KafkaProcessorConfig
-from openapi_typed import OpenAPIObject
+from openapi_typed_2 import OpenAPIObject, convert_to_openapi
 from yaml import safe_load
 from .meeshkan_types import *
 from .server.commands import record, mock
@@ -108,10 +107,9 @@ def build(input_file, out, initial_openapi_spec, mode, source, sink):
 
     if initial_openapi_spec is not None:
         try: 
-            maybe_openapi = cast(OpenAPIObject, safe_load(initial_openapi_spec.read())) 
+            maybe_openapi = safe_load(initial_openapi_spec.read())
             # will raise if not an API spec 
-            validate_openapi_object(maybe_openapi) 
-            openapi_spec = maybe_openapi
+            openapi_spec = convert_to_openapi(maybe_openapi)
         except: pass # just use the initial schema
     run_from_source(source, UpdateMode[mode.upper()], openapi_spec, sinks=sinks)
 

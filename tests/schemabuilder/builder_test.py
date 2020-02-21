@@ -6,7 +6,6 @@ from http_types import HttpExchange, Request, Response, RequestBuilder
 from tests.schemabuilder.paths_test import PETSTORE_SCHEMA
 from meeshkan.schemabuilder import build_schema_batch, update_openapi
 from meeshkan.schemabuilder.builder import BASE_SCHEMA
-from meeshkan.schemabuilder.schema import validate_openapi_object
 from ..util import petstore_schema, read_recordings_as_request_response, POKEAPI_RECORDINGS_PATH
 from openapi_typed import OpenAPIObject, Operation, PathItem, Response, Schema
 from typeguard import check_type
@@ -42,9 +41,6 @@ class TestSchema:
         return cast(Schema, self.schema['paths']['/user/repos']
                     ['get']['responses']['200']
                     ['content']['application/json']['schema'])  # type: ignore
-
-    def test_schema_valid(self):
-        validate_openapi_object(self.schema)
 
     def test_schema_typechecks(self):
         check_type('schema', self.schema, OpenAPIObject)

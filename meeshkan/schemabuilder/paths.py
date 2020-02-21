@@ -2,11 +2,12 @@
 import re
 import random
 import string
+from dataclasses import dataclass
 from deepdiff import DeepDiff
 from typing import cast, Pattern, Optional, Tuple, Mapping, Any
 from typing_extensions import TypedDict
 
-from openapi_typed import PathItem, Paths, Operation, Responses
+from openapi_typed_2 import PathItem, Paths, Operation, Responses
 
 # Pattern to match to in the escaped path string
 # Search for occurrences such as "{id}" or "{key-name}"
@@ -79,8 +80,17 @@ def _dumb_match_to_path(request_path: str, paths: Paths, request_method: str, op
 
     theoretically_plausible_paths = [path for path in paths.keys() if could_these_two_paths_possibly_represent_the_same_underlying_path(path, request_path)]
     for path in theoretically_plausible_paths:
-        operation = cast(Operation, paths[path][request_method])
-        potential_conflicts = set(cast(Responses, operation['responses']).keys()).intersection(set(cast(Responses, operation_candidate['responses']).keys()))
+        operation = {
+            "get": paths[path].get,
+            "post": paths[path].post,
+            "put": paths[path].put,
+            "delete": paths[path].delete,
+            "options": paths[path].options,
+            "head": paths[path].head,
+            "patch": paths[path].patch,
+            "trace": paths[path].trace,
+        }[request_method]
+        potential_conflicts = set(operation.responses.keys()).intersection(set(operation_candidate.responses.keys()))
         new_path = combine_paths_into_single_path(path, request_path)
         if len(potential_conflicts) != 0:
             irreconcilably_different = False
@@ -88,8 +98,8 @@ def _dumb_match_to_path(request_path: str, paths: Paths, request_method: str, op
                 # we look to see if potential conflicts resemble each other
                 # enough to call them the same thing
                 # if not, we deem them as irreconcilably different and give up
-                incumbent_potential_conflict = operation['responses'][potential_conflict]
-                candidate_potential_conflict = operation_candidate['responses'][potential_conflict]
+                incumbent_potential_conflict = operation.responses[potential_conflict]
+                candidate_potential_conflict = operation_candidate.responses[potential_conflict]
                 diff = DeepDiff(incumbent_potential_conflict, candidate_potential_conflict)
                 # we don't care about value differences
                 # if there are too many differences based on my totally aribtrary standard,
@@ -143,8 +153,8 @@ def _match_to_path(request_path: str, path: str) -> Optional[Mapping[str, Any]]:
 
     return {parameter_name: parameter_value for parameter_name, parameter_value in zip(parameter_names, captures)}
 
-
-class MatchingPath(TypedDict):
+@dataclass
+class MatchingPath:
   path: PathItem
   param_mapping: Mapping[str, Any]
   pathname_with_wildcard: str
@@ -174,7 +184,7 @@ def find_matching_path(request_path: str, paths: Paths, request_method: str, ope
 
             if path_match is None:
                 continue
-            return {'path': path_item, 'param_mapping': path_match, 'pathname_with_wildcard': pathname_with_wildcard, 'pathname_to_be_replaced_with_wildcard': pathname_to_be_replaced_with_wildcard }
+            return MatchingPath(path=path_item, param_mapping=path_match, pathname_with_wildcard=pathname_with_wildcard, pathname_to_be_replaced_with_wildcard=pathname_to_be_replaced_with_wildcard)
 
     return None
 

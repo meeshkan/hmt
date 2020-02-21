@@ -39,7 +39,7 @@ class RequestLoggingCallback():
         RequestBuilder.validate(request)
         ResponseBuilder.validate(response)
 
-        host = request['host']
+        host = request.host
         reqres = HttpExchange(request=request, response=response)
         if not host in self._logs:
             log_file = os.path.join(self._log_dir, '{}.jsonl'.format(host))

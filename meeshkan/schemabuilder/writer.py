@@ -1,6 +1,6 @@
 """Code for writing builder results to file system.
 """
-from openapi_typed import OpenAPIObject
+from openapi_typed_2 import OpenAPIObject, convert_from_openapi
 from .result import BuildResult
 import yaml
 from ..logger import get as getLogger
@@ -90,7 +90,7 @@ def write_build_result(directory: str, result: BuildResult) -> None:
 
     openapi_object = result['openapi']
 
-    schema_yaml = cast(str, yaml.safe_dump(openapi_object))
+    schema_yaml = cast(str, yaml.safe_dump(convert_from_openapi(openapi_object)))
 
     with openapi_output.open('wb') as f:
         LOGGER.debug("Writing to: %s\n", str(openapi_output))
