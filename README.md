@@ -98,6 +98,7 @@ meeshkan build --mode gen -i path/to/recordings.jsonl
 Supported modes are:
 * gen [default] - infer a schema from the recorded data
 * replay - replay the recorded data based on exact matching
+* mixed - replay the recorded data based on exact matching when it is possible
 
 The OpenAPI schemas can be manually edited to mix the two modes.
 
@@ -129,7 +130,7 @@ The following commands are available in mock mode:
 | `port`       | Server port | 8000    |
 | `admin_port` | Admin port  | 8999    |
 | `log_dir`    | The directory containing `.jsonl` files for mocking directly from recorded fixtures | `logs` |
-| `schema_dir` | The directory containing `.yml` or `.yaml` OpenAPI specs used for mocking, including ones built using `meeshkan build` | `__unmock__` |
+| `specs_dir`  | The directory containing `.yml` or `.yaml` OpenAPI specs used for mocking, including ones built using `meeshkan build` | `specs` |
 
 ## Recording
 

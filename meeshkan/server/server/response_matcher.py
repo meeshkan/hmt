@@ -1,5 +1,3 @@
-import copy
-import glob
 import json
 import logging
 from meeshkan.server.server.rest import rest_middleware_manager
@@ -9,8 +7,8 @@ import random
 from faker import Faker
 from typing import cast, Mapping, Union, Sequence, Tuple
 from openapi_typed import OpenAPIObject, Reference, Schema
-from ...gen.generator import match_urls, matcher, faker, change_ref, change_refs
-from http_types import Response, HttpMethod
+from ...gen.generator import matcher, faker, change_ref, change_refs
+from http_types import HttpMethod
 fkr = Faker()
 
 from http_types import Request, Response
@@ -19,15 +17,15 @@ logger = logging.getLogger(__name__)
 
 class ResponseMatcher:
     _schemas: Mapping[str, OpenAPIObject]
-    def __init__(self, schema_dir):
+    def __init__(self, specs_dir):
         schemas: Sequence[str] = []
-        if not os.path.exists(schema_dir):
-            logging.info('OpenAPI schema directory not found %s', schema_dir)
+        if not os.path.exists(specs_dir):
+            logging.info('OpenAPI schema directory not found %s', specs_dir)
         else:
-            schemas = [s for s in os.listdir(schema_dir) if s.endswith('yml') or s.endswith('yaml')]
+            schemas = [s for s in os.listdir(specs_dir) if s.endswith('yml') or s.endswith('yaml')]
         specs: Sequence[Tuple[str, OpenAPIObject]] = []
         for schema in schemas:
-            with open(os.path.join(schema_dir, schema), encoding='utf8') as schema_file:
+            with open(os.path.join(specs_dir, schema), encoding='utf8') as schema_file:
                 # TODO: validate schema?
                 specs = [*specs, (schema, cast(OpenAPIObject, yaml.safe_load(schema_file.read())))]
         self._schemas = { k: v for k, v in specs}
@@ -59,7 +57,7 @@ class ResponseMatcher:
             return self.match_error(path_error, request)
         if request['method'] not in [x for x in match[name]['paths'].values()][0].keys():
             return self.match_error(method_error, request)
-        method = [x for x in match[name]['paths'].values()][0][cast(HttpMethod, request['method'])]
+        method = [x for x in match[name]['paths'].values()][0][str(request['method'])]
         responses_error = 'While a stub for a specification exists for this endpoint, it contains no responses. That usually means the schema is corrupt or it has been constrained too much (ie asking for a 201 response when it only has 200 and 400).'
         if 'responses' not in method:
             return self.match_error(responses_error, request)

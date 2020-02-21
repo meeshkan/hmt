@@ -1,12 +1,12 @@
 import json
 import logging
-from meeshkan.schemabuilder.update_mode import UpdateMode
 import os
-
 from typing import cast
+
 import yaml
 from http_types import Request, Response, HttpExchange, RequestBuilder, ResponseBuilder
 
+from meeshkan.schemabuilder.update_mode import UpdateMode
 from ...schemabuilder.builder import BASE_SCHEMA, update_openapi
 
 logger = logging.getLogger(__name__)
@@ -19,27 +19,27 @@ class DataCallback:
 
 class RequestLoggingCallback():
     _log_dir: str
-    _schema_dir: str
-    def __init__(self, recording=False, log_dir=None, schema_dir=None, append=True):
-        self._recording = recording
-        self._append = append
+    _specs_dir: str
+
+    def __init__(self, log_dir, specs_dir, update_mode, append=True):
         self._log_dir = log_dir
-        self._schema_dir = schema_dir
+        self._specs_dir = specs_dir
+        self._update_mode = update_mode
+        self._append = append
 
         self._logs = {}
-        self._schemas = {}
+        self._specs = {}
 
-        if self._recording:
-            if not os.path.exists(self._log_dir):
-                os.makedirs(self._log_dir)
-            if not os.path.exists(self._schema_dir):
-                os.makedirs(self._schema_dir)
+        if not os.path.exists(self._log_dir):
+            os.makedirs(self._log_dir)
+        if not os.path.exists(self._specs_dir):
+            os.makedirs(self._specs_dir)
 
     def log(self, request: Request, response: Response):
         RequestBuilder.validate(request)
         ResponseBuilder.validate(response)
 
-        host = request['headers']['Host']
+        host = request['host']
         reqres = HttpExchange(request=request, response=response)
         if not host in self._logs:
             log_file = os.path.join(self._log_dir, '{}.jsonl'.format(host))
@@ -50,27 +50,26 @@ class RequestLoggingCallback():
 
         self._logs[host].write(json.dumps(reqres))
         self._logs[host].write('\n')
+        self._logs[host].flush()
 
-        schema_dir = os.path.join(self._schema_dir, cast(str, host))
-        if not os.path.exists(schema_dir):
-            os.makedirs(schema_dir)
+        logger.debug('Updated logs for host %s', host)
 
-        schema_file = os.path.join(schema_dir, 'openapi.yaml')
+        if self._update_mode:
+            spec_file = os.path.join(self._specs_dir, '{}_{}.yaml'.format(host, self._update_mode.name.lower()))
 
-        if not host in self._schemas:
-            if os.path.exists(schema_file) and self._append:
-                with open(schema_file, 'r') as f:
-                    self._schemas[host] = yaml.load(f)
-            else:
-                self._schemas[host] = BASE_SCHEMA
+            if not host in self._specs:
+                if os.path.exists(spec_file) and self._append:
+                    with open(spec_file, 'r') as f:
+                        self._specs[host] = yaml.load(f)
+                else:
+                    self._specs[host] = BASE_SCHEMA
 
-        # TODO: is hardcoded update mode correct?
-        self._schemas[host] = update_openapi(self._schemas[host], reqres, UpdateMode.GEN)
+            self._specs[host] = update_openapi(self._specs[host], reqres, self._update_mode)
 
-        with open(schema_file, 'w') as f:
-            yaml.dump(self._schemas[host], f)
+            with open(spec_file, 'w') as f:
+                yaml.dump(self._specs[host], f)
 
-        logger.debug('Updated logs and scheme for host %s', host)
+            logger.debug('Updated scheme for host %s', host)
 
     def __enter__(self):
         return self
