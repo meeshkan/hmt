@@ -4,6 +4,7 @@ node_modules
 *.pyc
 .python-version
 .vscode/
+.idea/
 .pytest_cache/
 .ipynb_checkpoints/
 .testmondata
