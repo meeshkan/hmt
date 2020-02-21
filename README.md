@@ -5,11 +5,9 @@
 [![PyPi](https://img.shields.io/pypi/pyversions/meeshkan)](https://pypi.org/project/meeshkan/)
 [![License](https://img.shields.io/pypi/l/meeshkan)](LICENSE)
 
-Meeshkan is a library and command-line tool for reverse engineering APIs from recorded traffic.
+Meeshkan is a tool for mocking HTTP APIs for use in sandboxes as well as for automated and exploratory testing. It uses a combination of API definitions, recorded traffic and code in order to make crafting mocks as enjoyable as possible.
 
-The supported input format for HTTP recordings is the [HTTP Types](https://meeshkan.github.io/http-types/) JSON format.
-
-Meeshkan requires Python 3.6 or later for the new async/await syntax.
+Meeshkan requires Python 3.6 or later.
 
 ## Table of Contents
 
@@ -73,7 +71,8 @@ openapi: OpenAPIObject = meeshkan.update_openapi(openapi, http_exchange)
 
 ## Builder
 
-Using the Meeshkan CLI, you can build OpenAPI schema from a single `recordings.jsonl` file:
+Using the Meeshkan CLI, you can build OpenAPI schema from a single `recordings.jsonl` file in the [HTTP Types](https://meeshkan.github.io/http-types/) JSON format.
+
 
 ```bash
 $ pip install meeshkan # if not done yet
