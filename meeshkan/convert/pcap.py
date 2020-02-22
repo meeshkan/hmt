@@ -49,8 +49,7 @@ def _request_from_tshark(obj) -> Request:
         path=path,
         pathname=pathname,
         host=host,
-        bodyAsJson=None,
-        timestamp=None))
+        bodyAsJson=None))
 
 
 def _response_from_tshark(obj) -> Response:
@@ -58,7 +57,7 @@ def _response_from_tshark(obj) -> Response:
     res_line = obj['http.response.line']
     body = obj['http.file_data']  # type: str
     headers = _parse_headers(header_line=res_line)
-    return ResponseBuilder.from_dict(dict(bodyAsJson=None, timestamp=None, statusCode=status_code, body=body, headers=headers))
+    return ResponseBuilder.from_dict(dict(bodyAsJson=None, statusCode=status_code, body=body, headers=headers))
 
 
 def _parse_headers(header_line: str) -> Dict[str, Union[str, List[str]]]:
