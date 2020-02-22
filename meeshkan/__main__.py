@@ -127,7 +127,9 @@ def convert(input_file, out):
     """
     Convert recordings from PCAP to JSONL format.
     """
+    return _convert(input_file, out)
 
+def _convert(input_file, out):
     if not input_file.endswith('.pcap'):
         raise ValueError(
             'Only .pcap files are accepted as input. Got: {}'.format(input_file))
