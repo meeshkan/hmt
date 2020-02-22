@@ -3,7 +3,8 @@
 from sys import argv
 from http_types import HttpExchange
 from typing import List, Optional, Any, Iterator
-from http_types.types import HttpExchange
+from http_types import HttpExchange
+from http_types.utils import RequestBuilder, ResponseBuilder
 from typing import Iterator
 from pathlib import Path
 import csv
@@ -39,7 +40,7 @@ def _request_from_tshark(obj) -> Request:
     if isinstance(host, list):
         raise AssertionError("Did not expect to get list as x-forwarded-host")
 
-    return Request(
+    return RequestBuilder.from_dict(dict(
         body=body,
         protocol=protocol,
         method=method,
@@ -49,7 +50,7 @@ def _request_from_tshark(obj) -> Request:
         pathname=pathname,
         host=host,
         bodyAsJson=None,
-        timestamp=None)
+        timestamp=None))
 
 
 def _response_from_tshark(obj) -> Response:
@@ -57,7 +58,7 @@ def _response_from_tshark(obj) -> Response:
     res_line = obj['http.response.line']
     body = obj['http.file_data']  # type: str
     headers = _parse_headers(header_line=res_line)
-    return Response(bodyAsJson=None, timestamp=None, statusCode=status_code, body=body, headers=headers)
+    return ResponseBuilder.from_dict(dict(bodyAsJson=None, timestamp=None, statusCode=status_code, body=body, headers=headers))
 
 
 def _parse_headers(header_line: str) -> Dict[str, Union[str, List[str]]]:

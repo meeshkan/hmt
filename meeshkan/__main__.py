@@ -1,3 +1,4 @@
+from io import StringIO
 import json
 import click
 from typing import Sequence, cast
@@ -14,6 +15,7 @@ from openapi_typed_2 import OpenAPIObject, convert_to_openapi
 from yaml import safe_load
 from .meeshkan_types import *
 from .server.commands import record, mock
+from http_types.utils import HttpExchangeBuilder
 
 
 LOGGER = getLogger(__name__)
@@ -137,7 +139,10 @@ def convert(input_file, out):
     counter = 0
     with open(out, 'w') as f:
         for reqres in request_response_pairs:
-            f.write((json.dumps(reqres) + "\n"))
+            sink = StringIO()
+            HttpExchangeBuilder(sink).write(reqres)
+            sink.seek(0)
+            f.write(''.join([x for x in sink])+'\n')
             counter += 1
 
     log("Wrote %d lines.", counter)

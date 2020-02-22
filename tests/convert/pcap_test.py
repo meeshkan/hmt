@@ -7,4 +7,4 @@ def test_convert_pcap():
     recordings_gen = convert_pcap(PCAP_SAMPLE)
     recordings = list(recordings_gen)
     assert_that(recordings, has_length(168))
-    assert_that(recordings[0], has_entry("request", has_entry("path", "/user/repos")))
+    assert_that(recordings[0].request, has_entry("path", "/user/repos"))
