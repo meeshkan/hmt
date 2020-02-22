@@ -264,7 +264,7 @@ def update_openapi(schema: OpenAPIObject, exchange: HttpExchange, mode: UpdateMo
         exchange.request, schema_servers)
     if normalized_pathname_or_none is None:
         schema_copy.servers = [*schema_copy.servers, Server(description=None, variables=None, _x=None, url=urlunsplit(
-            [exchange.request.protocol.value, exchange.request.host, '', '', '']))]
+            [str(exchange.request.protocol.value), exchange.request.host, '', '', '']))]
         normalized_pathname = request_path
     else:
         normalized_pathname = normalized_pathname_or_none

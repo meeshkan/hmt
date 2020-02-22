@@ -142,7 +142,7 @@ class ParamBuilder:
         # TODO Update shared incoming_params parameter schema
         shared_params = [
             param if (mode == UpdateMode.GEN) else replace(param,
-                schema=Schema(**{**_SCHEMA_DEFAULT, 'oneOf': unnest([param.schema, convert_to_Schema(to_const(incoming_params[param.name]))])})
+                schema=Schema(**{**_SCHEMA_DEFAULT, 'oneOf': unnest([*([param.schema] if param.schema is not None else []), convert_to_Schema(to_const(incoming_params[param.name]))])})
              ) for param in params if param.name in shared_param_names]
 
         missing_params = [
