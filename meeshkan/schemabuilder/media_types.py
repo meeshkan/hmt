@@ -4,7 +4,7 @@ from .update_mode import UpdateMode
 from http_types import HttpExchange as HttpExchange
 from ..logger import get as getLogger
 from typing import Any, Sequence, cast, Optional
-from openapi_typed_2 import MediaType, Schema
+from openapi_typed_2 import MediaType, Schema, convert_to_Schema
 from .defaults import _SCHEMA_DEFAULT
 import json
 from typing_extensions import Literal
@@ -19,20 +19,20 @@ MEDIA_TYPE_FOR_NON_JSON = "text/plain"
 
 
 def update_json_schema(json_body: Any, mode: UpdateMode, schema: Optional[Any] = None) -> Schema:
-    # TODO typeguard
-    return cast(Schema, to_openapi_json_schema(json_body, mode, schema))
+    out = to_openapi_json_schema(json_body, mode, schema)
+    return convert_to_Schema(out)
 
 def update_text_schema(text_body: str, mode: UpdateMode, schema: Optional[Any] = None) -> Schema:
     # TODO Better updates
-    generic = Schema(**_SCHEMA_DEFAULT, _type="string")
-    specific = Schema(**_SCHEMA_DEFAULT, _type="string", enum=[text_body])
-    return generic if mode == UpdateMode.GEN else Schema(
+    generic = Schema(**{**_SCHEMA_DEFAULT, '_type': "string"})
+    specific = Schema(**{**_SCHEMA_DEFAULT, '_type': "string", 'enum': [text_body]})
+    return generic if mode == UpdateMode.GEN else Schema(**{
         **_SCHEMA_DEFAULT,
-        oneOf=list(set([
+        'oneOf': list(set([
             specific,
             *([schema] if schema.oneOf is None else schema.oneOf)
         ]))
-    )
+    })
 
 
 def infer_media_type_from_nonempty(body: str) -> MediaTypeKey:

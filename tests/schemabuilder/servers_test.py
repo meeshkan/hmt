@@ -1,5 +1,5 @@
 from meeshkan.schemabuilder.servers import normalize_path_if_matches
-from openapi_typed import Server
+from openapi_typed_2 import Server
 from typing import List
 from hamcrest import *
 
@@ -8,7 +8,7 @@ from http_types import RequestBuilder
 petstore_req = RequestBuilder.from_url(
     "https://petstore.swagger.io/v1/pets")
 
-petstore_server = Server(url="https://petstore.swagger.io/v1")
+petstore_server = Server(description=None, variables=None, _x=None, url="https://petstore.swagger.io/v1")
 
 
 def test_normalize_path_for_match():

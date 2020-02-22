@@ -4,6 +4,9 @@ import inspect
 import json
 import logging
 import os
+from io import StringIO
+from http_types import HttpExchange
+from http_types.utils import ResponseBuilder, HttpExchangeWriter
 
 from .storage import storage_manager
 
@@ -74,9 +77,14 @@ class CallbackManager:
         return response
 
     def __call__(self, request, response):
-        callback = self._callbacks.get((request['host'], request['method'], request['pathname']))
+        callback = self._callbacks.get((request.host, request.method.value, request.pathname))
         if callback is not None:
-            return callback(request, response, storage_manager.default)
+            sink = StringIO()
+            HttpExchangeWriter(sink).write(HttpExchange(request=request, response=response))
+            sink.seek(0)
+            res = json.loads('\n'.join([x for x in sink]))
+            out = callback(res['request'], res['response'], storage_manager.default)
+            return ResponseBuilder.from_dict(out)
         else:
             return response
 

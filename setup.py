@@ -23,13 +23,14 @@ REQUIRED = [
     'lenses',
     'pyyaml',
     'jsonschema',
+    'dataclasses', # for 3.6, as it ships with 3.7
     'faker',
     'requests',
     'typing-extensions',
     'openapi-typed_2',
     'typeguard>=2.7.0',
     'genson',
-    'http-types>=0.0.8',
+    'http-types>=0.0.9',
     # kafka
     'faust',
     # server

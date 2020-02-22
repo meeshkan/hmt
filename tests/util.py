@@ -1,9 +1,8 @@
 import json
 from typing import Any, Dict, List, cast
 from http_types import HttpExchange, HttpExchangeBuilder
-from openapi_typed import OpenAPIObject
+from openapi_typed_2 import OpenAPIObject, convert_to_openapi
 from yaml import safe_load
-from meeshkan.schemabuilder.schema import validate_openapi_object
 
 SAMPLE_RECORDINGS_PATH = "resources/recordings.jsonl"
 POKEAPI_RECORDINGS_PATH = "resources/pokeapi.jsonl"
@@ -26,8 +25,5 @@ def read_recordings_as_request_response(requests_path=SAMPLE_RECORDINGS_PATH) ->
 
 def petstore_schema() -> OpenAPIObject:
     with open(PETSTORE_YAML_PATH, "r") as f:
-        oas = cast(Any, safe_load(f.read()))
-
-    validate_openapi_object(oas)
-
-    return oas
+        oas = convert_to_openapi(safe_load(f.read()))
+        return oas

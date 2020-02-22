@@ -8,6 +8,7 @@ from enum import Enum
 from urllib import parse
 from urllib.parse import urlsplit
 from http_types import Request, Response, HttpMethod
+from http_types.utils import RequestBuilder
 
 from meeshkan.server.utils.routing import Routing
 from .proxy_callback import ProxyCallback
@@ -158,7 +159,8 @@ class Channel:
           'str' cannot be assigned to 'Literal['options']'
           'str' cannot be assigned to 'Literal['delete']'
         '''
-        self._request = Request(method=typing.cast(HttpMethod, method.lower()), # type: ignore
+        self._request = RequestBuilder.from_dict(dict(
+                                method=method.lower(),
                                 host=route_info.host,
                                 path=fullpath,
                                 pathname=route_info.path,
@@ -166,7 +168,7 @@ class Channel:
                                 query=query,
                                 body=body,
                                 bodyAsJson=json.loads(body) if body else {},
-                                headers=headers)
+                                headers=headers))
 
         return RequestInfo(data=data, scheme=route_info.scheme, target_host=route_info.hostname, target_port=route_info.port)
 

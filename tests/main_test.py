@@ -7,7 +7,7 @@ from hamcrest import assert_that, has_key
 from pathlib import Path
 from typing import List
 from shutil import copyfile
-from openapi_typed import OpenAPIObject
+from openapi_typed_2 import OpenAPIObject, convert_from_openapi
 import json
 
 requests = read_recordings_as_strings()
@@ -20,7 +20,7 @@ def write_input_file(target_file: str, requests: List[str]):
 
 def write_base_schema(target_file: str, schema: OpenAPIObject):
     with open(target_file, 'w') as f:
-        f.write(json.dumps(schema))
+        f.write(json.dumps(convert_from_openapi(schema)))
 
 def test_build_cmd():
     """An uber test verifying build command input and output.

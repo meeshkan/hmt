@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from deepdiff import DeepDiff
 from typing import cast, Pattern, Optional, Tuple, Mapping, Any
 from typing_extensions import TypedDict
+from .operation import operation_from_string
 
 from openapi_typed_2 import PathItem, Paths, Operation, Responses
 
@@ -80,17 +81,12 @@ def _dumb_match_to_path(request_path: str, paths: Paths, request_method: str, op
 
     theoretically_plausible_paths = [path for path in paths.keys() if could_these_two_paths_possibly_represent_the_same_underlying_path(path, request_path)]
     for path in theoretically_plausible_paths:
-        operation = {
-            "get": paths[path].get,
-            "post": paths[path].post,
-            "put": paths[path].put,
-            "delete": paths[path].delete,
-            "options": paths[path].options,
-            "head": paths[path].head,
-            "patch": paths[path].patch,
-            "trace": paths[path].trace,
-        }[request_method]
-        potential_conflicts = set(operation.responses.keys()).intersection(set(operation_candidate.responses.keys()))
+        operation = operation_from_string(paths[path], request_method)
+        # TODO: could the operaiton ever return None above?
+        # theoretically it can, but coudl it ever practically?
+        # the `is not None` check below is for the typechecker
+        # but what would it mean in the algorithm if we got None?
+        potential_conflicts = set(operation.responses.keys() if operation is not None else []).intersection(set(operation_candidate.responses.keys()))
         new_path = combine_paths_into_single_path(path, request_path)
         if len(potential_conflicts) != 0:
             irreconcilably_different = False

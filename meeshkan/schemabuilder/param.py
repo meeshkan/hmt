@@ -3,10 +3,11 @@
 from functools import reduce
 from meeshkan.schemabuilder.json_schema import to_const
 from meeshkan.schemabuilder.update_mode import UpdateMode
-from openapi_typed_2 import Parameter, Reference, Schema, convert_to_Schema
+from openapi_typed_2 import convert_to_Schema, Parameter, Reference, Schema, convert_to_Schema
 from .defaults import _SCHEMA_DEFAULT
 from typing import Sequence, Union, cast, Sequence, List, Mapping
 from genson import SchemaBuilder  # type: ignore
+from dataclasses import replace
 
 SchemaParameters = Sequence[Parameter]
 
@@ -64,7 +65,7 @@ class ParamBuilder:
             schema_builder.add_object(value)
             out = convert_to_Schema(schema_builder.to_schema())
         else:
-            out = Schema(**_SCHEMA_DEFAULT, oneOf=[to_const(value)])
+            out = Schema(**{**_SCHEMA_DEFAULT, 'oneOf': [convert_to_Schema(to_const(value))]})
         schema = out
         return Parameter(
             description=None,
@@ -140,10 +141,8 @@ class ParamBuilder:
 
         # TODO Update shared incoming_params parameter schema
         shared_params = [
-            param if (mode == UpdateMode.GEN) else Parameter(
-                # use constants
-                **param,
-                schema=Schema(**_SCHEMA_DEFAULT, oneOf=unnest([param.schema, to_const(incoming_params[param.name])]))
+            param if (mode == UpdateMode.GEN) else replace(param,
+                schema=Schema(**{**_SCHEMA_DEFAULT, 'oneOf': unnest([param.schema, convert_to_Schema(to_const(incoming_params[param.name]))])})
              ) for param in params if param.name in shared_param_names]
 
         missing_params = [

@@ -6,7 +6,7 @@ import yaml
 import random
 from faker import Faker
 from typing import cast, Mapping, Union, Sequence, Tuple
-from openapi_typed_2 import OpenAPIObject, Reference, Schema, convert_to_openapi
+from openapi_typed_2 import convert_from_openapi, OpenAPIObject, Reference, Schema, convert_to_openapi
 from ...gen.generator import get_response_from_ref, matcher, faker, change_ref, change_refs, ref_name
 from http_types import HttpMethod
 fkr = Faker()
@@ -69,7 +69,7 @@ class ResponseMatcher:
         if request.method.value is None:
             return self.match_error(method_error, request)
         responses_error = 'While a stub for a specification exists for this endpoint, it contains no responses. That usually means the schema is corrupt or it has been constrained too much (ie asking for a 201 response when it only has 200 and 400).'
-        if 'responses' not in method:
+        if method.responses is None:
             return self.match_error(responses_error, request)
         potential_responses = [r for r in method.responses.items()]
         random.shuffle(potential_responses)
@@ -90,7 +90,7 @@ class ResponseMatcher:
         mime_types = response_1.content.keys()
         if "application/json" in mime_types:
             content = response_1.content['application/json']
-            if 'schema' not in content:
+            if content.schema is None:
                 return self.match_error('Could not find schema', request)
             schema = content.schema
             ct: Mapping[str, Union[str, Sequence[str]]] = { "Content-Type": "application/json" }
@@ -104,8 +104,8 @@ class ResponseMatcher:
                     timestamp=None
                 )
             to_fake = {
-                **(change_ref(schema) if isinstance(schema, Reference) else change_refs(schema)),
-                'definitions': { k: change_ref(v) if isinstance(v, Reference) else change_refs(v) for k,v in (match[name].components.schemas.items() if (name in match) and (match[name].components is not None) and (match[name].components.schemas is not None) else [])}
+                **convert_from_openapi(change_ref(schema) if isinstance(schema, Reference) else change_refs(schema)),
+                'definitions': { k: convert_from_openapi(change_ref(v) if isinstance(v, Reference) else change_refs(v)) for k,v in (match[name].components.schemas.items() if (name in match) and (match[name].components is not None) and (match[name].components.schemas is not None) else [])}
             }
             bodyAsJson = faker(to_fake, to_fake, 0)
             return Response(

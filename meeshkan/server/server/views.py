@@ -3,7 +3,7 @@ import logging
 from typing import cast
 from urllib import parse
 
-from http_types import Request, HttpMethod
+from http_types import RequestBuilder
 from tornado.web import RequestHandler
 
 from meeshkan.server.server.callbacks import callback_manager
@@ -55,22 +55,23 @@ class MockServerView(RequestHandler):
           'str' cannot be assigned to 'Literal['options']'
           'str' cannot be assigned to 'Literal['delete']'
         '''
-        request = Request(method=cast(HttpMethod, self.request.method.lower()),  # type: ignore
-                          host=route_info.host,
-                          path=fullpath,
-                          pathname=route_info.path,
-                          protocol=route_info.scheme,
-                          query=query,
-                          body=self.request.body,
-                          bodyAsJson=self._extract_json_safely(self.request.body),
-                          headers=headers)
+        request = RequestBuilder.from_dict({
+                            'method': self.request.method.lower(),
+                            'host': route_info.host,
+                            'path': fullpath,
+                            'pathname': route_info.path,
+                            'protocol': route_info.scheme,
+                            'query': query,
+                            'body': self.request.body,
+                            'bodyAsJson': self._extract_json_safely(self.request.body),
+                            'headers': headers})
 
         logger.debug(request)
         response = callback_manager(request, self.application.response_matcher.get_response(request))
-        for header, value in response['headers'].items():
+        for header, value in response.headers.items():
             self.set_header(header, value)
 
-        self.write(response['body'])
+        self.write(response.body)
 
     def _extract_json_safely(self, text):
         if text:

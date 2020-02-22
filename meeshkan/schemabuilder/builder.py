@@ -10,6 +10,7 @@ from http_types import HttpExchange as HttpExchange
 from openapi_typed_2 import Info, Paths, MediaType, Header, OpenAPIObject, PathItem, Response, Operation, Parameter, Reference, Server, Responses
 from typeguard import check_type  # type: ignore
 
+from .operation import operation_from_string, set_path_item_at_operation
 from ..logger import get as getLogger
 from .media_types import infer_media_type_from_nonempty, build_media_type, update_media_type, MediaTypeKey, update_text_schema
 from .paths import find_matching_path, RequestPathParameters
@@ -219,12 +220,15 @@ def update_operation(operation: Operation, request: HttpExchange, mode: UpdateMo
     existing_parameters: Sequence[Parameter] = [x for x in operation.parameters if not isinstance(x, Reference)] if operation.parameters is not None else []
     request_query_params: Mapping[str, Union[str, Sequence[str]]] = request.request.query
     request_header_params: Mapping[str, Union[str, Sequence[str]]] = request.request.headers
-    updated_parameters = list(set([*ParamBuilder('query').update(request_query_params,
+    _updated_parameters = [*ParamBuilder('query').update(request_query_params,
             mode, existing_parameters),
             # TODO: can we avoid the cast below? it is pretty hackish
         *ParamBuilder('header').update(request_header_params,
-            mode, existing_parameters)]))
-
+            mode, existing_parameters)]
+    updated_parameters: List[Parameter] = []
+    for i, param in enumerate(_updated_parameters):
+        if len([x for x in _updated_parameters[i+1:] if (x.name == param.name) and (x._in == param._in)]) == 0:
+            updated_parameters.append(param)
     operation.parameters = updated_parameters
     new_responses: Mapping[str, Response] = { response_code: response }
     operation.responses = { **operation.responses, **new_responses }
@@ -260,7 +264,7 @@ def update_openapi(schema: OpenAPIObject, exchange: HttpExchange, mode: UpdateMo
         exchange.request, schema_servers)
     if normalized_pathname_or_none is None:
         schema_copy.servers = [*schema_copy.servers, Server(description=None, variables=None, _x=None, url=urlunsplit(
-            [exchange.request.protocol, exchange.request.host, '', '', '']))]
+            [exchange.request.protocol.value, exchange.request.host, '', '', '']))]
         normalized_pathname = request_path
     else:
         normalized_pathname = normalized_pathname_or_none
@@ -320,16 +324,14 @@ def update_openapi(schema: OpenAPIObject, exchange: HttpExchange, mode: UpdateMo
         request_path_parameters = {}
         new_paths: Paths = { request_path: path_item }
         schema_copy.paths = {**schema_paths, **new_paths }
-    if request_method in path_item:
+    existing_operation = operation_from_string(path_item, request_method)
+    if existing_operation is not None:
         # Operation exists
-        existing_operation = path_item[request_method]  # type: ignore
         operation = update_operation(existing_operation, exchange, mode)
-
     else:
         operation = operation_candidate
 
-    # Needs type ignore as one cannot set variable property on typed dict
-    path_item[request_method] = operation  # type: ignore
+    set_path_item_at_operation(path_item, request_method, operation)
     return cast(OpenAPIObject, schema_copy)
 
 

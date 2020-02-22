@@ -3,11 +3,13 @@ import lenses
 from lenses.optics.base import Prism
 lens = lenses.lens
 import jsonschema
+from ..schemabuilder.operation import operation_from_string
+from dataclasses import replace
 import json
 import re
 from http_types import Request
 from typing import cast, Sequence, Tuple, TypeVar, Callable, Optional, Mapping, Union, Any
-from openapi_typed_2 import OpenAPIObject, Responses, MediaType, Response, RequestBody, Header, Operation, Parameter, Components, Reference, Schema, PathItem
+from openapi_typed_2 import convert_from_openapi, OpenAPIObject, Responses, MediaType, Response, RequestBody, Header, Operation, Parameter, Components, Reference, Schema, PathItem
 from urllib.parse import urlparse
 from ..schemabuilder.defaults import _SCHEMA_DEFAULT
 
@@ -38,15 +40,31 @@ all_methods: Sequence[str] = [
   "trace",
 ]
 
-def omit(p: C, a: str) -> C:
-    return { k: v for k, v in p.items() if k != a}
+def omit_method_from_path_item(p: PathItem, a: str) -> PathItem:
+    return replace(
+        p, get=None
+    ) if a == "get" else replace(
+        p, post=None
+    ) if a == "post" else replace(
+        p, put=None
+    ) if a == "put" else replace(
+        p, delete=None
+    ) if a == "delete" else replace(
+        p, patch=None
+    ) if a == "patch" else replace(
+        p, trace=None
+    ) if a == "trace" else replace(
+        p, options=None
+    ) if a == "options" else replace(
+        p, head=None
+    )
 
 _prism_o = (lambda a: a, lambda b: b)
 
 def odl(getter: Callable[[C], D], setter: Callable[[C, D], C]) -> lenses.ui.BaseUiLens[S, T, X, Y]:
     # TODO: is there a better `None` prism?
     # Seems verbose
-    return lens.Lens(getter, setter).Prism(lambda a: a, lambda a: a)
+    return lens.Lens(getter, setter).Prism(lambda a: a, lambda a: a, ignore_none=True)
 
 def _schema_o_setter(a: C, b: Optional[Schema]):
     a.schema = b
@@ -212,7 +230,7 @@ def change_ref(j: Reference) -> Reference:
     )
 
 def change_refs(j: Schema) -> Schema:
-    return Schema(**j,
+    return replace(j,
         additionalProperties=None if j.additionalProperties is None
             else j.additionalProperties
             if isinstance(j.additionalProperties, bool)
@@ -231,14 +249,14 @@ def change_refs(j: Schema) -> Schema:
 
 def make_definitions_from_schema(o: OpenAPIObject) -> Mapping[str, Any]:
     return {
-        a: change_ref(b) if isinstance(b, Reference) else change_refs(b) for a, b in o.components.schemas.items()
+        a: convert_from_openapi(change_ref(b) if isinstance(b, Reference) else change_refs(b)) for a, b in o.components.schemas.items()
     } if o.components and o.components.schemas else {}
 
 def find_relevant_path(m: str, a: Sequence[str], p: PathItem) -> PathItem:
   return p if len(a) == 0 else find_relevant_path(
         m,
         a[1:],
-        p if a[0] == m else omit(p, a[0]),
+        p if a[0] == m else omit_method_from_path_item(p, a[0]),
       )
 
 
@@ -249,11 +267,10 @@ def get_required_request_query_or_header_parameters_internal(header: bool, l: le
     # TODO: really dirty cast
     # is this even the case
     # copied from unmock, but need to investigate
-    return [Parameter(
-                **parameter,
+    return [replace(parameter,
                 name=parameter.name if not header else parameter.name.lower(),
-                schema=change_ref(parameter.schema) if isinstance(parameter.schema, Schema) else change_refs(parameter.schema) if parameter.schema is not None else Schema(**_SCHEMA_DEFAULT, _type='string')
-            ) for parameter in l.Prism(
+                schema=change_ref(parameter.schema) if isinstance(parameter.schema, Reference) else change_refs(parameter.schema) if parameter.schema is not None else Schema(**{**_SCHEMA_DEFAULT, '_type': 'string'})
+                ) for parameter in l.Prism(
         lambda s: get_parameter_from_ref(oai, ref_name(s)) if isinstance(s, Reference) else s,
         lambda a : a,
         ignore_none=True
@@ -309,7 +326,7 @@ def keep_method_if_required_request_body_is_present(
     oai: OpenAPIObject,
 ) -> Callable[[PathItem], PathItem]:
     def _keep_method_if_required_request_body_is_present(p: PathItem) -> PathItem:
-        out = p if (req.method.value not in p) or (len([s for s in get_required_request_body_schemas(req, oai, p) if
+        out = p if (operation_from_string(p, req.method.value) is None) or (len([s for s in get_required_request_body_schemas(req, oai, p) if
                 not valid_schema(req.bodyAsJson if req.bodyAsJson else json.loads(req.body), {
                     # TODO: this line is different than the TS implementation
                     # because I think there is a logic bug there
@@ -317,9 +334,9 @@ def keep_method_if_required_request_body_is_present(
                     # if the schema will be a reference or not
                     # perhaps I'm wrong in the assumption... only testing will tell...
                     # otherwise, change the TS implementation in unmock-js and delete this comment.
-                    **(change_ref(s) if isinstance(s, Reference) else change_refs(s)),
+                    **convert_from_openapi(change_ref(s) if isinstance(s, Reference) else change_refs(s)),
                     'definitions': make_definitions_from_schema(oai),
-                })]) == 0) else omit(p, req.method.value)
+                })]) == 0) else omit_method_from_path_item(p, req.method.value)
         return out
     return _keep_method_if_required_request_body_is_present
 
@@ -337,13 +354,14 @@ def keep_method_if_required_query_parameters_are_present(
     oai: OpenAPIObject,
 ) -> Callable[[PathItem], PathItem]:
     def _keep_method_if_required_query_parameters_are_present(p: PathItem) -> PathItem:
-        return keep_method_if_required_query_or_header_parameters_are_present(False, req, oai, p)
+        out = keep_method_if_required_query_or_header_parameters_are_present(False, req, oai, p)
+        return out
     return _keep_method_if_required_query_parameters_are_present
 
 def _json_schema_from_required_parameters(parameters: Sequence[Parameter], oai: OpenAPIObject) -> Any:
     return {
         'type': 'object',
-        'properties': {param.name: param.schema for param in parameters},
+        'properties': {param.name: convert_from_openapi(param.schema) for param in parameters},
         'required': [param.name for param in parameters if param.required],
         'additionalProperties': True,
         'definitions': make_definitions_from_schema(oai),
@@ -356,13 +374,13 @@ def keep_method_if_required_query_or_header_parameters_are_present(
     oai: OpenAPIObject,
     p: PathItem
 ) -> PathItem:
-    return p if (req.method.value not in p) or valid_schema(
+    return p if (operation_from_string(p, req.method.value) is None) or valid_schema(
         { k.lower(): v for k, v in req.headers.items() } if header else req.query,
         _json_schema_from_required_parameters(get_required_request_query_or_header_parameters(header, req, oai, p), oai)
-    ) else omit(p, req.method.value)
+    ) else omit_method_from_path_item(p, req.method.value)
 
 def maybe_add_string_schema(s: Sequence[Union[Reference, Schema]]) -> Sequence[Union[Reference, Schema]]:
-    return [Schema(**_SCHEMA_DEFAULT, _type="string")] if len(s) == 0 else s
+    return [Schema(**{**_SCHEMA_DEFAULT, '_type': "string"})] if len(s) == 0 else s
 
 def discern_name(o: Optional[Parameter], n: str) -> Optional[Parameter]:
     return o if (o is None) or ((o.name == n) and (o._in == 'path')) else None
@@ -451,7 +469,7 @@ def path_parameter_match(
         lambda a, b:
           a or
           valid_schema(b, {
-            **r,
+            **convert_from_openapi(r),
             'definitions': make_definitions_from_schema(oas),
           }),
         list(set([part, maybeJson(part)])),
@@ -511,31 +529,13 @@ def get_first_method_internal_2(
   o: Optional[Operation],
 ) ->  Optional[Tuple[str, Operation]]:
     return (n, o) if o is not None else get_first_method_internal(m, p)
-
-def get_operation_from_str(p: PathItem, op: str) -> Optional[Operation]:
-    if op == "get":
-        return p.get
-    elif op == "post":
-        return p.post
-    elif op == "put":
-        return p.put
-    elif op == "delete":
-        return p.delete
-    elif op == "head":
-        return p.head
-    elif op == "options":
-        return p.options
-    elif op == "trace":
-        return p.trace
-    else:
-        return p.patch
     
 
 def get_first_method_internal(
   m: Sequence[str],
   p: PathItem,
 ) -> Optional[Tuple[str, Operation]]:
-    return None if len(m) == 0 else get_first_method_internal_2(p, m[0], m[1:], get_operation_from_str(p, m[0]))
+    return None if len(m) == 0 else get_first_method_internal_2(p, m[0], m[1:], operation_from_string(p, m[0]))
 
 def get_first_method(p: PathItem) -> Optional[Tuple[str, Operation]]:
   return get_first_method_internal(all_methods, p)
@@ -558,7 +558,7 @@ def use_if_header_last_mile(
   p: Parameter,
   r: Optional[Schema],
 ) -> Optional[Tuple[str, Schema]]:
-  return None if r is None else (p.name, r if r is not None else Schema(**_SCHEMA_DEFAULT, _type="string"))
+  return None if r is None else (p.name, r if r is not None else Schema(**{**_SCHEMA_DEFAULT, '_type': "string"}))
 
 def use_if_header(
   o: OpenAPIObject,
@@ -566,7 +566,7 @@ def use_if_header(
 ) -> Optional[Tuple[str, Schema]]:
     return None if p._in != "header" else use_if_header_last_mile(
         p,
-        Schema(**_SCHEMA_DEFAULT, _type="string") if p.schema is None else
+        Schema(**{**_SCHEMA_DEFAULT, '_type':"string"}) if p.schema is None else
             get_schema_from_ref(o, ref_name(p.schema)) if isinstance(p.schema, Reference) else
                 p.schema
     )
@@ -602,18 +602,16 @@ def matcher(req: Request, r: Mapping[str, OpenAPIObject]) -> Mapping[str, OpenAP
         return __path_item_modifier
     def _oai_modifier(oai: OpenAPIObject) -> OpenAPIObject:
         return paths_o.Values().modify(
-            _path_item_modifier
-        )(OpenAPIObject(
-            **oai,
-            paths={n: o for n, o in oai.paths.items() if matches(
+            _path_item_modifier(oai)
+        )(replace(oai,
+                    paths={n: o for n, o in oai.paths.items() if matches(
                     truncate_path(req.pathname, oai, req),
                     n,
                     o,
                     req.method.value,
                     oai,
                   )}
-                )
-        )
+        ))
     return lens.Values().modify(
         _oai_modifier
     )({
@@ -661,7 +659,7 @@ def header_schemas_from_response(
       lambda a: a,
       ignore_none=True
     ).Iso(
-      lambda a: Parameter(**a[1], name=a[0], _in='header'),
+      lambda a: replace(a[1], name=a[0], _in='header'),
       lambda a: (a.name, a)
     ).add_lens(parameter_schema(schema)).collect()(operation)
 
