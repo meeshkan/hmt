@@ -1,5 +1,5 @@
 from meeshkan.schemabuilder.builder import BASE_SCHEMA
-from meeshkan.__main__ import cli
+from meeshkan.__main__ import cli, convert
 from meeshkan.schemabuilder.writer import OPENAPI_FILENAME, read_directory
 from click.testing import CliRunner
 from .util import read_recordings_as_strings
@@ -69,6 +69,26 @@ def test_convert_cmd():
 
         runner_result = runner.invoke(
             cli, ['convert', '-i', str(input_file), '-o', output_file])
+
+        assert Path(output_file).is_file(
+        ), "Expected output file {} to exist".format(output_file)
+
+        assert runner_result.exit_code == 0
+
+
+def test_convert_cmd_without_invocation():
+    runner = CliRunner()
+
+    # Absolute path, can be accessed in Click's "isolated filesystem"
+    input_file = Path('resources/recordings.pcap').resolve()
+    output_file = 'recordings.jsonl'
+
+    with runner.isolated_filesystem():
+
+        assert not Path(output_file).is_file(
+        ), "Expected output file {} to not exist".format(output_file)
+
+        runner_result = convert(str(input_file), output_file)
 
         assert Path(output_file).is_file(
         ), "Expected output file {} to exist".format(output_file)

@@ -1,9 +1,7 @@
 """Code for converting pcap to HttpExchange JSON format."""
 
 from sys import argv
-from http_types import HttpExchange
 from typing import List, Optional, Any, Iterator
-from http_types import HttpExchange
 from http_types.utils import RequestBuilder, ResponseBuilder
 from typing import Iterator
 from pathlib import Path
