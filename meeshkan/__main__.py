@@ -1,5 +1,6 @@
 from io import StringIO
 import json
+from http_types.utils import HttpExchangeWriter
 import click
 from typing import Sequence, cast
 
@@ -142,7 +143,7 @@ def _convert(input_file, out):
     with open(out, 'w') as f:
         for reqres in request_response_pairs:
             sink = StringIO()
-            HttpExchangeBuilder(sink).write(reqres)
+            HttpExchangeWriter(sink).write(reqres)
             sink.seek(0)
             f.write(''.join([x for x in sink])+'\n')
             counter += 1
