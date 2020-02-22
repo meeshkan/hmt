@@ -3,6 +3,7 @@ import importlib.util
 import inspect
 import json
 import logging
+from dataclasses import replace
 import os
 from io import StringIO
 from http_types import HttpExchange
@@ -80,6 +81,11 @@ class CallbackManager:
         callback = self._callbacks.get((request.host, request.method.value, request.pathname))
         if callback is not None:
             sink = StringIO()
+            #### there is a bug where sometimes, for unclear reasons,
+            #### the request body is sometimes written as a byte string
+            #### instead of a string. we hackishly fix here, but note that
+            #### the bug exists. would be good to know why
+            request = replace(request, body=str(request.body))
             HttpExchangeWriter(sink).write(HttpExchange(request=request, response=response))
             sink.seek(0)
             res = json.loads('\n'.join([x for x in sink]))
