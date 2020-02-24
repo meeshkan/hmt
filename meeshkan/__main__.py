@@ -1,3 +1,6 @@
+from .prepare import ignore_warnings
+ignore_warnings()
+
 from io import StringIO
 import json
 from http_types.utils import HttpExchangeWriter
