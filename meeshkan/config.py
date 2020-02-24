@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Dict, Any, List
 import yaml
 import logging
-import warnings
 
 
 PACKAGE_PATH = Path(os.path.dirname(os.path.realpath(__file__)))  # type: Path
@@ -18,22 +17,6 @@ LOGS_DIR = BASE_DIR.joinpath('logs')
 __all__ = []  # type: List[str]
 
 _SETUP_DONE = False
-
-def ignore_warnings():
-    """Several of our deps have deprecation warnings
-    # we ignore for now, but should look into."""
-    ### This comes from faust """
-    warnings.filterwarnings(
-        action='ignore',
-        category=DeprecationWarning,
-        module=r'venusian'
-    )
-    ### This comes from lenses
-    warnings.filterwarnings(
-        action='ignore',
-        category=DeprecationWarning,
-        module=r'singledispatch_helpers'
-    )
 
 
 def _ensure_base_dirs(verbose=True):

@@ -1,4 +1,4 @@
-from .config import ignore_warnings
+from .prepare import ignore_warnings
 ignore_warnings()
 
 from .schemabuilder import *
