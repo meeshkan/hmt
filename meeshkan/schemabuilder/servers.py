@@ -1,4 +1,4 @@
-from openapi_typed import Server
+from openapi_typed_2 import Server
 from http_types import Request
 from typing import List, Optional, Sequence
 from urllib.parse import urlparse
@@ -20,16 +20,16 @@ def normalize_path_if_matches(request: Request, servers: Sequence[Server]) -> Op
     """
 
     for server in servers:
-        server_url = urlparse(server['url'])
-        if server_url.scheme != request['protocol']:
+        server_url = urlparse(server.url)
+        if server_url.scheme != request.protocol.value:
             continue
 
-        if server_url.netloc != request['host']:
+        if server_url.netloc != request.host:
             continue
 
-        if not request['pathname'].startswith(server_url.path):
+        if not request.pathname.startswith(server_url.path):
             continue
 
-        return request['pathname'][len(server_url.path):]
+        return request.pathname[len(server_url.path):]
 
     return None

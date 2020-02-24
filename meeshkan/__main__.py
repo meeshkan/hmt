@@ -1,4 +1,6 @@
+from io import StringIO
 import json
+from http_types.utils import HttpExchangeWriter
 import click
 from typing import Sequence, cast
 
@@ -7,14 +9,14 @@ from .config import setup
 from .logger import get as getLogger
 from .schemabuilder.builder import BASE_SCHEMA, build_schema_async
 from .convert.pcap import convert_pcap
-from .schemabuilder.schema import validate_openapi_object
 from .sinks import AbstractSink, FileSystemSink
 from .sources import AbstractSource, KafkaSource, FileSource
 from .sources.kafka import KafkaProcessorConfig
-from openapi_typed import OpenAPIObject
+from openapi_typed_2 import OpenAPIObject, convert_to_openapi
 from yaml import safe_load
 from .meeshkan_types import *
 from .server.commands import record, mock
+from http_types.utils import HttpExchangeBuilder
 
 
 LOGGER = getLogger(__name__)
@@ -108,10 +110,9 @@ def build(input_file, out, initial_openapi_spec, mode, source, sink):
 
     if initial_openapi_spec is not None:
         try: 
-            maybe_openapi = cast(OpenAPIObject, safe_load(initial_openapi_spec.read())) 
+            maybe_openapi = safe_load(initial_openapi_spec.read())
             # will raise if not an API spec 
-            validate_openapi_object(maybe_openapi) 
-            openapi_spec = maybe_openapi
+            openapi_spec = convert_to_openapi(maybe_openapi)
         except: pass # just use the initial schema
     run_from_source(source, UpdateMode[mode.upper()], openapi_spec, sinks=sinks)
 
@@ -127,7 +128,9 @@ def convert(input_file, out):
     """
     Convert recordings from PCAP to JSONL format.
     """
+    return _convert(input_file, out)
 
+def _convert(input_file, out):
     if not input_file.endswith('.pcap'):
         raise ValueError(
             'Only .pcap files are accepted as input. Got: {}'.format(input_file))
@@ -139,7 +142,10 @@ def convert(input_file, out):
     counter = 0
     with open(out, 'w') as f:
         for reqres in request_response_pairs:
-            f.write((json.dumps(reqres) + "\n"))
+            sink = StringIO()
+            HttpExchangeWriter(sink).write(reqres)
+            sink.seek(0)
+            f.write(''.join([x for x in sink])+'\n')
             counter += 1
 
     log("Wrote %d lines.", counter)

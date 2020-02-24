@@ -4,7 +4,7 @@ import os
 from typing import cast
 
 import yaml
-from http_types import Request, Response, HttpExchange, RequestBuilder, ResponseBuilder
+from http_types import Request, Response, HttpExchange, HttpExchangeWriter, RequestBuilder, ResponseBuilder
 
 from meeshkan.schemabuilder.update_mode import UpdateMode
 from ...schemabuilder.builder import BASE_SCHEMA, update_openapi
@@ -39,7 +39,7 @@ class RequestLoggingCallback():
         RequestBuilder.validate(request)
         ResponseBuilder.validate(response)
 
-        host = request['host']
+        host = request.host
         reqres = HttpExchange(request=request, response=response)
         if not host in self._logs:
             log_file = os.path.join(self._log_dir, '{}.jsonl'.format(host))
@@ -48,7 +48,7 @@ class RequestLoggingCallback():
             else:
                 self._logs[host] = open(log_file, 'w')
 
-        self._logs[host].write(json.dumps(reqres))
+        HttpExchangeWriter(self._logs[host]).write(reqres)
         self._logs[host].write('\n')
         self._logs[host].flush()
 

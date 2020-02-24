@@ -1,6 +1,6 @@
 import abc
 from meeshkan.schemabuilder.result import BuildResult
-from openapi_typed import OpenAPIObject
+from openapi_typed_2 import OpenAPIObject
 from typing import Union, Awaitable
 from typing import Awaitable
 

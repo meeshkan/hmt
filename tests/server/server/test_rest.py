@@ -31,12 +31,18 @@ def test_rest_middleware(http_client, base_url, app):
     with requests_mock.Mocker() as m:
         m.post("https://api.hello.world", json={
             'petstore': {
+                'openapi': '3.0',
+                'info': {
+                    'title': 'hello',
+                    'version': 'world'
+                },
                 'servers': [{'url': 'http://petstore.swagger.io'}],
                 'paths': {
                     '/pets': {
                         'get': {
                             'responses': {
                                 '200': {
+                                    'description': 'a response',
                                     'content': {
                                         'application/json': {
                                             'schema': {

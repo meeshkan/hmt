@@ -2,6 +2,9 @@ description: API description
 title: API title
 version: '1.0'
 openapi: 3.0.0
+info:
+  title: OP Bank
+  version: '0.0.1'
 paths:
   /accounts/v3/accounts:
     description: Path description

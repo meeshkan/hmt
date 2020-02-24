@@ -1,10 +1,11 @@
 from meeshkan.gen.generator import matcher
-from openapi_typed import OpenAPIObject
+from openapi_typed_2 import OpenAPIObject, convert_to_openapi
+from http_types import RequestBuilder
 from typing import Dict
 import json
 
 store: Dict[str, OpenAPIObject] = {
-  'foo': {
+  'foo': convert_to_openapi({
     'openapi': "",
     'servers': [{ 'url': "https://api.foo.com" }],
     'info': { 'title': "", 'version': "" },
@@ -34,8 +35,8 @@ store: Dict[str, OpenAPIObject] = {
         'description': "",
       },
     },
-  },
-  'bar': {
+  }),
+  'bar': convert_to_openapi({
     'openapi': "",
     'servers': [{ 'url': "https://api.bar.com" }],
     'info': { 'title': "", 'version': "" },
@@ -56,8 +57,8 @@ store: Dict[str, OpenAPIObject] = {
         'description': "",
       },
     },
-  },
-  'baz': {
+  }),
+  'baz': convert_to_openapi({
     'openapi': "",
     'servers': [{ 'url': "https://api.baz.com" }],
     'info': { 'title': "", 'version': "" },
@@ -149,12 +150,12 @@ store: Dict[str, OpenAPIObject] = {
         'description': "",
       },
     },
-  },
+  }),
 }
 
 def test_matcher_1():
   assert matcher(
-      {
+      RequestBuilder.from_dict({
         'headers': {},
         'host': "api.foo.com",
         'path': "/user",
@@ -162,10 +163,10 @@ def test_matcher_1():
         'protocol': "https",
         'method': "get",
         'query': {},
-      },
+      }),
       store
     ) == {
-    'foo': {
+    'foo': convert_to_openapi({
       'openapi': "",
       'servers': [{ 'url': "https://api.foo.com" }],
       'info': { 'title': "", 'version': "" },
@@ -175,12 +176,12 @@ def test_matcher_1():
           'description': "",
         },
       },
-    },
+    }),
   }
 
 def test_matcher_2():
     matcher(
-      {
+      RequestBuilder.from_dict({
         'headers': {},
         'host': "api.bar.com",
         'path': "/guest/{id}",
@@ -188,10 +189,10 @@ def test_matcher_2():
         'protocol': "https",
         'method': "post",
         'query': {},
-      },
+      }),
       store
     ) == {
-        'bar': {
+        'bar': convert_to_openapi({
             'openapi': "",
             'servers': [{ 'url': "https://api.bar.com" }],
             'info': { 'title': "", 'version': "" },
@@ -201,12 +202,12 @@ def test_matcher_2():
                 'description': "",
                 },
             }
-        }
+        })
     }
 
 def test_matcher_3():
     assert matcher(
-      {
+      RequestBuilder.from_dict({
         'headers': {},
         'host': "api.foo.com",
         'path': "/users", # incorrect, should be user
@@ -214,20 +215,20 @@ def test_matcher_3():
         'protocol': "https",
         'method': "get",
         'query': {},
-      },
+      }),
       store
     ) == {
-    'foo': {
+    'foo': convert_to_openapi({
       'openapi': "",
       'servers': [{ 'url': "https://api.foo.com" }],
       'info': { 'title': "", 'version': "" },
       'paths': {},
-    }
+    })
   }
 
 def test_matcher_4():
     assert matcher(
-      {
+      RequestBuilder.from_dict({
         'headers': {},
         'host': "api.foo.com",
         'path': "/user/55", # correctly parses number
@@ -235,10 +236,10 @@ def test_matcher_4():
         'protocol': "https",
         'method': "get",
         'query': {},
-      },
+      }),
       store
     ) == {
-    'foo': {
+    'foo': convert_to_openapi({
       'openapi': "",
       'servers': [{ 'url': "https://api.foo.com" }],
       'info': { 'title': "", 'version': "" },
@@ -257,12 +258,12 @@ def test_matcher_4():
           'get': { 'responses': { '200': { 'description': "useridget" } } },
         },
       },
-    },
+    }),
   }
 
 def test_matcher_5():
     assert matcher(
-      {
+      RequestBuilder.from_dict({
         'headers': {},
         'host': "api.foo.com",
         'path': "/user/fdsfsfwef", # correctly rejects non-number
@@ -270,20 +271,20 @@ def test_matcher_5():
         'protocol': "https",
         'method': "get",
         'query': {},
-      },
+      }),
       store
     ) == {
-    'foo': {
+    'foo': convert_to_openapi({
       'openapi': "",
       'servers': [{ 'url': "https://api.foo.com" }],
       'info': { 'title': "", 'version': "" },
       'paths': {},
-    },
+    }),
   }
 
 def test_matcher_6():
     assert matcher(
-      {
+      RequestBuilder.from_dict({
         'headers': {},
         'host': "api.foo.com",
         'path': "/user",
@@ -291,10 +292,10 @@ def test_matcher_6():
         'protocol': "https",
         'method': "delete", # does not exist
         'query': {},
-      },
+      }),
       store,
     ) == {
-    'foo': {
+    'foo': convert_to_openapi({
       'openapi': "",
       'servers': [{ 'url': "https://api.foo.com" }],
       'info': { 'title': "", 'version': "" },
@@ -303,12 +304,12 @@ def test_matcher_6():
           'description': "",
         },
       },
-    },
+    }),
   }
 
 def test_matcher_7():
     assert matcher(
-      {
+      RequestBuilder.from_dict({
         'headers': {},
         'host': "api.foo.commmm", # does not exist
         'path': "/user",
@@ -316,13 +317,13 @@ def test_matcher_7():
         'protocol': "https",
         'method': "get",
         'query': {},
-      },
+      }),
       store,
     ) == {}
 
 def test_matcher_8():
     assert matcher(
-      {
+      RequestBuilder.from_dict({
         'headers': {},
         'host': "api.baz.com",
         'path': "/guest",
@@ -330,13 +331,13 @@ def test_matcher_8():
         'protocol': "https",
         'method': "get",
         'query': { 'hello': "0" }, # query param must be integer
-      },
+      }),
       store,
-    )['baz']['paths']["/guest"]['get'] == store['baz']['paths']["/guest"]['get']
+    )['baz'].paths["/guest"].get == store['baz'].paths["/guest"].get
 
 def test_matcher_9():
-    assert 'get' not in matcher(
-      {
+    assert matcher(
+      RequestBuilder.from_dict({
         'headers': {},
         'host': "api.baz.com",
         'path': "/guest",
@@ -344,13 +345,13 @@ def test_matcher_9():
         'protocol': "https",
         'method': "get",
         'query': { 'hello': "b" }, # query param intentionally off as string
-      },
+      }),
       store,
-    )['baz']['paths']["/guest"]
+    )['baz'].paths["/guest"].get == None
 
 def test_matcher_10():
-  assert 'get' not in matcher(
-      {
+  assert matcher(
+      RequestBuilder.from_dict({
         'headers': {},
         'host': "api.baz.com",
         'path': "/guest",
@@ -358,13 +359,13 @@ def test_matcher_10():
         'protocol': "https",
         'method': "get",
         'query': {}, # as query is required, this should fail
-      },
+      }),
       store,
-    )['baz']['paths']["/guest"]
+    )['baz'].paths["/guest"].get == None
 
 def test_matcher_11():
-    assert matcher(
-      {
+    print('shit', matcher(
+      RequestBuilder.from_dict({
         'headers': {},
         'host': "api.baz.com",
         'path': "/guest/3/name",
@@ -374,13 +375,27 @@ def test_matcher_11():
         'query': {},
         'bodyAsJson': { 'age': 42 },
         'body': json.dumps({ 'age': 42 }),
-      },
+      }),
       store,
-    )['baz']['paths']["/guest/{id}/name"]['post'] == store['baz']['paths']["/guest/{id}/name"]['post']
+    )['baz'].paths["/guest/{id}/name"])
+    assert matcher(
+      RequestBuilder.from_dict({
+        'headers': {},
+        'host': "api.baz.com",
+        'path': "/guest/3/name",
+        'pathname': "/guest/3/name",
+        'protocol': "https",
+        'method': "post",
+        'query': {},
+        'bodyAsJson': { 'age': 42 },
+        'body': json.dumps({ 'age': 42 }),
+      }),
+      store,
+    )['baz'].paths["/guest/{id}/name"].post == store['baz'].paths["/guest/{id}/name"].post
 
 def test_matcher_12():
-    assert 'post' not in matcher(
-      {
+    assert matcher(
+      RequestBuilder.from_dict({
         'headers': {},
         'host': "api.baz.com",
         'path': "/guest/3/name",
@@ -390,13 +405,13 @@ def test_matcher_12():
         'query': {},
         'body': json.dumps({ 'age': "42" }),
         'bodyAsJson': { 'age': "42" }, # wrong type, as 42 is string
-      },
+      }),
       store,
-    )['baz']['paths']["/guest/{id}/name"]
+    )['baz'].paths["/guest/{id}/name"].post == None
 
 def test_matcher_13():
     assert matcher(
-      {
+      RequestBuilder.from_dict({
         'headers': { 'zz': "top" },
         'host': "api.baz.com",
         'path': "/guest/4",
@@ -404,13 +419,13 @@ def test_matcher_13():
         'protocol': "https",
         'method': "post",
         'query': { 'zzz': "aaa", 'a': "foo", 'b': "baz" },
-      },
+      }),
       store,
-    )['baz']['paths']["/guest/{id}"]['post'] == store['baz']['paths']["/guest/{id}"]['post']
+    )['baz'].paths["/guest/{id}"].post == store['baz'].paths["/guest/{id}"].post
 
 def test_matcher_14():
-    assert 'post' not in matcher(
-      {
+    assert matcher(
+      RequestBuilder.from_dict({
         'headers': {}, # no header will lead to undefined
         'host': "api.baz.com",
         'path': "/guest/4",
@@ -418,6 +433,6 @@ def test_matcher_14():
         'protocol': "https",
         'method': "post",
         'query': { 'zzz': "aaa", 'a': "foo", 'b': "baz" },
-      },
+      }),
       store,
-    )['baz']['paths']["/guest/{id}"]
+    )['baz'].paths["/guest/{id}"].post == None
