@@ -67,72 +67,63 @@ def odl(getter: Callable[[C], D], setter: Callable[[C, D], C]) -> lenses.ui.Base
     return lens.Lens(getter, setter).Prism(lambda a: a, lambda a: a, ignore_none=True)
 
 def _schema_o_setter(a: C, b: Optional[Schema]):
-    a.schema = b
-    return a
+    return replace(a, schema = b)
 
 schema_o = odl(lambda a: a.schema, _schema_o_setter)
 
 def _request_body_o_setter(a: C, b: Optional[RequestBody]):
-    a.requestBody = b
-    return a
-
+    return replace(a, requestBody = b)
+    
 request_body_o = odl(lambda a: a.requestBody, _request_body_o_setter)
 
 def _content_o_setter(a: C, b: Optional[Mapping[str, MediaType]]):
-    a.content = b
-    return a
+    return replace(a, content = b)
 
 content_o = odl(lambda a: a.content, _content_o_setter)
 
 def _paths_o_setter(a: C, b: Optional[Mapping[str, PathItem]]):
-    a.paths = b
-    return a
+    return replace(a, paths = b)
 
 paths_o = odl(lambda a: a.paths, _paths_o_setter)
 
 def _headers_o_setter(a: C, b: Optional[Mapping[str, Union[Header, Reference]]]):
-    a.headers = b
-    return a
+    return replace(a, headers = b)   
 
 headers_o = odl(lambda a: a.headers, _headers_o_setter)
 
 def _responses_o(a: C, b: Responses):
-    a.responses = b
-    return a
+    return replace(a, responses = b)      
 
 responses_o = odl(lambda a: a.responses, _responses_o)
 
 def _parameters_o_setter(a: C, b: Optional[Sequence[Parameter]]):
-    a.parameters = b
-    return a
+    return replace(a, parameters = b)      
 
 parameters_o = odl(lambda a: a.parameters, _parameters_o_setter)
 
 def _get_o_setter(a: C, b: Optional[Operation]):
-    a.get = b
-    return a
+    return replace(a, get = b)          
 
 def _post_o_setter(a: C, b: Optional[Operation]):
-    a.post = b
-    return a
+    return replace(a, post = b)
+
 def _put_o_setter(a: C, b: Optional[Operation]):
-    a.put = b
-    return a
+    return replace(a, put = b) 
+
 def _delete_o_setter(a: C, b: Optional[Operation]):
-    a.delete = b
-    return a
+    return replace(a, delete = b)
+
 def _options_o_setter(a: C, b: Optional[Operation]):
-    a.options = b
-    return a
+    return replace(a, options = b)
+
 def _head_o_setter(a: C, b: Optional[Operation]):
-    a.head = b
-    return a
+    return replace(a, head = b)
+
 def _patch_o_setter(a: C, b: Optional[Operation]):
-    a.patch = b
-    return a
+    return replace(a, patch = b)
+
 def _trace_o_setter(a: C, b: Optional[Operation]):
-    a.trace = b
-    return a
+    return replace(a, trace = b)
 
 def operation_o(m: str):
     return {

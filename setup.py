@@ -19,7 +19,6 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
 
 REQUIRED = [
     'click',
-    'deepdiff',
     'lenses',
     'pyyaml',
     'jsonschema',
@@ -27,7 +26,7 @@ REQUIRED = [
     'faker',
     'requests',
     'typing-extensions',
-    'openapi-typed_2',
+    'openapi-typed_2>=0.0.2',
     'typeguard>=2.7.0',
     'genson',
     'http-types>=0.0.9',

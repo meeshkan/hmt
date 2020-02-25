@@ -1,5 +1,6 @@
 from openapi_typed_2 import PathItem, Operation, Optional
 from typing import Callable, Mapping
+from dataclasses import replace
 
 def operation_from_string(p: PathItem, s: str) -> Optional[Operation]:
     lexicon: Mapping[str, Optional[Operation]] = {
@@ -16,17 +17,17 @@ def operation_from_string(p: PathItem, s: str) -> Optional[Operation]:
         return None
     return lexicon[s]
 
-def set_path_item_at_operation(p: PathItem, s: str, o: Operation) -> None:
+def new_path_item_at_operation(p: PathItem, s: str, o: Operation) -> PathItem:
     lexicon: Mapping[str, Optional[Callable[[],None]]] = {
-            "get": lambda: setattr(p, 'get', o),
-            "post": lambda: setattr(p, 'post', o),
-            "put": lambda: setattr(p, 'put', o),
-            "delete": lambda: setattr(p, 'delete', o),
-            "options": lambda: setattr(p, 'options', o),
-            "head": lambda: setattr(p, 'head', o),
-            "patch": lambda: setattr(p, 'patch', o),
-            "trace": lambda: setattr(p, 'trace', o)
+            "get": {'get': o},
+            "post": {'post': o},
+            "put": {'put': o},
+            "delete": {'delete': o},
+            "options": {'options': o},
+            "head": {'head': o},
+            "patch": {'patch': o},
+            "trace": {'trace': o}
         }
     if s not in lexicon:
-        return None
-    return lexicon[s]()
+        return p
+    return replace(p, **lexicon[s])

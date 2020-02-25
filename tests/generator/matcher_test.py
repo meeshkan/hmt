@@ -364,20 +364,6 @@ def test_matcher_10():
     )['baz'].paths["/guest"].get == None
 
 def test_matcher_11():
-    print('shit', matcher(
-      RequestBuilder.from_dict({
-        'headers': {},
-        'host': "api.baz.com",
-        'path': "/guest/3/name",
-        'pathname': "/guest/3/name",
-        'protocol': "https",
-        'method': "post",
-        'query': {},
-        'bodyAsJson': { 'age': 42 },
-        'body': json.dumps({ 'age': 42 }),
-      }),
-      store,
-    )['baz'].paths["/guest/{id}/name"])
     assert matcher(
       RequestBuilder.from_dict({
         'headers': {},

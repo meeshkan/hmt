@@ -1,10 +1,10 @@
 """Code for working with OpenAPI paths, e.g., matching request path to an OpenAPI endpoint with parameter."""
+from meeshkan.schemabuilder.schemadiff import make_schema_diff
 import re
 import random
 import string
 from dataclasses import dataclass
-from deepdiff import DeepDiff
-from typing import cast, Pattern, Optional, Tuple, Mapping, Any
+from typing import Pattern, Optional, Tuple, Mapping, Any
 from typing_extensions import TypedDict
 from .operation import operation_from_string
 
@@ -96,17 +96,17 @@ def _dumb_match_to_path(request_path: str, paths: Paths, request_method: str, op
                 # if not, we deem them as irreconcilably different and give up
                 incumbent_potential_conflict = operation.responses[potential_conflict]
                 candidate_potential_conflict = operation_candidate.responses[potential_conflict]
-                diff = DeepDiff(incumbent_potential_conflict, candidate_potential_conflict)
-                # we don't care about value differences
-                # if there are too many differences based on my totally aribtrary standard,
-                # we deem the two to be irreconcilably different
-                if 'values_changed' in diff.keys():
-                    del diff['values_changed']
+                if (len(candidate_potential_conflict.content.keys()) != 1) or (len(incumbent_potential_conflict.content.keys()) != 1) or ([x for x in incumbent_potential_conflict.content.keys()] != [x for x in candidate_potential_conflict.content.keys()]):
+                    # give up
+                    irreconcilably_different = True
+                    break
+                diff = make_schema_diff([x for x in incumbent_potential_conflict.content.values()][0].schema,
+                                [x for x in candidate_potential_conflict.content.values()][0].schema)
                 # If there are more than five things that are different between the specs,
                 # we deem them as irreconcilably different.
                 # This is based on the Helsinki Standard of Irreconcilable Differences Between JSON Objects,
                 # ISO-2912432, which has been passed down as an oral traditoin since the dawn of time.
-                if sum([len(x) for x in diff.values()], 0) > 5:
+                if len(diff.differing_keys) + len(diff.differing_types) > 5:
                     irreconcilably_different = True
                     break
             if irreconcilably_different:
@@ -174,7 +174,8 @@ def find_matching_path(request_path: str, paths: Paths, request_method: str, ope
     # two paths are in fact similar.
     for fn in [
         lambda p, pi: (request_path, None, _match_to_path(request_path=request_path, path=p)),
-        lambda p, pi: _dumb_match_to_path(request_path, paths, request_method, operation_candidate)]:
+        lambda p, pi: _dumb_match_to_path(request_path, paths, request_method, operation_candidate)
+        ]:
         for path, path_item in paths.items():
             pathname_with_wildcard, pathname_to_be_replaced_with_wildcard, path_match = fn(path, path_item)
 
