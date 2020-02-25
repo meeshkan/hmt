@@ -1,4 +1,5 @@
 import copy
+from sys import path
 from meeshkan.gen.generator import parameters_o
 from .update_mode import UpdateMode
 from functools import reduce
@@ -257,27 +258,19 @@ def update_openapi(schema: OpenAPIObject, exchange: HttpExchange, mode: UpdateMo
                 # in the schema. it would not exist if we have already put a wildcard
                 pointer_to_value = schema_paths[pathname_to_be_replaced_with_wildcard]
                 schema_paths = { k: v for k, v in [(pathname_with_wildcard, pointer_to_value), *schema_paths.items()] if k != pathname_to_be_replaced_with_wildcard }
-                if  schema_paths[pathname_with_wildcard].parameters is None:
-                    schema_paths[pathname_with_wildcard].parameters = []
+                parameters_to_assign_to_pathname_with_wildcard = [] if schema_paths[pathname_with_wildcard].parameters is None else schema_paths[pathname_with_wildcard].parameters
                 for path_param in request_path_parameters.keys():
-                    params = [x for x in schema_paths[pathname_with_wildcard].parameters if not isinstance(x, Reference)]
+                    params = [x for x in parameters_to_assign_to_pathname_with_wildcard if not isinstance(x, Reference)]
                     if not (path_param in [x.name for x in params if x._in == 'path']):
-                        schema_paths[pathname_with_wildcard].parameters = [Parameter(
-                            description=None,
-                            deprecated=None,
-                            allowEmptyValue=None,
-                            style=None,
-                            explode=None,
-                            allowReserved=None,
-                            content=None,
-                            example=None,
-                            examples=None,
-                            _x=None,
-                            schema=None,
+                        parameters_to_assign_to_pathname_with_wildcard = [Parameter(
                             required=True,
                             _in='path',
                             name=path_param,
-                        ), *(schema_paths[pathname_with_wildcard].parameters)]
+                        ), *parameters_to_assign_to_pathname_with_wildcard]
+                schema_paths = {
+                    **schema_paths,
+                    pathname_with_wildcard: replace(schema_paths[pathname_with_wildcard], parameters=parameters_to_assign_to_pathname_with_wildcard)
+                }
             else:
                 # we are using recordings, so we shouldn't overwrite anything
                 # we only add if it is not there yet

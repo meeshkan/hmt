@@ -189,7 +189,7 @@ def test_schema_update_with_query(exchange_wo_query, query_exchange, expected_pa
     operation = schema.paths[expected_path_name].get
     assert operation.parameters == []
 
-    updated_schema = update_openapi(schema, exchange, UpdateMode.GEN)
+    updated_schema = update_openapi(schema, query_exchange, UpdateMode.GEN)
 
     operation = updated_schema.paths[expected_path_name].get
     assert_that(operation.parameters, has_length(2))
