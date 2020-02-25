@@ -18,7 +18,7 @@ def operation_from_string(p: PathItem, s: str) -> Optional[Operation]:
     return lexicon[s]
 
 def new_path_item_at_operation(p: PathItem, s: str, o: Operation) -> PathItem:
-    lexicon: Mapping[str, Optional[Callable[[],None]]] = {
+    lexicon = {
             "get": {'get': o},
             "post": {'post': o},
             "put": {'put': o},

@@ -8,7 +8,7 @@ from typing import Pattern, Optional, Tuple, Mapping, Any
 from typing_extensions import TypedDict
 from .operation import operation_from_string
 
-from openapi_typed_2 import PathItem, Paths, Operation, Responses
+from openapi_typed_2 import PathItem, Paths, Operation, Response, Schema
 
 # Pattern to match to in the escaped path string
 # Search for occurrences such as "{id}" or "{key-name}"
@@ -96,19 +96,25 @@ def _dumb_match_to_path(request_path: str, paths: Paths, request_method: str, op
                 # if not, we deem them as irreconcilably different and give up
                 incumbent_potential_conflict = operation.responses[potential_conflict]
                 candidate_potential_conflict = operation_candidate.responses[potential_conflict]
-                if (len(candidate_potential_conflict.content.keys()) != 1) or (len(incumbent_potential_conflict.content.keys()) != 1) or ([x for x in incumbent_potential_conflict.content.keys()] != [x for x in candidate_potential_conflict.content.keys()]):
-                    # give up
-                    irreconcilably_different = True
-                    break
-                diff = make_schema_diff([x for x in incumbent_potential_conflict.content.values()][0].schema,
-                                [x for x in candidate_potential_conflict.content.values()][0].schema)
-                # If there are more than five things that are different between the specs,
-                # we deem them as irreconcilably different.
-                # This is based on the Helsinki Standard of Irreconcilable Differences Between JSON Objects,
-                # ISO-2912432, which has been passed down as an oral traditoin since the dawn of time.
-                if len(diff.differing_keys) + len(diff.differing_types) > 5:
-                    irreconcilably_different = True
-                    break
+                if isinstance(incumbent_potential_conflict, Response) and isinstance(candidate_potential_conflict, Response):
+                    if (len(candidate_potential_conflict.content.keys()) != 1) or (len(incumbent_potential_conflict.content.keys()) != 1) or ([x for x in incumbent_potential_conflict.content.keys()] != [x for x in candidate_potential_conflict.content.keys()]):
+                        # give up
+                        irreconcilably_different = True
+                        break
+                    s0 = [x for x in incumbent_potential_conflict.content.values()][0].schema
+                    s1 = [x for x in candidate_potential_conflict.content.values()][0].schema
+                    if s0 is not None and s1 is not None:
+                        diff = make_schema_diff(s0 ,s1)
+                        # If there are more than five things that are different between the specs,
+                        # we deem them as irreconcilably different.
+                        # This is based on the Helsinki Standard of Irreconcilable Differences Between JSON Objects,
+                        # ISO-2912432, which has been passed down as an oral traditoin since the dawn of time.
+                        if len(diff.differing_keys) + len(diff.differing_types) > 5:
+                            irreconcilably_different = True
+                            break
+                else:
+                    # TODO: how should we treat response references?
+                    pass
             if irreconcilably_different:
                 continue
         # if it has gotten this far, all potential
@@ -173,12 +179,11 @@ def find_matching_path(request_path: str, paths: Paths, request_method: str, ope
     # Second pass - we construct a match if it looks like
     # two paths are in fact similar.
     for fn in [
-        lambda p, pi: (request_path, None, _match_to_path(request_path=request_path, path=p)),
+        lambda p, pi: (p, None, _match_to_path(request_path=request_path, path=p)),
         lambda p, pi: _dumb_match_to_path(request_path, paths, request_method, operation_candidate)
         ]:
         for path, path_item in paths.items():
             pathname_with_wildcard, pathname_to_be_replaced_with_wildcard, path_match = fn(path, path_item)
-
             if path_match is None:
                 continue
             return MatchingPath(path=path_item, param_mapping=path_match, pathname_with_wildcard=pathname_with_wildcard, pathname_to_be_replaced_with_wildcard=pathname_to_be_replaced_with_wildcard)

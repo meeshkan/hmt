@@ -110,17 +110,16 @@ def update_response(response: Response, mode: UpdateMode, exchange: HttpExchange
     ################
     ### HEADERS
     ################
-    response_headers = response.headers
+    response_headers = response.headers if response.headers is not None else {}
     # TODO: accommodate array headers (currently cuts them off)
     useable_headers: Mapping[str, str] = { k: v for k,v in exchange.response.headers.items() if k not in ['content-type', 'content-length', 'Content-Type', 'Content-Length'] and isinstance(v, str)}
-    has_headers = len(useable_headers) > 0
-    new_headers = response.headers if response_headers is not None else {
-            **response.headers,
+    new_headers = {
+            **response_headers,
             **{
             k: Header(
                 schema=update_text_schema(v, mode, schema=response.headers.get(k, None))) for k, v in useable_headers.items()
             }
-        } if has_headers else {}
+        }
 
     #############
     ### CONTENT
@@ -245,8 +244,7 @@ def update_openapi(schema: OpenAPIObject, exchange: HttpExchange, mode: UpdateMo
     path_match_result = find_matching_path(normalized_pathname, schema_paths, request_method, operation_candidate)
 
     request_path_parameters = {}
-    make_new_paths = False
-
+    make_new_paths = True
     if path_match_result is not None:
         # Path item exists for request path
         path_item, request_path_parameters, pathname_with_wildcard, pathname_to_be_replaced_with_wildcard = path_match_result.path, path_match_result.param_mapping, path_match_result.pathname_with_wildcard, path_match_result.pathname_to_be_replaced_with_wildcard
@@ -271,21 +269,20 @@ def update_openapi(schema: OpenAPIObject, exchange: HttpExchange, mode: UpdateMo
                     **schema_paths,
                     pathname_with_wildcard: replace(schema_paths[pathname_with_wildcard], parameters=parameters_to_assign_to_pathname_with_wildcard)
                 }
+                make_new_paths = False # because we've already done it above
             else:
                 # we are using recordings, so we shouldn't overwrite anything
                 # we only add if it is not there yet
-                if request_path not in schema_paths:
+                if normalized_pathname not in schema_paths:
                     # TODO: merge with liens below?
-                    path_item = PathItem(**_DEFAULT_PATH_ITEM, summary="Path summary",
+                    path_item = PathItem(summary="Path summary",
                              description="Path description")
                     request_path_parameters = {}
-                    make_new_paths = True
     else:
-        path_item = PathItem(**_DEFAULT_PATH_ITEM, summary="Path summary",
+        path_item = PathItem(summary="Path summary",
                              description="Path description")
         request_path_parameters = {}
-        new_paths: Paths = { request_path: path_item }
-        make_new_paths = True
+        new_paths: Paths = { normalized_pathname: path_item }
     existing_operation = operation_from_string(path_item, request_method)
     if existing_operation is not None:
         # Operation exists
@@ -294,13 +291,14 @@ def update_openapi(schema: OpenAPIObject, exchange: HttpExchange, mode: UpdateMo
         operation = operation_candidate
 
     path_item = new_path_item_at_operation(path_item, request_method, operation)
-    new_paths = { request_path: path_item } if make_new_paths else {}
+    new_paths = { path_match_result.pathname_with_wildcard if (mode == UpdateMode.GEN) and ((path_match_result is not None) and (path_match_result.pathname_with_wildcard is not None)) else normalized_pathname: path_item } if make_new_paths else {}
+    new_server = Server(url=urlunsplit(
+            [str(exchange.request.protocol.value), exchange.request.host, '', '', '']))
     return replace(
         schema,
         paths={ **schema_paths, **new_paths },
-        servers=[*serverz, Server(url=urlunsplit(
-            [str(exchange.request.protocol.value), exchange.request.host, '', '', '']))]
-        )
+        servers=serverz if (new_server.url in [x.url for x in serverz]) else [*serverz, new_server]
+    )
 
 
 BASE_SCHEMA = OpenAPIObject(openapi="3.0.0",
