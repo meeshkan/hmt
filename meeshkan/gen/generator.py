@@ -318,7 +318,7 @@ def keep_method_if_required_request_body_is_present(
 ) -> Callable[[PathItem], PathItem]:
     def _keep_method_if_required_request_body_is_present(p: PathItem) -> PathItem:
         out = p if (operation_from_string(p, req.method.value) is None) or (len([s for s in get_required_request_body_schemas(req, oai, p) if
-                not valid_schema(req.bodyAsJson if req.bodyAsJson else json.loads(req.body), {
+                not valid_schema(req.bodyAsJson if req.bodyAsJson is not None else json.loads(req.body) if req.body is not None else '', {
                     # TODO: this line is different than the TS implementation
                     # because I think there is a logic bug there
                     # it should look like this line as we are not sure
