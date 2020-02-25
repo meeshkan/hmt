@@ -1,2 +1,7 @@
 include meeshkan/logging.yaml
 include meeshkan/schemabuilder/schema.json
+exclude exclude gen.py
+exclude test/*.yml
+exclude tests/*.yaml
+exclude tests/*.py
+exclude resources/*

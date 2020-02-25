@@ -1,6 +1,9 @@
 import copy
+from sys import path
+from meeshkan.gen.generator import parameters_o
 from .update_mode import UpdateMode
 from functools import reduce
+from dataclasses import replace
 from typing import Any, List, Sequence, Iterable, AsyncIterable, cast, Tuple, Optional, Union, TypeVar, Type, Mapping
 from urllib.parse import urlunsplit
 from collections import defaultdict
@@ -10,7 +13,7 @@ from http_types import HttpExchange as HttpExchange
 from openapi_typed_2 import Info, Paths, MediaType, Header, OpenAPIObject, PathItem, Response, Operation, Parameter, Reference, Server, Responses
 from typeguard import check_type  # type: ignore
 
-from .operation import operation_from_string, set_path_item_at_operation
+from .operation import operation_from_string, new_path_item_at_operation
 from ..logger import get as getLogger
 from .media_types import infer_media_type_from_nonempty, build_media_type, update_media_type, MediaTypeKey, update_text_schema
 from .paths import find_matching_path, RequestPathParameters
@@ -83,7 +86,7 @@ def build_response(request: HttpExchange, mode: UpdateMode) -> Response:
 
 
 def update_response(response: Response, mode: UpdateMode, exchange: HttpExchange) -> Response:
-    """Update response object. Mutates the input object.
+    """Update response object.
 
     Response reference: https://swagger.io/specification/#responseObject
 
@@ -107,31 +110,15 @@ def update_response(response: Response, mode: UpdateMode, exchange: HttpExchange
     ################
     ### HEADERS
     ################
-    response_headers = response.headers
+    response_headers = response.headers if response.headers is not None else {}
     # TODO: accommodate array headers (currently cuts them off)
     useable_headers: Mapping[str, str] = { k: v for k,v in exchange.response.headers.items() if k not in ['content-type', 'content-length', 'Content-Type', 'Content-Length'] and isinstance(v, str)}
-    has_headers = len(useable_headers) > 0
-    if response_headers is None and has_headers:
-        response.headers = {}
-    if has_headers:
-        new_headers: Mapping[str, Header] = {
+    new_headers = {
+            **response_headers,
+            **{
             k: Header(
-                description=None,
-                required=None,
-                deprecated=None,
-                allowEmptyValue=None,
-                style=None,
-                explode=None,
-                allowReserved=None,
-                content=None,
-                example=None,
-                examples=None,
-                _x=None,
                 schema=update_text_schema(v, mode, schema=response.headers.get(k, None))) for k, v in useable_headers.items()
             }
-        response.headers = {
-            **response.headers,
-            **new_headers
         }
 
     #############
@@ -149,8 +136,7 @@ def update_response(response: Response, mode: UpdateMode, exchange: HttpExchange
 
     new_content: Mapping[str, MediaType] = {media_type_key: media_type}
     response_content = {**response_content, **new_content }
-    response.content = response_content
-    return response
+    return replace(response, headers=new_headers, content=response_content)
 
 
 def build_operation(exchange: HttpExchange, mode: UpdateMode) -> Operation:
@@ -170,18 +156,9 @@ def build_operation(exchange: HttpExchange, mode: UpdateMode) -> Operation:
     request_query_params = exchange.request.query
     request_header_params = exchange.request.headers
     schema_query_params = ParamBuilder('query').build(request_query_params, mode)
-    # TODO: unfreeze
     schema_header_params = ParamBuilder('header').build(request_header_params, mode)
 
     operation = Operation(
-        tags=None,
-        externalDocs=None,
-        requestBody=None,
-        callbacks=None,
-        deprecated=None,
-        security=None,
-        servers=None,
-        _x=None,
         summary="Operation summary",
         description="Operation description",
         operationId="id",
@@ -191,7 +168,7 @@ def build_operation(exchange: HttpExchange, mode: UpdateMode) -> Operation:
 
 
 def update_operation(operation: Operation, request: HttpExchange, mode: UpdateMode) -> Operation:
-    """Update OpenAPI operation object. Mutates the input object.
+    """Update OpenAPI operation object.
 
     Operation reference: https://swagger.io/specification/#operationObject
 
@@ -229,10 +206,8 @@ def update_operation(operation: Operation, request: HttpExchange, mode: UpdateMo
     for i, param in enumerate(_updated_parameters):
         if len([x for x in _updated_parameters[i+1:] if (x.name == param.name) and (x._in == param._in)]) == 0:
             updated_parameters.append(param)
-    operation.parameters = updated_parameters
     new_responses: Mapping[str, Response] = { response_code: response }
-    operation.responses = { **operation.responses, **new_responses }
-    return operation
+    return replace(operation, responses={ **operation.responses, **new_responses }, parameters = updated_parameters)
 
 
 T = TypeVar('T')
@@ -252,29 +227,24 @@ def update_openapi(schema: OpenAPIObject, exchange: HttpExchange, mode: UpdateMo
     Returns:
         OpenAPI -- Updated schema
     """
-    schema_copy = copy.deepcopy(schema)
     request_method = exchange.request.method.value
     request_path = exchange.request.pathname
 
-    if schema_copy.servers is None:
-        schema_copy.servers = []
-    schema_servers = schema_copy.servers
+    serverz = [] if schema.servers is None else schema.servers
 
     normalized_pathname_or_none = normalize_path_if_matches(
-        exchange.request, schema_servers)
+        exchange.request, serverz)
     if normalized_pathname_or_none is None:
-        schema_copy.servers = [*schema_copy.servers, Server(description=None, variables=None, _x=None, url=urlunsplit(
-            [str(exchange.request.protocol.value), exchange.request.host, '', '', '']))]
         normalized_pathname = request_path
     else:
         normalized_pathname = normalized_pathname_or_none
 
-    schema_paths = schema_copy.paths
+    schema_paths = schema.paths
     operation_candidate = build_operation(exchange, mode)
     path_match_result = find_matching_path(normalized_pathname, schema_paths, request_method, operation_candidate)
 
     request_path_parameters = {}
-
+    make_new_paths = True
     if path_match_result is not None:
         # Path item exists for request path
         path_item, request_path_parameters, pathname_with_wildcard, pathname_to_be_replaced_with_wildcard = path_match_result.path, path_match_result.param_mapping, path_match_result.pathname_with_wildcard, path_match_result.pathname_to_be_replaced_with_wildcard
@@ -286,44 +256,33 @@ def update_openapi(schema: OpenAPIObject, exchange: HttpExchange, mode: UpdateMo
                 # in the schema. it would not exist if we have already put a wildcard
                 pointer_to_value = schema_paths[pathname_to_be_replaced_with_wildcard]
                 schema_paths = { k: v for k, v in [(pathname_with_wildcard, pointer_to_value), *schema_paths.items()] if k != pathname_to_be_replaced_with_wildcard }
-                if  schema_paths[pathname_with_wildcard].parameters is None:
-                    schema_paths[pathname_with_wildcard].parameters = []
+                parameters_to_assign_to_pathname_with_wildcard = [] if schema_paths[pathname_with_wildcard].parameters is None else schema_paths[pathname_with_wildcard].parameters
                 for path_param in request_path_parameters.keys():
-                    params = [x for x in schema_paths[pathname_with_wildcard].parameters if not isinstance(x, Reference)]
+                    params = [x for x in parameters_to_assign_to_pathname_with_wildcard if not isinstance(x, Reference)]
                     if not (path_param in [x.name for x in params if x._in == 'path']):
-                        schema_paths[pathname_with_wildcard].parameters = [Parameter(
-                            description=None,
-                            deprecated=None,
-                            allowEmptyValue=None,
-                            style=None,
-                            explode=None,
-                            allowReserved=None,
-                            content=None,
-                            example=None,
-                            examples=None,
-                            _x=None,
-                            schema=None,
+                        parameters_to_assign_to_pathname_with_wildcard = [Parameter(
                             required=True,
                             _in='path',
                             name=path_param,
-                        ), *(schema_paths[pathname_with_wildcard].parameters)]
-                schema_copy.paths = schema_paths
+                        ), *parameters_to_assign_to_pathname_with_wildcard]
+                schema_paths = {
+                    **schema_paths,
+                    pathname_with_wildcard: replace(schema_paths[pathname_with_wildcard], parameters=parameters_to_assign_to_pathname_with_wildcard)
+                }
+                make_new_paths = False # because we've already done it above
             else:
                 # we are using recordings, so we shouldn't overwrite anything
                 # we only add if it is not there yet
-                if request_path not in schema_paths:
+                if normalized_pathname not in schema_paths:
                     # TODO: merge with liens below?
-                    path_item = PathItem(**_DEFAULT_PATH_ITEM, summary="Path summary",
+                    path_item = PathItem(summary="Path summary",
                              description="Path description")
                     request_path_parameters = {}
-                    new_paths: Paths = {request_path: path_item}
-                    schema_copy.paths = {**schema_paths, **new_paths}
     else:
-        path_item = PathItem(**_DEFAULT_PATH_ITEM, summary="Path summary",
+        path_item = PathItem(summary="Path summary",
                              description="Path description")
         request_path_parameters = {}
-        new_paths: Paths = { request_path: path_item }
-        schema_copy.paths = {**schema_paths, **new_paths }
+        new_paths: Paths = { normalized_pathname: path_item }
     existing_operation = operation_from_string(path_item, request_method)
     if existing_operation is not None:
         # Operation exists
@@ -331,8 +290,15 @@ def update_openapi(schema: OpenAPIObject, exchange: HttpExchange, mode: UpdateMo
     else:
         operation = operation_candidate
 
-    set_path_item_at_operation(path_item, request_method, operation)
-    return cast(OpenAPIObject, schema_copy)
+    path_item = new_path_item_at_operation(path_item, request_method, operation)
+    new_paths = { path_match_result.pathname_with_wildcard if (mode == UpdateMode.GEN) and ((path_match_result is not None) and (path_match_result.pathname_with_wildcard is not None)) else normalized_pathname: path_item } if make_new_paths else {}
+    new_server = Server(url=urlunsplit(
+            [str(exchange.request.protocol.value), exchange.request.host, '', '', '']))
+    return replace(
+        schema,
+        paths={ **schema_paths, **new_paths },
+        servers=serverz if (new_server.url in [x.url for x in serverz]) else [*serverz, new_server]
+    )
 
 
 BASE_SCHEMA = OpenAPIObject(openapi="3.0.0",
