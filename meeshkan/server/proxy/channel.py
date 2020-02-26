@@ -36,7 +36,6 @@ class StreamWrapper:
         self._stream = stream
         self._state = ConnectionState.CONNECTING
 
-        self._stream.set_nodelay(True)
         self._stream.set_close_callback(close_callback)
         self._queue_on_connecting = queue_on_connecting
 
@@ -127,9 +126,11 @@ class Channel:
                 break
             else:
                 header, value = line.split(': ')
-                if header == 'Host':
+                if header.lower() == 'host':
                     host_line = last_line
-                headers[header] = value
+                    headers['Host'] = value
+                else:
+                    headers[header] = value
 
 
         body_start = last_line + 1
