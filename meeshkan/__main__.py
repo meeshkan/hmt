@@ -101,7 +101,7 @@ def build(input_file, out, initial_openapi_spec, mode, source, sink):
         # TODO Kafka configuration
         source = KafkaSource(config=KafkaProcessorConfig(
             broker="localhost:9092",
-            topic="express_recordings"))
+            topic="http_recordings"))
     elif source == 'file':
         if input_file is None:
             raise Exception("Option --input-file for source 'file' required.")
