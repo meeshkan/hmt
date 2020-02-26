@@ -2,7 +2,7 @@
 """
 from openapi_typed_2 import OpenAPIObject, convert_from_openapi
 from .result import BuildResult
-import yaml
+import json
 from ..logger import get as getLogger
 from typing import cast
 from pathlib import Path
@@ -10,44 +10,7 @@ from pathlib import Path
 LOGGER = getLogger(__name__)
 
 
-OPENAPI_FILENAME = 'openapi.yaml'
-
-
-def _read_openapi(file: Path) -> OpenAPIObject:
-    """Read an OpenAPI YAML from file.
-
-    Arguments:
-        file {Path} -- Path to OpenAPI YAML file.
-
-    Returns:
-        OpenAPIObject -- OpenAPI object.
-    """
-    with file.open('rb') as f:
-        return cast(OpenAPIObject, yaml.safe_load(f))
-
-
-def read_directory(directory: str) -> BuildResult:
-    """Read BuildResult from directory.
-
-    Arguments:
-        directory {str} -- Directory to read, possibly relative.
-
-    Raises:
-        FileNotFoundError: If directory is not an existing directory.
-
-    Returns:
-        BuildResult -- Build result.
-    """
-    path = _resolve_path(directory)
-
-    if not path.is_dir():
-        raise FileNotFoundError("Cannot read from {}".format(str(path)))
-
-    openapi_path = path / OPENAPI_FILENAME
-    openapi_object = _read_openapi(openapi_path)
-
-    return BuildResult(openapi=openapi_object)
-
+OPENAPI_FILENAME = 'openapi.json'
 
 def _ensure_dir_exists(path: Path) -> None:
     """Ensure directory at `path` exists. Does NOT create parent directories.
@@ -90,8 +53,8 @@ def write_build_result(directory: str, result: BuildResult) -> None:
 
     openapi_object = result['openapi']
 
-    schema_yaml = cast(str, yaml.safe_dump(convert_from_openapi(openapi_object)))
+    schema_json = cast(str, json.dumps(convert_from_openapi(openapi_object)))
 
     with openapi_output.open('wb') as f:
         LOGGER.debug("Writing to: %s\n", str(openapi_output))
-        f.write(schema_yaml.encode(encoding="utf-8"))
+        f.write(schema_json.encode(encoding="utf-8"))
