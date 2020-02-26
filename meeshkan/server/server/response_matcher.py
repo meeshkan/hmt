@@ -22,12 +22,12 @@ class ResponseMatcher:
         if not os.path.exists(specs_dir):
             logging.info('OpenAPI schema directory not found %s', specs_dir)
         else:
-            schemas = [s for s in os.listdir(specs_dir) if s.endswith('yml') or s.endswith('yaml')]
+            schemas = [s for s in os.listdir(specs_dir) if s.endswith('yml') or s.endswith('yaml') or s.endswith('json')]
         specs: Sequence[Tuple[str, OpenAPIObject]] = []
         for schema in schemas:
             with open(os.path.join(specs_dir, schema), encoding='utf8') as schema_file:
                 # TODO: validate schema?
-                specs = [*specs, (schema, convert_to_openapi(yaml.safe_load(schema_file.read())))]
+                specs = [*specs, (schema, convert_to_openapi((json.loads if schema.endswith('json') else yaml.safe_load)(schema_file.read())))]
         self._schemas = { k: v for k, v in specs}
 
     def match_error(self, msg: str, req: Request) -> Response:

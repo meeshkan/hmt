@@ -1,12 +1,11 @@
 from meeshkan.schemabuilder.builder import BASE_SCHEMA
 from meeshkan.__main__ import cli, _convert
-from meeshkan.schemabuilder.writer import OPENAPI_FILENAME, read_directory
 from click.testing import CliRunner
 from .util import read_recordings_as_strings
 from hamcrest import assert_that, has_key
 from pathlib import Path
 from typing import List
-from shutil import copyfile
+import os
 from openapi_typed_2 import OpenAPIObject, convert_from_openapi
 import json
 
@@ -45,11 +44,11 @@ def test_build_cmd():
 
         assert output_directory_path.is_dir(
         ), "Output directory {} should exist".format(output_directory)
+        with open(os.path.join(output_directory, 'openapi.json'), 'r') as oai:
+            build_result = json.loads(oai.read())
 
-        build_result = read_directory(output_directory)
-
-    # Verify result
-    assert_that(build_result, has_key('openapi'))
+            # Verify result
+            assert_that(build_result, has_key('openapi'))
 
     assert runner_result.exit_code == 0
     assert len(runner_result.output) == 0
