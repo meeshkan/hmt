@@ -1,8 +1,9 @@
 import asyncio
 from dataclasses import dataclass
-from typing import Tuple
+from typing import AsyncIterable, Tuple
 
 import faust
+from http_types.types import HttpExchange
 from http_types.utils import HttpExchangeBuilder
 
 from .abstract import AbstractSource
@@ -14,6 +15,15 @@ class KafkaSourceConfig:
     broker: str
     topic: str
 
+async def http_exchange_stream(input_stream) -> AsyncIterable[HttpExchange]:
+    """Stream transform converting HttpExchange dictionaries to HttpExchange objects.
+
+    Yields:
+        [HttpExchange] -- [description]
+    """
+    async for rec in input_stream:
+        yield HttpExchangeBuilder.from_dict(rec)
+
 
 class KafkaSource(AbstractSource):
     def __init__(self, config: KafkaSourceConfig):
@@ -23,10 +33,17 @@ class KafkaSource(AbstractSource):
 
         faust_topic = self.app.topic(config.topic, key_type=str, value_type=str)
 
-        async def http_exchange_stream():
-            async for rec in faust_topic.stream():
-                yield HttpExchangeBuilder.from_dict(rec)
+        @self.app.agent(faust_topic)
+        async def http_exchange_json_stream(stream):
+            """Dummy faust agent reading from given topic and passing values on.
 
+            Yields:
+                [dict] -- HttpExchange dictionary objects
+            """
+            async for rec in stream:
+                yield rec
+
+        self.recording_agent = http_exchange_json_stream
         self.http_exchange_stream = http_exchange_stream
 
         self.worker = None
@@ -38,7 +55,8 @@ class KafkaSource(AbstractSource):
         async def start_worker(worker: faust.Worker) -> None:
             await worker.start()
 
-        source = self.http_exchange_stream()
+        source = self.http_exchange_stream(self.recording_agent.stream())
+
         worker_coro = start_worker(self.worker)
         self.worker_task = loop.create_task(worker_coro)
 
