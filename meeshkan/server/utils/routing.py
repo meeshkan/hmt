@@ -37,8 +37,9 @@ class PathRouting(Routing):
 class HeaderRouting(Routing):
     def route(self, path: str, headers: typing.Dict, inbound_scheme='http') -> RoutingInfo:
         url = urllib.parse.urlsplit('//{}'.format(headers['Host']))
+        scheme = headers['X-Meeshkan-Scheme'] if 'X-Meeshkan-Scheme' in headers else headers['x-meeshkan-scheme'] if 'x-meeshkan-scheme' in headers else inbound_scheme
         return RoutingInfo(path=path, host=headers['Host'], hostname=url.hostname,
-                           port=get_port(inbound_scheme, url.port), scheme=inbound_scheme)
+                           port=get_port(scheme, url.port), scheme=scheme)
 
 
 class StaticRouting(Routing):

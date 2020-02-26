@@ -702,7 +702,7 @@ def fake_object(schema: Any, top_schema: Any, depth: int) -> Any:
 def fake_array(schema: Any, top_schema: Any, depth: int) -> Any:
     mn = 0 if 'minItems' not in schema else schema['minItems']
     mx = 100 if 'maxItems' not in schema else schema['maxItems']
-    return [faker(x, top_schema, depth) for x in schema['items']] if type(schema['items']) is type([]) else [faker(schema['items'], top_schema, depth) for x in range(random.randint(mn, mx))]
+    return [] if 'items' not in schema else [faker(x, top_schema, depth) for x in schema['items']] if type(schema['items']) is type([]) else [faker(schema['items'], top_schema, depth) for x in range(random.randint(mn, mx))]
 
 def fake_any_of(schema: Any, top_schema: Any, depth: int) -> Any:
     return faker(random.choice(schema["anyOf"]), top_schema, depth)

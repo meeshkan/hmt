@@ -422,3 +422,33 @@ def test_matcher_14():
       }),
       store,
     )['baz'].paths["/guest/{id}"].post == None
+
+def test_matcher_15():
+    matcher(
+      RequestBuilder.from_dict({
+        'headers': {
+          'X-Meeshkan-Scheme': 'https',
+          'Host': "api.bar.com"
+        },
+        'host': "api.bar.com",
+        'path': "/v1/guest/{id}",
+        'pathname': "/v1/guest/{id}",
+        'protocol': "http",
+        'method': "post",
+        'query': {},
+      }),
+      store
+    ) == {
+        'bar': convert_to_openapi({
+            'openapi': "",
+            'servers': [{ 'url': "https://api.bar.com/v1" }],
+            'info': { 'title': "", 'version': "" },
+            'paths': {
+                "/guest/{id}": {
+                'post': { 'responses': { '201': { 'description': "guestidpost" } } },
+                'description': "",
+                },
+            }
+        })
+    }
+
