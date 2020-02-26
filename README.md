@@ -35,23 +35,25 @@ Note that `meeshkan` requires **Python 3.6+.**
 ### Quick start
 
 ```python
-from openapi_typed import OpenAPIObject
+from meeshkan.schemabuilder.update_mode import UpdateMode
+from meeshkan.schemabuilder import build_schema_batch, build_schema_online, update_openapi
+from openapi_typed_2 import OpenAPIObject
 import meeshkan
 from typing import List
 import json
-from http_types import HttpExchange, Request, Response, RequestBuilder
+from http_types import HttpExchange, Request, Response, ResponseBuilder, RequestBuilder, HttpMethod
 
 
 def read_http_exchanges() -> List[HttpExchange]:
     """Read HTTP exchanges from the source of your choice.
     """
     request: Request = RequestBuilder.from_url(
-        "https://example.org/v1", method="get", headers={})
+        "https://example.org/v1", method=HttpMethod.GET, headers={})
 
-    response: Response = Response(
-        statusCode=200, body=json.dumps({"hello": "world"}), headers={})
+    response: Response = ResponseBuilder.from_dict(dict(
+        statusCode=200, body=json.dumps({"hello": "world"}), headers={}))
 
-    http_exchange: HttpExchange = {'request': request, 'response': response}
+    http_exchange: HttpExchange = HttpExchange(request=request, response=response)
 
     return [http_exchange]
 
@@ -59,15 +61,14 @@ def read_http_exchanges() -> List[HttpExchange]:
 http_exchanges = read_http_exchanges()
 
 # Build OpenAPI schema from a list of recordings
-openapi: OpenAPIObject = meeshkan.build_schema_batch(http_exchanges)
+openapi: OpenAPIObject = build_schema_batch(http_exchanges)
 
 # Build schema from an iterator
-openapi: OpenAPIObject = meeshkan.build_schema_online(iter(http_exchanges))
+openapi: OpenAPIObject = build_schema_online(iter(http_exchanges), UpdateMode.GEN)
 
 # Update OpenAPI schema one `HttpExchange` at a time
 http_exchange = http_exchanges[0]
-openapi: OpenAPIObject = meeshkan.update_openapi(openapi, http_exchange)
-```
+openapi: OpenAPIObject = update_openapi(openapi, http_exchange, UpdateMode.GEN)```
 
 ## Builder
 
