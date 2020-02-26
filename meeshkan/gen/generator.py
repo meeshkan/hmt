@@ -157,10 +157,14 @@ def match_urls(protocol: str, host: str, o: OpenAPIObject) -> Sequence[str]:
     servers = o.servers
     if servers is None:
         return []
+    #### if the openapi server url has no scheme,
+    #### we ignore the incoming scheme and treat the url as the host
+    #### not sure if this is the right decision,
+    #### but it deals with a realistic outcome in certain schemas
     return [server.url
         for server in servers
-        if (urlparse(server.url).scheme == protocol)
-            and  (urlparse(server.url).netloc == host)]
+        if ((urlparse(server.url).scheme in ['', None]) or (urlparse(server.url).scheme == protocol))
+            and ((server.url.split('/')[0] == host) or (urlparse(server.url).netloc == host))]
 
 def get_component_from_ref(o: OpenAPIObject, d: str, accessor: Callable[[Components], Optional[Mapping[str, Union[Reference, C]]]], getter: Callable[[OpenAPIObject, Union[C, Reference]], Optional[C]]) -> Optional[C]:
     return lens.F(
