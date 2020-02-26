@@ -7,7 +7,7 @@ import json
 store: Dict[str, OpenAPIObject] = {
   'foo': convert_to_openapi({
     'openapi': "",
-    'servers': [{ 'url': "https://api.foo.com" }],
+    'servers': [{ 'url': "api.foo.com" }], # we omit the protocol and it should still match
     'info': { 'title': "", 'version': "" },
     'paths': {
       "/user": {
@@ -38,7 +38,7 @@ store: Dict[str, OpenAPIObject] = {
   }),
   'bar': convert_to_openapi({
     'openapi': "",
-    'servers': [{ 'url': "https://api.bar.com" }],
+    'servers': [{ 'url': "https://api.bar.com/v1" }],
     'info': { 'title': "", 'version': "" },
     'paths': {
       "/guest": {
@@ -168,7 +168,7 @@ def test_matcher_1():
     ) == {
     'foo': convert_to_openapi({
       'openapi': "",
-      'servers': [{ 'url': "https://api.foo.com" }],
+      'servers': [{ 'url': "api.foo.com" }],
       'info': { 'title': "", 'version': "" },
       'paths': {
         "/user": {
@@ -184,8 +184,8 @@ def test_matcher_2():
       RequestBuilder.from_dict({
         'headers': {},
         'host': "api.bar.com",
-        'path': "/guest/{id}",
-        'pathname': "/guest/{id}",
+        'path': "/v1/guest/{id}",
+        'pathname': "/v1/guest/{id}",
         'protocol': "https",
         'method': "post",
         'query': {},
@@ -194,7 +194,7 @@ def test_matcher_2():
     ) == {
         'bar': convert_to_openapi({
             'openapi': "",
-            'servers': [{ 'url': "https://api.bar.com" }],
+            'servers': [{ 'url': "https://api.bar.com/v1" }],
             'info': { 'title': "", 'version': "" },
             'paths': {
                 "/guest/{id}": {
@@ -220,7 +220,7 @@ def test_matcher_3():
     ) == {
     'foo': convert_to_openapi({
       'openapi': "",
-      'servers': [{ 'url': "https://api.foo.com" }],
+      'servers': [{ 'url': "api.foo.com" }],
       'info': { 'title': "", 'version': "" },
       'paths': {},
     })
@@ -241,7 +241,7 @@ def test_matcher_4():
     ) == {
     'foo': convert_to_openapi({
       'openapi': "",
-      'servers': [{ 'url': "https://api.foo.com" }],
+      'servers': [{ 'url': "api.foo.com" }],
       'info': { 'title': "", 'version': "" },
       'paths': {
         "/user/{id}": {
@@ -276,7 +276,7 @@ def test_matcher_5():
     ) == {
     'foo': convert_to_openapi({
       'openapi': "",
-      'servers': [{ 'url': "https://api.foo.com" }],
+      'servers': [{ 'url': "api.foo.com" }],
       'info': { 'title': "", 'version': "" },
       'paths': {},
     }),
@@ -297,7 +297,7 @@ def test_matcher_6():
     ) == {
     'foo': convert_to_openapi({
       'openapi': "",
-      'servers': [{ 'url': "https://api.foo.com" }],
+      'servers': [{ 'url': "api.foo.com" }],
       'info': { 'title': "", 'version': "" },
       'paths': {
         "/user": {

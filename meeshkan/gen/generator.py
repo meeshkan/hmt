@@ -164,7 +164,7 @@ def match_urls(protocol: str, host: str, o: OpenAPIObject) -> Sequence[str]:
     return [server.url
         for server in servers
         if ((urlparse(server.url).scheme in ['', None]) or (urlparse(server.url).scheme == protocol))
-            and ((server.url == host) or (urlparse(server.url).netloc == host))]
+            and ((server.url.split('/')[0] == host) or (urlparse(server.url).netloc == host))]
 
 def get_component_from_ref(o: OpenAPIObject, d: str, accessor: Callable[[Components], Optional[Mapping[str, Union[Reference, C]]]], getter: Callable[[OpenAPIObject, Union[C, Reference]], Optional[C]]) -> Optional[C]:
     return lens.F(
