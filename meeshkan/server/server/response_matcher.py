@@ -55,7 +55,9 @@ class ResponseMatcher:
             return self.match_error(path_error, request)
         if len(match[name].paths.items()) == 0:
             return self.match_error(path_error, request)
-        path_candidate = [x for x in match[name].paths.values()][0]
+        path_candidates = [x for x in match[name].paths.values()]
+        random.shuffle(path_candidates)
+        path_candidate = path_candidates[0]
         method = {
             "get": path_candidate.get,
             "post": path_candidate.post,
