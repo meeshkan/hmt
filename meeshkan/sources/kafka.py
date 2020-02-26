@@ -15,15 +15,6 @@ class KafkaSourceConfig:
     broker: str
     topic: str
 
-async def http_exchange_stream(input_stream) -> AsyncIterable[HttpExchange]:
-    """Stream transform converting HttpExchange dictionaries to HttpExchange objects.
-
-    Yields:
-        [HttpExchange] -- [description]
-    """
-    async for rec in input_stream:
-        yield HttpExchangeBuilder.from_dict(rec)
-
 
 class KafkaSource(AbstractSource):
     def __init__(self, config: KafkaSourceConfig):
@@ -34,8 +25,8 @@ class KafkaSource(AbstractSource):
         faust_topic = self.app.topic(config.topic, key_type=str, value_type=str)
 
         @self.app.agent(faust_topic)
-        async def http_exchange_json_stream(stream):
-            """Dummy faust agent reading from given topic and passing values on.
+        async def recording_agent(stream):
+            """Dummy faust agent reading values from Kafka topic and passing values on.
 
             Yields:
                 [dict] -- HttpExchange dictionary objects
@@ -43,11 +34,20 @@ class KafkaSource(AbstractSource):
             async for rec in stream:
                 yield rec
 
-        self.recording_agent = http_exchange_json_stream
-        self.http_exchange_stream = http_exchange_stream
+        self.recording_agent = recording_agent
 
         self.worker = None
         self.worker_task = None
+
+    async def http_exchange_stream(self) -> AsyncIterable[HttpExchange]:
+        """Generator of HttpExchange objects.
+        Does not generate any values until the underlying agent is started.
+
+        Yields:
+            [HttpExchange] -- HttpExchange object
+        """
+        async for rec in self.recording_agent.stream():
+            yield HttpExchangeBuilder.from_dict(rec)
 
     async def start(self, loop: asyncio.AbstractEventLoop) -> Tuple[HttpExchangeStream, asyncio.Task]:
         self.worker = faust.Worker(self.app, loop=loop, loglevel='info')
@@ -55,7 +55,7 @@ class KafkaSource(AbstractSource):
         async def start_worker(worker: faust.Worker) -> None:
             await worker.start()
 
-        source = self.http_exchange_stream(self.recording_agent.stream())
+        source = self.http_exchange_stream()
 
         worker_coro = start_worker(self.worker)
         self.worker_task = loop.create_task(worker_coro)

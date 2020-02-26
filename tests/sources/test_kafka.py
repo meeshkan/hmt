@@ -16,7 +16,7 @@ kafkaSourceConfig = KafkaSourceConfig(
 
 
 @pytest.fixture()
-def test_processor(event_loop):
+def kafka_source(event_loop):
     processor = KafkaSource(kafkaSourceConfig)
     app = processor.app
     """passing in event_loop helps avoid 'attached to a different loop' error"""
@@ -27,21 +27,16 @@ def test_processor(event_loop):
 
 
 @pytest.mark.asyncio()
-@pytest.mark.skip()
-async def test_processing(test_processor: KafkaSource):
-    async with test_processor.http_exchange_stream.test_context() as agent:
+async def test_processing(kafka_source: KafkaSource):
+    async with kafka_source.recording_agent.test_context() as agent:
+        kafka_source.recording_agent = agent
         for exchange in exchanges:
             await agent.put(exchange)
         res = agent.results
         assert_that(list(res.keys()), has_length(168))
-        sink = StringIO()
-        writer = HttpExchangeWriter(sink)
-        writer.write(res[0])
-        sink.seek(0)
-        assert_that(json.loads('\n'.join([x for x in sink])), is_(exchanges[0]))
-
-
-@pytest.mark.asyncio()
-async def test_source(test_processor: KafkaSource):
-    # TODO How to test the source stream with `agent.test_context()` (without running Kafka)?
-    pass
+        """
+        # TODO How to test that kafka_source.http_exchange_stream() works without running Kafka?
+        exchange_stream = kafka_source.http_exchange_stream()
+        exchange_objs = [exchange async for exchange in exchange_stream]
+        assert_that(exchange_objs[0], has_property("request"))
+        """
