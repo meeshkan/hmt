@@ -58,7 +58,7 @@ DEV = BUNDLE_REQUIREMENTS + [
     'pytest-asyncio'
 ]
 
-VERSION = '0.2.10'
+VERSION = '0.2.11'
 
 ENTRY_POINTS = ['meeshkan = meeshkan.__main__:cli']
 
