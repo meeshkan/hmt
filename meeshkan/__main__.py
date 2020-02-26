@@ -2,10 +2,9 @@ from .prepare import ignore_warnings
 ignore_warnings()
 
 from io import StringIO
-import json
 from http_types.utils import HttpExchangeWriter
 import click
-from typing import Sequence, cast
+from typing import Sequence
 
 from meeshkan.schemabuilder.update_mode import UpdateMode
 from .config import setup
@@ -14,12 +13,11 @@ from .schemabuilder.builder import BASE_SCHEMA, build_schema_async
 from .convert.pcap import convert_pcap
 from .sinks import AbstractSink, FileSystemSink
 from .sources import AbstractSource, KafkaSource, FileSource
-from .sources.kafka import KafkaProcessorConfig
+from .sources.kafka import KafkaSourceConfig
 from openapi_typed_2 import OpenAPIObject, convert_to_openapi
 from yaml import safe_load
 from .meeshkan_types import *
 from .server.commands import record, mock
-from http_types.utils import HttpExchangeBuilder
 
 
 LOGGER = getLogger(__name__)
@@ -99,7 +97,7 @@ def build(input_file, out, initial_openapi_spec, mode, source, sink):
 
     if source == 'kafka':
         # TODO Kafka configuration
-        source = KafkaSource(config=KafkaProcessorConfig(
+        source = KafkaSource(config=KafkaSourceConfig(
             broker="localhost:9092",
             topic="http_recordings"))
     elif source == 'file':
