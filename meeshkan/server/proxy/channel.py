@@ -1,21 +1,18 @@
 import collections
 import json
 import logging
-import os
 import socket
 import typing
 from enum import Enum
 from urllib import parse
-from urllib.parse import urlsplit
-from http_types import Request, Response, HttpMethod
+
+from http_types import Response
 from http_types.utils import RequestBuilder
+from tornado.iostream import IOStream, SSLIOStream, StreamClosedError
 
 from meeshkan.server.utils.routing import Routing
 from .proxy_callback import ProxyCallback
-from ..utils.http_utils import split_path, response_from_bytes
-from tornado.iostream import IOStream, SSLIOStream, StreamClosedError
-
-
+from ..utils.http_utils import response_from_bytes
 
 logger = logging.getLogger(__name__)
 
@@ -132,7 +129,6 @@ class Channel:
                 else:
                     headers[header] = value
 
-
         body_start = last_line + 1
         body = []
         # TODO: @Nikolay, is cur_id correct?
@@ -161,17 +157,18 @@ class Channel:
           'str' cannot be assigned to 'Literal['delete']'
         '''
         self._request = RequestBuilder.from_dict(dict(
-                                method=method.lower(),
-                                host=route_info.host,
-                                path=fullpath,
-                                pathname=route_info.path,
-                                protocol=route_info.scheme,
-                                query=query,
-                                body=body,
-                                bodyAsJson=json.loads(body) if body else {},
-                                headers=headers))
+            method=method.lower(),
+            host=route_info.host,
+            path=fullpath,
+            pathname=route_info.path,
+            protocol=route_info.scheme,
+            query=query,
+            body=body,
+            bodyAsJson=json.loads(body) if body else {},
+            headers=headers))
 
-        return RequestInfo(data=data, scheme=route_info.scheme, target_host=route_info.hostname, target_port=route_info.port)
+        return RequestInfo(data=data, scheme=route_info.scheme, target_host=route_info.hostname,
+                           target_port=route_info.port)
 
     def on_response_chunk(self, data: bytes):
         if len(self._response) == 0:
@@ -264,5 +261,3 @@ class Channel:
     @property
     def client_state(self):
         return self._client_stream.state
-
-
