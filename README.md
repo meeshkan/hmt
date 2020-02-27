@@ -104,7 +104,7 @@ The OpenAPI schemas can be manually edited to mix the two modes.
 
 ### Reading from Kafka
 
-Install `kafka` bundle: `pip install meeshkan[kafka]` and set `--source kafka`:
+Set `--source kafka` in `build` command:
 
 ```bash
 $ meeshkan build --source kafka [-o path/to/output_directory]
