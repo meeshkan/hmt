@@ -62,7 +62,7 @@ class MockServerView(RequestHandler):
                             'pathname': route_info.path,
                             'protocol': route_info.scheme,
                             'query': query,
-                            'body': self.request.body,
+                            'body': str(self.request.body),
                             'bodyAsJson': self._extract_json_safely(self.request.body),
                             'headers': headers})
 
