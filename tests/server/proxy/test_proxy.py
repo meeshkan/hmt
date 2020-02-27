@@ -69,7 +69,8 @@ def test_header_proxy(http_client, base_url):
         host_url = urllib.parse.urlsplit(base_url)
         response = yield http_client.fetch(HTTPRequest('http://localhost:{}/pets'.format(port),
                                                        headers={'host': '{}:{}'.format(host_url.hostname,
-                                                                                       host_url.port)}))
+                                                                                       host_url.port),
+                                                                'X-Meeshkan-Scheme': 'http'}))
 
         assert 200 == response.code
         rb = json.loads(response.body)

@@ -228,7 +228,8 @@ class Channel:
         if self._server_stream is None:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
             stream = SSLIOStream(s, ssl_options={}) if request_info.scheme == 'https' else IOStream(s)
-            stream.connect((request_info.target_host, request_info.target_port), self.on_server_connect)
+            stream.connect((request_info.target_host, request_info.target_port), self.on_server_connect,
+                           server_hostname=request_info.target_host)
             self._server_stream = StreamWrapper(stream, self.on_server_close, True)
 
         self._server_stream.write(request_info.data)
