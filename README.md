@@ -68,12 +68,12 @@ openapi: OpenAPIObject = build_schema_online(iter(http_exchanges), UpdateMode.GE
 
 # Update OpenAPI schema one `HttpExchange` at a time
 http_exchange = http_exchanges[0]
-openapi: OpenAPIObject = update_openapi(openapi, http_exchange, UpdateMode.GEN)```
+openapi: OpenAPIObject = update_openapi(openapi, http_exchange, UpdateMode.GEN)
+```
 
 ## Builder
 
 Using the Meeshkan CLI, you can build OpenAPI schema from a single `recordings.jsonl` file in the [HTTP Types](https://meeshkan.github.io/http-types/) JSON format.
-
 
 ```bash
 $ pip install meeshkan # if not done yet
@@ -104,7 +104,7 @@ The OpenAPI schemas can be manually edited to mix the two modes.
 
 ### Reading from Kafka
 
-Install `kafka` bundle: `pip install meeshkan[kafka]` and set `--source kafka`:
+Set `--source kafka` in `build` command:
 
 ```bash
 $ meeshkan build --source kafka [-o path/to/output_directory]

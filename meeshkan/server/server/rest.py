@@ -29,12 +29,10 @@ class RestMiddlewareManager:
         self._endpoints.add(url)
     
     def spew(self, request: Request, schemas: Mapping[str, OpenAPIObject]) -> Mapping[str, OpenAPIObject]:
-        _request = copy.deepcopy(request)
-        _request.body = str(_request.body)
         cur_schemas = schemas
         req_io = StringIO()
         # TODO: this is hackish. is there a better way?
-        HttpExchangeWriter(req_io).write(HttpExchange(request=_request, response=ResponseBuilder.from_dict(dict(statusCode=200,body='',headers={}))))
+        HttpExchangeWriter(req_io).write(HttpExchange(request=request, response=ResponseBuilder.from_dict(dict(statusCode=200,body='',headers={}))))
         # should only be one line... and why do we join with newline?
         req_io.seek(0)
         req = json.loads('\n'.join([x for x in req_io]))['request']
