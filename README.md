@@ -62,7 +62,7 @@ $ pip install meeshkan # if not installed yet
 $ meeshkan record
 ```
 
-This starts Meeshkan as a reverse proxy on the default port of `8000`.  For example, with curl, you can use Meeshkan as a proxy like so.
+This starts Meeshkan as a reverse proxy on the default port of `8000`.  For example, with curl, you can use Meeshkan as a proxy like so:
 
 ```bash
 $ curl http://localhost:8000/http://api.example.com
