@@ -8,7 +8,7 @@
 Meeshkan is a tool that mocks HTTP APIs for use in sandboxes as well as for automated and exploratory testing. It uses a combination of API definitions, recorded traffic and code in order to make crafting mocks as enjoyable as possible.
 
 
-## Table of Contents
+## What's in this document
 
 - [Installation](#installation)
 - [Getting started with Meeshkan](#getting-started-with-meeshkan)
