@@ -34,7 +34,6 @@ jobs: # A basic unit of work in a run
           name: Install pipenv
           command: |
             sudo pip install pipenv
-            pipenv install --pre black
             pipenv install -e .[dev]
             pipenv update
       - run:
