@@ -49,7 +49,6 @@ class RequestLoggingCallback():
                 self._logs[host] = open(log_file, 'w')
 
         HttpExchangeWriter(self._logs[host]).write(reqres)
-        self._logs[host].write('\n')
         self._logs[host].flush()
 
         logger.debug('Updated logs for host %s', host)
