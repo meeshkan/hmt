@@ -46,9 +46,11 @@ $ curl http://localhost:8000 -H '{"Host": "time.jsontest.com" }' # mock traffic
 $ meeshkan mock --stop-daemon # stop the daemon
 ```
 
-## Record
+## Collect
 
-Meeshkan provides a recorder that can capture API traffic using a proxy.
+To build a Meeshkan spec, one starts by **collecting** OpenAPI server specs and recordings of server traffic.  During its build step, Meeshkan can use all these sources of information.
+
+To record API traffic, Meeshkan provides a recorder that can capture API traffic using a proxy.
 
 ```bash
 $ pip install meeshkan # if not installed yet
@@ -61,7 +63,7 @@ This starts Meeshkan as a reverse proxy on the default port of `8000`.  For exam
 $ curl http://localhost:8000/http://api.example.com
 ```
 
-By default, the recording proxy treats the path as the target URL and writes a `.jsonl` file containing logs of all server traffic to a `logs` directory.  All logs are created in the [`http-types`](https://github.com/meeshkan/http-types) format. 
+By default, the recording proxy treats the path as the target URL and writes a `.jsonl` file containing logs of all server traffic to a `logs` directory.  All logs are created in the [`http-types`](https://github.com/meeshkan/http-types) format.
 
 For more information about recording, including direct file writing and kafka streaming, see the [recording documentation](./meeshkan/RECORDING.md).
 
