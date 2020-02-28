@@ -48,7 +48,7 @@ $ meeshkan mock --stop-daemon # stop the daemon
 
 ## Record
 
-Meeshkan provides a recorder that can capture API traffic using a proxy and, like the builder, automatically assembles it into an OpenAPI schema in addition to storing the raw recordings.
+Meeshkan provides a recorder that can capture API traffic using a proxy.
 
 ```bash
 $ pip install meeshkan # if not installed yet
@@ -60,7 +60,8 @@ This starts Meeshkan as a reverse proxy on the default port of `8000`.  For exam
 ```bash
 $ curl http://localhost:8000/http://api.example.com
 ```
-By default the recording proxy uses the first path items to navigate to a target host.
+By default the recording proxy treats the path as the target URL.
+
 Now you should have the `logs` folder with jsonl files and the `__unmock__` folder with ready openapi schemes. 
 
 For more advanced information about recording, including custom middleware, see the [server documentation](./meeshkan/server/SERVER.md).
