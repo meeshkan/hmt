@@ -36,11 +36,11 @@ jobs: # A basic unit of work in a run
             sudo pip install pipenv
             pipenv install -e .[dev]
             pipenv update
+            echo 'export VENV_HOME_DIR=$(pipenv --venv)' >> $BASH_ENV
+            echo 'source $VENV_HOME_DIR/bin/activate' >> $BASH_ENV
       - run:
           name: Run pytest
           command: |
-            export VENV_HOME_DIR=$(pipenv --venv)
-            source $VENV_HOME_DIR/bin/activate
             pytest -s
       - run:
           name: Install pyright and run typecheck
@@ -49,8 +49,6 @@ jobs: # A basic unit of work in a run
             echo 'export PATH=$(yarn global bin):$PATH' >> $BASH_ENV
             source $BASH_ENV
             yarn global add pyright
-            export VENV_HOME_DIR=$(pipenv --venv)
-            source $VENV_HOME_DIR/bin/activate
             python setup.py test
   test-3.7:
     <<: *test-template
