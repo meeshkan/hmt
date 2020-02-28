@@ -1,6 +1,6 @@
 # Recording with Meeshkan
 
-Meeshkan can be used to transform HTTP traf
+Meeshkan can be used to record HTTP API traffic in a format that Meeshkan build can understand.  This format is JSON objects in the [`http-types`](https://github.com/meeshkan/http-types) format written to a `.jsonl` file.
 
 ## Ecosystem
 
