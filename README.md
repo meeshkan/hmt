@@ -89,6 +89,7 @@ $ meeshkan build --source file -i - < recordings.jsonl
 ```
 
 ### Building modes
+
 You can use a mode flag to indicate how the OpenAPI spec should be built, ie:
 
 ```bash
@@ -96,9 +97,10 @@ meeshkan build --mode gen -i path/to/recordings.jsonl
 ```
 
 Supported modes are:
-* gen [default] - infer a schema from the recorded data
-* replay - replay the recorded data based on exact matching
-* mixed - replay the recorded data based on exact matching when it is possible
+
+- gen [default] - infer a schema from the recorded data
+- replay - replay the recorded data based on exact matching
+- mixed - replay the recorded data based on exact matching when it is possible
 
 The OpenAPI schemas can be manually edited to mix the two modes.
 
@@ -125,11 +127,11 @@ $ meeshkan mock
 
 The following commands are available in mock mode:
 
-| Argument     | Description | Default |
-| ------------ | ----------- | ------- |
-| `port`       | Server port | 8000    |
-| `admin_port` | Admin port  | 8999    |
-| `log_dir`    | The directory containing `.jsonl` files for mocking directly from recorded fixtures | `logs` |
+| Argument     | Description                                                                                                            | Default |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------- | ------- |
+| `port`       | Server port                                                                                                            | 8000    |
+| `admin_port` | Admin port                                                                                                             | 8999    |
+| `log_dir`    | The directory containing `.jsonl` files for mocking directly from recorded fixtures                                    | `logs`  |
 | `specs_dir`  | The directory containing `.yml` or `.yaml` OpenAPI specs used for mocking, including ones built using `meeshkan build` | `specs` |
 
 ## Recording
@@ -141,13 +143,14 @@ $ pip install meeshkan # if not installed yet
 $ meeshkan record
 ```
 
-This starts Meeshkan as a reverse proxy on the default port of `8000`.  For example, with curl, you can use Meeshkan as a proxy like so.
+This starts Meeshkan as a reverse proxy on the default port of `8000`. For example, with curl, you can use Meeshkan as a proxy like so.
 
 ```bash
 $ curl http://localhost:8000/http://api.example.com
 ```
+
 By default the recording proxy uses the first path items to navigate to a target host.
-Now you should have the `logs` folder with jsonl files and the `__unmock__` folder with ready openapi schemes. 
+Now you should have the `logs` folder with jsonl files and the `__unmock__` folder with ready openapi schemes.
 
 For more advanced information about recording, including custom middleware, see the [server documentation](./meeshkan/server/SERVER.md).
 
@@ -176,6 +179,14 @@ Converter does not decrypt captured packages, so only files containing plain une
 
 ### Tests
 
+Run all checks:
+
+```bash
+$ python setup.py test
+```
+
+#### `pytest`
+
 Run [tests/](https://github.com/Meeshkan/meeshkan/tree/master/tests/) with `pytest`:
 
 ```bash
@@ -186,7 +197,29 @@ python setup.py test
 
 Configuration for `pytest` is found in [pytest.ini](https://github.com/Meeshkan/meeshkan/tree/master/pytest.ini).
 
-### Type-checking
+#### `black`
+
+Run format checks:
+
+```bash
+$ black --check .
+```
+
+Fix formatting:
+
+```bash
+$ black .
+```
+
+#### `flake8`
+
+Run style checks:
+
+```bash
+$ flake8 .
+```
+
+#### `pyright`
 
 Run type-checking by installing [pyright](https://github.com/microsoft/pyright) globally and running
 
