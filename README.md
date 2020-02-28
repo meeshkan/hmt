@@ -37,7 +37,7 @@ The basic Meeshkan flow is **collect, build and mock.**
 
 ### Tutorial
 
-The [Meeshkan tutorial](https://github.com/meeshkan/meeshkan-tutorial) covers the most essential aspects of the collect, build and mock flow.
+The quickest way to get an overview of Meeshkan is to complete our [interactive tutorial](https://github.com/meeshkan/meeshkan-tutorial). It walks you through the collect, build, and mock flow - while also covering the concepts necessary for development.
 
 ### Hello world
 
