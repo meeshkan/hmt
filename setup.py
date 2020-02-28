@@ -66,7 +66,7 @@ BUNDLE_REQUIREMENTS = [dep for _, bundle_dep in BUNDLES.items()
 
 DEV = BUNDLE_REQUIREMENTS + [
     "autopep8",
-    "black",
+    "black=19.10b0",  # black hack for pipenv https://github.com/psf/black/issues/209
     "flake8",
     "pyhamcrest",
     "pylint",
