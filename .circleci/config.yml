@@ -51,14 +51,14 @@ jobs: # A basic unit of work in a run
             yarn global add pyright
             export VENV_HOME_DIR=$(pipenv --venv)
             source $VENV_HOME_DIR/bin/activate
-            pyright --lib
+            python setup.py test
       - run:
           name: Run integretion tests
           command: |
             export VENV_HOME_DIR=$(pipenv --venv)
             source $VENV_HOME_DIR/bin/activate
             git clone https://github.com/meeshkan/meeshkan-examples.git  ../meeshkan-examples
-            cd ../meeshkan-examples &&  python run_all.py
+            cd ../meeshkan-examples && python run_all.py
   test-3.7:
     <<: *test-template
     docker:
