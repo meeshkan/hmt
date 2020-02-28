@@ -91,7 +91,7 @@ Use dash (`-i -`) to read from standard input:
 $ meeshkan build --source file -i - < recordings.jsonl
 ```
 ### Building modes
-You can use a mode flag to indicate how the OpenAPI spec should be built, ie:
+You can use a mode flag to indicate how the OpenAPI spec should be built, for example:
 
 ```bash
 meeshkan build -i path/to/recordings.jsonl --mode gen
