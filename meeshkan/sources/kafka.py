@@ -67,4 +67,4 @@ class KafkaSource(AbstractSource):
         self.worker.stop_and_shutdown()
 
 
-__all__ = ["KafkaProcessorConfig", "KafkaProcessor", "KafkaSource"]
+__all__ = ["KafkaSource", "KafkaSourceConfig"]
