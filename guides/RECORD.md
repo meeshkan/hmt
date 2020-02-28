@@ -82,7 +82,9 @@ with open('recordings.jsonl', 'w') as recording_file:
 
 ### Integrations
 
-We plan on maintaining middleware and plugins for a variety of projects.  Below is a list of integrations that exist or are in development.
+We plan on maintaining middleware and plugins for a variety of projects.  
+
+Here is a list of integrations that exist or are in development:
 
 | Integration | Description | Status |
 | ----------- | ----------- | ------ |
