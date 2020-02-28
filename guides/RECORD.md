@@ -7,14 +7,14 @@ Meeshkan can be used to record HTTP API traffic in a format that `meeshkan build
 To start a Meeshkan server that will record HTTP API traffic, use the `meeshkan record` command.
 
 ```
-$ pip install meeshkan
+$ pip install meeshkan # if not installed yet
 $ meeshkan record
 ```
 This starts Meeshkan as a reverse proxy on the default port of `8000`.
 
-By default, `meeshkan record` records all traffic to a folder called `logs`.  You can change the recording directory using the `-l` flag, ie `-l some_other_directory`. For a full list of recording options, type `meeshkan record --help`.
+By default, `meeshkan record` records all traffic to a folder called `logs`.  You can change the recording directory using the `-l` flag, i.e. `-l some_other_directory`. For a full list of recording options, type `meeshkan record --help`.
 
-## Path versus header routing
+## Path vs. header routing
 
 By default, Meeshkan uses **path routing** to intercept HTTP API calls.  Path routing is done by appending the URL you wish to call to the URL of the recording server.
 
