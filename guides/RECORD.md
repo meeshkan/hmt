@@ -2,7 +2,7 @@
 
 Meeshkan can be used to record HTTP API traffic in a format that `meeshkan build` can understand.  This format serializes JSON objects in the [`http-types`](https://github.com/meeshkan/http-types) format written to a [`.jsonl`](https://jsonlines.org) file.
 
-## The meeshkan record command
+## The `meeshkan record` command
 
 To start a Meeshkan server that will record HTTP API traffic, use the `meeshkan record` command.
 
