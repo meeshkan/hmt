@@ -68,7 +68,7 @@ This starts Meeshkan as a reverse proxy on the default port of `8000`.  For exam
 $ curl http://localhost:8000/http://api.example.com
 ```
 
-By default, the recording proxy treats the path as the target URL and writes a `.jsonl` file containing logs of all server traffic to a `logs` directory.  All logs are created in the [`http-types`](https://github.com/meeshkan/http-types) format.
+By default, the recording proxy treats the path as the target URL and writes a [`.jsonl`](https://jsonlines.org) file containing logs of all server traffic to a `logs` directory.  All logs are created in the [`http-types`](https://github.com/meeshkan/http-types) format.  The `meeshkan build` tool expects all recordings to be represented in a `.jsonl` file containing recordings represented in the `http-types` format.
 
 For more information about recording, including direct file writing and kafka streaming, see the [recording documentation](./guides/RECORD.md).
 
