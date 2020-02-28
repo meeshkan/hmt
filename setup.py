@@ -40,8 +40,7 @@ REQUIRED = [
 BUNDLES = {}
 
 # Requirements of all bundles
-BUNDLE_REQUIREMENTS = [dep for _, bundle_dep in BUNDLES.items()
-                       for dep in bundle_dep]
+BUNDLE_REQUIREMENTS = [dep for _, bundle_dep in BUNDLES.items() for dep in bundle_dep]
 
 DEV = BUNDLE_REQUIREMENTS + [
     "autopep8",
