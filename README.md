@@ -12,10 +12,17 @@ Meeshkan is a tool that mocks HTTP APIs for use in sandboxes as well as for auto
 
 - [Installation](#installation)
 - [Getting started with Meeshkan](#getting-started-with-meeshkan)
+  - [Tutorial](#tutorial)
 - [Collect recordings of API traffic](#collect-recordings-of-api-traffic)
 - [Build a Meeshkan spec from recordings](#build-a-meeshkan-spec-from-recordings)
+  - [Building modes](#building-modes)
 - [Mock server traffic using a Meeshkan spec](#mock-server-traffic-using-a-meeshkan-spec)
 - [Development](#development)
+  - [Getting started](#getting-started)
+  - [Tests](#tests)
+  - [Type-checking](#type-checking)
+  - [Automated builds](#automated-builds)
+  - [Publishing Meeshkan as a PyPi package](#publishing-meeshkan-as-a-pypi-package)
 - [Contributing](#contributing)
 
 ## Installation
@@ -26,7 +33,7 @@ Install via [pip](https://pip.pypa.io/en/stable/installing/):
 $ pip install meeshkan
 ```
 
-Note that `meeshkan` requires **Python 3.6+.**
+_Note: `meeshkan` requires **Python 3.6+.**_
 
 ## Getting started with Meeshkan
 
@@ -38,6 +45,37 @@ The basic Meeshkan flow is **collect, build and mock.**
 ### Tutorial
 
 The quickest way to get an overview of Meeshkan is to complete our [interactive tutorial](https://github.com/meeshkan/meeshkan-tutorial). It walks you through the collect, build, and mock flow - while also covering the concepts necessary for development.
+
+First, install `meeshkan-tutorial` via [pip](https://pip.pypa.io/en/stable/installing/):
+
+```bash
+$ pip install meeshkan-tutorial
+$ meeshkan-tutorial
+```
+
+_Note: This tutorial has been tested on Python 3.6, 3.7, and 3.8._
+
+After installing, you can begin the tutorial by invoking from the command line:
+
+```bash
+$ meeshkan-tutorial
+```
+
+Once you've run this, you should see:
+
+```bash
+                             __    __
+   ____ ___  ___  ___  _____/ /_  / /______ _____
+  / __ `__ \/ _ \/ _ \/ ___/ __ \/ //_/ __ `/ __ \
+ / / / / / /  __/  __(__  ) / / / ,< / /_/ / / / /
+/_/ /_/ /_/\___/\___/____/_/ /_/_/|_|\__,_/_/ /_/
+
+
+The tutorial!!
+Press ENTER to continue...
+```
+
+If not, it's probably our fault. Please let us know by [filing an issue on the meeshkan-tutorial repo](https://github.com/meeshkan/meeshkan-tutorial/issues).
 
 ## Collect recordings of API traffic
 
@@ -104,14 +142,11 @@ For more information about mocking, including adding custom middleware and modif
 
 ## Development
 
-Here are some useful tips for building and running Meeshkan from source. To obtain a copy of the source code, you can use the following command:
-
-```bash
-$ git clone https://github.com/meeshkan/meeshkan
-```
+Here are some useful tips for building and running Meeshkan from source. 
 
 ### Getting started
 
+1. Clone this repository: `git clone https://github.com/meeshkan/meeshkan`
 1. Create a virtual environment: `virtualenv .venv && source .venv/bin/activate`
 1. Install dependencies: `pip install --upgrade -e '.[dev]'`
 
