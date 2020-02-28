@@ -34,7 +34,7 @@ Alternatively, you can run Meeshkan in **header** mode, which uses the host and 
 ```bash
 $ meeshkan record -r
 ```
-And then, in another terminal window
+Then, in another terminal window, run:
 
 ```bash
 $ curl http://localhost:8000/api/v2/pokemon/ditto -H '{"Host":"pokeapi.co", "X-Meeshkan-Schema": "https" }'
