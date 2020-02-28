@@ -105,7 +105,7 @@ For more information about building, including mixing together the two modes and
 
 ## Mock server traffic using a Meeshkan spec
 
-You can use an OpenAPI spec, such as the one created with `meeshkan build` to create a **mock** server using Meeshkan.
+You can use an OpenAPI spec, such as the one created with `meeshkan build`, to create a **mock** server using Meeshkan.
 
 ```bash
 $ pip install meeshkan # if not installed yet
