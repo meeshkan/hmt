@@ -104,15 +104,16 @@ class SetupCommand(Command):
 
 
 BUILD_COMMAND = "{executable} setup.py sdist bdist_wheel --universal".format(
-    executable=sys.executable)
+    executable=sys.executable
+)
 
 TYPE_CHECK_COMMAND = "pyright --lib"
 
 TEST_COMMAND = "pytest"
 
-LINT_COMMAND = "flake8 --exclude .git,.venv,__pycache__,build,dist"
+LINT_COMMAND = "flake8"
 
-FORMAT_COMMAND = "black --check ."
+FORMAT_COMMAND = "black ."
 FORMAT_CHECK_COMMAND = "black --check ."
 
 
@@ -130,6 +131,10 @@ def run_tests():
 
 def lint():
     run_sys_command(LINT_COMMAND, "Linting failed")
+
+
+def check_format():
+    run_sys_command(FORMAT_CHECK_COMMAND, "Format-check failed")
 
 
 def run_formatting():
@@ -163,13 +168,13 @@ class TestCommand(SetupCommand):
     description = "Run tests, formatting, type-checks, and linting"
 
     def run(self):
-        self.status("Formatting code with black...")
-        run_formatting()
+        self.status("Checking formatting...")
+        check_format()
 
-        self.status("Running flake8...")
+        self.status("Checking style...")
         lint()
 
-        self.status("Running type-checking...")
+        self.status("Checking types...")
         type_check()
 
         self.status("Running pytest...")
@@ -227,6 +232,4 @@ setup(
         "test": TestCommand,
         "typecheck": TypeCheckCommand,
     },
-
-
 )
