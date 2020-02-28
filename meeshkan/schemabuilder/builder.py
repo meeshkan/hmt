@@ -462,8 +462,12 @@ async def build_schema_async(
 ) -> AsyncIterable[BuildResult]:
     schema = starting_spec
     async for exchange in async_iter:
-        schema = update_openapi(schema, exchange, mode)
-        yield BuildResult(openapi=schema)
+        try:
+            schema = update_openapi(schema, exchange, mode)
+            yield BuildResult(openapi=schema)
+        except Exception:
+            logger.exception("Error updating spec")
+            raise
 
 
 def build_schema_online(
