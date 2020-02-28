@@ -114,11 +114,7 @@ For more information about mocking, including adding custom middleware and modif
 
 ## Development
 
-Start by cloning the Meeshkan source code from this git repository:
-
-```bash
-$ git clone http://github.com/meeshkan/meeshkan
-```
+Here are some useful tips for building and running Meeshkan from source.
 
 ### Getting started
 
