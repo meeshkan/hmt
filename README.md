@@ -74,7 +74,7 @@ For more information about recording, including direct file writing and kafka st
 
 ## Build a Meeshkan spec from recordings
 
-Using the Meeshkan CLI, you can **build** an OpenAPI schema from a single `.jsonl` file in the [HTTP Types](https://meeshkan.github.io/http-types/) JSON format in addition to any existing OpenAPI specs that describe how a servie works.
+Using the Meeshkan CLI, you can **build** an OpenAPI schema from a single `.jsonl` file, in addition to any existing OpenAPI specs that describe how a service works.
 
 ```bash
 $ pip install meeshkan # if not done yet
