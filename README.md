@@ -60,9 +60,8 @@ This starts Meeshkan as a reverse proxy on the default port of `8000`.  For exam
 ```bash
 $ curl http://localhost:8000/http://api.example.com
 ```
-By default the recording proxy treats the path as the target URL.
 
-Now you should have the `logs` folder with jsonl files and the `__unmock__` folder with ready openapi schemes. 
+By default, the recording proxy treats the path as the target URL and writes a `.jsonl` file containing logs of all server traffic to a `logs` directory.  All logs are created in the [`http-types`](https://github.com/meeshkan/http-types) format. 
 
 For more advanced information about recording, including custom middleware, see the [server documentation](./meeshkan/server/SERVER.md).
 
