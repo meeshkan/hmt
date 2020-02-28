@@ -42,13 +42,13 @@ The quickest way to get an overview of Meeshkan is to complete our [interactive 
 ### Hello world
 
 ```bash
-$ meeshkan record -r --daemon # start the recorder in daemon mode
+$ meeshkan record -r > /dev/null 2>&1 & # start the recorder in the background
 $ curl http://localhost:8000 -H '{"Host": "time.jsontest.com" }' # record traffic
-$ meeshkan record --stop-daemon # stop the daemon
+$ kill $(ps aux | grep 'meeshkan record' | awk '{print $2}') # stop the server
 $ meeshkan build
-$ meeshkan mock -r --daemon # start the mocking server in daemon mode
+$ meeshkan mock -r > /dev/null 2>&1 & # start the mocking server in the background
 $ curl http://localhost:8000 -H '{"Host": "time.jsontest.com" }' # mock traffic
-$ meeshkan mock --stop-daemon # stop the daemon
+$ kill $(ps aux | grep 'meeshkan mock' | awk '{print $2}') # stop the server
 ```
 
 ## Collect recordings of API traffic
@@ -141,12 +141,18 @@ Configuration for `pytest` is found in [pytest.ini](https://github.com/Meeshkan/
 
 ### Type-checking
 
-You can run type-checking by installing [pyright](https://github.com/microsoft/pyright) globally and running:
+You can run type-checking by installing [pyright](https://github.com/microsoft/pyright) globally:
 
 ```bash
-pyright --lib
-# or
-python setup.py typecheck
+$ npm -i -g pyright
+```
+
+And then running:
+
+```bash
+$ pyright --lib
+$ # or
+$ python setup.py typecheck
 ```
 
 Using the [Pyright extension](https://marketplace.visualstudio.com/items?itemName=ms-pyright.pyright) is recommended for development in VS Code.
