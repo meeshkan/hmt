@@ -2,6 +2,43 @@
 
 Meeshkan can be used to record HTTP API traffic in a format that Meeshkan build can understand.  This format is JSON objects in the [`http-types`](https://github.com/meeshkan/http-types) format written to a `.jsonl` file.
 
+## The meeshkan record command
+
+To start a Meeshkan server that will record HTTP API traffic, use the `meeshkan record` command.
+
+```
+$ pip install meeshkan
+$ meeshkan record
+```
+
+By default, `meeshkan record` records all traffic to a folder called `logs`.  You can change the recording directory using the `-l` flag, ie `-l some_other_directory`. For a full list of recording options, type `meeshkan record --help`.
+
+## Path versus header routing
+
+By default, Meeshkan uses **path routing** to intercept HTTP API calls.  Path routing is done by appending the URL you wish to call to the URL of the recording server.
+
+```bash
+$ meeshkan record
+```
+And then, in another terminal window
+
+```
+$ curl http://localhost:8000/http://time.jsontest.com
+```
+
+Meeshkan will automatically make an API call using the URL in the path - in this case, [http://time.jsontest.com](http://time.jsontest.com), and return the response from the called API.
+
+Alternatively, you can run Meeshkan in **header** mode, which uses the host and optionally the schema reported in the header.
+
+```bash
+$ meeshkan record -r
+```
+And then, in another terminal window
+
+```bash
+$ curl http://localhost:8000/api/v2/pokemon/ditto -H '{"Host":"pokeapi.co", "X-Meeshkan-Schema": "https" }'
+```
+
 ## Ecosystem
 
 In addition to using Meeshkan to record, there is a growing ecosystem of projects that one can use to create `.jsonl` files in the [`http-types`](https://github.com/meeshkan/http-types).  Here are some other ways one can create `.jsonl` files of server recordings that are consumable by `meeshkan build`.
