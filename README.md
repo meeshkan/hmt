@@ -32,7 +32,7 @@ Note that `meeshkan` requires **Python 3.6+.**
 ## Hello world
 
 The basic Meeshkan flow is **collect, build and mock.**
-1. To start, **collect** data from recorded server traffic and OpenAPI specs.
+1. To start, **collect** data from recorded server traffic and, optionally, OpenAPI specs.
 1. Then, **build** a schema that unifies these various data sources.
 1. Finally, use this schema to create a **mock** server of an API.
 
