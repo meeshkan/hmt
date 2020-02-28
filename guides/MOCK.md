@@ -90,7 +90,10 @@ To achieve this, Meeshkan provides a webhook API that will send the incoming req
 
 | Method | Path | Description |
 | ------ | ---- | ----------- |
-| `GET` | x | x |
+| `POST` | `/admin/middleware/rest/pregen/http://localhost:8080` | Notify the server to use the webhook http://localhost:8080. |
+| `DELETE` | `/admin/middleware/rest/pregen/http://localhost:8080` | Delete the webhook http://localhost:8080. |
+| `GET` | `/admin/middleware/rest/pregen` | Get all webhooks that have been registered. |
+| `DELETE` | `/admin/middleware/rest/pregen` | Delete all registered webhooks. |
 
 The webhook must accept a `POST` request for an object in the following format:
 
