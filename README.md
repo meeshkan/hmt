@@ -65,7 +65,7 @@ $ curl http://localhost:8000/http://api.example.com
 
 By default, the recording proxy treats the path as the target URL and writes a `.jsonl` file containing logs of all server traffic to a `logs` directory.  All logs are created in the [`http-types`](https://github.com/meeshkan/http-types) format.
 
-For more information about recording, including direct file writing and kafka streaming, see the [recording documentation](./meeshkan/RECORDING.md).
+For more information about recording, including direct file writing and kafka streaming, see the [recording documentation](./guides/RECORD.md).
 
 ## Build
 
@@ -94,7 +94,7 @@ Supported modes are:
 * gen [default] - infer a schema from the recorded data
 * replay - replay the recorded data based on exact matching
 
-For more information about building, including mixing together the two modes and editing the created OpenAPI schema, see the [building documentation](./BUILD.md).
+For more information about building, including mixing together the two modes and editing the created OpenAPI schema, see the [building documentation](./guides/BUILD.md).
 
 ## Mock
 
@@ -105,7 +105,7 @@ $ pip install meeshkan # if not installed yet
 $ meeshkan mock
 ```
 
-For more information about mocking, including adding custom middleware and modifying the mocking schema JIT via an admin API, see the [mocking documentation](./MOCK.md).
+For more information about mocking, including adding custom middleware and modifying the mocking schema JIT via an admin API, see the [mocking documentation](./guides/MOCK.md).
 
 ## Development
 
