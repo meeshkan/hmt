@@ -321,8 +321,12 @@ BASE_SCHEMA = OpenAPIObject(openapi="3.0.0",
 async def build_schema_async(async_iter: AsyncIterable[HttpExchange],  mode: UpdateMode, starting_spec: OpenAPIObject) -> AsyncIterable[BuildResult]:
     schema = starting_spec
     async for exchange in async_iter:
-        schema = update_openapi(schema, exchange, mode)
-        yield BuildResult(openapi=schema)
+        try:
+            schema = update_openapi(schema, exchange, mode)
+            yield BuildResult(openapi=schema)
+        except Exception:
+            logger.exception("Error updating spec")
+            raise
 
 
 def build_schema_online(requests: Iterable[HttpExchange], mode: UpdateMode, base_schema: OpenAPIObject = BASE_SCHEMA) -> OpenAPIObject:
