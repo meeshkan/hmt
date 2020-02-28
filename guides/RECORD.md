@@ -20,9 +20,9 @@ By default, Meeshkan uses **path routing** to intercept HTTP API calls.  Path ro
 ```bash
 $ meeshkan record
 ```
-And then, in another terminal window
+And then, in another terminal window, type:
 
-```
+```bash
 $ curl http://localhost:8000/http://time.jsontest.com
 ```
 
