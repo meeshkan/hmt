@@ -39,17 +39,15 @@ jobs: # A basic unit of work in a run
             echo 'export VENV_HOME_DIR=$(pipenv --venv)' >> $BASH_ENV
             echo 'source $VENV_HOME_DIR/bin/activate' >> $BASH_ENV
       - run:
-          name: Run pytest
-          command: |
-            pytest -s
-      - run:
-          name: Install pyright and run typecheck
+          name: Install pyright and run all chckecks
           command: |
             set +e
             echo 'export PATH=$(yarn global bin):$PATH' >> $BASH_ENV
             source $BASH_ENV
             yarn global add pyright
-            python setup.py test
+      - run:
+          name: Run all checks
+          command: python setup.py test
   test-3.7:
     <<: *test-template
     docker:
