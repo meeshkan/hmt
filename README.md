@@ -48,7 +48,7 @@ $ meeshkan mock --stop-daemon # stop the daemon
 
 ## Collect
 
-To build a Meeshkan spec, one starts by **collecting** OpenAPI server specs and recordings of server traffic.  During its build step, Meeshkan can use all these sources of information.
+To build a Meeshkan spec, one must first **collect** OpenAPI server specs and recordings of server traffic.  During its build step, Meeshkan can use all these sources of information.
 
 To record API traffic, Meeshkan provides a recorder that can capture API traffic using a proxy.
 
@@ -69,7 +69,7 @@ For more information about recording, including direct file writing and kafka st
 
 ## Build
 
-Using the Meeshkan CLI, you can build OpenAPI schema from a single `.jsonl` file in the [HTTP Types](https://meeshkan.github.io/http-types/) JSON format.
+Using the Meeshkan CLI, you can **build** an OpenAPI schema from a single `.jsonl` file in the [HTTP Types](https://meeshkan.github.io/http-types/) JSON format in addition to any existing OpenAPI specs that describe how a servie works.
 
 ```bash
 $ pip install meeshkan # if not done yet
@@ -98,7 +98,7 @@ For more information about building, including mixing together the two modes and
 
 ## Mock
 
-You can use an OpenAPI spec, such as the one created with `meeshkan build` to create a mock server using Meeshkan.
+You can use an OpenAPI spec, such as the one created with `meeshkan build` to create a **mock** server using Meeshkan.
 
 ```bash
 $ pip install meeshkan # if not installed yet
