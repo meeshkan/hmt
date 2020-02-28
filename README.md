@@ -165,6 +165,6 @@ To see what the different commands do, see `Command` classes in [setup.py](https
 
 ## Contributing
 
-Thanks for your interest in contributing! Please take a look at our [development guide](#development) for notes on how to develop the package locally.  A great way to start contributing is to file an [issue](https://github.com/meeshkan/meeshkan/issue) or make a [pull request](https://github.com/meeshkan/meeshkan/pulls).
+Thanks for your interest in contributing! Please take a look at our [development guide](#development) for notes on how to develop the package locally.  A great way to start contributing is to [file an issue](https://github.com/meeshkan/meeshkan/issue) or [make a pull request](https://github.com/meeshkan/meeshkan/pulls).
 
 Please note that this project is governed by the [Meeshkan Community Code of Conduct](https://github.com/Meeshkan/code-of-conduct). By participating, you agree to abide by its terms.
