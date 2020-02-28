@@ -1,6 +1,6 @@
 # Mocking with Meeshkan
 
-Meeshkan can be used to creae a mock server from an OpenAPI spec using.
+Meeshkan can be used to create a mock server from an OpenAPI spec using.
 
 ## The meeshkan mock command
 
