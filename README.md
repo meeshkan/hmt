@@ -5,18 +5,17 @@
 [![PyPi](https://img.shields.io/pypi/pyversions/meeshkan)](https://pypi.org/project/meeshkan/)
 [![License](https://img.shields.io/pypi/l/meeshkan)](LICENSE)
 
-Meeshkan is a tool for mocking HTTP APIs for use in sandboxes as well as for automated and exploratory testing. It uses a combination of API definitions, recorded traffic and code in order to make crafting mocks as enjoyable as possible.
+Meeshkan is a tool that mocks HTTP APIs for use in sandboxes as well as for automated and exploratory testing. It uses a combination of API definitions, recorded traffic and code in order to make crafting mocks as enjoyable as possible.
 
 Meeshkan requires Python 3.6 or later.
 
 ## Table of Contents
 
 1. [Installation](#installation)
-1. [Python API](#python-api)
-1. [Builder](#builder)
-1. [Mocking](#mocking)
-1. [Recording](#recording)
-1. [Converting](#converting)
+1. [Hello world](#hello-world)
+1. [Collect](#collect)
+1. [Build](#build)
+1. [Mock](#mock)
 1. [Development](#development)
 1. [Contributing](#contributing)
 
@@ -30,48 +29,43 @@ $ pip install meeshkan
 
 Note that `meeshkan` requires **Python 3.6+.**
 
-## Python API
+## Hello world
 
-### Quick start
+The basic Meeshkan flow is **collect, build and mock.**
+1. Start by **collecting** data from recorded server traffic and OpenAPI specs.
+1. Then, **build** a schema that unifies these various data sources.
+1. Finally, use this schema to create a **mock** server of an API.
 
-```python
-from meeshkan.schemabuilder.update_mode import UpdateMode
-from meeshkan.schemabuilder import build_schema_batch, build_schema_online, update_openapi
-from openapi_typed_2 import OpenAPIObject
-import meeshkan
-from typing import List
-import json
-from http_types import HttpExchange, Request, Response, ResponseBuilder, RequestBuilder, HttpMethod
-
-
-def read_http_exchanges() -> List[HttpExchange]:
-    """Read HTTP exchanges from the source of your choice.
-    """
-    request: Request = RequestBuilder.from_url(
-        "https://example.org/v1", method=HttpMethod.GET, headers={})
-
-    response: Response = ResponseBuilder.from_dict(dict(
-        statusCode=200, body=json.dumps({"hello": "world"}), headers={}))
-
-    http_exchange: HttpExchange = HttpExchange(request=request, response=response)
-
-    return [http_exchange]
-
-
-http_exchanges = read_http_exchanges()
-
-# Build OpenAPI schema from a list of recordings
-openapi: OpenAPIObject = build_schema_batch(http_exchanges)
-
-# Build schema from an iterator
-openapi: OpenAPIObject = build_schema_online(iter(http_exchanges), UpdateMode.GEN)
-
-# Update OpenAPI schema one `HttpExchange` at a time
-http_exchange = http_exchanges[0]
-openapi: OpenAPIObject = update_openapi(openapi, http_exchange, UpdateMode.GEN)
+```bash
+$ meeshkan record -r --daemon # start the recorder in daemon mode
+$ curl http://localhost:8000 -H '{"Host": "time.jsontest.com" }' # record traffic
+$ meeshkan record --stop-daemon # stop the daemon
+$ meeshkan build
+$ meeshkan mock -r --daemon # start the mocking server in daemon mode
+$ curl http://localhost:8000 -H '{"Host": "time.jsontest.com" }' # mock traffic
+$ meeshkan mock --stop-daemon # stop the daemon
 ```
 
-## Builder
+## Record
+
+Meeshkan provides a recorder that can capture API traffic using a proxy and, like the builder, automatically assembles it into an OpenAPI schema in addition to storing the raw recordings.
+
+```bash
+$ pip install meeshkan # if not installed yet
+$ meeshkan record
+```
+
+This starts Meeshkan as a reverse proxy on the default port of `8000`.  For example, with curl, you can use Meeshkan as a proxy like so.
+
+```bash
+$ curl http://localhost:8000/http://api.example.com
+```
+By default the recording proxy uses the first path items to navigate to a target host.
+Now you should have the `logs` folder with jsonl files and the `__unmock__` folder with ready openapi schemes. 
+
+For more advanced information about recording, including custom middleware, see the [server documentation](./meeshkan/server/SERVER.md).
+
+## Build
 
 Using the Meeshkan CLI, you can build OpenAPI schema from a single `recordings.jsonl` file in the [HTTP Types](https://meeshkan.github.io/http-types/) JSON format.
 
@@ -102,17 +96,7 @@ Supported modes are:
 
 The OpenAPI schemas can be manually edited to mix the two modes.
 
-### Reading from Kafka
-
-Set `--source kafka` in `build` command:
-
-```bash
-$ meeshkan build --source kafka [-o path/to/output_directory]
-```
-
-_TODO: Configuration for Kafka_
-
-## Mocking
+## Mock
 
 You can use an existing OpenAPI spec, an OpenAPI spec you've built using `meeshkan build`, and recordings to create a mock server using Meeshkan.
 
@@ -131,41 +115,6 @@ The following commands are available in mock mode:
 | `admin_port` | Admin port  | 8999    |
 | `log_dir`    | The directory containing `.jsonl` files for mocking directly from recorded fixtures | `logs` |
 | `specs_dir`  | The directory containing `.yml` or `.yaml` OpenAPI specs used for mocking, including ones built using `meeshkan build` | `specs` |
-
-## Recording
-
-In addition to the builder, Meeshkan provides a recorder that can capture API traffic using a proxy and, like the builder, automatically assembles it into an OpenAPI schema in addition to storing the raw recordings.
-
-```bash
-$ pip install meeshkan # if not installed yet
-$ meeshkan record
-```
-
-This starts Meeshkan as a reverse proxy on the default port of `8000`.  For example, with curl, you can use Meeshkan as a proxy like so.
-
-```bash
-$ curl http://localhost:8000/http://api.example.com
-```
-By default the recording proxy uses the first path items to navigate to a target host.
-Now you should have the `logs` folder with jsonl files and the `__unmock__` folder with ready openapi schemes. 
-
-For more advanced information about recording, including custom middleware, see the [server documentation](./meeshkan/server/SERVER.md).
-
-## Converting
-
-Meeshkan provides utilities to convert from certain popular recording formats to the `.jsonl` format.
-
-### Converting from pcap
-
-You can convert [packet capture files](https://en.wikipedia.org/wiki/Pcap) to [HTTP Types](https://meeshkan.github.io/http-types/) format using the `convert` command:
-
-```bash
-meeshkan convert -i /path/to/file.pcap -o recordings.jsonl
-```
-
-**Executable [tshark](https://www.wireshark.org/docs/man-pages/tshark.html) must be present in your PATH.**
-
-Converter does not decrypt captured packages, so only files containing plain unencrypted HTTP traffic are currently supported.
 
 ## Development
 
