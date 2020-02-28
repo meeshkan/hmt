@@ -58,7 +58,7 @@ You can use one of the [`http-types`](https://github.com/meeshkan/http-types) cl
 
 In the future, we hope to build client libraries in C#, C++, Go, Rust, Brainfuck, Haskell and OCaml.
 
-Below is an example of how one can use `py-http-types` to record HTTP traffic to `.jsonl` files directly in Python.
+The following code snippet is an example of how you can use `py-http-types` to record HTTP traffic to `.jsonl` files directly in Python.
 
 ```python
 import urllib.request as request
