@@ -116,7 +116,11 @@ For more information about mocking, including adding custom middleware and modif
 
 ## Development
 
-Here are some useful tips for building and running Meeshkan from source.
+Here are some useful tips for building and running Meeshkan from source. To obtain a copy of the source code, you can use the following command:
+
+```bash
+$ git clone https://github.com/meeshkan/meeshkan
+```
 
 ### Getting started
 
