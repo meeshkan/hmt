@@ -39,18 +39,6 @@ The basic Meeshkan flow is **collect, build and mock.**
 
 The quickest way to get an overview of Meeshkan is to complete our [interactive tutorial](https://github.com/meeshkan/meeshkan-tutorial). It walks you through the collect, build, and mock flow - while also covering the concepts necessary for development.
 
-### Hello world
-
-```bash
-$ meeshkan record -r > /dev/null 2>&1 & # start the recorder in the background
-$ curl http://localhost:8000 -H '{"Host": "time.jsontest.com" }' # record traffic
-$ kill $(ps aux | grep 'meeshkan record' | awk '{print $2}') # stop the server
-$ meeshkan build
-$ meeshkan mock -r > /dev/null 2>&1 & # start the mocking server in the background
-$ curl http://localhost:8000 -H '{"Host": "time.jsontest.com" }' # mock traffic
-$ kill $(ps aux | grep 'meeshkan mock' | awk '{print $2}') # stop the server
-```
-
 ## Collect recordings of API traffic
 
 Let's look at how to build a Meeshkan spec. First, you have to **collect** recordings of server traffic and/or OpenAPI server specs.
