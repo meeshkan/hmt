@@ -63,11 +63,11 @@ $ curl http://localhost:8000/http://api.example.com
 
 By default, the recording proxy treats the path as the target URL and writes a `.jsonl` file containing logs of all server traffic to a `logs` directory.  All logs are created in the [`http-types`](https://github.com/meeshkan/http-types) format. 
 
-For more advanced information about recording, including custom middleware, see the [server documentation](./meeshkan/server/SERVER.md).
+For more information about recording, including direct file writing and kafka streaming, see the [recording documentation](./meeshkan/RECORDING.md).
 
 ## Build
 
-Using the Meeshkan CLI, you can build OpenAPI schema from a single `recordings.jsonl` file in the [HTTP Types](https://meeshkan.github.io/http-types/) JSON format.
+Using the Meeshkan CLI, you can build OpenAPI schema from a single `.jsonl` file in the [HTTP Types](https://meeshkan.github.io/http-types/) JSON format.
 
 ```bash
 $ pip install meeshkan # if not done yet
@@ -81,51 +81,46 @@ Use dash (`-i -`) to read from standard input:
 ```bash
 $ meeshkan build --source file -i - < recordings.jsonl
 ```
-
 ### Building modes
 You can use a mode flag to indicate how the OpenAPI spec should be built, ie:
 
 ```bash
-meeshkan build --mode gen -i path/to/recordings.jsonl
+meeshkan build -i path/to/recordings.jsonl --mode gen
 ```
 
 Supported modes are:
 * gen [default] - infer a schema from the recorded data
 * replay - replay the recorded data based on exact matching
-* mixed - replay the recorded data based on exact matching when it is possible
 
-The OpenAPI schemas can be manually edited to mix the two modes.
+For more information about building, including mixing together the two modes and editing the created OpenAPI schema, see the [building documentation](./BUILD.md).
 
 ## Mock
 
-You can use an existing OpenAPI spec, an OpenAPI spec you've built using `meeshkan build`, and recordings to create a mock server using Meeshkan.
+You can use an OpenAPI spec, such as the one created with `meeshkan build` to create a mock server using Meeshkan.
 
 ```bash
 $ pip install meeshkan # if not installed yet
 $ meeshkan mock
 ```
 
-### Common command-line arguments
-
-The following commands are available in mock mode:
-
-| Argument     | Description | Default |
-| ------------ | ----------- | ------- |
-| `port`       | Server port | 8000    |
-| `admin_port` | Admin port  | 8999    |
-| `log_dir`    | The directory containing `.jsonl` files for mocking directly from recorded fixtures | `logs` |
-| `specs_dir`  | The directory containing `.yml` or `.yaml` OpenAPI specs used for mocking, including ones built using `meeshkan build` | `specs` |
+For more information about mocking, including adding custom middleware and modifying the mocking schema JIT via an admin API, see the [mocking documentation](./MOCK.md).
 
 ## Development
 
+To obtain a copy of this source code, you can clone it from this git repository.
+
+```bash
+$ git clone http://github.com/meeshkan/meeshkan
+```
+
 ### Getting started
 
-1. Create virtual environment
+1. Create a virtual environment: `virtualenv .venv && source .venv/bin/activate`
 1. Install dependencies: `pip install --upgrade -e '.[dev]'`
 
 ### Tests
 
-Run [tests/](https://github.com/Meeshkan/meeshkan/tree/master/tests/) with `pytest`:
+You can run the  [tests/](https://github.com/Meeshkan/meeshkan/tree/master/tests/) with `pytest`:
 
 ```bash
 pytest
@@ -137,7 +132,7 @@ Configuration for `pytest` is found in [pytest.ini](https://github.com/Meeshkan/
 
 ### Type-checking
 
-Run type-checking by installing [pyright](https://github.com/microsoft/pyright) globally and running
+You can run type-checking by installing [pyright](https://github.com/microsoft/pyright) globally and running:
 
 ```bash
 pyright --lib
@@ -151,7 +146,9 @@ Using the [Pyright extension](https://marketplace.visualstudio.com/items?itemNam
 
 Configuration for CircleCI [build pipeline](https://app.circleci.com/github/Meeshkan/meeshkan/pipelines) can be found in [.circleci/config.yml](https://github.com/Meeshkan/meeshkan/tree/master/.circleci/config.yml).
 
-### Publishing package
+### Publishing Meeshkan as a PyPi package
+
+To publish Meeshkan as a PyPi package, please do the following steps:
 
 1. Bump the version in [setup.py](https://github.com/Meeshkan/meeshkan/tree/master/setup.py) if the version is the same as in the published [package](https://pypi.org/project/meeshkan/). Commit and push.
 1. Run `python setup.py test`, `python setup.py typecheck` and `python setup.py dist` to check everything works
@@ -161,6 +158,6 @@ To see what the different commands do, see `Command` classes in [setup.py](https
 
 ## Contributing
 
-Thanks for wanting to contribute! Take a look at our [development guide](#development) for notes on how to develop the package locally.
+Thanks for your interest in contributing! Please take a look at our [development guide](#development) for notes on how to develop the package locally.  A great way to start contributing is to file an [issue](https://github.com/meeshkan/meeshkan/issue) or make a [pull request](https://github.com/meeshkan/meeshkan/pulls).
 
 Please note that this project is governed by the [Meeshkan Community Code of Conduct](https://github.com/Meeshkan/code-of-conduct). By participating in this project, you agree to abide by its terms.
