@@ -71,12 +71,26 @@ Once you've run this, you should see:
  / / / / / /  __/  __(__  ) / / / ,< / /_/ / / / /
 /_/ /_/ /_/\___/\___/____/_/ /_/_/|_|\__,_/_/ /_/
 
+<<<<<<< HEAD
+=======
+### Building modes
+
+You can use a mode flag to indicate how the OpenAPI spec should be built, ie:
+>>>>>>> 852eeb2... Update README.
 
 The tutorial!!
 Press ENTER to continue...
 ```
 
+<<<<<<< HEAD
 If not, it's probably our fault. Please let us know by [filing an issue on the meeshkan-tutorial repo](https://github.com/meeshkan/meeshkan-tutorial/issues).
+=======
+Supported modes are:
+
+- gen [default] - infer a schema from the recorded data
+- replay - replay the recorded data based on exact matching
+- mixed - replay the recorded data based on exact matching when it is possible
+>>>>>>> 852eeb2... Update README.
 
 ## Collect recordings of API traffic
 
@@ -97,7 +111,16 @@ $ curl http://localhost:8000/http://api.example.com
 
 By default, the recording proxy treats the path as the target URL and writes a [`.jsonl`](https://jsonlines.org) file containing logs of all server traffic to a `logs` directory.  All logs are created in the [`http-types`](https://github.com/meeshkan/http-types) format.  The `meeshkan build` tool expects all recordings to be represented in a `.jsonl` file containing recordings represented in the `http-types` format.
 
+<<<<<<< HEAD
 For more information about recording, including direct file writing and kafka streaming, see the [recording documentation](./docs/RECORD.md).
+=======
+| Argument     | Description                                                                                                            | Default |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------- | ------- |
+| `port`       | Server port                                                                                                            | 8000    |
+| `admin_port` | Admin port                                                                                                             | 8999    |
+| `log_dir`    | The directory containing `.jsonl` files for mocking directly from recorded fixtures                                    | `logs`  |
+| `specs_dir`  | The directory containing `.yml` or `.yaml` OpenAPI specs used for mocking, including ones built using `meeshkan build` | `specs` |
+>>>>>>> 852eeb2... Update README.
 
 ## Build a Meeshkan spec from recordings
 
@@ -108,17 +131,27 @@ $ pip install meeshkan # if not done yet
 $ meeshkan build -i path/to/recordings.jsonl [-o path/to/output_directory]
 ```
 
+<<<<<<< HEAD
 The input file should be in [JSON Lines](http://jsonlines.org/) format and every line should be in [http-types](https://meeshkan.github.io/http-types/) JSON format. 
 
 For an example input file, see [recordings.jsonl](https://github.com/Meeshkan/meeshkan/blob/master/resources/recordings.jsonl). The libraries listed at [http-types](https://meeshkan.github.io/http-types/) can be used to generate input files in your language of choice.
 
 Use dash (`-i -`) to read from standard input:
+=======
+This starts Meeshkan as a reverse proxy on the default port of `8000`. For example, with curl, you can use Meeshkan as a proxy like so.
+>>>>>>> 852eeb2... Update README.
 
 ```bash
 $ meeshkan build -i - < recordings.jsonl
 ```
+<<<<<<< HEAD
 ### Building modes
 You can use a mode flag to indicate how the OpenAPI spec should be built, for example:
+=======
+
+By default the recording proxy uses the first path items to navigate to a target host.
+Now you should have the `logs` folder with jsonl files and the `__unmock__` folder with ready openapi schemes.
+>>>>>>> 852eeb2... Update README.
 
 ```bash
 meeshkan build -i path/to/recordings.jsonl --mode gen
@@ -153,7 +186,19 @@ Here are some useful tips for building and running Meeshkan from source.
 
 ### Tests
 
+<<<<<<< HEAD
 You can run the  [tests/](https://github.com/Meeshkan/meeshkan/tree/master/tests/) with `pytest`:
+=======
+Run all checks:
+
+```bash
+$ python setup.py test
+```
+
+#### `pytest`
+
+Run [tests/](https://github.com/Meeshkan/meeshkan/tree/master/tests/) with `pytest`:
+>>>>>>> 852eeb2... Update README.
 
 ```bash
 pytest
@@ -163,7 +208,29 @@ python setup.py test
 
 Configuration for `pytest` is found in [pytest.ini](https://github.com/Meeshkan/meeshkan/tree/master/pytest.ini).
 
-### Type-checking
+#### `black`
+
+Run format checks:
+
+```bash
+$ black --check .
+```
+
+Fix formatting:
+
+```bash
+$ black .
+```
+
+#### `flake8`
+
+Run style checks:
+
+```bash
+$ flake8 .
+```
+
+#### `pyright`
 
 You can run type-checking by installing [pyright](https://github.com/microsoft/pyright) globally:
 
