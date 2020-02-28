@@ -40,7 +40,7 @@ Then, in another terminal window, run:
 $ curl http://localhost:8000/api/v2/pokemon/ditto -H '{"Host":"pokeapi.co", "X-Meeshkan-Schema": "https" }'
 ```
 
-This instructs meeshkan to call pokeapi.co and to use the HTTPS protocol.
+This instructs meeshkan to call the [Pokemon API](pokeapi.co) and use the HTTPS protocol.
 
 ## Ecosystem
 
