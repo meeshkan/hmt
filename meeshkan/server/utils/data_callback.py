@@ -1,7 +1,5 @@
-import json
 import logging
 import os
-from typing import cast
 
 import yaml
 from http_types import (
@@ -13,7 +11,6 @@ from http_types import (
     ResponseBuilder,
 )
 
-from meeshkan.schemabuilder.update_mode import UpdateMode
 from ...schemabuilder.builder import BASE_SCHEMA, update_openapi
 
 logger = logging.getLogger(__name__)
@@ -56,7 +53,6 @@ class RequestLoggingCallback:
                 self._logs[host] = open(log_file, "w")
 
         HttpExchangeWriter(self._logs[host]).write(reqres)
-        self._logs[host].write("\n")
         self._logs[host].flush()
 
         logger.debug("Updated logs for host %s", host)
