@@ -48,7 +48,7 @@ $ meeshkan mock --stop-daemon # stop the daemon
 
 ## Collect
 
-To build a Meeshkan spec, one must first **collect** recordings of server traffic and/or OpenAPI server specs.  During its build step, Meeshkan can use either or both of these sources of information.
+To build a Meeshkan spec, one must first **collect** recordings of server traffic and/or OpenAPI server specs.
 
 To record API traffic, Meeshkan provides a recorder that can capture API traffic using a proxy.
 
