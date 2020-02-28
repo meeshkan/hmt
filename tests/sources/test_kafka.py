@@ -13,7 +13,8 @@ from hamcrest import *
 exchanges = read_recordings_as_dict()
 
 kafkaProcessorConfig = KafkaProcessorConfig(
-    broker="'kafka://localhost:9092", topic="example")
+    broker="'kafka://localhost:9092", topic="example"
+)
 
 
 @pytest.fixture()
@@ -22,7 +23,7 @@ def test_processor(event_loop):
     app = processor.app
     """passing in event_loop helps avoid 'attached to a different loop' error"""
     app.finalize()
-    app.conf.store = 'memory://'
+    app.conf.store = "memory://"
     app.flow_control.resume()
     return processor
 
@@ -38,7 +39,7 @@ async def test_processing(test_processor: KafkaProcessor):
         writer = HttpExchangeWriter(sink)
         writer.write(res[0])
         sink.seek(0)
-        assert_that(json.loads('\n'.join([x for x in sink])), is_(exchanges[0]))
+        assert_that(json.loads("\n".join([x for x in sink])), is_(exchanges[0]))
 
 
 @pytest.mark.asyncio()

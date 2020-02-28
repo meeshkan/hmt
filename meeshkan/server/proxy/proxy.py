@@ -16,7 +16,9 @@ class ProxyBase(ProxyCallback):
         self._router = router
 
     def handle_stream(self, stream, address):
-        logger.debug("Creating channel for new connection from client {}".format(address))
+        logger.debug(
+            "Creating channel for new connection from client {}".format(address)
+        )
         self._channels[address] = self._create_channel(stream, address)
 
     def on_remove_channel(self, client_address):

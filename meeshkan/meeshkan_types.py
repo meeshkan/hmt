@@ -7,6 +7,5 @@ from .schemabuilder.result import BuildResult
 HttpExchangeStream = AsyncIterable[HttpExchange]
 BuildResultStream = AsyncIterable[BuildResult]
 
-Source = Callable[[asyncio.AbstractEventLoop],
-                  Tuple[HttpExchangeStream, asyncio.Task]]
+Source = Callable[[asyncio.AbstractEventLoop], Tuple[HttpExchangeStream, asyncio.Task]]
 Sink = Callable[[BuildResultStream], Awaitable[None]]
