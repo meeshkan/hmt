@@ -55,7 +55,7 @@ $ meeshkan mock --stop-daemon # stop the daemon
 
 To build a Meeshkan spec, one must first **collect** recordings of server traffic and/or OpenAPI server specs.
 
-To record API traffic, Meeshkan provides a recorder that can capture API traffic using a proxy.
+To record API traffic, the Meeshkan CLI provides a `record` mode that captures API traffic using a proxy.
 
 ```bash
 $ pip install meeshkan # if not installed yet
