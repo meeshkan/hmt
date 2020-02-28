@@ -11,7 +11,7 @@ PETSTORE_YAML_PATH = "resources/petstore.yaml"
 
 def read_recordings_as_strings(requests_path=SAMPLE_RECORDINGS_PATH) -> List[str]:
     with open(requests_path, encoding="utf8") as f:
-        return [line for line in f]
+        return [line for line in f if line.rstrip() != ""]
 
 
 def read_recordings_as_dict(

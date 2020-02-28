@@ -16,7 +16,8 @@ class FileSource(AbstractSource):
 
         async def read():
             for line in self.input_file:
-                yield HttpExchangeReader.from_json(line)
+                if line.rstrip() != "":  # prevent reading empty space
+                    yield HttpExchangeReader.from_json(line)
 
         return read(), None
 
