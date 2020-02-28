@@ -18,7 +18,7 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = '\n' + f.read()
 
 REQUIRED = [
-    'click',
+    'click==7.0',
     'lenses',
     'pyyaml',
     'jsonschema',
@@ -58,7 +58,7 @@ DEV = BUNDLE_REQUIREMENTS + [
     'pytest-asyncio'
 ]
 
-VERSION = '0.2.15'
+VERSION = '0.2.16'
 
 ENTRY_POINTS = ['meeshkan = meeshkan.__main__:cli']
 
