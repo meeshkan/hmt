@@ -39,6 +39,8 @@ And then, in another terminal window
 $ curl http://localhost:8000/api/v2/pokemon/ditto -H '{"Host":"pokeapi.co", "X-Meeshkan-Schema": "https" }'
 ```
 
+This instructs meeshkan to call pokeapi.co and to use the HTTPS protocol.
+
 ## Ecosystem
 
 In addition to using Meeshkan to record, there is a growing ecosystem of projects that one can use to create `.jsonl` files in the [`http-types`](https://github.com/meeshkan/http-types).  Here are some other ways one can create `.jsonl` files of server recordings that are consumable by `meeshkan build`.
