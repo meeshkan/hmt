@@ -51,7 +51,7 @@ jobs: # A basic unit of work in a run
             yarn global add pyright
             export VENV_HOME_DIR=$(pipenv --venv)
             source $VENV_HOME_DIR/bin/activate
-            pyright --lib
+            python setup.py test
   test-3.7:
     <<: *test-template
     docker:
