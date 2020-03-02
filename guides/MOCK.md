@@ -14,7 +14,7 @@ $ meeshkan mock -i spec_dir/
 And then, in another terminal window, type:
 
 ```bash
-$ curl http://localhost:8000/foo -H "Host: my.api.com" -H "X-Meeshkan-Scheme: https"
+$ curl http://localhost:8000/https://my.api.com/foo
 ```
 
 Assuming that the directory `spec_dir/` contains an OpenAPI spec with the server `https://my.api.com`, it will return a mock of the resource `GET /foo`.
