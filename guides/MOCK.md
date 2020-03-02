@@ -26,7 +26,7 @@ More options for the `meeshkan mock` command an be seen by running `meeshkan moc
 To customize responses a directory containing callbacks can be provided in the `callback-path` argument (default: `./callbacks`).
 
 This directory can contain multiple Python scripts containing callbacks. A callback is a function decorated as 
-`tools.meeshkan_server.server.callbacks.callback`, each being mapped to an endpoint by a HTTP method, host and path.
+`meeshkan_server.server.callbacks.callback`, each being mapped to an endpoint by a HTTP method, host and path.
 
 ```python
 from meeshkan.server.server.callbacks import callback
