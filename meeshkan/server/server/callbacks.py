@@ -38,7 +38,7 @@ class CallbackManager:
         self._callbacks = dict()
 
     def load(self, path):
-        if not os.path.exists(path):
+        if not path or not os.path.exists(path):
             logger.debug("Callback configuration path doesn't exist %s", path)
 
         for f in glob.glob(os.path.join(path, '*.py')):
