@@ -37,10 +37,10 @@ def start_admin(port):
 
 @click.command()
 @click.option('-p', '--port', default="8000", help='Server port.')
-@click.option('-a', '--admin_port', default="8888", help='Admin server port.')
+@click.option('-a', '--admin-port', default="8888", help='Admin server port.')
 @click.option('-l', '--log_dir', default="./logs", help='API calls logs direcotry')
-@click.option('-r', '--header_routing', is_flag=True, help='Whether to use a header based routing to a target host.')
-@click.option('-s', '--specs_dir', default="./specs", help='Directory to store OpenAPI specs.')
+@click.option('-r', '--header-routing', is_flag=True, help='Use header based routing to target hosts.')
+@click.option('-s', '--specs-dir', default="./specs", help='Directory to store OpenAPI specs.')
 @click.option("-m", "--mode", type=click.Choice(['GEN', 'REPLAY', 'MIXED'], case_sensitive=False),
               default=None, help="Spec building mode.")
 def record(port, admin_port, log_dir, header_routing, specs_dir, mode):
@@ -74,11 +74,11 @@ def make_mocking_app(callback_path, specs_dir, router):
 
 
 @click.command()
-@click.option('-c', '--callback_path', default="./callbacks", help='Directory with configured callbacks.')
+@click.option('-c', '--callback-path', default="./callbacks", help='Directory with configured callbacks.')
 @click.option('-p', '--port', default="8000", help='Server port.')
-@click.option('-a', '--admin_port', default="8888", help='Admin server port.')
-@click.option('-s', '--specs_dir', default="./specs", help='Directory with OpenAPI schemas.')
-@click.option('-r', '--header_routing', is_flag=True, help='Whether to use a path based routing to a target host.')
+@click.option('-a', '--admin-port', default="8888", help='Admin server port.')
+@click.option('-s', '--specs-dir', default="./specs", help='Directory with OpenAPI schemas.')
+@click.option('-r', '--header-routing', is_flag=True, help='Use header based routing to target hosts.')
 def mock(callback_path, admin_port, port, specs_dir, header_routing):
     """
     Run a mock server.
