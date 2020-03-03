@@ -10,6 +10,7 @@ def counter_callback(request_body, response_body, storage):
     response_body['count'] = storage['called']
     return response_body
 
+
 @callback('api.com', 'get', '/text_counter', format='text')
 def counter_callback(query, response_body, storage):
     if 'set' in query:
@@ -17,3 +18,8 @@ def counter_callback(query, response_body, storage):
     else:
         storage['called'] = storage.get('called', 0) + 1
     return "{} {} times".format(response_body, storage['called'])
+
+
+@callback('petstore.swagger.io', 'post', '/v1/pets', format='text')
+def echo_callback(request_body):
+    return request_body
