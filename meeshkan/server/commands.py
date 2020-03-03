@@ -35,7 +35,7 @@ def mock():
     pass
 
 
-@mock.command(name='start')
+@mock.command(name='start') # type: ignore
 @click.option('-c', '--callback-path', default="./callbacks", help='Directory with configured callbacks.')
 @add_options(_common_server_options)
 def start_mock(callback_path, admin_port, port, specs_dir, header_routing, daemon):
@@ -56,7 +56,7 @@ def start_mock(callback_path, admin_port, port, specs_dir, header_routing, daemo
         server.run()
 
 
-@mock.command(name='stop')
+@mock.command(name='stop') # type: ignore
 def stop_mocking():
     daemon = daemonocle.Daemon(
         pidfile=Path.home().joinpath('.meeshkan/mock.pid'),
@@ -64,7 +64,7 @@ def stop_mocking():
     daemon.stop()
 
 
-@mock.command(name='status')
+@mock.command(name='status') # type: ignore
 def status_mocking():
     daemon = daemonocle.Daemon(
         pidfile=Path.home().joinpath('.meeshkan/mock.pid'),
@@ -77,7 +77,7 @@ def record():
     pass
 
 
-@record.command(name='start')
+@record.command(name='start') # type: ignore
 @click.option('-l', '--log-dir', default="./logs", help='API calls logs direcotry')
 @click.option("-m", "--mode", type=click.Choice(['GEN', 'REPLAY', 'MIXED'], case_sensitive=False),
               default=None, help="Spec building mode.")
@@ -97,7 +97,7 @@ def start_record(port, admin_port, log_dir, header_routing, specs_dir, mode, dae
         proxy_runner.run()
 
 
-@record.command(name='stop')
+@record.command(name='stop') # type: ignore
 def stop_recording():
     daemon = daemonocle.Daemon(
         pidfile=Path.home().joinpath('.meeshkan/record.pid'),
@@ -105,7 +105,7 @@ def stop_recording():
     daemon.stop()
 
 
-@record.command(name='status')
+@record.command(name='status') # type: ignore
 def status_recording():
     daemon = daemonocle.Daemon(
         pidfile=Path.home().joinpath('.meeshkan/record.pid'),
