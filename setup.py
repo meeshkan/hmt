@@ -29,7 +29,7 @@ REQUIRED = [
     'openapi-typed_2>=0.0.2',
     'typeguard>=2.7.0',
     'genson',
-    'http-types==0.0.11',
+    'http-types>=0.0.13,<0.1.0',
     # kafka
     'faust',
     # server

@@ -11,5 +11,5 @@ def counter_callback(request_body, response):
 @callback('another.api.com', 'get', '/echo', response='full')
 def counter_callback(query, response, storage):
     response['headers']['X-Echo-Header'] = 'value'
-    response['bodyAsJson']['message'] = query['message']
+    response['bodyAsJson'] = {'message': query['message']}
     return response
