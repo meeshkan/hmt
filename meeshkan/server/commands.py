@@ -11,6 +11,8 @@ from ..schemabuilder.update_mode import UpdateMode
 
 LOG_CONFIG = os.path.join(os.path.dirname(__file__), 'logging.yaml')
 
+MOCK_PID = Path.home().joinpath('.meeshkan/mock.pid')
+RECORD_PID = Path.home().joinpath('.meeshkan/record.pid')
 
 def add_options(options):
     def _add_options(func):
@@ -29,19 +31,26 @@ _common_server_options = [
     click.option('-r', '--header-routing', is_flag=True, help='Whether to use a path based routing to a target host.')
 ]
 
+_record_options = _common_server_options + [
+    click.option('-l', '--log-dir', default="./logs", help='API calls logs direcotry'),
+    click.option("-m", "--mode", type=click.Choice(['GEN', 'REPLAY', 'MIXED'], case_sensitive=False),
+                 default=None, help="Spec building mode.")]
 
-@click.group()
-def mock():
-    pass
+_mock_options = _common_server_options + [
+    click.option('-c', '--callback-path', default="./callbacks", help='Directory with configured callbacks.')]
 
 
-@mock.command(name='start') # type: ignore
-@click.option('-c', '--callback-path', default="./callbacks", help='Directory with configured callbacks.')
-@add_options(_common_server_options)
+@click.group(invoke_without_command=True)
+@add_options(_mock_options)
+@click.pass_context
+def mock(ctx, callback_path, admin_port, port, specs_dir, header_routing, daemon):
+    if ctx.invoked_subcommand is None:
+        ctx.forward(start_mock)
+
+
+@mock.command(name='start')  # type: ignore
+@add_options(_mock_options)
 def start_mock(callback_path, admin_port, port, specs_dir, header_routing, daemon):
-    """
-    Run a mock server.
-    """
     server = MockServer(callback_path=callback_path, admin_port=admin_port, port=port, specs_dir=specs_dir,
                         routing=HeaderRouting() if header_routing else PathRouting())
 
@@ -49,39 +58,39 @@ def start_mock(callback_path, admin_port, port, specs_dir, header_routing, daemo
         daemon = daemonocle.Daemon(
             worker=server.run,
             workdir=os.getcwd(),
-            pidfile=Path.home().joinpath('.meeshkan/mock.pid'),
+            pidfile=MOCK_PID,
         )
         daemon.start()
     else:
         server.run()
 
 
-@mock.command(name='stop') # type: ignore
+@mock.command(name='stop')  # type: ignore
 def stop_mocking():
     daemon = daemonocle.Daemon(
-        pidfile=Path.home().joinpath('.meeshkan/mock.pid'),
+        pidfile=MOCK_PID,
     )
     daemon.stop()
 
 
-@mock.command(name='status') # type: ignore
+@mock.command(name='status')  # type: ignore
 def status_mocking():
     daemon = daemonocle.Daemon(
-        pidfile=Path.home().joinpath('.meeshkan/mock.pid'),
+        pidfile=MOCK_PID,
     )
     daemon.status()
 
 
-@click.group()
-def record():
-    pass
+@click.group(invoke_without_command=True)
+@add_options(_record_options)
+@click.pass_context
+def record(ctx, port, admin_port, log_dir, header_routing, specs_dir, mode, daemon):
+    if ctx.invoked_subcommand is None:
+        ctx.forward(start_record)
 
 
-@record.command(name='start') # type: ignore
-@click.option('-l', '--log-dir', default="./logs", help='API calls logs direcotry')
-@click.option("-m", "--mode", type=click.Choice(['GEN', 'REPLAY', 'MIXED'], case_sensitive=False),
-              default=None, help="Spec building mode.")
-@add_options(_common_server_options)
+@record.command(name='start')  # type: ignore
+@add_options(_record_options)
 def start_record(port, admin_port, log_dir, header_routing, specs_dir, mode, daemon):
     proxy_runner = RecordProxyRunner(port=port, admin_port=admin_port, log_dir=log_dir,
                                      routing=HeaderRouting() if header_routing else PathRouting(),
@@ -90,24 +99,24 @@ def start_record(port, admin_port, log_dir, header_routing, specs_dir, mode, dae
         daemon = daemonocle.Daemon(
             worker=proxy_runner.run,
             workdir=os.getcwd(),
-            pidfile=Path.home().joinpath('.meeshkan/record.pid'),
+            pidfile=RECORD_PID,
         )
         daemon.start()
     else:
         proxy_runner.run()
 
 
-@record.command(name='stop') # type: ignore
+@record.command(name='stop')  # type: ignore
 def stop_recording():
     daemon = daemonocle.Daemon(
-        pidfile=Path.home().joinpath('.meeshkan/record.pid'),
+        pidfile=RECORD_PID,
     )
     daemon.stop()
 
 
-@record.command(name='status') # type: ignore
+@record.command(name='status')  # type: ignore
 def status_recording():
     daemon = daemonocle.Daemon(
-        pidfile=Path.home().joinpath('.meeshkan/record.pid'),
+        pidfile=RECORD_PID,
     )
     daemon.status()
