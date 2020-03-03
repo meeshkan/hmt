@@ -38,7 +38,7 @@ def start_admin(port):
 @click.command()
 @click.option('-p', '--port', default="8000", help='Server port.')
 @click.option('-a', '--admin-port', default="8888", help='Admin server port.')
-@click.option('-l', '--log_dir', default="./logs", help='API calls logs direcotry')
+@click.option('-l', '--log-dir', default="./logs", help='API calls logs directory.')
 @click.option('-r', '--header-routing', is_flag=True, help='Use header based routing to target hosts.')
 @click.option('-s', '--specs-dir', default="./specs", help='Directory to store OpenAPI specs.')
 @click.option("-m", "--mode", type=click.Choice(['GEN', 'REPLAY', 'MIXED'], case_sensitive=False),
