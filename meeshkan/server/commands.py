@@ -37,17 +37,15 @@ def start_admin(port):
 
 @click.command()
 @click.option('-p', '--port', default="8000", help='Server port.')
-@click.option('-a', '--admin-port', default="8888", help='Admin server port.')
 @click.option('-l', '--log_dir', default="./logs", help='API calls logs direcotry')
 @click.option('-r', '--header-routing', is_flag=True, help='Use header based routing to target hosts.')
 @click.option('-s', '--specs-dir', default="./specs", help='Directory to store OpenAPI specs.')
 @click.option("-m", "--mode", type=click.Choice(['GEN', 'REPLAY', 'MIXED'], case_sensitive=False),
               default=None, help="Spec building mode.")
-def record(port, admin_port, log_dir, header_routing, specs_dir, mode):
+def record(port, log_dir, header_routing, specs_dir, mode):
     """
     Record http traffic to http-types format.
     """
-    start_admin(admin_port)
     logger.info('Starting Meeshkan proxy on http://localhost:%s', port)
     logger.info('Spec generation mode is %s', mode.lower() if mode else 'disabled')
     with RequestLoggingCallback(log_dir=log_dir, specs_dir=specs_dir,
