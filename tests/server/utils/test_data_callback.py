@@ -3,7 +3,7 @@ import os
 import shutil
 from unittest.mock import patch
 
-from http_types import Response, Request, RequestBuilder, ResponseBuilder
+from http_types import Response, Request, RequestBuilder, ResponseBuilder, HttpExchangeReader
 
 from meeshkan import UpdateMode
 from meeshkan.server.utils.data_callback import RequestLoggingCallback
@@ -37,7 +37,6 @@ def test_request_logging():
                       pathname='/echo',
                       query={'message': 'Hello'},
                       body='',
-                      bodyAsJson={},
                       protocol='http',
                       headers={}))
     response = ResponseBuilder.from_dict(dict(statusCode=200, body='{"message": "hello"}', bodyAsJson={"message": "hello"},
@@ -53,9 +52,9 @@ def test_request_logging():
     with open('./tests/tmp/logs/api.com.jsonl', 'r') as f:
         data = [x for x in f.read().split('\n') if x != '']
         assert 1 == len(data)
-        http_exchange = json.loads(data[0])
-        assert request == RequestBuilder.from_dict(http_exchange['request'])
-        assert response == ResponseBuilder.from_dict(http_exchange['response'])
+        http_exchange = HttpExchangeReader.from_json(data[0])
+        assert request == http_exchange.request
+        assert response == http_exchange.response
 
 
     shutil.rmtree('./tests/tmp')
