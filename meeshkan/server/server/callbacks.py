@@ -3,11 +3,10 @@ import importlib.util
 import inspect
 import json
 import logging
-from dataclasses import asdict, replace
+from dataclasses import asdict
 import os
-from io import StringIO
-from http_types import HttpExchange
-from http_types.utils import ResponseBuilder, HttpExchangeWriter
+import sys
+from http_types.utils import ResponseBuilder
 
 from .storage import storage_manager
 
@@ -38,8 +37,9 @@ class CallbackManager:
         self._callbacks = dict()
 
     def load(self, path):
-        if not path or not os.path.exists(path):
-            logger.debug("Callback configuration path doesn't exist %s", path)
+        if not os.path.exists(path):
+            logger.fatal("Callback configuration path doesn't exist: %s", path)
+            sys.exit(1)
 
         for f in glob.glob(os.path.join(path, '*.py')):
             module_name = 'callbacks.{}'.format(os.path.splitext(os.path.basename(f))[0])
