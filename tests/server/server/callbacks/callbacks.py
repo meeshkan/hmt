@@ -11,9 +11,10 @@ def counter_callback(request_body, response_body, storage):
     return response_body
 
 @callback('api.com', 'get', '/text_counter', format='text')
-def counter_callback(query, response_body, storage):
+def counter_callback(query, response_body, storage, response_headers):
     if 'set' in query:
         storage['called'] = query['set']
     else:
         storage['called'] = storage.get('called', 0) + 1
+    response_headers['x-meeshkan-counter'] = storage['called']
     return "{} {} times".format(response_body, storage['called'])

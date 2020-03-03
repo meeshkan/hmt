@@ -92,6 +92,7 @@ def test_text():
 
     new_response = callback_manager(request, response)
 
+    assert 10 == new_response.headers['x-meeshkan-counter']
     assert "Called 10 times" == new_response.body
 
 

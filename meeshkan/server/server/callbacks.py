@@ -18,7 +18,7 @@ class CallbackManager:
     ARGS_MAP_COMMON = {
         'query': lambda request, response, storage: request['query'],
         'request_headers': lambda request, response, storage: request['headers'],
-        'respone_headers': lambda request, response, storage: response['headers'],
+        'response_headers': lambda request, response, storage: response['headers'],
         'request': lambda request, response, storage: request,
         'response': lambda request, response, storage: response,
         'storage': lambda request, response, storage: storage,
