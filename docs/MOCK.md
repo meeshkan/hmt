@@ -1,6 +1,6 @@
 # Mocking with Meeshkan
 
-Meeshkan can be used to create a mock server from an OpenAPI spec using.
+Meeshkan can be used to create a mock server from OpenAPI specifications and optional custom callback scripts.
 
 ## The meeshkan mock command
 
@@ -14,7 +14,7 @@ $ meeshkan mock -i spec_dir/
 And then, in another terminal window, type:
 
 ```bash
-$ curl http://localhost:8000/foo -H '{"Host": "my.api.com", "X-Meeshkan-Schema": "https"}'
+$ curl http://localhost:8000/https://my.api.com/foo
 ```
 
 Assuming that the directory `spec_dir/` contains an OpenAPI spec with the server `https://my.api.com`, it will return a mock of the resource `GET /foo`.
@@ -23,13 +23,11 @@ More options for the `meeshkan mock` command an be seen by running `meeshkan moc
 
 ## Callbacks
 
-A directory containing callbacks can be provided in callback_path argument. The default is:
-```bash
-meeshkan mock --callback_path ./callbacks
+To customize responses a directory containing callbacks can be provided in the `callback-path` argument (default: `./callbacks`).
 
-```
-A directory can contain multiple Python scripts. A callback is a function with decorated as 
-tools.meeshkan_server.server.callbacks.callback. Each callback is mapped to an endpoint by providing an HTTP method, a host, and a path.
+This directory can contain multiple Python scripts containing callbacks. A callback is a function decorated as 
+`meeshkan_server.server.callbacks.callback`, each being mapped to an endpoint by a HTTP method, host and path.
+
 ```python
 from meeshkan.server.server.callbacks import callback
 

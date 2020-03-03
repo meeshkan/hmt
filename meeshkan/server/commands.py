@@ -23,9 +23,10 @@ def add_options(options):
 
 _common_server_options = [
     click.option('-p', '--port', default="8000", help='Server port.'),
-    click.option('-a', '--admin_port', default="8888", help='Admin server port.'),
-    click.option('-s', '--specs_dir', default="./specs", help='Directory with OpenAPI schemas.'),
-    click.option('-d', '--daemon', is_flag=True, help='Whether to run meeshkan as a daemon.')
+    click.option('-a', '--admin-port', default="8888", help='Admin server port.'),
+    click.option('-s', '--specs-dir', default="./specs", help='Directory with OpenAPI schemas.'),
+    click.option('-d', '--daemon', is_flag=True, help='Whether to run meeshkan as a daemon.'),
+    click.option('-r', '--header-routing', is_flag=True, help='Whether to use a path based routing to a target host.')
 ]
 
 
@@ -35,8 +36,7 @@ def mock():
 
 
 @mock.command(name='start')
-@click.option('-c', '--callback_path', default="./callbacks", help='Directory with configured callbacks.')
-@click.option('-r', '--header_routing', is_flag=True, help='Whether to use a path based routing to a target host.')
+@click.option('-c', '--callback-path', default="./callbacks", help='Directory with configured callbacks.')
 @add_options(_common_server_options)
 def start_mock(callback_path, admin_port, port, specs_dir, header_routing, daemon):
     """
@@ -78,8 +78,7 @@ def record():
 
 
 @record.command(name='start')
-@click.option('-l', '--log_dir', default="./logs", help='API calls logs direcotry')
-@click.option('-r', '--header_routing', is_flag=True, help='Whether to use a header based routing to a target host.')
+@click.option('-l', '--log-dir', default="./logs", help='API calls logs direcotry')
 @click.option("-m", "--mode", type=click.Choice(['GEN', 'REPLAY', 'MIXED'], case_sensitive=False),
               default=None, help="Spec building mode.")
 @add_options(_common_server_options)
