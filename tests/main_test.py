@@ -21,6 +21,23 @@ def write_base_schema(target_file: str, schema: OpenAPIObject):
     with open(target_file, 'w') as f:
         f.write(json.dumps(convert_from_openapi(schema)))
 
+def test_build_default_output_dir():
+    runner = CliRunner()
+
+    input_file = 'input.jsonl'
+    base_schema = 'openapi.yml'
+
+    with runner.isolated_filesystem():
+        # Prepare input file
+        write_input_file(input_file, requests)
+        write_base_schema(base_schema, BASE_SCHEMA)
+
+        runner_result = runner.invoke(
+            cli, ['build', '-i', input_file, '-a', base_schema, '--source', 'file'])
+
+        assert Path("specs/").is_dir(), "Output directory specs/ should exist"
+
+
 def test_build_cmd():
     """An uber test verifying build command input and output.
     """
@@ -42,8 +59,7 @@ def test_build_cmd():
         runner_result = runner.invoke(
             cli, ['build', '-i', input_file, '-o', output_directory, '-a', base_schema, '--source', 'file'])
 
-        assert output_directory_path.is_dir(
-        ), "Output directory {} should exist".format(output_directory)
+        assert output_directory_path.is_dir(), "Output directory {} should exist".format(output_directory_path.absolute)
         with open(os.path.join(output_directory, 'openapi.json'), 'r') as oai:
             build_result = json.loads(oai.read())
 

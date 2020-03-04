@@ -77,7 +77,7 @@ def run_from_source(source: AbstractSource, mode: UpdateMode, starting_spec: Ope
 @click.command()
 @click.option("-i", "--input-file", required=False, type=click.File('rb'), help="Input file. Use dash '-' to read from stdin.")
 #TODO Isn't it a too complicated instruction? Probably, we want to change behavior to os.makedirs()
-@click.option("-o", "--out", required=True, default='out',
+@click.option("-o", "--out", required=True, default='specs',
               type=click.Path(exists=False, file_okay=False, writable=True, readable=True),
               help="Output directory. If the directory does not exist, it is created if the parent directory exists.")
 @click.option("-a", "--initial-openapi-spec", required=False, type=click.File('rb'), help="Initial OpenAPI spec.")
