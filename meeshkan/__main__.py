@@ -49,6 +49,10 @@ async def write_to_sink(result_stream: BuildResultStream, sinks: Sequence[Abstra
 def run_from_source(source: AbstractSource, mode: UpdateMode, starting_spec: OpenAPIObject, sinks: Sequence[AbstractSink]):
     loop = asyncio.get_event_loop()
 
+    if loop.is_closed():
+        # Hack to allow running multiple tests that close the event loop
+        loop = asyncio.new_event_loop()
+
     async def run(loop):
         source_stream, source_task = await source.start(loop)
         result_stream = build_schema_async(source_stream, mode, starting_spec)

@@ -34,9 +34,8 @@ def test_build_default_output_dir():
 
         runner_result = runner.invoke(
             cli, ['build', '-i', input_file, '-a', base_schema, '--source', 'file'])
-
+        assert runner_result.exit_code == 0, "Exited with code {}, expected zero".format(runner_result.exit_code)
         assert Path("specs/").is_dir(), "Output directory specs/ should exist"
-
 
 def test_build_cmd():
     """An uber test verifying build command input and output.
@@ -58,6 +57,8 @@ def test_build_cmd():
 
         runner_result = runner.invoke(
             cli, ['build', '-i', input_file, '-o', output_directory, '-a', base_schema, '--source', 'file'])
+
+        assert runner_result.exit_code == 0, "Exited with code {}, expected zero".format(runner_result.exit_code)
 
         assert output_directory_path.is_dir(), "Output directory {} should exist".format(output_directory_path.absolute)
         with open(os.path.join(output_directory, 'openapi.json'), 'r') as oai:
