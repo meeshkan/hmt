@@ -29,7 +29,7 @@ def test_request_logging():
                                 update_mode=UpdateMode.MIXED) as data_callback:
         data_callback.log(request, response)
 
-    assert os.path.exists('./tests/tmp/logs/another.api.com.jsonl')
+    assert os.path.exists('./tests/tmp/logs/another.api.com-recordings.jsonl')
     assert os.path.exists('./tests/tmp/specs/another.api.com_mixed.yaml')
 
     request = RequestBuilder.from_dict(dict(method='get',
@@ -46,10 +46,11 @@ def test_request_logging():
                                 update_mode=UpdateMode.GEN) as data_callback:
         data_callback.log(request, response)
 
-    assert os.path.exists('./tests/tmp/logs/api.com.jsonl')
+    expected_recordings_path = './tests/tmp/logs/api.com-recordings.jsonl'
+    assert os.path.exists(expected_recordings_path)
     assert os.path.exists('./tests/tmp/specs/api.com_gen.yaml')
 
-    with open('./tests/tmp/logs/api.com.jsonl', 'r') as f:
+    with open(expected_recordings_path, 'r') as f:
         data = [x for x in f.read().split('\n') if x != '']
         assert 1 == len(data)
         http_exchange = HttpExchangeReader.from_json(data[0])
@@ -63,7 +64,7 @@ def test_request_logging():
                                 update_mode=None) as data_callback:
         data_callback.log(request, response)
 
-    assert os.path.exists('./tests/tmp/logs/api.com.jsonl')
+    assert os.path.exists(expected_recordings_path)
     assert 0 == len(os.listdir('./tests/tmp/specs'))
 
 
