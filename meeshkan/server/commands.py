@@ -9,6 +9,7 @@ from tornado.web import Application
 
 from .utils.routing import PathRouting, HeaderRouting, Routing
 from .admin.views import RestMiddlewareView, RestMiddlewaresView, StorageView
+from ..config import DEFAULT_SPECS_DIRECTORY
 from ..schemabuilder.update_mode import UpdateMode
 from .admin.views import StorageView
 from .proxy.proxy import RecordProxy
@@ -40,7 +41,7 @@ def start_admin(port):
 @click.option('-a', '--admin-port', default="8888", help='Admin server port.')
 @click.option('-l', '--log_dir', default="./logs", help='API calls logs direcotry')
 @click.option('-r', '--header-routing', is_flag=True, help='Use header based routing to target hosts.')
-@click.option('-s', '--specs-dir', default="./specs", help='Directory to store OpenAPI specs.')
+@click.option('-s', '--specs-dir', default=DEFAULT_SPECS_DIRECTORY, help='Directory to store OpenAPI specs.')
 @click.option("-m", "--mode", type=click.Choice(['GEN', 'REPLAY', 'MIXED'], case_sensitive=False),
               default=None, help="Spec building mode.")
 def record(port, admin_port, log_dir, header_routing, specs_dir, mode):
@@ -77,7 +78,7 @@ def make_mocking_app(callback_path, specs_dir, router):
 @click.option('-c', '--callback-path', default="./callbacks", help='Directory with configured callbacks.')
 @click.option('-p', '--port', default="8000", help='Server port.')
 @click.option('-a', '--admin-port', default="8888", help='Admin server port.')
-@click.option('-s', '--specs-dir', default="./specs", help='Directory with OpenAPI schemas.')
+@click.option('-s', '--specs-dir', default=DEFAULT_SPECS_DIRECTORY, help='Directory with OpenAPI schemas.')
 @click.option('-r', '--header-routing', is_flag=True, help='Use header based routing to target hosts.')
 def mock(callback_path, admin_port, port, specs_dir, header_routing):
     """
