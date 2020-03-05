@@ -1,5 +1,6 @@
 from meeshkan.schemabuilder.builder import BASE_SCHEMA
 from meeshkan.__main__ import cli, _convert
+from meeshkan.config import DEFAULT_SPECS_DIR
 from click.testing import CliRunner
 from .util import read_recordings_as_strings
 from hamcrest import assert_that, has_key
@@ -35,7 +36,13 @@ def test_build_default_output_dir():
         runner_result = runner.invoke(
             cli, ['build', '-i', input_file, '-a', base_schema, '--source', 'file'])
         assert runner_result.exit_code == 0, "Exited with code {}, expected zero".format(runner_result.exit_code)
-        assert Path("specs/").is_dir(), "Output directory specs/ should exist"
+        expected_outputdir_path = Path(DEFAULT_SPECS_DIR)
+        assert expected_outputdir_path.is_dir(), "Output directory specs/ should exist"
+        with open(expected_outputdir_path.joinpath('openapi.json'), 'r') as oai:
+            build_result = json.loads(oai.read())
+
+            # Verify result
+            assert_that(build_result, has_key('openapi'))
 
 def test_build_cmd():
     """An uber test verifying build command input and output.
