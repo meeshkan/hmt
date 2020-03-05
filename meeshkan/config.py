@@ -4,7 +4,7 @@ from typing import Dict, Any, List
 import yaml
 import logging
 
-DEFAULT_SPECS_DIRECTORY = "specs/"
+DEFAULT_SPECS_DIR = "specs/"
 
 PACKAGE_PATH = Path(os.path.dirname(os.path.realpath(__file__)))  # type: Path
 
