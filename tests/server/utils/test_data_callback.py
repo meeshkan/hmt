@@ -3,7 +3,7 @@ import shutil
 
 from http_types import RequestBuilder, ResponseBuilder, HttpExchangeReader
 
-from meeshkan.schemabuilder import UpdateMode
+from meeshkan import UpdateMode
 from meeshkan.server.utils.data_callback import RequestLoggingCallback
 import pytest
 
