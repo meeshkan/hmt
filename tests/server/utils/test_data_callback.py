@@ -7,12 +7,16 @@ from http_types import Response, Request, RequestBuilder, ResponseBuilder, HttpE
 
 from meeshkan import UpdateMode
 from meeshkan.server.utils.data_callback import RequestLoggingCallback
+import pytest
 
+@pytest.fixture()
+def tmp_dir():
+    tmp_dir = './tests/tmp'
+    yield tmp_dir
+    if os.path.exists(tmp_dir):
+        shutil.rmtree(tmp_dir)
 
-def test_request_logging():
-    if os.path.exists('./tests/tmp'):
-        shutil.rmtree('./tests/tmp')
-
+def test_request_logging_mixed(tmp_dir):
     request = RequestBuilder.from_dict(dict(method='get',
                       host='another.api.com',
                       pathname='/echo',
@@ -25,13 +29,15 @@ def test_request_logging():
     response = ResponseBuilder.from_dict(dict(statusCode=200, body='{"message": "hello"}', bodyAsJson={"message": "hello"},
                         headers={}))
 
-    with RequestLoggingCallback(log_dir='./tests/tmp/logs', specs_dir='./tests/tmp/specs',
+    with RequestLoggingCallback(log_dir=os.path.join(tmp_dir, "logs"), specs_dir=os.path.join(tmp_dir, "specs"),
                                 update_mode=UpdateMode.MIXED) as data_callback:
         data_callback.log(request, response)
 
-    assert os.path.exists('./tests/tmp/logs/another.api.com-recordings.jsonl')
-    assert os.path.exists('./tests/tmp/specs/another.api.com_mixed.yaml')
+    assert os.path.exists(os.path.join(tmp_dir, 'logs/another.api.com-recordings.jsonl'))
+    assert os.path.exists(os.path.join(tmp_dir, 'specs/another.api.com_mixed.yaml'))
 
+
+def test_request_logging_gen():
     request = RequestBuilder.from_dict(dict(method='get',
                       host='api.com',
                       pathname='/echo',
@@ -41,7 +47,6 @@ def test_request_logging():
                       headers={}))
     response = ResponseBuilder.from_dict(dict(statusCode=200, body='{"message": "hello"}', bodyAsJson={"message": "hello"},
                         headers={}))
-
     with RequestLoggingCallback(log_dir='./tests/tmp/logs', specs_dir='./tests/tmp/specs',
                                 update_mode=UpdateMode.GEN) as data_callback:
         data_callback.log(request, response)
@@ -60,12 +65,22 @@ def test_request_logging():
 
     shutil.rmtree('./tests/tmp')
 
+def test_request_logging_none():
+    request = RequestBuilder.from_dict(dict(method='get',
+                      host='api.com',
+                      pathname='/echo',
+                      query={'message': 'Hello'},
+                      body='',
+                      protocol='http',
+                      headers={}))
+    response = ResponseBuilder.from_dict(dict(statusCode=200, body='{"message": "hello"}', bodyAsJson={"message": "hello"},
+                        headers={}))
     with RequestLoggingCallback(log_dir='./tests/tmp/logs', specs_dir='./tests/tmp/specs',
                                 update_mode=None) as data_callback:
         data_callback.log(request, response)
 
+    expected_recordings_path = './tests/tmp/logs/api.com-recordings.jsonl'
     assert os.path.exists(expected_recordings_path)
     assert 0 == len(os.listdir('./tests/tmp/specs'))
-
 
     shutil.rmtree('./tests/tmp')
