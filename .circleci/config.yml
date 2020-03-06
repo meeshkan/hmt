@@ -74,14 +74,14 @@ jobs: # A basic unit of work in a run
       - run:
           name: Call integration tests
           command: |
-            curl -u ecd05b95cb166ea9a9accb867247c2037a684916: \
+            curl -u $API_TOKEN: \
             -d build_parameters[CIRCLE_JOB]=test-3.6 \
             https://circleci.com/api/v1.1/project/github/meeshkan/meeshkan-examples/tree/master
 
-            curl -u ecd05b95cb166ea9a9accb867247c2037a684916: \
-            -d build_parameters[CIRCLE_JOB]=test-3.6 \
+            curl -u $API_TOKEN: \
+            -d build_parameters[CIRCLE_JOB]=test-3.7 \
             https://circleci.com/api/v1.1/project/github/meeshkan/meeshkan-examples/tree/master
 
-            curl -u ecd05b95cb166ea9a9accb867247c2037a684916: \
-            -d build_parameters[CIRCLE_JOB]=test-3.6 \
+            curl -u $API_TOKEN: \
+            -d build_parameters[CIRCLE_JOB]=test-3.8 \
             https://circleci.com/api/v1.1/project/github/meeshkan/meeshkan-examples/tree/master
