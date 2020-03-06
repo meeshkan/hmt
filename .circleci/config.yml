@@ -56,45 +56,15 @@ jobs: # A basic unit of work in a run
       - run:
           name: Run integretion tests
           command: |
+            export VENV_HOME_DIR=$(pipenv --venv)
+            source $VENV_HOME_DIR/bin/activate
             git clone https://github.com/meeshkan/meeshkan-examples.git  ../meeshkan-examples
             cd ../meeshkan-examples &&  python run_all.py
-
-
   test-3.7:
     <<: *test-template
     docker:
       - image: circleci/python:3.7.6-stretch
   test-3.8:
     <<: *test-template
-    docker:
-      - image: circleci/python:3.8.1-buster
-  integration-tests-3.6: &integration-test-template
-    # directory where steps are run
-    working_directory: ~/meeshkan-examples
-    docker: # run the steps with Docker
-      # CircleCI Python images available at: https://hub.docker.com/r/circleci/python/
-      - image: circleci/python:3.6.4-stretch
-        environment: # environment variables for primary container
-          PIPENV_VENV_IN_PROJECT: "true"
-    steps: # steps that comprise the `build` job
-      - checkout # check out source code to working directory
-      - run:
-          name: Install pipenv
-          command: |
-            sudo pip install pipenv
-            pipenv update
-            pipenv install -r ./requirements.txt
-      - run:
-          name: Run tests
-          command: |
-            export VENV_HOME_DIR=$(pipenv --venv)
-            source $VENV_HOME_DIR/bin/activate
-            python run_all.py
-  integration-tests-3.7:
-    <<: *integration-test-template
-    docker:
-      - image: circleci/python:3.7.6-stretch
-  integration-tests-3.8:
-    <<: *integration-test-template
     docker:
       - image: circleci/python:3.8.1-buster
