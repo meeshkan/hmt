@@ -69,6 +69,7 @@ jobs: # A basic unit of work in a run
     docker:
       - image: circleci/python:3.8.1-buster
   integration-tests:
+    machine: True
     steps:
       - run:
           name: Call integration tests
