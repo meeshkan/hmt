@@ -1,5 +1,6 @@
-from meeshkan.server import make_admin_app
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
+
+from meeshkan.server.admin import make_admin_app
 from meeshkan.server.server.rest import rest_middleware_manager
 
 import pytest
