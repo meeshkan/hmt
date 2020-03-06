@@ -28,10 +28,7 @@ def update_text_schema(text_body: str, mode: UpdateMode, schema: Optional[Any] =
     specific = Schema(**{**_SCHEMA_DEFAULT, '_type': "string", 'enum': [text_body]})
     return generic if mode == UpdateMode.GEN else Schema(**{
         **_SCHEMA_DEFAULT,
-        'oneOf': list(set([
-            specific,
-            *([schema] if schema is None or schema.oneOf is None else schema.oneOf)
-        ]))
+        'oneOf': list({specific, *([schema] if schema.oneOf is None else schema.oneOf)})
     })
 
 
