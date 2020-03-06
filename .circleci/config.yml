@@ -6,13 +6,6 @@ workflows:
       - test-3.6
       - test-3.7
       - test-3.8
-      - integration-tests:
-          filters:
-            branches:
-              only:
-                - master
-                - feature_101
-
 jobs: # A basic unit of work in a run
   test-3.6: &test-template
     # directory where steps are run
@@ -60,6 +53,13 @@ jobs: # A basic unit of work in a run
             export VENV_HOME_DIR=$(pipenv --venv)
             source $VENV_HOME_DIR/bin/activate
             pyright --lib
+      - run:
+          name: Run integretion tests
+          command: |
+            git clone https://github.com/meeshkan/meeshkan-examples.git  ../meeshkan-examples
+            cd ../meeshkan-examples &&  python run_all.py
+
+
   test-3.7:
     <<: *test-template
     docker:
@@ -68,20 +68,33 @@ jobs: # A basic unit of work in a run
     <<: *test-template
     docker:
       - image: circleci/python:3.8.1-buster
-  integration-tests:
-    machine: True
-    steps:
+  integration-tests-3.6: &integration-test-template
+    # directory where steps are run
+    working_directory: ~/meeshkan-examples
+    docker: # run the steps with Docker
+      # CircleCI Python images available at: https://hub.docker.com/r/circleci/python/
+      - image: circleci/python:3.6.4-stretch
+        environment: # environment variables for primary container
+          PIPENV_VENV_IN_PROJECT: "true"
+    steps: # steps that comprise the `build` job
+      - checkout # check out source code to working directory
       - run:
-          name: Call integration tests
+          name: Install pipenv
           command: |
-            curl -u $API_TOKEN: \
-            -d build_parameters[CIRCLE_JOB]=test-3.6 \
-            https://circleci.com/api/v1.1/project/github/meeshkan/meeshkan-examples/tree/master
-
-            curl -u $API_TOKEN: \
-            -d build_parameters[CIRCLE_JOB]=test-3.7 \
-            https://circleci.com/api/v1.1/project/github/meeshkan/meeshkan-examples/tree/master
-
-            curl -u $API_TOKEN: \
-            -d build_parameters[CIRCLE_JOB]=test-3.8 \
-            https://circleci.com/api/v1.1/project/github/meeshkan/meeshkan-examples/tree/master
+            sudo pip install pipenv
+            pipenv update
+            pipenv install -r ./requirements.txt
+      - run:
+          name: Run tests
+          command: |
+            export VENV_HOME_DIR=$(pipenv --venv)
+            source $VENV_HOME_DIR/bin/activate
+            python run_all.py
+  integration-tests-3.7:
+    <<: *integration-test-template
+    docker:
+      - image: circleci/python:3.7.6-stretch
+  integration-tests-3.8:
+    <<: *integration-test-template
+    docker:
+      - image: circleci/python:3.8.1-buster
