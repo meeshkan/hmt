@@ -7,6 +7,7 @@
 
 Meeshkan is a tool that mocks HTTP APIs for use in sandboxes as well as for automated and exploratory testing. It uses a combination of API definitions, recorded traffic and code in order to make crafting mocks as enjoyable as possible.
 
+[Chat with us on Gitter](https://gitter.im/meeshkan/community) to let us know about questions, problems or ideas!
 
 ## What's in this document
 
@@ -107,14 +108,14 @@ $ pip install meeshkan # if not done yet
 $ meeshkan build -i path/to/recordings.jsonl [-o path/to/output_directory]
 ```
 
-The input file should be in [JSON Lines](http://jsonlines.org/) format and every line should be in [HTTP Types](https://meeshkan.github.io/http-types/) JSON format. 
+The input file should be in [JSON Lines](http://jsonlines.org/) format and every line should be in [http-types](https://meeshkan.github.io/http-types/) JSON format. 
 
-For an example input file, see [recordings.jsonl](https://github.com/Meeshkan/meeshkan/blob/master/resources/recordings.jsonl). The libraries listed at [HTTP Types](https://meeshkan.github.io/http-types/) can be used to generate input files in your language of choice.
+For an example input file, see [recordings.jsonl](https://github.com/Meeshkan/meeshkan/blob/master/resources/recordings.jsonl). The libraries listed at [http-types](https://meeshkan.github.io/http-types/) can be used to generate input files in your language of choice.
 
 Use dash (`-i -`) to read from standard input:
 
 ```bash
-$ meeshkan build --source file -i - < recordings.jsonl
+$ meeshkan build -i - < recordings.jsonl
 ```
 ### Building modes
 You can use a mode flag to indicate how the OpenAPI spec should be built, for example:
