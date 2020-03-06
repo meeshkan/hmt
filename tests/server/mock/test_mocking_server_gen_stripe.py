@@ -1,8 +1,8 @@
-from meeshkan.server import make_mocking_app
-
-import pytest
 import json
 
+import pytest
+
+from meeshkan.server.server.server import make_mocking_app
 from meeshkan.server.utils.routing import HeaderRouting
 
 
@@ -12,9 +12,9 @@ def app():
 
 
 @pytest.mark.gen_test
-#@pytest.mark.skip("takes too long due to a timeout, need to investigate")
+# @pytest.mark.skip("takes too long due to a timeout, need to investigate")
 def test_mocking_server_customers(http_client, base_url):
-    response = yield http_client.fetch(base_url+'/v1/customers')
+    response = yield http_client.fetch(base_url + '/v1/customers')
     assert response.code == 200
     rb = json.loads(response.body)
     assert type(rb) == type({})

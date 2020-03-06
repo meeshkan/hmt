@@ -34,7 +34,8 @@ REQUIRED = [
     'faust',
     # server
     'tornado==5.1.1',
-    'urllib3==1.25.6'
+    'urllib3==1.25.6',
+    'daemonocle'
 ]
 
 BUNDLES = {
