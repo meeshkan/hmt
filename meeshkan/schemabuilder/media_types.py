@@ -30,7 +30,7 @@ def update_text_schema(text_body: str, mode: UpdateMode, schema: Optional[Any] =
         **_SCHEMA_DEFAULT,
         'oneOf': list(set([
             specific,
-            *([schema] if schema.oneOf is None else schema.oneOf)
+            *([schema] if schema is None or schema.oneOf is None else schema.oneOf)
         ]))
     })
 
