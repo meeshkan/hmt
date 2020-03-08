@@ -22,8 +22,3 @@ def read_recordings_as_dict(requests_path=SAMPLE_RECORDINGS_PATH) -> List[Dict[A
 def read_recordings_as_request_response(requests_path=SAMPLE_RECORDINGS_PATH) -> List[HttpExchange]:
     return [HttpExchangeBuilder.from_dict(reqres) for reqres in read_recordings_as_dict(requests_path)]
 
-
-def petstore_schema() -> OpenAPIObject:
-    with open(PETSTORE_YAML_PATH, "r") as f:
-        oas = convert_to_openapi(safe_load(f.read()))
-        return oas

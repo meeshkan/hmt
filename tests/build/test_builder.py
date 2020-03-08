@@ -4,13 +4,14 @@ import json
 import re
 from dataclasses import replace
 from http_types import HttpExchange, Request, Response, RequestBuilder, HttpExchangeBuilder
-from tests.schemabuilder.paths_test import PETSTORE_SCHEMA
 from meeshkan.build import build_schema_batch, update_openapi, build_schema_online
 from meeshkan.build.builder import BASE_SCHEMA
 from meeshkan.build.update_mode import UpdateMode
-from ..util import petstore_schema, read_recordings_as_request_response, POKEAPI_RECORDINGS_PATH
+from ..util import read_recordings_as_request_response, POKEAPI_RECORDINGS_PATH
 from openapi_typed_2 import OpenAPIObject, Operation, PathItem, Schema, Response as _Response
 from typeguard import check_type
+from yaml import safe_load
+from openapi_typed_2 import convert_to_openapi
 import pytest
 from hamcrest import *
 
@@ -28,7 +29,11 @@ expected_schema = replace(BASE_SCHEMA, paths = {
     )
 })
 
-PETSTORE_SCHEMA = petstore_schema()
+@pytest.fixture
+def petstore_schema():
+    with open("/tests/build/schemas/petstore/index.yaml", "r") as f:
+        oas = convert_to_openapi(safe_load(f.read()))
+        return oas
 
 @pytest.fixture
 def schema():
@@ -125,18 +130,18 @@ def get_pets_exchange():
     return HttpExchange(request=get_pets_req, response=pet_res)
 
 @pytest.fixture
-def orig_schema_paths():
-    return list(PETSTORE_SCHEMA.paths.keys())
+def orig_schema_paths(petstore_schema):
+    return list(petstore_schema.paths.keys())
 
-def test_update_respects_path_parameter(get_one_pet_exchange, orig_schema_paths):
+def test_update_respects_path_parameter(get_one_pet_exchange, orig_schema_paths, petstore_schema):
     updated_schema = update_openapi(
-        PETSTORE_SCHEMA, get_one_pet_exchange, UpdateMode.GEN)
+        petstore_schema, get_one_pet_exchange, UpdateMode.GEN)
     updated_schema_paths = list(updated_schema.paths.keys())
     assert_that(updated_schema_paths, is_(orig_schema_paths))
 
-def test_update_respects_basepath(get_pets_exchange, orig_schema_paths):
+def test_update_respects_basepath(get_pets_exchange, orig_schema_paths, petstore_schema):
     updated_schema = update_openapi(
-        PETSTORE_SCHEMA, get_pets_exchange, UpdateMode.GEN)
+        petstore_schema, get_pets_exchange, UpdateMode.GEN)
     updated_schema_paths = list(updated_schema.paths.keys())
     assert_that(updated_schema_paths, is_(orig_schema_paths))
 
@@ -218,7 +223,7 @@ def test_build_string_body(text_exchange):
 
 def test_schema_in_replay_mode():
     reqs = []
-    with open('tests/build/recordings/opbank.jsonl','r') as rr: 
+    with open('tests/build/recordings/opbank/recordings.jsonl','r') as rr: 
         reqs = rr.read().split('\n')
 
     reqs = [HttpExchangeBuilder.from_dict(json.loads(r)) for r in reqs if r != '']
@@ -234,7 +239,7 @@ import time
 ACCEPTABLE_TIME = 10 # 10 seconds
 def test_builder_speed():
     now = time.time()
-    with open('tests/build/large.jsonl', 'r') as recordings:
+    with open('tests/build/pokeapi/large.jsonl', 'r') as recordings:
         http_exchanges = [HttpExchangeBuilder.from_dict(json.loads(d)) for d in recordings.read().split('\n') if d != '']
         build_schema_online(iter(http_exchanges), mode=UpdateMode.REPLAY)
     assert (time.time() - now) < ACCEPTABLE_TIME

@@ -1,9 +1,14 @@
 from meeshkan.build.paths import path_to_regex, find_matching_path
 from hamcrest import *
-from ..util import petstore_schema
-from openapi_typed_2 import convert_to_Operation
+from openapi_typed_2 import convert_to_Operation, convert_to_openapi
+import pytest
+from yaml import safe_load
 
-PETSTORE_SCHEMA = petstore_schema()
+@pytest.fixture
+def schema():
+    with open("/tests/build/schemas/petstore/index.yaml", "r") as f:
+        oas = convert_to_openapi(safe_load(f.read()))
+        return oas
 
 
 def test_path_to_regex():
@@ -28,8 +33,8 @@ def test_path_to_regex_with_multiple_params():
     assert_that("/pets/32/items/car", matches_regexp(as_regex))
 
 
-def test_match_paths():
-    paths = PETSTORE_SCHEMA.paths
+def test_match_paths(schema):
+    paths = schema.paths
     request_path = "/pets/32"
 
     match_result = find_matching_path(request_path, paths, "get", convert_to_Operation({
@@ -38,7 +43,7 @@ def test_match_paths():
 
     assert match_result is not None
 
-    expected_path_item = PETSTORE_SCHEMA.paths['/pets/{petId}']
+    expected_path_item = schema.paths['/pets/{petId}']
     path_item, parameters = match_result.path, match_result.param_mapping
 
     assert_that(path_item, equal_to(expected_path_item))
