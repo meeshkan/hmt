@@ -4,7 +4,7 @@ from http_types import HttpExchange, HttpExchangeBuilder
 from openapi_typed_2 import OpenAPIObject, convert_to_openapi
 from yaml import safe_load
 
-SAMPLE_RECORDINGS_PATH = "resources/recordings.jsonl"
+SAMPLE_RECORDINGS_PATH = "resources/github.jsonl"
 POKEAPI_RECORDINGS_PATH = "resources/pokeapi.jsonl"
 PETSTORE_YAML_PATH = "resources/petstore.yaml"
 
