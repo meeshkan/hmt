@@ -234,7 +234,7 @@ import time
 ACCEPTABLE_TIME = 10 # 10 seconds
 def test_builder_speed():
     now = time.time()
-    with open('resources/large.jsonl', 'r') as recordings:
+    with open('tests/build/large.jsonl', 'r') as recordings:
         http_exchanges = [HttpExchangeBuilder.from_dict(json.loads(d)) for d in recordings.read().split('\n') if d != '']
         build_schema_online(iter(http_exchanges), mode=UpdateMode.REPLAY)
     assert (time.time() - now) < ACCEPTABLE_TIME

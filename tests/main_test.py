@@ -58,7 +58,7 @@ def test_convert_cmd():
     runner = CliRunner()
 
     # Absolute path, can be accessed in Click's "isolated filesystem"
-    input_file = Path('resources/recordings.pcap').resolve()
+    input_file = Path('tests/convert/recordings/recordings.pcap').resolve()
     output_file = 'recordings.jsonl'
 
     with runner.isolated_filesystem():
@@ -83,7 +83,7 @@ def test_convert_cmd_without_invocation():
     runner = CliRunner()
 
     # Absolute path, can be accessed in Click's "isolated filesystem"
-    input_file = Path('resources/recordings.pcap').resolve()
+    input_file = Path('tests/convert/recordings/recordings.pcap').resolve()
     output_file = 'recordings.jsonl'
 
     with runner.isolated_filesystem():
