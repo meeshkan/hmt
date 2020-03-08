@@ -215,9 +215,13 @@ def test_build_string_body(text_exchange):
 
     assert media_type.schema._type == "string"
 
+# TODO
+# this sullies the structure of the repo a bit as
+# we are reading from an odd loation
+# given where this test lives
 def test_schema_in_replay_mode():
     reqs = []
-    with open('tests/mock/mock/callbacks/opbank/recordings/recording.jsonl','r') as rr: 
+    with open('tests/serve/mock/end-to-end/opbank/recordings/recording.jsonl','r') as rr: 
         reqs = rr.read().split('\n')
 
     reqs = [HttpExchangeBuilder.from_dict(json.loads(r)) for r in reqs if r != '']
@@ -225,6 +229,10 @@ def test_schema_in_replay_mode():
     # this schema has four recordings, of which two correspond to /v1/payments/confirm
     assert 2 == len(r.paths['/v1/payments/confirm'].post.responses['201'].content['application/json'].schema.oneOf)
 
+# TODO
+# this sullies the structure of the repo a bit as
+# we are reading from an odd loation
+# given where this test lives
 import time
 ACCEPTABLE_TIME = 10 # 10 seconds
 def test_builder_speed():

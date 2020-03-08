@@ -9,7 +9,7 @@ from meeshkan.serve.utils.routing import HeaderRouting
 
 @pytest.fixture
 def app():
-    return make_mocking_app('tests/mock/mock/callbacks', 'tests/mock/mock/petstore_schema', HeaderRouting())
+    return make_mocking_app('tests/serve/mock/callbacks', 'tests/serve/mock/schemas/petstore', HeaderRouting())
 
 URL = 'petstore.swagger.io'
 
