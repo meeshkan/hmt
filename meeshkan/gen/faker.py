@@ -15,29 +15,29 @@ def sane_depth(n):
     return max([0, 3-n])
 
 def fake_object(schema: Any, top_schema: Any, depth: int) -> Any:
-    addls = {} if 'additionalProperties' not in schema else {k:v for k,v in [(fkr.name(), random.random() if (type(schema['additionalProperties']) == type(True)) and (schema['additionalProperties'] == True) else faker(schema['additionalProperties'], top_schema, depth)) for x in range(random.randint(0, 4))]}
+    addls = {} if 'additionalProperties' not in schema else {k:v for k,v in [(fkr.name(), random.random() if (type(schema['additionalProperties']) == type(True)) and (schema['additionalProperties'] == True) else fake_it(schema['additionalProperties'], top_schema, depth)) for x in range(random.randint(0, 4))]}
     properties = [] if 'properties' not in schema else [x for x in schema['properties'].keys()]
     random.shuffle(properties)
     properties = [] if len(properties) == 0 else properties[:min([sane_depth(depth), random.randint(0, len(properties) - 1 )])]
     properties = list(set(([] if 'required' not in schema else schema['required']) + properties))
     return {
         **addls,
-        **{ k: v for k,v in [(p, faker(schema['properties'][p], top_schema, depth)) for p in properties]}
+        **{ k: v for k,v in [(p, fake_it(schema['properties'][p], top_schema, depth)) for p in properties]}
     }
 
 def fake_array(schema: Any, top_schema: Any, depth: int) -> Any:
     mn = 0 if 'minItems' not in schema else schema['minItems']
     mx = 100 if 'maxItems' not in schema else schema['maxItems']
-    return [] if 'items' not in schema else [faker(x, top_schema, depth) for x in schema['items']] if type(schema['items']) is type([]) else [faker(schema['items'], top_schema, depth) for x in range(random.randint(mn, mx))]
+    return [] if 'items' not in schema else [fake_it(x, top_schema, depth) for x in schema['items']] if type(schema['items']) is type([]) else [fake_it(schema['items'], top_schema, depth) for x in range(random.randint(mn, mx))]
 
 def fake_any_of(schema: Any, top_schema: Any, depth: int) -> Any:
-    return faker(random.choice(schema["anyOf"]), top_schema, depth)
+    return fake_it(random.choice(schema["anyOf"]), top_schema, depth)
 
 def fake_all_of(schema: Any, top_schema: Any, depth: int) -> Any:
-    return reduce(lambda a, b: { **a, **b}, [faker(x, top_schema, depth) for x in schema["allOf"]], {})
+    return reduce(lambda a, b: { **a, **b}, [fake_it(x, top_schema, depth) for x in schema["allOf"]], {})
 
 def fake_one_of(schema: Any, top_schema: Any, depth: int) -> Any:
-    return faker(random.choice(schema["oneOf"]), top_schema, depth)
+    return fake_it(random.choice(schema["oneOf"]), top_schema, depth)
 
 # TODO - make this work
 def fake_not(schema: Any, top_schema: Any, depth: int) -> Any:
@@ -58,7 +58,7 @@ def fake_integer(schema: Any) -> int:
 
 def fake_ref(schema: Any, top_schema, depth):
     name = schema['$ref'].split('/')[2]
-    return faker(top_schema['definitions'][name], top_schema, depth)
+    return fake_it(top_schema['definitions'][name], top_schema, depth)
 
 def fake_null(schema: Any) -> None:
     return None
