@@ -1,5 +1,4 @@
 from meeshkan.schemabuilder.update_mode import UpdateMode
-from meeshkan.schemabuilder.defaults import _SCHEMA_DEFAULT
 from meeshkan.schemabuilder.param import ParamBuilder, SchemaParameters
 from http_types import RequestBuilder
 from openapi_typed_2 import Parameter, Schema
@@ -34,7 +33,7 @@ required_query_parameter = Parameter(description=None,
                                      _x=None,
                                      name='key',
                                      required=True,
-                                     schema=Schema(**{ **_SCHEMA_DEFAULT, '_type': 'string'}),
+                                     schema=Schema(_type='string'),
                                      _in='query')
 
 
