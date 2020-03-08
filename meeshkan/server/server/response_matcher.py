@@ -7,7 +7,8 @@ import random
 from faker import Faker
 from typing import cast, Mapping, Union, Sequence, Tuple
 from openapi_typed_2 import convert_from_openapi, OpenAPIObject, Reference, Schema, convert_to_openapi
-from ...gen.generator import get_response_from_ref, matcher, faker, change_ref, change_refs, ref_name
+from ...gen.matcher import get_response_from_ref, match_request_to_openapi, change_ref, change_refs, ref_name
+from ...gen.faker import fake_it
 from http_types import HttpMethod
 fkr = Faker()
 
@@ -43,7 +44,7 @@ class ResponseMatcher:
         # TODO: tight coupling here
         # try to decouple...
         schemas = rest_middleware_manager.spew(request, self._schemas)
-        match = matcher(request, schemas)
+        match = match_request_to_openapi(request, schemas)
         if len(match) == 0:
             return self.match_error('Could not find a open API schema for the host %s.' % request.host, request)
         match_keys = [x for x in match.keys()]
@@ -109,7 +110,7 @@ class ResponseMatcher:
                 **convert_from_openapi(change_ref(schema) if isinstance(schema, Reference) else change_refs(schema)),
                 'definitions': { k: convert_from_openapi(change_ref(v) if isinstance(v, Reference) else change_refs(v)) for k,v in (match[name].components.schemas.items() if (name in match) and (match[name].components is not None) and (match[name].components.schemas is not None) else [])}
             }
-            bodyAsJson = faker(to_fake, to_fake, 0)
+            bodyAsJson = fake_it(to_fake, to_fake, 0)
             return Response(
                 statusCode=statusCode,
                 body=json.dumps(bodyAsJson),

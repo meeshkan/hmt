@@ -1,4 +1,4 @@
-from meeshkan.gen.generator import match_urls, use_if_header, ref_name, get_path_item_with_method, matches
+from meeshkan.gen.matcher import match_urls, use_if_header, ref_name, get_path_item_with_method, matches
 from openapi_typed_2 import PathItem, Reference, OpenAPIObject, convert_to_Parameter, convert_to_PathItem, convert_to_Components, convert_to_openapi, convert_to_Schema
 from dataclasses import replace
 

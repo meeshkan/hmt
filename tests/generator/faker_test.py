@@ -1,4 +1,5 @@
-from meeshkan.gen.generator import faker, valid_schema
+from meeshkan.gen.matcher import valid_schema
+from meeshkan.gen.faker import fake_it
 import jsonschema
 
 def test_faker_1():
@@ -23,7 +24,7 @@ def test_faker_1():
     }
   }
 }
-    res = faker(schema, schema, 0)
+    res = fake_it(schema, schema, 0)
     assert valid_schema(res, schema)
 
 def test_faker_2():
@@ -48,7 +49,7 @@ def test_faker_2():
     }
   }
 }
-    res = faker(schema, schema, 0)
+    res = fake_it(schema, schema, 0)
     assert valid_schema(res, schema)
 
 def test_faker_3():
@@ -72,7 +73,7 @@ def test_faker_3():
     }
   }
 }
-    res = faker(schema, schema, 0)
+    res = fake_it(schema, schema, 0)
     assert valid_schema(res, schema)
 
 def test_faker_4():
@@ -110,10 +111,10 @@ def test_faker_4():
     }
   }
 }
-    res = faker(schema, schema, 0)
+    res = fake_it(schema, schema, 0)
     assert valid_schema(res, schema)
 
 def test_faker_5():
   schema = {"type":"array"}
-  res = faker(schema, schema, 0)
+  res = fake_it(schema, schema, 0)
   assert valid_schema(res, schema)

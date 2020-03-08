@@ -22,7 +22,7 @@ X = TypeVar('X')
 Y = TypeVar('Y')
 Z = TypeVar('Z')
 
-__all__ = ['matcher', 'faker', 'change_ref', 'change_refs']
+__all__ = ['match_request_to_openapi', 'change_ref', 'change_refs']
 
 
 #def pp(s, c: C) -> C:
@@ -586,7 +586,7 @@ def truncate_path(
         path,
     )
 
-def matcher(req: Request, r: Mapping[str, OpenAPIObject]) -> Mapping[str, OpenAPIObject]:
+def match_request_to_openapi(req: Request, r: Mapping[str, OpenAPIObject]) -> Mapping[str, OpenAPIObject]:
     def _path_item_modifier(oai: OpenAPIObject) -> Callable[[PathItem], PathItem]:
         def __path_item_modifier(path_item: PathItem) -> PathItem:
             return reduce(lambda a, b: b(a), [
@@ -613,159 +613,3 @@ def matcher(req: Request, r: Mapping[str, OpenAPIObject]) -> Mapping[str, OpenAP
         k: v for k, v in r.items() if len(match_urls(req.protocol.value, req.host, v)) > 0
     })
 
-def _first_or_none(l: Sequence[C]) -> Optional[C]:
-    return None if len(l) == 0 else l[0]
-
-def headers_schemas_from_operation(schema: OpenAPIObject, operation: Operation) -> Sequence[Schema]:
-    return parameters_o.Each().Prism(
-        lambda s: s if isinstance(s, Reference) else get_parameter_from_ref(schema, ref_name(s)) if isinstance(s, Reference) else None,
-        lambda a: a,
-        ignore_none=True
-    ).Iso(
-        lambda a: (use_if_header(schema, a), a),
-        lambda b: b[1]
-    )[0].Prism(*_prism_o, ignore_none=True).collect()(operation)
-
-def make_lens_to_response_starting_from_operation(
-    schema: OpenAPIObject,
-    code: str,
-    l: lenses.ui.BaseUiLens[S, T, X, Y] = lens
-) -> lenses.ui.BaseUiLens[S, T, X, Y]:
-    return l.add_lens(responses_o).Prism(
-        lambda s: s if isinstance(s, Response) else 
-            get_response_from_ref(schema, ref_name(s)) if isinstance(s, Reference) else
-            None,
-        lambda a: a,
-        ignore_none=True
-    )
-
-def string_header(n: str, o: Optional[Header]) -> Optional[Tuple[str, Header]]:
-    return None if o is None else (n, o)
-
-def header_schemas_from_response(
-  schema: OpenAPIObject,
-  operation: Operation,
-  code: str
-) -> Sequence[Schema]:
-    return make_lens_to_response_starting_from_operation(
-      schema, code
-    ).add_lens(headers_o).Items().Prism(
-      lambda a: string_header(a[0], get_header_from_ref(schema, ref_name(a[1]))) if isinstance(a[1], Reference) else (a[0], a[1]),
-      lambda a: a,
-      ignore_none=True
-    ).Iso(
-      lambda a: replace(a[1], name=a[0], _in='header'),
-      lambda a: (a.name, a)
-    ).add_lens(parameter_schema(schema)).collect()(operation)
-
-def body_from_response(
-  schema: OpenAPIObject,
-  operation: Operation,
-  code: str
-) -> Optional[Union[Reference, Schema]]:
-  return _first_or_none(
-    make_lens_to_response_starting_from_operation(
-          schema, code
-    ).add_lens(
-        content_o
-    ).Items().add_lens(
-        oll(0)
-    )[1].add_lens(
-        schema_o
-    ).collect()([operation]))
-
-
-########################
-#### FAKER
-########################
-import random
-from faker import Faker
-fkr = Faker()
-_LO = -99999999
-_HI = 99999999
-
-# to prevent too-nested objects
-def sane_depth(n):
-    return max([0, 3-n])
-
-def fake_object(schema: Any, top_schema: Any, depth: int) -> Any:
-    addls = {} if 'additionalProperties' not in schema else {k:v for k,v in [(fkr.name(), random.random() if (type(schema['additionalProperties']) == type(True)) and (schema['additionalProperties'] == True) else faker(schema['additionalProperties'], top_schema, depth)) for x in range(random.randint(0, 4))]}
-    properties = [] if 'properties' not in schema else [x for x in schema['properties'].keys()]
-    random.shuffle(properties)
-    properties = [] if len(properties) == 0 else properties[:min([sane_depth(depth), random.randint(0, len(properties) - 1 )])]
-    properties = list(set(([] if 'required' not in schema else schema['required']) + properties))
-    return {
-        **addls,
-        **{ k: v for k,v in [(p, faker(schema['properties'][p], top_schema, depth)) for p in properties]}
-    }
-
-def fake_array(schema: Any, top_schema: Any, depth: int) -> Any:
-    mn = 0 if 'minItems' not in schema else schema['minItems']
-    mx = 100 if 'maxItems' not in schema else schema['maxItems']
-    return [] if 'items' not in schema else [faker(x, top_schema, depth) for x in schema['items']] if type(schema['items']) is type([]) else [faker(schema['items'], top_schema, depth) for x in range(random.randint(mn, mx))]
-
-def fake_any_of(schema: Any, top_schema: Any, depth: int) -> Any:
-    return faker(random.choice(schema["anyOf"]), top_schema, depth)
-
-def fake_all_of(schema: Any, top_schema: Any, depth: int) -> Any:
-    return reduce(lambda a, b: { **a, **b}, [faker(x, top_schema, depth) for x in schema["allOf"]], {})
-
-def fake_one_of(schema: Any, top_schema: Any, depth: int) -> Any:
-    return faker(random.choice(schema["oneOf"]), top_schema, depth)
-
-# TODO - make this work
-def fake_not(schema: Any, top_schema: Any, depth: int) -> Any:
-    return {}
-
-# TODO - make this not suck
-def fake_string(schema: Any) -> str:
-    return random.choice(schema['enum']) if 'enum' in schema else fkr.name()
-
-def fake_boolean(schema: Any) -> bool:
-    return random.choice(schema['enum']) if 'enum' in schema else True if random.random() > 0.5 else False
-
-# TODO: add exclusiveMinimum and exclusiveMaximum
-def fake_integer(schema: Any) -> int:
-    mn = _LO if 'minimum' not in schema else schema['minimum']
-    mx = _HI if 'maximum' not in schema else schema['maximum']
-    return random.choice(schema['enum']) if 'enum' in schema else random.randint(mn, mx)
-
-def fake_ref(schema: Any, top_schema, depth):
-    name = schema['$ref'].split('/')[2]
-    return faker(top_schema['definitions'][name], top_schema, depth)
-
-def fake_null(schema: Any) -> None:
-    return None
-
-def fake_number(schema: Any) -> float:
-    mn = _LO if 'minimum' not in schema else schema['minimum']
-    mx = _HI if 'maximum' not in schema else schema['maximum']
-    return random.choice(schema['enum']) if 'enum' in schema else (random.random() * (mx - mn)) + mn
-
-def faker(schema: Any, top_schema: Any, depth: int) -> Any:
-    depth += 1
-    return fake_array(
-        schema, top_schema, depth
-    ) if ('type' in schema) and (schema["type"] == "array") else fake_any_of(
-        schema, top_schema, depth
-    ) if "anyOf" in schema else fake_all_of(
-        schema, top_schema, depth
-    ) if "allOf" in schema else fake_one_of(
-        schema, top_schema, depth
-    ) if "oneOf" in schema else fake_not(
-        schema, top_schema, depth
-    ) if "not" in schema else fake_ref(
-        schema, top_schema, depth
-    ) if "$ref" in schema else fake_object(
-        schema, top_schema, depth
-    ) if ("type" not in schema) or (schema["type"] == "object") else fake_string(
-        schema
-    ) if schema["type"] == "string" else fake_integer(
-        schema
-    ) if schema["type"] == "integer" else fake_boolean(
-        schema
-    ) if schema["type"] == "boolean" else fake_null(
-        schema
-    ) if schema["type"] == "null" else fake_number(
-        schema
-    ) if schema["type"] == "number" else {}

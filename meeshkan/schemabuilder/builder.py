@@ -1,6 +1,5 @@
 import copy
 from sys import path
-from meeshkan.gen.generator import parameters_o
 from .update_mode import UpdateMode
 from functools import reduce
 from dataclasses import replace

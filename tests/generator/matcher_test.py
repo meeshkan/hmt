@@ -1,4 +1,4 @@
-from meeshkan.gen.generator import matcher
+from meeshkan.gen.matcher import match_request_to_openapi
 from openapi_typed_2 import OpenAPIObject, convert_to_openapi
 from http_types import RequestBuilder
 from typing import Dict
@@ -154,7 +154,7 @@ store: Dict[str, OpenAPIObject] = {
 }
 
 def test_matcher_1():
-  assert matcher(
+  assert match_request_to_openapi(
       RequestBuilder.from_dict({
         'headers': {},
         'host': "api.foo.com",
@@ -180,7 +180,7 @@ def test_matcher_1():
   }
 
 def test_matcher_2():
-    matcher(
+    match_request_to_openapi(
       RequestBuilder.from_dict({
         'headers': {},
         'host': "api.bar.com",
@@ -206,7 +206,7 @@ def test_matcher_2():
     }
 
 def test_matcher_3():
-    assert matcher(
+    assert match_request_to_openapi(
       RequestBuilder.from_dict({
         'headers': {},
         'host': "api.foo.com",
@@ -227,7 +227,7 @@ def test_matcher_3():
   }
 
 def test_matcher_4():
-    assert matcher(
+    assert match_request_to_openapi(
       RequestBuilder.from_dict({
         'headers': {},
         'host': "api.foo.com",
@@ -262,7 +262,7 @@ def test_matcher_4():
   }
 
 def test_matcher_5():
-    assert matcher(
+    assert match_request_to_openapi(
       RequestBuilder.from_dict({
         'headers': {},
         'host': "api.foo.com",
@@ -283,7 +283,7 @@ def test_matcher_5():
   }
 
 def test_matcher_6():
-    assert matcher(
+    assert match_request_to_openapi(
       RequestBuilder.from_dict({
         'headers': {},
         'host': "api.foo.com",
@@ -308,7 +308,7 @@ def test_matcher_6():
   }
 
 def test_matcher_7():
-    assert matcher(
+    assert match_request_to_openapi(
       RequestBuilder.from_dict({
         'headers': {},
         'host': "api.foo.commmm", # does not exist
@@ -322,7 +322,7 @@ def test_matcher_7():
     ) == {}
 
 def test_matcher_8():
-    assert matcher(
+    assert match_request_to_openapi(
       RequestBuilder.from_dict({
         'headers': {},
         'host': "api.baz.com",
@@ -336,7 +336,7 @@ def test_matcher_8():
     )['baz'].paths["/guest"].get == store['baz'].paths["/guest"].get
 
 def test_matcher_9():
-    assert matcher(
+    assert match_request_to_openapi(
       RequestBuilder.from_dict({
         'headers': {},
         'host': "api.baz.com",
@@ -350,7 +350,7 @@ def test_matcher_9():
     )['baz'].paths["/guest"].get == None
 
 def test_matcher_10():
-  assert matcher(
+  assert match_request_to_openapi(
       RequestBuilder.from_dict({
         'headers': {},
         'host': "api.baz.com",
@@ -364,7 +364,7 @@ def test_matcher_10():
     )['baz'].paths["/guest"].get == None
 
 def test_matcher_11():
-    assert matcher(
+    assert match_request_to_openapi(
       RequestBuilder.from_dict({
         'headers': {},
         'host': "api.baz.com",
@@ -380,7 +380,7 @@ def test_matcher_11():
     )['baz'].paths["/guest/{id}/name"].post == store['baz'].paths["/guest/{id}/name"].post
 
 def test_matcher_12():
-    assert matcher(
+    assert match_request_to_openapi(
       RequestBuilder.from_dict({
         'headers': {},
         'host': "api.baz.com",
@@ -396,7 +396,7 @@ def test_matcher_12():
     )['baz'].paths["/guest/{id}/name"].post == None
 
 def test_matcher_13():
-    assert matcher(
+    assert match_request_to_openapi(
       RequestBuilder.from_dict({
         'headers': { 'zz': "top" },
         'host': "api.baz.com",
@@ -410,7 +410,7 @@ def test_matcher_13():
     )['baz'].paths["/guest/{id}"].post == store['baz'].paths["/guest/{id}"].post
 
 def test_matcher_14():
-    assert matcher(
+    assert match_request_to_openapi(
       RequestBuilder.from_dict({
         'headers': {}, # no header will lead to undefined
         'host': "api.baz.com",
@@ -424,7 +424,7 @@ def test_matcher_14():
     )['baz'].paths["/guest/{id}"].post == None
 
 def test_matcher_15():
-    matcher(
+    match_request_to_openapi(
       RequestBuilder.from_dict({
         'headers': {
           'X-Meeshkan-Scheme': 'https',
