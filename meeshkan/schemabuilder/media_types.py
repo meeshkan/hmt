@@ -5,7 +5,6 @@ from http_types import HttpExchange as HttpExchange
 from ..logger import get as getLogger
 from typing import Any, Sequence, cast, Optional
 from openapi_typed_2 import MediaType, Schema, convert_to_Schema
-from .defaults import _SCHEMA_DEFAULT
 import json
 from typing_extensions import Literal
 from .json_schema import to_openapi_json_schema
@@ -24,15 +23,13 @@ def update_json_schema(json_body: Any, mode: UpdateMode, schema: Optional[Any] =
 
 def update_text_schema(text_body: str, mode: UpdateMode, schema: Optional[Any] = None) -> Schema:
     # TODO Better updates
-    generic = Schema(**{**_SCHEMA_DEFAULT, '_type': "string"})
-    specific = Schema(**{**_SCHEMA_DEFAULT, '_type': "string", 'enum': [text_body]})
-    return generic if mode == UpdateMode.GEN else Schema(**{
-        **_SCHEMA_DEFAULT,
-        'oneOf': list(set([
+    generic = Schema(_type="string")
+    specific = Schema(_type="string", enum=[text_body])
+    return generic if mode == UpdateMode.GEN else Schema(oneOf=list(set([
             specific,
-            *([schema] if schema.oneOf is None else schema.oneOf)
+            *([] if schema is None else [schema] if schema.oneOf is None else schema.oneOf)
         ]))
-    })
+    )
 
 
 def infer_media_type_from_nonempty(body: str) -> MediaTypeKey:
