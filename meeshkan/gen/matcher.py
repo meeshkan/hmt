@@ -11,7 +11,6 @@ from http_types import Request
 from typing import cast, Sequence, Tuple, TypeVar, Callable, Optional, Mapping, Union, Any
 from openapi_typed_2 import convert_from_openapi, OpenAPIObject, Responses, MediaType, Response, RequestBody, Header, Operation, Parameter, Components, Reference, Schema, PathItem
 from urllib.parse import urlparse
-from ..schemabuilder.defaults import _SCHEMA_DEFAULT
 
 C = TypeVar('C') 
 D = TypeVar('D')
@@ -264,7 +263,7 @@ def get_required_request_query_or_header_parameters_internal(header: bool, l: le
     # copied from unmock, but need to investigate
     return [replace(parameter,
                 name=parameter.name if not header else parameter.name.lower(),
-                schema=change_ref(parameter.schema) if isinstance(parameter.schema, Reference) else change_refs(parameter.schema) if parameter.schema is not None else Schema(**{**_SCHEMA_DEFAULT, '_type': 'string'})
+                schema=change_ref(parameter.schema) if isinstance(parameter.schema, Reference) else change_refs(parameter.schema) if parameter.schema is not None else Schema(_type='string')
                 ) for parameter in l.Prism(
         lambda s: get_parameter_from_ref(oai, ref_name(s)) if isinstance(s, Reference) else s,
         lambda a : a,
@@ -375,7 +374,7 @@ def keep_method_if_required_query_or_header_parameters_are_present(
     ) else omit_method_from_path_item(p, req.method.value)
 
 def maybe_add_string_schema(s: Sequence[Union[Reference, Schema]]) -> Sequence[Union[Reference, Schema]]:
-    return [Schema(**{**_SCHEMA_DEFAULT, '_type': "string"})] if len(s) == 0 else s
+    return [Schema(_type="string")] if len(s) == 0 else s
 
 def discern_name(o: Optional[Parameter], n: str) -> Optional[Parameter]:
     return o if (o is None) or ((o.name == n) and (o._in == 'path')) else None
@@ -553,7 +552,7 @@ def use_if_header_last_mile(
   p: Parameter,
   r: Optional[Schema],
 ) -> Optional[Tuple[str, Schema]]:
-  return None if r is None else (p.name, r if r is not None else Schema(**{**_SCHEMA_DEFAULT, '_type': "string"}))
+  return None if r is None else (p.name, r if r is not None else Schema(_type="string"))
 
 def use_if_header(
   o: OpenAPIObject,
@@ -561,7 +560,7 @@ def use_if_header(
 ) -> Optional[Tuple[str, Schema]]:
     return None if p._in != "header" else use_if_header_last_mile(
         p,
-        Schema(**{**_SCHEMA_DEFAULT, '_type':"string"}) if p.schema is None else
+        Schema(_type="string") if p.schema is None else
             get_schema_from_ref(o, ref_name(p.schema)) if isinstance(p.schema, Reference) else
                 p.schema
     )

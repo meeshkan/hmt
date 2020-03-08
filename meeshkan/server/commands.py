@@ -2,7 +2,8 @@ import os
 from pathlib import Path
 
 import click
-import daemonocle
+
+IS_WINDOWS = os.name == 'nt'
 
 from meeshkan.server.server.server import MockServer
 from .proxy.proxy import RecordProxyRunner
@@ -54,7 +55,8 @@ def start_mock(callback_path, admin_port, port, specs_dir, header_routing, daemo
     server = MockServer(callback_path=callback_path, admin_port=admin_port, port=port, specs_dir=specs_dir,
                         routing=HeaderRouting() if header_routing else PathRouting())
 
-    if daemon:
+    if daemon and (not IS_WINDOWS):
+        import daemonocle
         daemon = daemonocle.Daemon(
             worker=server.run,
             workdir=os.getcwd(),
@@ -67,18 +69,22 @@ def start_mock(callback_path, admin_port, port, specs_dir, header_routing, daemo
 
 @mock.command(name='stop')  # type: ignore
 def stop_mocking():
-    daemon = daemonocle.Daemon(
-        pidfile=MOCK_PID,
-    )
-    daemon.stop()
+    if not IS_WINDOWS:
+        import daemonocle
+        daemon = daemonocle.Daemon(
+            pidfile=MOCK_PID,
+        )
+        daemon.stop()
 
 
 @mock.command(name='status')  # type: ignore
 def status_mocking():
-    daemon = daemonocle.Daemon(
-        pidfile=MOCK_PID,
-    )
-    daemon.status()
+    if not IS_WINDOWS:
+        import daemonocle
+        daemon = daemonocle.Daemon(
+            pidfile=MOCK_PID,
+        )
+        daemon.status()
 
 
 @click.group(invoke_without_command=True)
@@ -95,7 +101,8 @@ def start_record(port, admin_port, log_dir, header_routing, specs_dir, mode, dae
     proxy_runner = RecordProxyRunner(port=port, admin_port=admin_port, log_dir=log_dir,
                                      routing=HeaderRouting() if header_routing else PathRouting(),
                                      specs_dir=specs_dir, mode=UpdateMode[mode.upper()] if mode else None)
-    if daemon:
+    if daemon and (not IS_WINDOWS):
+        import daemonocle
         daemon = daemonocle.Daemon(
             worker=proxy_runner.run,
             workdir=os.getcwd(),
@@ -108,15 +115,19 @@ def start_record(port, admin_port, log_dir, header_routing, specs_dir, mode, dae
 
 @record.command(name='stop')  # type: ignore
 def stop_recording():
-    daemon = daemonocle.Daemon(
-        pidfile=RECORD_PID,
-    )
-    daemon.stop()
+    if not IS_WINDOWS:
+        import daemonocle
+        daemon = daemonocle.Daemon(
+            pidfile=RECORD_PID,
+        )
+        daemon.stop()
 
 
 @record.command(name='status')  # type: ignore
 def status_recording():
-    daemon = daemonocle.Daemon(
-        pidfile=RECORD_PID,
-    )
-    daemon.status()
+    if not IS_WINDOWS:
+        import daemonocle
+        daemon = daemonocle.Daemon(
+            pidfile=RECORD_PID,
+        )
+        daemon.status()
