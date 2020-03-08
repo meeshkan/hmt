@@ -1,4 +1,4 @@
-from meeshkan.schemabuilder.builder import BASE_SCHEMA
+from meeshkan.build.builder import BASE_SCHEMA
 from meeshkan.__main__ import cli, _convert
 from click.testing import CliRunner
 from .util import read_recordings_as_strings

@@ -1,5 +1,5 @@
-from meeshkan.schemabuilder.result import BuildResult
-from meeshkan.schemabuilder.writer import write_build_result
+from meeshkan.build.result import BuildResult
+from meeshkan.build.writer import write_build_result
 from .abstract import AbstractSink
 
 
