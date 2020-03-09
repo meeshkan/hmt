@@ -62,8 +62,7 @@ class MockServerView(RequestHandler):
                             'pathname': route_info.path,
                             'protocol': route_info.scheme,
                             'query': query,
-                            'body': str(self.request.body),
-                            'bodyAsJson': self._extract_json_safely(self.request.body),
+                            'body': self.request.body.decode('utf-8'),
                             'headers': headers})
 
         logger.debug(request)
@@ -72,12 +71,3 @@ class MockServerView(RequestHandler):
             self.set_header(header, value)
 
         self.write(response.body)
-
-    def _extract_json_safely(self, text):
-        if text:
-            try:
-                return json.loads(text)
-            except Exception as e:
-                pass
-
-        return {}

@@ -9,9 +9,9 @@ from meeshkan.serve.mock.server import MockServer
 from .record.proxy import RecordProxyRunner
 from .utils.routing import PathRouting, HeaderRouting
 from ..build.update_mode import UpdateMode
+from ..config import DEFAULT_SPECS_DIR
 
 LOG_CONFIG = os.path.join(os.path.dirname(__file__), 'logging.yaml')
-
 MOCK_PID = Path.home().joinpath('.meeshkan/mock.pid')
 RECORD_PID = Path.home().joinpath('.meeshkan/record.pid')
 
@@ -26,8 +26,8 @@ def add_options(options):
 
 _common_server_options = [
     click.option('-p', '--port', default="8000", help='Server port.'),
-    click.option('-a', '--admin-port', default="8888", help='Admin mock port.'),
-    click.option('-s', '--specs-dir', default="./specs", help='Directory with OpenAPI schemas.'),
+    click.option('-a', '--admin-port', default="8888", help='Admin server port.'),
+    click.option('-s', '--specs-dir', default=DEFAULT_SPECS_DIR, help='Directory with OpenAPI schemas.'),
     click.option('-d', '--daemon', is_flag=True, help='Whether to run meeshkan as a daemon.'),
     click.option('-r', '--header-routing', is_flag=True, help='Whether to use a path based routing to a target host.')
 ]
@@ -38,21 +38,21 @@ _record_options = _common_server_options + [
                  default=None, help="Spec building mode.")]
 
 _mock_options = _common_server_options + [
-    click.option('-c', '--callback-path', default="./callbacks", help='Directory with configured callbacks.')]
+    click.option('-c', '--callback-dir', default="./callbacks", help='Directory with configured callbacks.')]
 
 
 @click.group(invoke_without_command=True)
 @add_options(_mock_options)
 @click.pass_context
-def mock(ctx, callback_path, admin_port, port, specs_dir, header_routing, daemon):
+def mock(ctx, callback_dir, admin_port, port, specs_dir, header_routing, daemon):
     if ctx.invoked_subcommand is None:
         ctx.forward(start_mock)
 
 
 @mock.command(name='start')  # type: ignore
 @add_options(_mock_options)
-def start_mock(callback_path, admin_port, port, specs_dir, header_routing, daemon):
-    server = MockServer(callback_path=callback_path, admin_port=admin_port, port=port, specs_dir=specs_dir,
+def start_mock(callback_dir, admin_port, port, specs_dir, header_routing, daemon):
+    server = MockServer(callback_dir=callback_dir, admin_port=admin_port, port=port, specs_dir=specs_dir,
                         routing=HeaderRouting() if header_routing else PathRouting())
 
     if daemon and (not IS_WINDOWS):
