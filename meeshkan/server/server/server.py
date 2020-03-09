@@ -18,11 +18,12 @@ class MeeshkanApplication(Application):
     router: Routing
 
 
-def make_mocking_app(callback_path, specs_dir, routing):
+def make_mocking_app(callback_dir, specs_dir, routing):
     app = MeeshkanApplication([
         (r'/.*', MockServerView)
     ])
-    callback_manager.load(callback_path)
+    if callback_dir:
+        callback_manager.load(callback_dir)
 
     app.response_matcher = ResponseMatcher(specs_dir)
     app.router = routing
@@ -30,8 +31,8 @@ def make_mocking_app(callback_path, specs_dir, routing):
 
 
 class MockServer:
-    def __init__(self, port, specs_dir, callback_path=None, admin_port=None, routing=PathRouting()):
-        self._callback_path = callback_path
+    def __init__(self, port, specs_dir, callback_dir=None, admin_port=None, routing=PathRouting()):
+        self._callback_dir = callback_dir
         self._admin_port = admin_port
         self._port = port
         self._specs_dir = specs_dir
@@ -40,7 +41,7 @@ class MockServer:
     def run(self):
         if self._admin_port:
             start_admin(self._admin_port)
-        app = make_mocking_app(self._callback_path, self._specs_dir, self._routing)
+        app = make_mocking_app(self._callback_dir, self._specs_dir, self._routing)
         http_server = HTTPServer(app)
         http_server.listen(self._port)
         logger.info('Mock server is listening on http://localhost:%s', self._port)
