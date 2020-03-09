@@ -5,6 +5,7 @@ from hamcrest import *
 
 from http_types import RequestBuilder
 
+
 petstore_req = RequestBuilder.from_url(
     "https://petstore.swagger.io/v1/pets")
 
