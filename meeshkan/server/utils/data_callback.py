@@ -42,7 +42,7 @@ class RequestLoggingCallback():
         host = request.host
         reqres = HttpExchange(request=request, response=response)
         if not host in self._logs:
-            log_file = os.path.join(self._log_dir, '{}.jsonl'.format(host))
+            log_file = os.path.join(self._log_dir, '{}-recordings.jsonl'.format(host))
             if self._append and os.path.exists(log_file):
                 self._logs[host] = open(log_file, 'a')
             else:

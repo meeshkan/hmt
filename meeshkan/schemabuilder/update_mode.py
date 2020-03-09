@@ -6,5 +6,3 @@ class UpdateMode(enum.Enum):
     MIXED = 2
 
 __all__ = ['UpdateMode']
-
-
