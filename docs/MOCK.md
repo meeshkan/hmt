@@ -21,6 +21,19 @@ Assuming that the directory `spec_dir/` contains an OpenAPI spec with the server
 
 More options for the `meeshkan mock` command an be seen by running `meeshkan mock --help`.
 
+## Daemon mode
+Meeshkan can be launched as a daemon by providing -d command-line argument:
+```bash
+$ meeshkan mock -d
+```
+
+All other command line arguments stay the same.
+
+To stop meeshkan daemon run:
+```bash
+$ meeshkan mock stop
+```
+
 ## Callbacks
 
 To customize responses a directory containing callbacks can be provided in the `callback-path` argument (default: `./callbacks`).

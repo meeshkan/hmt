@@ -1,9 +1,9 @@
-from meeshkan.server import make_mocking_app
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 
 import pytest
 import json
 
+from meeshkan.server.server.server import make_mocking_app
 from meeshkan.server.utils.routing import HeaderRouting
 
 
