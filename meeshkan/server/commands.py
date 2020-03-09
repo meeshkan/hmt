@@ -9,6 +9,7 @@ from meeshkan.server.server.server import MockServer
 from .proxy.proxy import RecordProxyRunner
 from .utils.routing import PathRouting, HeaderRouting
 from ..config import DEFAULT_SPECS_DIR
+from ..schemabuilder import UpdateMode
 
 LOG_CONFIG = os.path.join(os.path.dirname(__file__), 'logging.yaml')
 
