@@ -112,7 +112,7 @@ TEST_COMMAND = "pytest"
 
 LINT_COMMAND = "flake8 --exclude .git,.venv,__pycache__,build,dist"
 
-FORMAT_COMMAND = "black --check ."
+FORMAT_COMMAND = "black ."
 FORMAT_CHECK_COMMAND = "black --check ."
 
 
