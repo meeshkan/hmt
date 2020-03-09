@@ -128,12 +128,12 @@ def run_tests():
     run_sys_command(TEST_COMMAND, "Tests failed")
 
 
-def lint():
-    run_sys_command(LINT_COMMAND, "Linting failed")
+def check_style():
+    run_sys_command(LINT_COMMAND, "CHecking style failed")
 
 
-def run_formatting():
-    run_sys_command(FORMAT_COMMAND, "Formatting failed")
+def check_formatting():
+    run_sys_command(FORMAT_CHECK_COMMAND, "Checking formatting failed")
 
 
 class BuildDistCommand(SetupCommand):
@@ -163,13 +163,13 @@ class TestCommand(SetupCommand):
     description = "Run tests, formatting, type-checks, and linting"
 
     def run(self):
-        self.status("Formatting code with black...")
-        run_formatting()
+        self.status("Checking formatting...")
+        check_formatting()
 
-        self.status("Running flake8...")
-        lint()
+        self.status("Checking style...")
+        check_style()
 
-        self.status("Running type-checking...")
+        self.status("Checking types...")
         type_check()
 
         self.status("Running pytest...")
@@ -227,6 +227,4 @@ setup(
         "test": TestCommand,
         "typecheck": TypeCheckCommand,
     },
-
-
 )
