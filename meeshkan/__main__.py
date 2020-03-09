@@ -6,10 +6,10 @@ from http_types.utils import HttpExchangeWriter
 import click
 from typing import Sequence
 
-from meeshkan.schemabuilder.update_mode import UpdateMode
+from meeshkan.build.update_mode import UpdateMode
 from .config import setup, DEFAULT_SPECS_DIR
 from .logger import get as getLogger
-from .schemabuilder.builder import BASE_SCHEMA, build_schema_async
+from .build.builder import BASE_SCHEMA, build_schema_async
 from .convert.pcap import convert_pcap
 from .sinks import AbstractSink, FileSystemSink
 from .sources import AbstractSource, KafkaSource, FileSource
@@ -17,7 +17,7 @@ from .sources.kafka import KafkaSourceConfig
 from openapi_typed_2 import OpenAPIObject, convert_to_openapi
 from yaml import safe_load
 from .meeshkan_types import *
-from .server.commands import record, mock
+from .serve.commands import record, mock
 
 
 LOGGER = getLogger(__name__)

@@ -32,7 +32,7 @@ REQUIRED = [
     'http-types>=0.0.13,<0.1.0',
     # kafka
     'faust',
-    # server
+    # mock
     'tornado==5.1.1',
     'urllib3==1.25.6',
     'daemonocle'
