@@ -8,7 +8,8 @@ IS_WINDOWS = os.name == 'nt'
 from meeshkan.server.server.server import MockServer
 from .proxy.proxy import RecordProxyRunner
 from .utils.routing import PathRouting, HeaderRouting
-from ..schemabuilder.update_mode import UpdateMode
+from ..config import DEFAULT_SPECS_DIR
+from ..schemabuilder import UpdateMode
 
 LOG_CONFIG = os.path.join(os.path.dirname(__file__), 'logging.yaml')
 
@@ -27,7 +28,7 @@ def add_options(options):
 _common_server_options = [
     click.option('-p', '--port', default="8000", help='Server port.'),
     click.option('-a', '--admin-port', default="8888", help='Admin server port.'),
-    click.option('-s', '--specs-dir', default="./specs", help='Directory with OpenAPI schemas.'),
+    click.option('-s', '--specs-dir', default=DEFAULT_SPECS_DIR, help='Directory with OpenAPI schemas.'),
     click.option('-d', '--daemon', is_flag=True, help='Whether to run meeshkan as a daemon.'),
     click.option('-r', '--header-routing', is_flag=True, help='Whether to use a path based routing to a target host.')
 ]
