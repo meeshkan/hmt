@@ -4,13 +4,14 @@ from typing import Dict, Any, List
 import yaml
 import logging
 
+DEFAULT_SPECS_DIR = "specs/"
 
 PACKAGE_PATH = Path(os.path.dirname(os.path.realpath(__file__)))  # type: Path
 
-LOG_CONFIG_FILE = PACKAGE_PATH.joinpath("logging.yaml")
+LOG_CONFIG_FILE = PACKAGE_PATH.joinpath('logging.yaml')
 
-BASE_DIR = Path.home().joinpath(".meeshkan")
-LOGS_DIR = BASE_DIR.joinpath("logs")
+BASE_DIR = Path.home().joinpath('.meeshkan')
+LOGS_DIR = BASE_DIR.joinpath('logs')
 
 
 # Don't automatically expose anything to top level, as the entire module is loaded as-is
@@ -42,8 +43,7 @@ def _setup_logging(log_config: Path = LOG_CONFIG_FILE, silent: bool = False) -> 
 
     if not log_config.is_file():
         raise RuntimeError(
-            "Logging file {log_file} not found".format(log_file=log_config)
-        )
+            "Logging file {log_file} not found".format(log_file=log_config))
 
     with log_config.open() as log_file:
         config_orig = yaml.safe_load(log_file.read())  # type: Any
@@ -54,18 +54,18 @@ def _setup_logging(log_config: Path = LOG_CONFIG_FILE, silent: bool = False) -> 
         :param config: Configuration dictionary
         :return: Configuration with 'filename's prepended with LOGS_DIR
         """
-        for handler_name in config["handlers"].keys():
-            handler_config = config["handlers"][handler_name]
-            if "filename" in handler_config:
-                filename = Path(handler_config["filename"]).name
-                handler_config["filename"] = str(LOGS_DIR.joinpath(filename))
+        for handler_name in config['handlers'].keys():
+            handler_config = config['handlers'][handler_name]
+            if 'filename' in handler_config:
+                filename = Path(handler_config['filename']).name
+                handler_config['filename'] = str(LOGS_DIR.joinpath(filename))
         return config
 
     config = prepare_filenames(config_orig)
     # for some reason, pyright fails with "'config' is not a known member of module"
     # even though this is an officially documented member of logging
     # for now we ignore the type
-    logging.config.dictConfig(config)  # type: ignore
+    logging.config.dictConfig(config) # type: ignore
     if silent:
         _remove_non_file_handlers()
 

@@ -18,9 +18,9 @@ class KafkaSourceConfig:
 
 class KafkaSource(AbstractSource):
     def __init__(self, config: KafkaSourceConfig):
-        self.app = faust.App(
-            "meeshkan-kafka-source", broker=config.broker, stream_wait_empty=False
-        )
+        self.app = faust.App('meeshkan-kafka-source',
+                              broker=config.broker,
+                              stream_wait_empty=False)
 
         faust_topic = self.app.topic(config.topic, key_type=str, value_type=str)
 
@@ -49,10 +49,8 @@ class KafkaSource(AbstractSource):
         async for rec in self.recording_agent.stream():
             yield HttpExchangeBuilder.from_dict(rec)
 
-    async def start(
-        self, loop: asyncio.AbstractEventLoop
-    ) -> Tuple[HttpExchangeStream, asyncio.Task]:
-        self.worker = faust.Worker(self.app, loop=loop, loglevel="info")
+    async def start(self, loop: asyncio.AbstractEventLoop) -> Tuple[HttpExchangeStream, asyncio.Task]:
+        self.worker = faust.Worker(self.app, loop=loop, loglevel='info')
 
         async def start_worker(worker: faust.Worker) -> None:
             await worker.start()
