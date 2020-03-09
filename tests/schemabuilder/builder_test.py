@@ -8,7 +8,6 @@ from tests.schemabuilder.paths_test import PETSTORE_SCHEMA
 from meeshkan.schemabuilder import build_schema_batch, update_openapi, build_schema_online
 from meeshkan.schemabuilder.builder import BASE_SCHEMA
 from meeshkan.schemabuilder.update_mode import UpdateMode
-from meeshkan.schemabuilder.defaults import _SCHEMA_DEFAULT
 from ..util import petstore_schema, read_recordings_as_request_response, POKEAPI_RECORDINGS_PATH
 from openapi_typed_2 import OpenAPIObject, Operation, PathItem, Schema, Response as _Response
 from typeguard import check_type
@@ -82,7 +81,7 @@ def test_items(schema):
     assert isinstance(items.properties, dict)
     properties = items.properties
     assert_that(properties, has_entry('clone_url',
-                                        equal_to(Schema(**{**_SCHEMA_DEFAULT, '_type': "string"}))))
+                                        equal_to(Schema(_type= "string"))))
 
 def test_servers(schema):
     servers = schema.servers

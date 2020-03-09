@@ -42,6 +42,18 @@ $ curl http://localhost:8000/api/v2/pokemon/ditto -H "Host: pokeapi.co" -H "X-Me
 
 This instructs meeshkan to call the [Pokemon API](pokeapi.co) and use the HTTPS protocol.
 
+## Daemon mode
+Meeshkan can be launched as a daemon by providing -d command-line argument:
+```bash
+$ meeshkan record -d
+```
+
+All other command line arguments stay the same.
+
+To stop meeshkan daemon run:
+```bash
+$ meeshkan record stop
+```
 ## Ecosystem
 
 In addition to using Meeshkan to record, there is a growing ecosystem of projects that one can use to create `.jsonl` files in the [`http-types`](https://github.com/meeshkan/http-types).  

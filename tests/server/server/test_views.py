@@ -2,13 +2,12 @@ import json
 from unittest.mock import Mock
 
 import pytest
-from http_types import Response, HttpMethod, Protocol
-from http_types.utils import RequestBuilder, ResponseBuilder
+from http_types import HttpMethod, Protocol
+from http_types.utils import ResponseBuilder
 from tornado.httpclient import HTTPRequest
 
-from meeshkan.server import make_mocking_app
+from meeshkan.server.server.server import make_mocking_app
 from meeshkan.server.utils.routing import HeaderRouting
-
 
 @pytest.fixture
 def app():
@@ -18,8 +17,9 @@ def app():
 
 @pytest.mark.gen_test
 def test_mocking_server_pets(http_client, base_url, app):
-    response = ResponseBuilder.from_dict(dict(statusCode=200, body='{"message": "hello"}', bodyAsJson=json.loads('{"message": "hello"}'),
-                        headers={}))
+    response = ResponseBuilder.from_dict(
+        dict(statusCode=200, body='{"message": "hello"}', bodyAsJson=json.loads('{"message": "hello"}'),
+             headers={}))
     app.response_matcher.get_response = Mock(return_value=response)
 
     req = HTTPRequest(base_url + '/pets', headers={

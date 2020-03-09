@@ -4,8 +4,8 @@ from unittest.mock import Mock
 
 import pytest
 from http_types import HttpMethod, Protocol
-from meeshkan.server import make_mocking_app
 from meeshkan.server.proxy.proxy import RecordProxy
+from meeshkan.server.server.server import make_mocking_app
 from meeshkan.server.utils.data_callback import DataCallback
 from meeshkan.server.utils.routing import PathRouting, StaticRouting, HeaderRouting
 from tornado.httpclient import HTTPRequest

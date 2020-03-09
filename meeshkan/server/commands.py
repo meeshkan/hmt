@@ -1,91 +1,133 @@
-import logging
 import os
+from pathlib import Path
 
 import click
-import tornado.ioloop
-from tornado.httpserver import HTTPServer
-from tornado.ioloop import IOLoop
-from tornado.web import Application
 
-from .utils.routing import PathRouting, HeaderRouting, Routing
-from .admin.views import RestMiddlewareView, RestMiddlewaresView, StorageView
+IS_WINDOWS = os.name == 'nt'
+
+from meeshkan.server.server.server import MockServer
+from .proxy.proxy import RecordProxyRunner
+from .utils.routing import PathRouting, HeaderRouting
 from ..schemabuilder.update_mode import UpdateMode
-from .admin.views import StorageView
-from .proxy.proxy import RecordProxy
-from .server.callbacks import callback_manager
-from .server.response_matcher import ResponseMatcher
-from .server.views import MockServerView
-from .utils.data_callback import RequestLoggingCallback
-from .utils.routing import PathRouting, HeaderRouting, Routing
 
 LOG_CONFIG = os.path.join(os.path.dirname(__file__), 'logging.yaml')
-logger = logging.getLogger(__name__)
 
-def make_admin_app():
-    return Application([
-        (r'/admin/storage', StorageView),
-        (r'/admin/middleware/rest/pregen', RestMiddlewaresView),
-        (r'/admin/middleware/rest/pregen/(.+)', RestMiddlewareView),
-    ])
+MOCK_PID = Path.home().joinpath('.meeshkan/mock.pid')
+RECORD_PID = Path.home().joinpath('.meeshkan/record.pid')
 
-def start_admin(port):
-    app = make_admin_app()
-    http_server = HTTPServer(app)
-    http_server.listen(port)
-    logger.info('Starting admin endpont on http://localhost:%s/admin', port)
+def add_options(options):
+    def _add_options(func):
+        for option in reversed(options):
+            func = option(func)
+        return func
+
+    return _add_options
 
 
-@click.command()
-@click.option('-p', '--port', default="8000", help='Server port.')
-@click.option('-a', '--admin-port', default="8888", help='Admin server port.')
-@click.option('-l', '--log_dir', default="./logs", help='API calls logs direcotry')
-@click.option('-r', '--header-routing', is_flag=True, help='Use header based routing to target hosts.')
-@click.option('-s', '--specs-dir', default="./specs", help='Directory to store OpenAPI specs.')
-@click.option("-m", "--mode", type=click.Choice(['GEN', 'REPLAY', 'MIXED'], case_sensitive=False),
-              default=None, help="Spec building mode.")
-def record(port, admin_port, log_dir, header_routing, specs_dir, mode):
-    """
-    Record http traffic to http-types format.
-    """
-    start_admin(admin_port)
-    logger.info('Starting Meeshkan proxy on http://localhost:%s', port)
-    logger.info('Spec generation mode is %s', mode.lower() if mode else 'disabled')
-    with RequestLoggingCallback(log_dir=log_dir, specs_dir=specs_dir,
-                                update_mode=UpdateMode[mode.upper()] if mode else None) as callback:
-        server = RecordProxy(callback, HeaderRouting() if header_routing else PathRouting())
-        server.listen(port)
-        tornado.ioloop.IOLoop.instance().start()
+_common_server_options = [
+    click.option('-p', '--port', default="8000", help='Server port.'),
+    click.option('-a', '--admin-port', default="8888", help='Admin server port.'),
+    click.option('-s', '--specs-dir', default="./specs", help='Directory with OpenAPI schemas.'),
+    click.option('-d', '--daemon', is_flag=True, help='Whether to run meeshkan as a daemon.'),
+    click.option('-r', '--header-routing', is_flag=True, help='Whether to use a path based routing to a target host.')
+]
+
+_record_options = _common_server_options + [
+    click.option('-l', '--log-dir', default="./logs", help='API calls logs direcotry'),
+    click.option("-m", "--mode", type=click.Choice(['GEN', 'REPLAY', 'MIXED'], case_sensitive=False),
+                 default=None, help="Spec building mode.")]
+
+_mock_options = _common_server_options + [
+    click.option('-c', '--callback-path', default="./callbacks", help='Directory with configured callbacks.')]
 
 
-class MeeshkanApplication(Application):
-    response_matcher: ResponseMatcher
-    router: Routing
+@click.group(invoke_without_command=True)
+@add_options(_mock_options)
+@click.pass_context
+def mock(ctx, callback_path, admin_port, port, specs_dir, header_routing, daemon):
+    if ctx.invoked_subcommand is None:
+        ctx.forward(start_mock)
 
 
-def make_mocking_app(callback_path, specs_dir, router):
-    app = MeeshkanApplication([
-        (r'/.*', MockServerView)
-    ])
-    callback_manager.load(callback_path)
+@mock.command(name='start')  # type: ignore
+@add_options(_mock_options)
+def start_mock(callback_path, admin_port, port, specs_dir, header_routing, daemon):
+    server = MockServer(callback_path=callback_path, admin_port=admin_port, port=port, specs_dir=specs_dir,
+                        routing=HeaderRouting() if header_routing else PathRouting())
 
-    app.response_matcher = ResponseMatcher(specs_dir)
-    app.router = router
-    return app
+    if daemon and (not IS_WINDOWS):
+        import daemonocle
+        daemon = daemonocle.Daemon(
+            worker=server.run,
+            workdir=os.getcwd(),
+            pidfile=MOCK_PID,
+        )
+        daemon.start()
+    else:
+        server.run()
 
 
-@click.command()
-@click.option('-c', '--callback-path', default="./callbacks", help='Directory with configured callbacks.')
-@click.option('-p', '--port', default="8000", help='Server port.')
-@click.option('-a', '--admin-port', default="8888", help='Admin server port.')
-@click.option('-s', '--specs-dir', default="./specs", help='Directory with OpenAPI schemas.')
-@click.option('-r', '--header-routing', is_flag=True, help='Use header based routing to target hosts.')
-def mock(callback_path, admin_port, port, specs_dir, header_routing):
-    """
-    Run a mock server.
-    """
-    start_admin(admin_port)
-    app = make_mocking_app(callback_path, specs_dir, HeaderRouting() if header_routing else PathRouting())
-    http_server = HTTPServer(app)
-    http_server.listen(port)
-    logger.info('Mock server is listening on http://localhost:%s', port)
-    IOLoop.current().start()
+@mock.command(name='stop')  # type: ignore
+def stop_mocking():
+    if not IS_WINDOWS:
+        import daemonocle
+        daemon = daemonocle.Daemon(
+            pidfile=MOCK_PID,
+        )
+        daemon.stop()
+
+
+@mock.command(name='status')  # type: ignore
+def status_mocking():
+    if not IS_WINDOWS:
+        import daemonocle
+        daemon = daemonocle.Daemon(
+            pidfile=MOCK_PID,
+        )
+        daemon.status()
+
+
+@click.group(invoke_without_command=True)
+@add_options(_record_options)
+@click.pass_context
+def record(ctx, port, admin_port, log_dir, header_routing, specs_dir, mode, daemon):
+    if ctx.invoked_subcommand is None:
+        ctx.forward(start_record)
+
+
+@record.command(name='start')  # type: ignore
+@add_options(_record_options)
+def start_record(port, admin_port, log_dir, header_routing, specs_dir, mode, daemon):
+    proxy_runner = RecordProxyRunner(port=port, admin_port=admin_port, log_dir=log_dir,
+                                     routing=HeaderRouting() if header_routing else PathRouting(),
+                                     specs_dir=specs_dir, mode=UpdateMode[mode.upper()] if mode else None)
+    if daemon and (not IS_WINDOWS):
+        import daemonocle
+        daemon = daemonocle.Daemon(
+            worker=proxy_runner.run,
+            workdir=os.getcwd(),
+            pidfile=RECORD_PID,
+        )
+        daemon.start()
+    else:
+        proxy_runner.run()
+
+
+@record.command(name='stop')  # type: ignore
+def stop_recording():
+    if not IS_WINDOWS:
+        import daemonocle
+        daemon = daemonocle.Daemon(
+            pidfile=RECORD_PID,
+        )
+        daemon.stop()
+
+
+@record.command(name='status')  # type: ignore
+def status_recording():
+    if not IS_WINDOWS:
+        import daemonocle
+        daemon = daemonocle.Daemon(
+            pidfile=RECORD_PID,
+        )
+        daemon.status()
