@@ -8,7 +8,7 @@ To create a mock server from an OpenAPI spec, use the `meeshkan mock` command.
 
 ```bash
 $ pip install meeshkan
-$ meeshkan mock -i spec_dir/
+$ meeshkan mock -s spec_dir/
 ```
 
 And then, in another terminal window, type:
