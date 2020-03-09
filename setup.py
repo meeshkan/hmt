@@ -18,7 +18,6 @@ with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = "\n" + f.read()
 
 REQUIRED = [
-<<<<<<< HEAD
     'click==7.0',
     'lenses',
     'pyyaml',
@@ -37,25 +36,6 @@ REQUIRED = [
     'tornado==5.1.1',
     'urllib3==1.25.6',
     'daemonocle'
-=======
-    "click",
-    "lenses",
-    "pyyaml",
-    "jsonschema",
-    "dataclasses",  # for 3.6, as it ships with 3.7
-    "faker",
-    "requests",
-    "typing-extensions",
-    "openapi-typed_2>=0.0.2",
-    "typeguard>=2.7.0",
-    "genson",
-    "http-types==0.0.11",
-    # kafka
-    "faust",
-    # server
-    "tornado==5.1.1",
-    "urllib3==1.25.6",
->>>>>>> 24547dc... Add flake8, black, etc.
 ]
 
 BUNDLES = {}
@@ -65,8 +45,7 @@ BUNDLE_REQUIREMENTS = [dep for _, bundle_dep in BUNDLES.items()
                        for dep in bundle_dep]
 
 DEV = BUNDLE_REQUIREMENTS + [
-    "autopep8",
-    "black==19.10b0",  # black hack for pipenv https://github.com/psf/black/issues/209
+    "black==19.10b0",
     "flake8",
     "pyhamcrest",
     "pylint",
@@ -81,11 +60,7 @@ DEV = BUNDLE_REQUIREMENTS + [
     "wheel",
 ]
 
-<<<<<<< HEAD
 VERSION = '0.2.16'
-=======
-VERSION = "0.2.13"
->>>>>>> 24547dc... Add flake8, black, etc.
 
 ENTRY_POINTS = ["meeshkan = meeshkan.__main__:cli"]
 
@@ -129,16 +104,15 @@ class SetupCommand(Command):
 
 
 BUILD_COMMAND = "{executable} setup.py sdist bdist_wheel --universal".format(
-    executable=sys.executable
-)
+    executable=sys.executable)
 
 TYPE_CHECK_COMMAND = "pyright --lib"
 
 TEST_COMMAND = "pytest"
 
-LINT_COMMAND = "flake8"
+LINT_COMMAND = "flake8 --exclude .git,.venv,__pycache__,build,dist"
 
-FORMAT_COMMAND = "black ."
+FORMAT_COMMAND = "black --check ."
 FORMAT_CHECK_COMMAND = "black --check ."
 
 
@@ -156,10 +130,6 @@ def run_tests():
 
 def lint():
     run_sys_command(LINT_COMMAND, "Linting failed")
-
-
-def check_format():
-    run_sys_command(FORMAT_CHECK_COMMAND, "Format-check failed")
 
 
 def run_formatting():
@@ -193,13 +163,13 @@ class TestCommand(SetupCommand):
     description = "Run tests, formatting, type-checks, and linting"
 
     def run(self):
-        self.status("Checking formatting...")
-        check_format()
+        self.status("Formatting code with black...")
+        run_formatting()
 
-        self.status("Checking style...")
+        self.status("Running flake8...")
         lint()
 
-        self.status("Checking types...")
+        self.status("Running type-checking...")
         type_check()
 
         self.status("Running pytest...")
@@ -257,4 +227,6 @@ setup(
         "test": TestCommand,
         "typecheck": TypeCheckCommand,
     },
+
+
 )
