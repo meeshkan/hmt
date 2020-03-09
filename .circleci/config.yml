@@ -39,11 +39,7 @@ jobs: # A basic unit of work in a run
             echo 'export VENV_HOME_DIR=$(pipenv --venv)' >> $BASH_ENV
             echo 'source $VENV_HOME_DIR/bin/activate' >> $BASH_ENV
       - run:
-          name: Run pytest
-          command: |
-            pytest -s
-      - run:
-          name: Install pyright and run typecheck
+          name: Install pyright and run all checks
           command: |
             set +e
             echo 'export PATH=$(yarn global bin):$PATH' >> $BASH_ENV
