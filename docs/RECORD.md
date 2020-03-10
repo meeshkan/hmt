@@ -1,6 +1,16 @@
 # Recording with Meeshkan
 
-Meeshkan can be used to record HTTP API traffic in a format that `meeshkan build` can understand.  This format serializes JSON objects in the [`http-types`](https://github.com/meeshkan/http-types) format written to a [`.jsonl`](https://jsonlines.org) file.
+Meeshkan can be used to record HTTP API traffic in a format that `meeshkan build` can understand.  This format serializes JSON objects in the [`http-types`](https://github.com/meeshkan/http-types) format written to a [`.jsonl`](https://jsonlines.org) file. By default, this file will be called `{hostname}-recordings.jsonl` with `{hostname}` referring to your API's host URL. 
+
+## What's in this document
+
+- [The `meeshkan record` command](#the-meeshkan-record-command)
+- [Path vs. header routing](#path-vs-header-routing)
+- [Daemon mode](#daemon-mode)
+- [Ecosystem](#ecosystem)
+    - [Client libraries](#client-libraries)
+    - [Integrations](#integrations)
+- [Next up: Building with Meeshkan](#next-up-building-with-meeshkan)
 
 ## The `meeshkan record` command
 
@@ -9,9 +19,11 @@ To start a Meeshkan server that will record HTTP API traffic, use the `meeshkan 
 ```sh
 $ meeshkan record
 ```
-This starts Meeshkan as a reverse proxy on the default port of `8000`.
+This starts Meeshkan as a reverse proxy on the default port of `8000`. Running `meeshkan record` will also generate two directories: `logs` and `specs`.
 
-By default, `meeshkan record` records all traffic to a folder called `logs`.  You can change the recording directory using the `-l` flag, i.e. `-l some_other_directory`. For a full list of recording options, type `meeshkan record --help`.
+By default, `meeshkan record` records all traffic to a folder called `logs`.  You can change the recording directory using the `--log_dir` flag, i.e. `--log_dir some_other_directory`. For a full list of recording options, type `meeshkan record --help`.
+
+To stop Meeshkan without losing your any of your data, type `Ctrl + C` or another `kill` command.  
 
 ## Path vs. header routing
 
@@ -20,7 +32,7 @@ By default, Meeshkan uses **path routing** to intercept HTTP API calls.  Path ro
 ```bash
 $ meeshkan record
 ```
-And then, in another terminal window, type:
+Keep this running. Then, in another terminal window, type:
 
 ```bash
 $ curl http://localhost:8000/http://time.jsontest.com
@@ -31,9 +43,9 @@ Meeshkan will automatically make an API call using the URL in the path - in this
 Alternatively, you can run Meeshkan in **header** mode, which uses the host and optionally the schema reported in the header.
 
 ```bash
-$ meeshkan record -r
+$ meeshkan record --header_routing
 ```
-Then, in another terminal window, run:
+Keep this running. Then, in another terminal window, run:
 
 ```bash
 $ curl http://localhost:8000/api/v2/pokemon/ditto -H "Host: pokeapi.co" -H "X-Meeshkan-Scheme: https"
@@ -42,17 +54,18 @@ $ curl http://localhost:8000/api/v2/pokemon/ditto -H "Host: pokeapi.co" -H "X-Me
 This instructs meeshkan to call the [Pokemon API](pokeapi.co) and use the HTTPS protocol.
 
 ## Daemon mode
-Meeshkan can be launched as a daemon by providing -d command-line argument:
+Meeshkan can be launched as a daemon by providing the `--daemon` flag:
 ```bash
-$ meeshkan record -d
+$ meeshkan record --daemon
 ```
 
-All other command line arguments stay the same.
+All other command line arguments remain the same.
 
-To stop meeshkan daemon run:
+To stop the Meeshkan daemon, run:
 ```bash
 $ meeshkan record stop
 ```
+
 ## Ecosystem
 
 In addition to using Meeshkan to record, there is a growing ecosystem of projects that one can use to create `.jsonl` files in the [`http-types`](https://github.com/meeshkan/http-types).  
@@ -107,3 +120,9 @@ Here is a list of integrations that exist or are in development:
 | Kong plugin | Log requests and responses to the Kong API Gateway using a variety of transport layers, including the file system and Apache Kafka. | In development |
 | AWS API Gateway Plugin | Log requests and responses to the AWS API Gateway using a variety of transport layers, including the file system and Apache Kafka. | In development |
 | Apigee Plugin | Log requests and responses to the Apigee API Gateway using a variety of transport layers, including the file system and Apache Kafka. | In development |
+
+## Next up: Building with Meeshkan
+
+After you've recorded your API traffic with `meeshkan record`, you can use that data to to build an OpenAPI schema via the Meeshkan CLI. 
+
+To learn how, visit our [building documentation](./docs/BUILD.md).
