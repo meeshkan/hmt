@@ -100,13 +100,15 @@ To record API traffic, the Meeshkan CLI provides a `record` mode that captures A
 $ meeshkan record
 ```
 
-This starts Meeshkan as a reverse proxy on the default port of `8000`.  For example, with curl, you can use Meeshkan as a proxy like so:
+This starts Meeshkan as a reverse proxy on the default port of `8000` and creates two directories: `logs` and `specs`. 
+
+For example, with [curl](https://curl.haxx.se/), you can use Meeshkan as a proxy like so:
 
 ```bash
 $ curl http://localhost:8000/http://api.example.com
 ```
 
-By default, the recording proxy treats the path as the target URL and writes a [`.jsonl`](https://jsonlines.org) file containing logs of all server traffic to a `logs` directory.  All logs are created in the [`http-types`](https://github.com/meeshkan/http-types) format.  The `meeshkan build` tool expects all recordings to be represented in a `.jsonl` file containing recordings represented in the `http-types` format.
+By default, the recording proxy treats the path as the target URL and writes a [`.jsonl`](https://jsonlines.org) file containing logs of all server traffic to the `logs` directory.  All logs are created in the [`http-types`](https://github.com/meeshkan/http-types) format.  The `meeshkan build` tool expects all recordings to be represented in a `.jsonl` file containing recordings represented in the `http-types` format.
 
 For more information about recording, including direct file writing and kafka streaming, see the [recording documentation](./docs/RECORD.md).
 
@@ -115,23 +117,26 @@ For more information about recording, including direct file writing and kafka st
 Using the Meeshkan CLI, you can **build** an OpenAPI schema from a single `.jsonl` file, in addition to any existing OpenAPI specs that describe how a service works.
 
 ```bash
-$ meeshkan build -i path/to/recordings.jsonl [-o path/to/output_directory]
+$ pip install meeshkan # if not installed yet
+$ meeshkan build --input-file path/to/recordings.jsonl 
 ```
 
 The input file should be in [JSON Lines](http://jsonlines.org/) format and every line should be in [http-types](https://meeshkan.github.io/http-types/) JSON format. 
 
 For an example input file, see [recordings.jsonl](https://github.com/Meeshkan/meeshkan/blob/master/resources/recordings.jsonl). The libraries listed at [http-types](https://meeshkan.github.io/http-types/) can be used to generate input files in your language of choice.
 
-Use dash (`-i -`) to read from standard input:
+Optionally, you can also specify an output directory using the `--out` flag followed by the path to this directory. By default, Meeshkan will build the new OpenAPI specifications in the `specs` directory. 
+
+Use dash (`--input-file -`) to read from standard input:
 
 ```bash
-$ meeshkan build -i - < recordings.jsonl
+$ meeshkan build --input-file - < recordings.jsonl
 ```
 ### Building modes
 You can use a mode flag to indicate how the OpenAPI spec should be built, for example:
 
 ```bash
-meeshkan build -i path/to/recordings.jsonl --mode gen
+meeshkan build --input-file path/to/recordings.jsonl --mode gen
 ```
 
 Supported modes are:

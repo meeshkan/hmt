@@ -6,21 +6,56 @@ Meeshkan builds OpenAPI specs from two possible sources:
 
 In case one only has an OpenAPI spec and no server recodings, it is not necessary to run Meeshkan build and you can go directly to the [`meeshkan mock`](./MOCK.md) command.
 
-## The meeshkan build command
+## What's in this document
 
-To build an OpenAPI spec from recorded HTTP API traffic and other OpenAPI specs, use the `meeshkan build` command.
+- [The `meeshkan build` command](#the-meeshkan-build-command)
+    - [Building a spec from recorded HTTP API traffic](#building-a-spec-from-recorded-http-api-traffic)
+    - [Building a spec from both recorded traffic and other OpenAPI specs](#building-a-spec-from-both-recorded-traffic-and-other-openapi-specs)
+- [`gen` vs. `replay` mode](#gen-vs-replay-mode)
+    - [`gen` mode](#gen-mode)
+    - [`replay` mode](#replay-mode)
+- [Editing and merging specs](#editing-and-merging-specs)
+- [Next up: Mocking with Meeshkan](#next-up-mocking-with-meeshkan)
 
-```sh
-$ meeshkan build -i my_recoding.jsonl -a my_openapi_spec.yml -o result/
+## The `meeshkan build` command
+
+⚠️ Before getting started, you should make sure that any recorded HTTP API traffic that you'll use is in the correct format. The `meeshkan build` command expects that recordings are in a single [JSON Lines](http://jsonlines.org/) file and every line should be in the [http-types](https://meeshkan.github.io/http-types/) JSON format.
+
+For an example input file, see [recordings.jsonl](https://github.com/Meeshkan/meeshkan/blob/master/resources/recordings.jsonl). The libraries listed at [http-types](https://meeshkan.github.io/http-types/) can be used to generate input files in your language of choice.
+
+### Building a spec from recorded HTTP API traffic
+
+Once you've ensured that your files are formatted correctly, use the `meeshkan build` command to build an OpenAPI schema from your `.jsonl` file:
+
+```bash
+$ pip install meeshkan # if not installed yet
+$ meeshkan build --input-file path/to/recordings.jsonl 
 ```
 
-The above command will blend `my_recording.jsonl` and `my_openapi_spec.yml` into a unified OpenAPI spec stored in `result/openapi.yml`.
+Optionally, you can also specify an output directory using the `--out` flag followed by the path to this directory. By default, Meeshkan will build the new OpenAPI specifications in the `specs` directory. 
 
-## Gen mode versus replay mode
+> Note: More options for the `meeshkan build` command an be seen by running `meeshkan build --help`.
 
-Meeshkan can build OpenAPI specs in two different modes: `gen` and `replay`.  The default mode is `gen`, and the `-m` flag controls which mode is used.
+###  Building a spec from both recorded traffic and other OpenAPI specs
 
-# gen mode
+To build an OpenAPI spec from recorded HTTP API traffic and other OpenAPI specs, use the `meeshkan build` command with a few extra flags:
+
+```
+$ pip install meeshkan # if not installed yet
+$ meeshkan build --input-file pokeapi.co-recodings.jsonl --initial-openapi-spec my_openapi_spec.yml --out result/
+```
+
+The above command specifies recordings from the Pokemon API (`pokeapi.co-recodings.jsonl`) as the input file. Then, it blends those recordings with the designated initial spec (`my_openapi_spec.yml`) to create a unified OpenAPI specification. This specification is stored in `result/openapi.yml`.
+
+Designating an output directory (like with `result/` in the previous example) is optional. By default, Meeshkan will build the new OpenAPI specifications in the `specs` directory.
+
+> Note: More options for the `meeshkan build` command an be seen by running `meeshkan build --help`.
+
+## `gen` vs. `replay` mode
+
+Meeshkan can build OpenAPI specs in two different modes: `gen` and `replay`.  The default mode is `gen`, and the `--mode` flag controls which mode is used.
+
+### `gen` mode
 
 When `meeshkan build` runs in gen mode, it _infers_ the topology of an OpenAPI spec from recorded server traffic. For example, let's say that https://myapi.com returns the following three JSON objects.
 
@@ -55,7 +90,7 @@ Meeshkan will induce that the schema for a `200` resposne from `GET /uses/{id}` 
 
 We call this `gen` mode because it can be used to generate synthetic data from types. For example, when testing an API, `meeshkan mock` will serve synthetic data based on this spec.  A user will always have an integer id greater than 0, a name that is a first name, and may have an age between 0 and 200.
 
-# replay mode
+### `replay` mode
 
 Alternatively, `replay` mode will serve back rote fixtures recorded from the API.  Using one of the API calls as above, let's examine the spec that Meeshkan produces in replay mode.
 
@@ -76,6 +111,8 @@ Meeshkan will build a schema that contains the exact response received as a `200
   "required": ["id", "name"]
 }
 ```
+
+<!-- TODO: Mixed mode docs -->
 
 ## Editing and merging specs
 
@@ -98,3 +135,9 @@ with open('replay/openapi.json', 'r') as replay_file:
         with open('both/openapi.json', 'w') as both_file:
             both_file.write(json.dumps(convert_from_openapi(new), indent=2))
 ```
+
+## Next up: Mocking with Meeshkan
+
+Once you've generated an OpenAPI specification with `meeshkan build`, you can use that spec to create a mock server using Meeshkan.
+
+To learn how, visit our [mocking documentation](./docs/MOCK.md).

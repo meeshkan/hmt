@@ -2,7 +2,15 @@
 
 Meeshkan can be used to create a mock server from OpenAPI specifications and optional custom callback scripts.
 
-## The meeshkan mock command
+## What's in this document
+
+- [The `meeshkan mock` command](#the-meeshkan-mock-command)
+- [Daemon mode](#daemon-mode)
+- [Callbacks](#callbacks)
+- [Admin server](#admin-server)
+- [JIT OpenAPI schema manipulations](#jit-openapi-schema-manipulations)
+
+## The `meeshkan mock` command
 
 To create a mock server from an OpenAPI spec, use the `meeshkan mock` command.
 
@@ -10,13 +18,15 @@ To create a mock server from an OpenAPI spec, use the `meeshkan mock` command.
 $ meeshkan mock spec/dir/or/file
 ```
 
-And then, in another terminal window, type:
+> Note: The `--specs-dir` flag is telling Meeshkan to search for our OpenAPI spec inside the `specs` directory.
+
+Keep this running. Then, in another terminal window, type:
 
 ```bash
 $ curl http://localhost:8000/https://my.api.com/foo
 ```
 
-Assuming that the directory `spec_dir/` contains an OpenAPI spec with the server `https://my.api.com`, it will return a mock of the resource `GET /foo`.
+Assuming that the directory `specs` contains an OpenAPI spec with the server `https://my.api.com`, this will return a mock of the resource `GET /foo`.
 
 More options for the `meeshkan mock` command an be seen by running `meeshkan mock --help`.
 
@@ -88,7 +98,7 @@ def counter_callback(request_body, response_body, storage):
                                 headers={'x-custom-header': 'some value'})
 ```
 
-### Admin server
+## Admin server
 
 An admin server exists at the http://[host]:[admin_port]/admin endpoint. It can be used to reset the callback storage by calling `DELETE http://[host]:[admin_port]/admin/storage`.
 
