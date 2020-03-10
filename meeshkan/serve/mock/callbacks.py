@@ -38,8 +38,7 @@ class CallbackManager:
 
     def load(self, path):
         if not os.path.exists(path):
-            logger.fatal("Callback configuration path doesn't exist: %s", path)
-            sys.exit(1)
+            raise FileNotFoundError(f"Callback configuration path doesn't exist: {path}")
 
         for f in glob.glob(os.path.join(path, '*.py')):
             module_name = 'callbacks.{}'.format(os.path.splitext(os.path.basename(f))[0])

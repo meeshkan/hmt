@@ -1,4 +1,6 @@
 import os
+import sys
+import logging
 from pathlib import Path
 
 import click
@@ -15,6 +17,8 @@ LOG_CONFIG = os.path.join(os.path.dirname(__file__), 'logging.yaml')
 MOCK_PID = Path.home().joinpath('.meeshkan/mock.pid')
 RECORD_PID = Path.home().joinpath('.meeshkan/record.pid')
 
+logger = logging.getLogger(__name__)
+
 def add_options(options):
     def _add_options(func):
         for option in reversed(options):
@@ -23,13 +27,20 @@ def add_options(options):
 
     return _add_options
 
+def run_with_exception_handling(runnable, verbose):
+    try:
+        runnable.run()
+    except Exception as e:
+        logger.critical(e, exc_info=verbose)
+        sys.exit(1)
 
 _common_server_options = [
     click.option('-p', '--port', default="8000", help='Server port.'),
     click.option('-a', '--admin-port', default="8888", help='Admin server port.'),
     click.option('-s', '--specs-dir', default=DEFAULT_SPECS_DIR, help='Directory with OpenAPI schemas.'),
     click.option('-d', '--daemon', is_flag=True, help='Whether to run meeshkan as a daemon.'),
-    click.option('-r', '--header-routing', is_flag=True, help='Whether to use a path based routing to a target host.')
+    click.option('-r', '--header-routing', is_flag=True, help='Whether to use a path based routing to a target host.'),
+    click.option('--verbose', is_flag=True, help='If logging should be verbose.')
 ]
 
 _record_options = _common_server_options + [
@@ -44,14 +55,14 @@ _mock_options = _common_server_options + [
 @click.group(invoke_without_command=True)
 @add_options(_mock_options)
 @click.pass_context
-def mock(ctx, callback_dir, admin_port, port, specs_dir, header_routing, daemon):
+def mock(ctx, callback_dir, admin_port, port, specs_dir, header_routing, daemon, verbose):
     if ctx.invoked_subcommand is None:
         ctx.forward(start_mock)
 
 
 @mock.command(name='start')  # type: ignore
 @add_options(_mock_options)
-def start_mock(callback_dir, admin_port, port, specs_dir, header_routing, daemon):
+def start_mock(callback_dir, admin_port, port, specs_dir, header_routing, daemon, verbose):
     server = MockServer(callback_dir=callback_dir, admin_port=admin_port, port=port, specs_dir=specs_dir,
                         routing=HeaderRouting() if header_routing else PathRouting())
 
@@ -64,7 +75,7 @@ def start_mock(callback_dir, admin_port, port, specs_dir, header_routing, daemon
         )
         daemon.start()
     else:
-        server.run()
+        run_with_exception_handling(server, verbose)
 
 
 @mock.command(name='stop')  # type: ignore
@@ -90,14 +101,14 @@ def status_mocking():
 @click.group(invoke_without_command=True)
 @add_options(_record_options)
 @click.pass_context
-def record(ctx, port, admin_port, log_dir, header_routing, specs_dir, mode, daemon):
+def record(ctx, port, admin_port, log_dir, header_routing, specs_dir, mode, daemon, verbose):
     if ctx.invoked_subcommand is None:
         ctx.forward(start_record)
 
 
 @record.command(name='start')  # type: ignore
 @add_options(_record_options)
-def start_record(port, admin_port, log_dir, header_routing, specs_dir, mode, daemon):
+def start_record(port, admin_port, log_dir, header_routing, specs_dir, mode, daemon, verbose):
     proxy_runner = RecordProxyRunner(port=port, admin_port=admin_port, log_dir=log_dir,
                                      routing=HeaderRouting() if header_routing else PathRouting(),
                                      specs_dir=specs_dir, mode=UpdateMode[mode.upper()] if mode else None)
@@ -110,7 +121,7 @@ def start_record(port, admin_port, log_dir, header_routing, specs_dir, mode, dae
         )
         daemon.start()
     else:
-        proxy_runner.run()
+        run_with_exception_handling(proxy_runner, verbose)
 
 
 @record.command(name='stop')  # type: ignore
