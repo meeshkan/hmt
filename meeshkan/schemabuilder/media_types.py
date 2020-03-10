@@ -24,12 +24,12 @@ def update_json_schema(json_body: Any, mode: UpdateMode, schema: Optional[Any] =
 
 def update_text_schema(text_body: str, mode: UpdateMode, schema: Optional[Any] = None) -> Schema:
     # TODO Better updates
-    generic = Schema(**{**_SCHEMA_DEFAULT, '_type': "string"})
-    specific = Schema(**{**_SCHEMA_DEFAULT, '_type': "string", 'enum': [text_body]})
-    return generic if mode == UpdateMode.GEN else Schema(**{
-        **_SCHEMA_DEFAULT,
-        'oneOf': list({specific, *([schema] if schema.oneOf is None else schema.oneOf)})
-    })
+    generic = Schema(_type= "string")
+    specific = Schema(_type = "string", enum = [text_body])
+    # TODO don't merge equal schemas
+    return generic if mode == UpdateMode.GEN else Schema(
+        oneOf = [specific, *([] if schema is None else [schema] if schema.oneOf is None else schema.oneOf)]
+    )
 
 
 def infer_media_type_from_nonempty(body: str) -> MediaTypeKey:

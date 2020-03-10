@@ -119,10 +119,10 @@ def test_pokeapi_schema_valid_replay(schema):
     # from all these paths
     pokeapi_schema = build_schema_batch(pokeapi_requests, UpdateMode.REPLAY)
     paths = pokeapi_schema.paths.keys()
-    assert 4 == len(paths)
+    assert 14 == len(paths)
     assert_that(paths, has_item("/v2/pokemon/"))
     assert_that(paths, has_item(
-        matches_regexp(r'\/v2\/pokemon\/\{[\w]+\}')))
+        matches_regexp(r'\/v2\/pokemon\/\{[\w]+\}\/')))
     assert_that(paths, has_item(
         matches_regexp(r'\/v2\/type\/\{[\w]+\}')))
     assert_that(paths, has_item(
