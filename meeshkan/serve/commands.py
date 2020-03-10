@@ -38,7 +38,7 @@ _record_options = _common_server_options + [
                  default=None, help="Spec building mode.")]
 
 _mock_options = _common_server_options + [
-    click.option('-c', '--callback-dir', default=None, type=click.Path(exists=True, file_okay=False, resolve_path=True), help='Directory with configured callbacks.')]
+    click.option('-c', '--callback-dir', default="./callbacks", help='Directory with configured callbacks.')]
 
 
 @click.group(invoke_without_command=True)
