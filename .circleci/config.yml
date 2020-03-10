@@ -7,8 +7,7 @@ workflows:
       - test-3.7
       - test-3.8
 jobs: # A basic unit of work in a run
-  test-3.6: &test-template
-    # directory where steps are run
+  test-3.6: &test-template # directory where steps are run
     working_directory: ~/meeshkan
     docker: # run the steps with Docker
       # CircleCI Python images available at: https://hub.docker.com/r/circleci/python/
@@ -37,29 +36,21 @@ jobs: # A basic unit of work in a run
             sudo pip install pipenv
             pipenv install -e .[dev]
             pipenv update
+            echo 'export VENV_HOME_DIR=$(pipenv --venv)' >> $BASH_ENV
+            echo 'source $VENV_HOME_DIR/bin/activate' >> $BASH_ENV
       - run:
-          name: Run pytest
-          command: |
-            export VENV_HOME_DIR=$(pipenv --venv)
-            source $VENV_HOME_DIR/bin/activate
-            pytest -s
-      - run:
-          name: Install pyright and run typecheck
+          name: Install pyright and run all checks
           command: |
             set +e
             echo 'export PATH=$(yarn global bin):$PATH' >> $BASH_ENV
             source $BASH_ENV
             yarn global add pyright
-            export VENV_HOME_DIR=$(pipenv --venv)
-            source $VENV_HOME_DIR/bin/activate
-            pyright --lib
+            python setup.py test
       - run:
           name: Run integretion tests
           command: |
-            export VENV_HOME_DIR=$(pipenv --venv)
-            source $VENV_HOME_DIR/bin/activate
             git clone https://github.com/meeshkan/meeshkan-examples.git  ../meeshkan-examples
-            cd ../meeshkan-examples &&  python run_all.py
+            cd ../meeshkan-examples && python run_all.py
   test-3.7:
     <<: *test-template
     docker:
