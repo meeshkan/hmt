@@ -113,7 +113,6 @@ TEST_COMMAND = "pytest"
 LINT_COMMAND = "flake8 --exclude .git,.venv,__pycache__,build,dist"
 
 FORMAT_COMMAND = "black ."
-FORMAT_CHECK_COMMAND = "black --check ."
 
 
 def build():
@@ -132,8 +131,8 @@ def check_style():
     run_sys_command(LINT_COMMAND, "CHecking style failed")
 
 
-def check_formatting():
-    run_sys_command(FORMAT_CHECK_COMMAND, "Checking formatting failed")
+def enforce_formatting():
+    run_sys_command(FORMAT_COMMAND, "Checking formatting failed")
 
 
 class BuildDistCommand(SetupCommand):
@@ -163,9 +162,8 @@ class TestCommand(SetupCommand):
     description = "Run tests, formatting, type-checks, and linting"
 
     def run(self):
-        # FIXME
-        # self.status("Checking formatting...")
-        # check_formatting()
+        self.status("Checking formatting...")
+        enforce_formatting()
 
         # FIXME
         # self.status("Checking style...")
