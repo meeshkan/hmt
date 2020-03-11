@@ -46,7 +46,6 @@ jobs: # A basic unit of work in a run
             source $BASH_ENV
             yarn global add pyright
             python setup.py test
-            black --check .
       - run:
           name: Run integretion tests
           command: |

@@ -130,7 +130,7 @@ def run_tests():
 
 
 def check_style():
-    run_sys_command(LINT_COMMAND, "CHecking style failed")
+    run_sys_command(LINT_COMMAND, "Checking style failed")
 
 
 def check_formatting():
@@ -164,9 +164,8 @@ class TestCommand(SetupCommand):
     description = "Run tests, formatting, type-checks, and linting"
 
     def run(self):
-        # FIXME
-        # self.status("Checking formatting...")
-        # check_formatting()
+        self.status("Checking formatting...")
+        check_formatting()
 
         # FIXME
         # self.status("Checking style...")
