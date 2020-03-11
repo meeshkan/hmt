@@ -41,32 +41,41 @@ class MockServerView(RequestHandler):
     def _serve(self):
         headers = {k: v for k, v in self.request.headers.get_all()}
         route_info = self.application.router.route(self.request.path, headers)
-        headers['Host'] = route_info.host
+        headers["Host"] = route_info.host
 
         query = parse.parse_qs(self.request.query)
-        fullpath = "{}?{}".format(route_info.path, self.request.query) if query else route_info.path
+        fullpath = (
+            "{}?{}".format(route_info.path, self.request.query)
+            if query
+            else route_info.path
+        )
 
         # ignoring type due to this error
-        '''
+        """
           46:34 - error: Argument of type 'str' cannot be assigned to parameter 'method' of type 'Literal['connect', 'head', 'trace', 'options', 'delete', 'patch', 'post', 'put', 'get']'
           'str' cannot be assigned to 'Literal['connect']'
           'str' cannot be assigned to 'Literal['head']'
           'str' cannot be assigned to 'Literal['trace']'
           'str' cannot be assigned to 'Literal['options']'
           'str' cannot be assigned to 'Literal['delete']'
-        '''
-        request = RequestBuilder.from_dict({
-                            'method': self.request.method.lower(),
-                            'host': route_info.host,
-                            'path': fullpath,
-                            'pathname': route_info.path,
-                            'protocol': route_info.scheme,
-                            'query': query,
-                            'body': self.request.body.decode('utf-8'),
-                            'headers': headers})
+        """
+        request = RequestBuilder.from_dict(
+            {
+                "method": self.request.method.lower(),
+                "host": route_info.host,
+                "path": fullpath,
+                "pathname": route_info.path,
+                "protocol": route_info.scheme,
+                "query": query,
+                "body": self.request.body.decode("utf-8"),
+                "headers": headers,
+            }
+        )
 
         logger.debug(request)
-        response = callback_manager(request, self.application.response_matcher.get_response(request))
+        response = callback_manager(
+            request, self.application.response_matcher.get_response(request)
+        )
         for header, value in response.headers.items():
             self.set_header(header, value)
 

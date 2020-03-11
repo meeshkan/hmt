@@ -9,7 +9,7 @@ import urllib3
 
 def split_path(path):
     splits = list()
-    while path != '/':
+    while path != "/":
         path, split = os.path.split(path)
         splits.append(split)
     return splits[::-1]

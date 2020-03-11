@@ -19,9 +19,7 @@ class MeeshkanApplication(Application):
 
 
 def make_mocking_app(callback_dir, specs_dir, routing):
-    app = MeeshkanApplication([
-        (r'/.*', MockServerView)
-    ])
+    app = MeeshkanApplication([(r"/.*", MockServerView)])
     if callback_dir:
         callback_manager.load(callback_dir)
 
@@ -31,7 +29,9 @@ def make_mocking_app(callback_dir, specs_dir, routing):
 
 
 class MockServer:
-    def __init__(self, port, specs_dir, callback_dir=None, admin_port=None, routing=PathRouting()):
+    def __init__(
+        self, port, specs_dir, callback_dir=None, admin_port=None, routing=PathRouting()
+    ):
         self._callback_dir = callback_dir
         self._admin_port = admin_port
         self._port = port
@@ -44,5 +44,5 @@ class MockServer:
         app = make_mocking_app(self._callback_dir, self._specs_dir, self._routing)
         http_server = HTTPServer(app)
         http_server.listen(self._port)
-        logger.info('Mock mock is listening on http://localhost:%s', self._port)
+        logger.info("Mock mock is listening on http://localhost:%s", self._port)
         IOLoop.current().start()

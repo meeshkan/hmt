@@ -22,7 +22,7 @@ class StorageManager:
         self._default.clear()
         for storage in self._storages.values():
             storage.clear()
-        logger.debug('Storage cleared')
+        logger.debug("Storage cleared")
 
 
 storage_manager = StorageManager()

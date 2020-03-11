@@ -31,7 +31,7 @@ class RestMiddlewaresView(RequestHandler):
 
     def get(self):
         self.write(json.dumps(rest_middleware_manager.get()))
-        
+
 
 class RestMiddlewareView(RequestHandler):
     SUPPORTED_METHODS = ["DELETE", "POST"]
@@ -44,7 +44,3 @@ class RestMiddlewareView(RequestHandler):
 
     def post(self, url):
         rest_middleware_manager.add(url)
-        
-
-
-

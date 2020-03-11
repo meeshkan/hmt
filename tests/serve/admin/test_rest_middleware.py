@@ -49,4 +49,3 @@ def test_admin_server_middleware(http_client, base_url):
     assert len(json.loads(response.body)) == 2
     assert "https://foo.bar.com/api/v2" in json.loads(response.body)
     assert "111" in json.loads(response.body)
-

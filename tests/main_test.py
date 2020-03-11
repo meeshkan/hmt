@@ -14,19 +14,21 @@ requests = read_recordings_as_strings()
 
 
 def write_input_file(target_file: str, requests: List[str]):
-    with open(target_file, 'w') as f:
+    with open(target_file, "w") as f:
         for request in requests:
             f.write(request)
 
+
 def write_base_schema(target_file: str, schema: OpenAPIObject):
-    with open(target_file, 'w') as f:
+    with open(target_file, "w") as f:
         f.write(json.dumps(convert_from_openapi(schema)))
+
 
 def test_build_default_output_dir():
     runner = CliRunner()
 
-    input_file = 'input.jsonl'
-    base_schema = 'openapi.yml'
+    input_file = "input.jsonl"
+    base_schema = "openapi.yml"
 
     with runner.isolated_filesystem():
         # Prepare input file
@@ -34,24 +36,28 @@ def test_build_default_output_dir():
         write_base_schema(base_schema, BASE_SCHEMA)
 
         runner_result = runner.invoke(
-            cli, ['build', '-i', input_file, '-a', base_schema, '--source', 'file'])
-        assert runner_result.exit_code == 0, "Exited with code {}, expected zero".format(runner_result.exit_code)
+            cli, ["build", "-i", input_file, "-a", base_schema, "--source", "file"]
+        )
+        assert (
+            runner_result.exit_code == 0
+        ), "Exited with code {}, expected zero".format(runner_result.exit_code)
         expected_outputdir_path = Path(DEFAULT_SPECS_DIR)
         assert expected_outputdir_path.is_dir(), "Output directory specs/ should exist"
-        with open(expected_outputdir_path.joinpath('openapi.json'), 'r') as oai:
+        with open(expected_outputdir_path.joinpath("openapi.json"), "r") as oai:
             build_result = json.loads(oai.read())
 
             # Verify result
-            assert_that(build_result, has_key('openapi'))
+            assert_that(build_result, has_key("openapi"))
+
 
 def test_build_cmd():
     """An uber test verifying build command input and output.
     """
     runner = CliRunner()
 
-    input_file = 'input.jsonl'
-    base_schema = 'openapi.yml'
-    output_directory = 'out'
+    input_file = "input.jsonl"
+    base_schema = "openapi.yml"
+    output_directory = "out"
 
     with runner.isolated_filesystem():
         output_directory_path = Path(output_directory)
@@ -59,20 +65,37 @@ def test_build_cmd():
         write_input_file(input_file, requests)
         write_base_schema(base_schema, BASE_SCHEMA)
 
-        assert not output_directory_path.is_dir(
+        assert (
+            not output_directory_path.is_dir()
         ), "Output directory {} should not exist yet".format(output_directory)
 
         runner_result = runner.invoke(
-            cli, ['build', '-i', input_file, '-o', output_directory, '-a', base_schema, '--source', 'file'])
+            cli,
+            [
+                "build",
+                "-i",
+                input_file,
+                "-o",
+                output_directory,
+                "-a",
+                base_schema,
+                "--source",
+                "file",
+            ],
+        )
 
-        assert runner_result.exit_code == 0, "Exited with code {}, expected zero".format(runner_result.exit_code)
+        assert (
+            runner_result.exit_code == 0
+        ), "Exited with code {}, expected zero".format(runner_result.exit_code)
 
-        assert output_directory_path.is_dir(), "Output directory {} should exist".format(output_directory_path.absolute)
-        with open(os.path.join(output_directory, 'openapi.json'), 'r') as oai:
+        assert (
+            output_directory_path.is_dir()
+        ), "Output directory {} should exist".format(output_directory_path.absolute)
+        with open(os.path.join(output_directory, "openapi.json"), "r") as oai:
             build_result = json.loads(oai.read())
 
             # Verify result
-            assert_that(build_result, has_key('openapi'))
+            assert_that(build_result, has_key("openapi"))
 
     assert runner_result.exit_code == 0
     assert len(runner_result.output) == 0
@@ -82,40 +105,47 @@ def test_convert_cmd():
     runner = CliRunner()
 
     # Absolute path, can be accessed in Click's "isolated filesystem"
-    input_file = Path('tests/convert/recordings/recordings.pcap').resolve()
-    output_file = 'recordings.jsonl'
+    input_file = Path("tests/convert/recordings/recordings.pcap").resolve()
+    output_file = "recordings.jsonl"
 
     with runner.isolated_filesystem():
 
-        assert not Path(output_file).is_file(
-        ), "Expected output file {} to not exist".format(output_file)
+        assert not Path(
+            output_file
+        ).is_file(), "Expected output file {} to not exist".format(output_file)
 
         runner_result = runner.invoke(
-            cli, ['convert', '-i', str(input_file), '-o', output_file])
+            cli, ["convert", "-i", str(input_file), "-o", output_file]
+        )
 
-        assert Path(output_file).is_file(
-        ), "Expected output file {} to exist".format(output_file)
+        assert Path(output_file).is_file(), "Expected output file {} to exist".format(
+            output_file
+        )
 
         assert runner_result.exit_code == 0
+
 
 ######
 ## TODO: these tests are basically identical, with the one below
 ## only existing to get a more complete error log in case the one
 ## above is broken.
 
+
 def test_convert_cmd_without_invocation():
     runner = CliRunner()
 
     # Absolute path, can be accessed in Click's "isolated filesystem"
-    input_file = Path('tests/convert/recordings/recordings.pcap').resolve()
-    output_file = 'recordings.jsonl'
+    input_file = Path("tests/convert/recordings/recordings.pcap").resolve()
+    output_file = "recordings.jsonl"
 
     with runner.isolated_filesystem():
 
-        assert not Path(output_file).is_file(
-        ), "Expected output file {} to not exist".format(output_file)
+        assert not Path(
+            output_file
+        ).is_file(), "Expected output file {} to not exist".format(output_file)
 
         runner_result = _convert(str(input_file), output_file)
 
-        assert Path(output_file).is_file(
-        ), "Expected output file {} to exist".format(output_file)
+        assert Path(output_file).is_file(), "Expected output file {} to exist".format(
+            output_file
+        )

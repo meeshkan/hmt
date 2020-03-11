@@ -4,7 +4,6 @@ from .abstract import AbstractSink
 
 
 class FileSystemSink(AbstractSink):
-
     def __init__(self, out_dir: str):
         self.out_dir = out_dir
         self.result = None
