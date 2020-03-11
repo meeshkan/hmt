@@ -114,24 +114,17 @@ def test_pokeapi_schema_valid(schema):
 
 
 def test_pokeapi_schema_valid_replay(schema):
-    # this should conflate to
-    # /pokemon
-    # /abilities/*
-    # /types/*
-    # /pokemon/*
-    # meaning that it should recognize wildcards
-    # from all these paths
     pokeapi_schema = build_schema_batch(pokeapi_requests, UpdateMode.REPLAY)
-    paths = pokeapi_schema.paths.keys()
+    paths = list(pokeapi_schema.paths.keys())
     assert 14 == len(paths)
     assert_that(paths, has_item("/v2/pokemon/"))
     assert_that(paths, has_item(
-        matches_regexp(r'\/v2\/pokemon\/\{[\w]+\}\/')))
+        matches_regexp(r'\/v2\/pokemon\/[\w]+\/')))
     assert_that(paths, has_item(
-        matches_regexp(r'\/v2\/type\/\{[\w]+\}')))
+        matches_regexp(r'\/v2\/type\/[\w]+')))
     assert_that(paths, has_item(
-        matches_regexp(r'\/v2\/ability\/\{[\w]+\}')))
-#### petstore
+        matches_regexp(r'\/v2\/ability\/[\w]+')))
+
 
 get_pets_req = RequestBuilder.from_url(
     "http://petstore.swagger.io/v1/pets")
