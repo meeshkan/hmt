@@ -107,7 +107,7 @@ BUILD_COMMAND = "{executable} setup.py sdist bdist_wheel --universal".format(
     executable=sys.executable
 )
 
-TYPE_CHECK_COMMAND = "mypy"
+TYPE_CHECK_COMMAND = "pyright --lib"
 
 TEST_COMMAND = "pytest"
 
