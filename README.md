@@ -193,23 +193,17 @@ Run style checks:
 $ flake8 .
 ```
 
-#### `pyright`
+#### `mypy`
 
-You can run type-checking by installing [pyright](https://github.com/microsoft/pyright) globally:
-
-```bash
-$ npm -i -g pyright
-```
-
-And then running:
+You can run type-checking with [mypy](http://mypy-lang.org/) by running:
 
 ```bash
-$ pyright --lib
+$ mypy
 $ # or
 $ python setup.py typecheck
 ```
 
-Using the [Pyright extension](https://marketplace.visualstudio.com/items?itemName=ms-pyright.pyright) is recommended for development in VS Code.
+Using the [Python extension](https://code.visualstudio.com/docs/languages/python) is recommended for development in VS Code.
 
 ### Automated builds
 

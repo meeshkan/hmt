@@ -39,16 +39,12 @@ jobs: # A basic unit of work in a run
             echo 'export VENV_HOME_DIR=$(pipenv --venv)' >> $BASH_ENV
             echo 'source $VENV_HOME_DIR/bin/activate' >> $BASH_ENV
       - run:
-          name: Install pyright and run all checks
+          name: Run all checks
           command: |
-            set +e
-            echo 'export PATH=$(yarn global bin):$PATH' >> $BASH_ENV
-            source $BASH_ENV
-            yarn global add pyright
             python setup.py test
             black --check .
       - run:
-          name: Run integretion tests
+          name: Run integration tests
           command: |
             git clone https://github.com/meeshkan/meeshkan-examples.git  ../meeshkan-examples
             cd ../meeshkan-examples && python run_all.py
