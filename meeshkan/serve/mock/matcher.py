@@ -65,10 +65,21 @@ def odl(getter: Callable[[C], D], setter: Callable[[C, D], C]) -> lenses.ui.Base
     # Seems verbose
     return lens.Lens(getter, setter).Prism(lambda a: a, lambda a: a, ignore_none=True)
 
-def _schema_o_setter(a: C, b: Optional[Schema]):
+def _schema_o_setter_MediaType(a: MediaType, b: Optional[Schema]) -> MediaType:
     return replace(a, schema = b)
 
-schema_o = odl(lambda a: a.schema, _schema_o_setter)
+def _schema_o_getter_MediaType(a: MediaType) -> Optional[Schema]:
+    return a.schema
+
+schema_o_MediaType = odl(_schema_o_getter_MediaType, _schema_o_setter_MediaType)
+
+def _schema_o_setter_Parameter(a: Parameter, b: Optional[Schema]) -> Parameter:
+    return replace(a, schema = b)
+
+def _schema_o_getter_Parameter(a: Parameter) -> Optional[Schema]:
+    return a.schema
+
+schema_o_Parameter = odl(_schema_o_getter_Parameter, _schema_o_setter_Parameter)
 
 def _request_body_o_setter(a: C, b: Optional[RequestBody]):
     return replace(a, requestBody = b)
@@ -304,7 +315,7 @@ def get_required_request_body_schemas(
     ).add_lens(
         content_o
     ).Values().add_lens(
-        schema_o
+        schema_o_MediaType
     ).add_lens(schema_prism(oai)).collect()(p)
 
 def valid_schema(to_validate: Any, schema: Any) -> bool:
@@ -390,7 +401,7 @@ def internal_get_parameter_schemas(
         lambda a: a,
         ignore_none=True
     ).add_lens(
-        schema_o
+        schema_o_Parameter
     ).collect()(path_item)
 
 
