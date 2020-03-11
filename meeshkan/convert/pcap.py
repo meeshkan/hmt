@@ -1,14 +1,12 @@
 """Code for converting pcap to HttpExchange JSON format."""
 
 from sys import argv
-from typing import List, Optional, Any, Iterator
+from typing import List, Optional, Dict, Any, Iterator, Union
 from http_types.utils import RequestBuilder, ResponseBuilder
-from typing import Iterator
 from pathlib import Path
 import csv
 import json
 import shutil
-from typing import List, Optional, Dict, Union
 from http_types import Request, Response, HttpExchange
 import re
 import subprocess
@@ -126,10 +124,10 @@ def _request_response_parser():
 
 def transform_tshark(tshark_csv: Iterator[str]) -> Iterator[HttpExchange]:
     """Convert tshark-produced CSV to an iterator of HttpExchanges.
-    
+
     Arguments:
         tshark_csv {Iterator[str]} -- Lines of CSV produced by tshark.
-    
+
     Returns:
         Iterator[HttpExchange] -- [description]
     """

@@ -1,5 +1,5 @@
 from meeshkan.convert.pcap import convert_pcap
-from hamcrest import assert_that, has_length, has_entry
+from hamcrest import assert_that, has_length
 
 PCAP_SAMPLE = "tests/convert/recordings/recordings.pcap"
 

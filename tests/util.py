@@ -1,7 +1,6 @@
 import json
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, List
 from http_types import HttpExchange, HttpExchangeBuilder
-from yaml import safe_load
 
 SAMPLE_RECORDINGS_PATH = "resources/github.jsonl"
 POKEAPI_RECORDINGS_PATH = "resources/pokeapi.jsonl"

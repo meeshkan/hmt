@@ -1,7 +1,5 @@
-import json
 import logging
 import os
-from typing import cast
 
 import yaml
 from http_types import (
@@ -13,7 +11,6 @@ from http_types import (
     ResponseBuilder,
 )
 
-from meeshkan.build.update_mode import UpdateMode
 from ...build.builder import BASE_SCHEMA, update_openapi
 
 logger = logging.getLogger(__name__)
@@ -48,7 +45,7 @@ class RequestLoggingCallback:
 
         host = request.host
         reqres = HttpExchange(request=request, response=response)
-        if not host in self._logs:
+        if host not in self._logs:
             log_file = os.path.join(self._log_dir, "{}-recordings.jsonl".format(host))
             if self._append and os.path.exists(log_file):
                 self._logs[host] = open(log_file, "a")
@@ -66,7 +63,7 @@ class RequestLoggingCallback:
                 "{}_{}.yaml".format(host, self._update_mode.name.lower()),
             )
 
-            if not host in self._specs:
+            if host not in self._specs:
                 if os.path.exists(spec_file) and self._append:
                     with open(spec_file, "r") as f:
                         self._specs[host] = yaml.load(f)

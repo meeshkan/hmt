@@ -1,4 +1,4 @@
-from tornado.httpclient import AsyncHTTPClient, HTTPRequest
+from tornado.httpclient import HTTPRequest
 
 import pytest
 import json
@@ -25,9 +25,9 @@ def test_mocking_server_pets(http_client, base_url):
     response = yield http_client.fetch(req)
     assert response.code == 200
     rb = json.loads(response.body)
-    assert type(rb) == type([])
+    assert isinstance(rb, list)
     for pet in rb:
-        assert type(pet["name"]) == type("")
+        assert isinstance(pet["name"], str)
 
 
 @pytest.mark.gen_test
@@ -36,6 +36,6 @@ def test_mocking_server_pet(http_client, base_url):
     response = yield http_client.fetch(req)
     assert response.code == 200
     rb = json.loads(response.body)
-    assert type(rb) == type({})
-    assert type(rb["name"]) == type("")
-    assert type(rb["id"]) == type(0)
+    assert isinstance(rb, dict)
+    assert isinstance(rb["name"], str)
+    assert isinstance(rb["id"], int)

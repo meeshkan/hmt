@@ -24,7 +24,7 @@ store: Dict[str, OpenAPIObject] = {
                             "name": "id",
                             "in": "path",
                             "required": True,
-                            "schema": {"type": "integer",},
+                            "schema": {"type": "integer"},
                         },
                     ],
                     "get": {"responses": {"200": {"description": "useridget"}}},
@@ -105,7 +105,7 @@ store: Dict[str, OpenAPIObject] = {
                             "name": "b",
                             "schema": {"type": "string"},
                         },
-                        {"in": "query", "name": "c", "schema": {"type": "string"},},
+                        {"in": "query", "name": "c", "schema": {"type": "string"}},
                     ],
                     "get": {"responses": {"200": {"description": "guestidget"}}},
                     "post": {
@@ -122,7 +122,7 @@ store: Dict[str, OpenAPIObject] = {
                                 "name": "zzz",
                                 "schema": {"type": "string"},
                             },
-                            {"in": "query", "name": "c", "schema": {"type": "string"},},
+                            {"in": "query", "name": "c", "schema": {"type": "string"}},
                         ],
                         "responses": {"201": {"description": "guestidpost"}},
                     },
@@ -267,7 +267,7 @@ def test_matcher_4():
                                 "name": "id",
                                 "in": "path",
                                 "required": True,
-                                "schema": {"type": "integer",},
+                                "schema": {"type": "integer"},
                             },
                         ],
                         "get": {"responses": {"200": {"description": "useridget"}}},
@@ -324,7 +324,7 @@ def test_matcher_6():
                 "openapi": "",
                 "servers": [{"url": "api.foo.com"}],
                 "info": {"title": "", "version": ""},
-                "paths": {"/user": {"description": "",},},
+                "paths": {"/user": {"description": ""}},
             }
         ),
     }
@@ -390,7 +390,7 @@ def test_matcher_9():
         )["baz"]
         .paths["/guest"]
         .get
-        == None
+        is None
     )
 
 
@@ -412,7 +412,7 @@ def test_matcher_10():
         )["baz"]
         .paths["/guest"]
         .get
-        == None
+        is None
     )
 
 
@@ -460,7 +460,7 @@ def test_matcher_12():
         )["baz"]
         .paths["/guest/{id}/name"]
         .post
-        == None
+        is None
     )
 
 
@@ -504,7 +504,7 @@ def test_matcher_14():
         )["baz"]
         .paths["/guest/{id}"]
         .post
-        == None
+        is None
     )
 
 

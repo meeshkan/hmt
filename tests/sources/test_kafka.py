@@ -1,13 +1,7 @@
-from io import StringIO
-
-from http_types.utils import HttpExchangeWriter
-
-import json
-
 from meeshkan.sources.kafka import KafkaSourceConfig, KafkaSource
 import pytest
 from ..util import read_recordings_as_dict
-from hamcrest import *
+from hamcrest import assert_that, has_length
 
 exchanges = read_recordings_as_dict()
 

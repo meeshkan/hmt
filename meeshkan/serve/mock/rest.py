@@ -6,7 +6,6 @@ from http_types.utils import HttpExchangeWriter, ResponseBuilder, HttpExchange
 from io import StringIO
 import requests
 import json
-import copy
 
 logger = logging.getLogger(__name__)
 
