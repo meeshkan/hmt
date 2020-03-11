@@ -46,6 +46,7 @@ BUNDLE_REQUIREMENTS = [dep for _, bundle_dep in BUNDLES.items() for dep in bundl
 DEV = BUNDLE_REQUIREMENTS + [
     "black==19.10b0",
     "flake8",
+    "mypy",
     "pyhamcrest",
     "pylint",
     "pytest",
