@@ -32,16 +32,14 @@ _common_server_options = [
         "-s",
         "--specs-dir",
         default=DEFAULT_SPECS_DIR,
-        help="Directory with OpenAPI schemas.",
+        help="Directory with OpenAPI specifications.",
     ),
-    click.option(
-        "-d", "--daemon", is_flag=True, help="Whether to run meeshkan as a daemon."
-    ),
+    click.option("-d", "--daemon", is_flag=True, help="Run meeshkan as a daemon."),
     click.option(
         "-r",
         "--header-routing",
         is_flag=True,
-        help="Whether to use a path based routing to a target host.",
+        help="Use headers to specify target hosts.",
     ),
 ]
 
@@ -62,7 +60,7 @@ _mock_options = _common_server_options + [
         "--callback-dir",
         default=None,
         type=click.Path(exists=True, file_okay=False, resolve_path=True),
-        help="Directory with configured callbacks.",
+        help="Directory with callback scripts to modify behavior.",
     )
 ]
 
@@ -71,6 +69,9 @@ _mock_options = _common_server_options + [
 @add_options(_mock_options)
 @click.pass_context
 def mock(ctx, callback_dir, admin_port, port, specs_dir, header_routing, daemon):
+    """
+    Run a mock server using OpenAPI specifications.
+    """
     if ctx.invoked_subcommand is None:
         ctx.forward(start_mock)
 
@@ -119,6 +120,9 @@ def status_mocking():
 @add_options(_record_options)
 @click.pass_context
 def record(ctx, port, admin_port, log_dir, header_routing, specs_dir, mode, daemon):
+    """
+    Record HTTP traffic from a reverse proxy.
+    """
     if ctx.invoked_subcommand is None:
         ctx.forward(start_record)
 
