@@ -153,7 +153,15 @@ Here are some useful tips for building and running Meeshkan from source.
 
 ### Tests
 
-You can run the  [tests/](https://github.com/Meeshkan/meeshkan/tree/master/tests/) with `pytest`:
+Run all checks:
+
+```bash
+$ python setup.py test
+```
+
+#### `pytest`
+
+Run [tests/](https://github.com/Meeshkan/meeshkan/tree/master/tests/) with `pytest`:
 
 ```bash
 pytest
@@ -163,7 +171,29 @@ python setup.py test
 
 Configuration for `pytest` is found in [pytest.ini](https://github.com/Meeshkan/meeshkan/tree/master/pytest.ini).
 
-### Type-checking
+#### `black`
+
+Run format checks:
+
+```bash
+$ black --check .
+```
+
+Fix formatting:
+
+```bash
+$ black .
+```
+
+#### `flake8`
+
+Run style checks:
+
+```bash
+$ flake8 .
+```
+
+#### `pyright`
 
 You can run type-checking by installing [pyright](https://github.com/microsoft/pyright) globally:
 

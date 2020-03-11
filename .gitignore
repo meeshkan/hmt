@@ -1,4 +1,4 @@
-node_modules
+/node_modules
 .venv
 .vscode
 *.pyc
@@ -9,6 +9,7 @@ node_modules
 .ipynb_checkpoints/
 .testmondata
 *.egg-info/
-out/
-build/
-dist/
+/out/
+/build/
+/dist/
+/.mypy_cache/
