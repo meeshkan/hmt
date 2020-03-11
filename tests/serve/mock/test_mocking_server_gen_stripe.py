@@ -19,4 +19,4 @@ def test_mocking_server_customers(http_client, base_url):
     response = yield http_client.fetch(base_url + "/v1/customers")
     assert response.code == 200
     rb = json.loads(response.body)
-    assert type(rb) == type({})
+    assert isinstance(rb, dict)

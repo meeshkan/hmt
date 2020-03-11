@@ -4,7 +4,6 @@ from tornado.web import RequestHandler
 
 from ..mock.storage import storage_manager
 from ..mock.rest import rest_middleware_manager
-from tornado.web import RequestHandler
 import json
 
 logger = logging.getLogger(__name__)

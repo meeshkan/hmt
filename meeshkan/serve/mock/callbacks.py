@@ -5,7 +5,6 @@ import json
 import logging
 from dataclasses import asdict
 import os
-import sys
 from http_types.utils import ResponseBuilder
 
 from .storage import storage_manager

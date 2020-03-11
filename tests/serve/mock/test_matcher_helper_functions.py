@@ -76,7 +76,7 @@ def test_get_path_item_with_method():
         }
     )
     assert get_path_item_with_method("get", o) == convert_to_PathItem(
-        {"get": {"responses": {"100": {"description": "hello"}}}, "description": "foo",}
+        {"get": {"responses": {"100": {"description": "hello"}}}, "description": "foo"}
     )
     assert get_path_item_with_method("post", o) == convert_to_PathItem(
         {
@@ -101,7 +101,7 @@ def test_matcher():
         {
             "openapi": "",
             "info": {"title": "", "version": ""},
-            "paths": {"/b/{foo}": _bfoo,},
+            "paths": {"/b/{foo}": _bfoo},
         }
     )
     assert matches("/a/b", "/a/b", bfoo, "get", oai)
@@ -137,7 +137,7 @@ def test_use_if_header():
     assert use_if_header(
         baseO,
         convert_to_Parameter(
-            {"name": "foo", "in": "header", "schema": {"type": "number"},}
+            {"name": "foo", "in": "header", "schema": {"type": "number"}}
         ),
     ) == ("foo", convert_to_Schema({"type": "number"}))
     assert use_if_header(

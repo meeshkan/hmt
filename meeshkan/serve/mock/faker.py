@@ -26,8 +26,8 @@ def fake_object(schema: Any, top_schema: Any, depth: int) -> Any:
                 (
                     fkr.name(),
                     random.random()
-                    if (type(schema["additionalProperties"]) == type(True))
-                    and (schema["additionalProperties"] == True)
+                    if (isinstance(schema["additionalProperties"], bool))
+                    and (schema["additionalProperties"] is True)
                     else fake_it(schema["additionalProperties"], top_schema, depth),
                 )
                 for x in range(random.randint(0, 4))
@@ -67,7 +67,7 @@ def fake_array(schema: Any, top_schema: Any, depth: int) -> Any:
         []
         if "items" not in schema
         else [fake_it(x, top_schema, depth) for x in schema["items"]]
-        if type(schema["items"]) is type([])
+        if isinstance(schema["items"], list)
         else [
             fake_it(schema["items"], top_schema, depth)
             for x in range(random.randint(mn, mx))

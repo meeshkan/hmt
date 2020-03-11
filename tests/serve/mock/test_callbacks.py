@@ -1,4 +1,3 @@
-from http_types import Request, Response
 from http_types.utils import RequestBuilder, ResponseBuilder
 
 from meeshkan.serve.mock.callbacks import callback_manager

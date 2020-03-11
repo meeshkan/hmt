@@ -1,8 +1,6 @@
 from functools import reduce
 import lenses
-from lenses.optics.base import Prism
-
-lens = lenses.lens
+from lenses import lens
 import jsonschema
 from meeshkan.build.operation import operation_from_string
 from dataclasses import replace
@@ -191,7 +189,7 @@ def operation_o(m: str):
 
 
 def oll(focus: int) -> lenses.ui.BaseUiLens[S, T, X, Y]:
-    """Focus on a specific index in an array if it exists 
+    """Focus on a specific index in an array if it exists
     """
     return lens.Items().Filter(lambda a: a[0] == focus)[1]
 

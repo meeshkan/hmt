@@ -1,6 +1,4 @@
-import json
 import logging
-from typing import cast
 from urllib import parse
 
 from http_types import RequestBuilder
