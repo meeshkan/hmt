@@ -27,14 +27,20 @@ Meeshkan is a tool that mocks HTTP APIs for use in sandboxes as well as for auto
 - [Contributing](#contributing)
 
 ## Installation
-
-Install via [pip](https://pip.pypa.io/en/stable/installing/):
+Install via [pip](https://pip.pypa.io/en/stable/installing/) (requires **Python 3.6+**):
 
 ```bash
 $ pip install meeshkan
 ```
 
-_Note: `meeshkan` requires **Python 3.6+.**_
+macOS users can install Meeshkan with [Homebrew](https://brew.sh/):
+
+```sh
+$ brew tap meeshkan/tap
+$ brew install meeshkan
+```
+
+
 
 ## Getting started with Meeshkan
 
