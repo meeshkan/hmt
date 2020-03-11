@@ -124,10 +124,9 @@ def run_from_source(
     type=str,
     help="Source to read recordings from. For example, 'kafka'",
 )
-@click.option("--sink", required=False, type=str, help="Sink where to write results.")
-def build(input_file, out, initial_openapi_spec, mode, source, sink):
+def build(input_file, out, initial_openapi_spec, mode, source):
     """
-    Build OpenAPI schema from HTTP exchanges.
+    Build an OpenAPI specification from HTTP recordings.
     """
 
     if input_file is not None and source != "file":
