@@ -11,7 +11,6 @@ from .utils.routing import PathRouting, HeaderRouting
 from ..build.update_mode import UpdateMode
 from ..config import DEFAULT_SPECS_DIR
 
-LOG_CONFIG = os.path.join(os.path.dirname(__file__), "logging.yaml")
 MOCK_PID = Path.home().joinpath(".meeshkan/mock.pid")
 RECORD_PID = Path.home().joinpath(".meeshkan/record.pid")
 
