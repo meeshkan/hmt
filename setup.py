@@ -18,31 +18,30 @@ with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = "\n" + f.read()
 
 REQUIRED = [
-    'click==7.0',
-    'lenses',
-    'pyyaml',
-    'jsonschema',
-    'dataclasses', # for 3.6, as it ships with 3.7
-    'faker',
-    'requests',
-    'typing-extensions',
-    'openapi-typed_2>=0.0.2',
-    'typeguard>=2.7.0',
-    'genson',
-    'http-types>=0.0.13,<0.1.0',
+    "click==7.0",
+    "lenses",
+    "pyyaml",
+    "jsonschema",
+    "dataclasses",  # for 3.6, as it ships with 3.7
+    "faker",
+    "requests",
+    "typing-extensions",
+    "openapi-typed_2>=0.0.2",
+    "typeguard>=2.7.0",
+    "genson",
+    "http-types>=0.0.13,<0.1.0",
     # kafka
-    'faust',
+    "faust",
     # mock
-    'tornado==5.1.1',
-    'urllib3==1.25.6',
-    'daemonocle'
+    "tornado==5.1.1",
+    "urllib3==1.25.6",
+    "daemonocle",
 ]
 
 BUNDLES = {}
 
 # Requirements of all bundles
-BUNDLE_REQUIREMENTS = [dep for _, bundle_dep in BUNDLES.items()
-                       for dep in bundle_dep]
+BUNDLE_REQUIREMENTS = [dep for _, bundle_dep in BUNDLES.items() for dep in bundle_dep]
 
 DEV = BUNDLE_REQUIREMENTS + [
     "black==19.10b0",
@@ -60,7 +59,7 @@ DEV = BUNDLE_REQUIREMENTS + [
     "wheel",
 ]
 
-VERSION = '0.2.16'
+VERSION = "0.2.16"
 
 ENTRY_POINTS = ["meeshkan = meeshkan.__main__:cli"]
 
@@ -104,7 +103,8 @@ class SetupCommand(Command):
 
 
 BUILD_COMMAND = "{executable} setup.py sdist bdist_wheel --universal".format(
-    executable=sys.executable)
+    executable=sys.executable
+)
 
 TYPE_CHECK_COMMAND = "pyright --lib"
 

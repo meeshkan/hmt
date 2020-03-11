@@ -1,4 +1,5 @@
 from .prepare import ignore_warnings
+
 ignore_warnings()
 
 from io import StringIO
@@ -35,7 +36,9 @@ def cli():
     setup()  # Ensure setup is done before invoking the CLI.
 
 
-async def write_to_sink(result_stream: BuildResultStream, sinks: Sequence[AbstractSink]):
+async def write_to_sink(
+    result_stream: BuildResultStream, sinks: Sequence[AbstractSink]
+):
     try:
         async for result in result_stream:
             for sink in sinks:
@@ -46,7 +49,12 @@ async def write_to_sink(result_stream: BuildResultStream, sinks: Sequence[Abstra
             sink.flush()
 
 
-def run_from_source(source: AbstractSource, mode: UpdateMode, starting_spec: OpenAPIObject, sinks: Sequence[AbstractSink]):
+def run_from_source(
+    source: AbstractSource,
+    mode: UpdateMode,
+    starting_spec: OpenAPIObject,
+    sinks: Sequence[AbstractSink],
+):
     loop = asyncio.get_event_loop()
 
     if loop.is_closed():
@@ -79,16 +87,44 @@ def run_from_source(source: AbstractSource, mode: UpdateMode, starting_spec: Ope
 
 
 @click.command()
-@click.option("-i", "--input-file", required=False, type=click.File('rb'), help="Input file. Use dash '-' to read from stdin.")
-#TODO Isn't it a too complicated instruction? Probably, we want to change behavior to os.makedirs()
-@click.option("-o", "--out", required=True, default=DEFAULT_SPECS_DIR,
-              type=click.Path(exists=False, file_okay=False, writable=True, readable=True),
-              help="Output directory. If the directory does not exist, it is created if the parent directory exists.")
-@click.option("-a", "--initial-openapi-spec", required=False, type=click.File('rb'), help="Initial OpenAPI spec.")
-@click.option("-m", "--mode", type=click.Choice(['GEN', 'REPLAY', 'MIXED'], case_sensitive=False),
-              default='GEN', help="Spec building mode.")
-@click.option("--source", required=False, default='file', type=str, help="Source to read recordings from. For example, 'kafka'")
-@click.option("--sink", required=False, type=str,  help="Sink where to write results.")
+@click.option(
+    "-i",
+    "--input-file",
+    required=False,
+    type=click.File("rb"),
+    help="Input file. Use dash '-' to read from stdin.",
+)
+# TODO Isn't it a too complicated instruction? Probably, we want to change behavior to os.makedirs()
+@click.option(
+    "-o",
+    "--out",
+    required=True,
+    default=DEFAULT_SPECS_DIR,
+    type=click.Path(exists=False, file_okay=False, writable=True, readable=True),
+    help="Output directory. If the directory does not exist, it is created if the parent directory exists.",
+)
+@click.option(
+    "-a",
+    "--initial-openapi-spec",
+    required=False,
+    type=click.File("rb"),
+    help="Initial OpenAPI spec.",
+)
+@click.option(
+    "-m",
+    "--mode",
+    type=click.Choice(["GEN", "REPLAY", "MIXED"], case_sensitive=False),
+    default="GEN",
+    help="Spec building mode.",
+)
+@click.option(
+    "--source",
+    required=False,
+    default="file",
+    type=str,
+    help="Source to read recordings from. For example, 'kafka'",
+)
+@click.option("--sink", required=False, type=str, help="Sink where to write results.")
 def build(input_file, out, initial_openapi_spec, mode, source, sink):
     """
     Build OpenAPI schema from HTTP exchanges.
@@ -99,12 +135,12 @@ def build(input_file, out, initial_openapi_spec, mode, source, sink):
 
     sinks = [FileSystemSink(out)]
 
-    if source == 'kafka':
+    if source == "kafka":
         # TODO Kafka configuration
-        source = KafkaSource(config=KafkaSourceConfig(
-            broker="localhost:9092",
-            topic="http_recordings"))
-    elif source == 'file':
+        source = KafkaSource(
+            config=KafkaSourceConfig(broker="localhost:9092", topic="http_recordings")
+        )
+    elif source == "file":
         if input_file is None:
             raise Exception("Option --input-file for source 'file' required.")
         source = FileSource(input_file)
@@ -114,43 +150,59 @@ def build(input_file, out, initial_openapi_spec, mode, source, sink):
     openapi_spec: OpenAPIObject = BASE_SCHEMA
 
     if initial_openapi_spec is not None:
-        try: 
+        try:
             maybe_openapi = safe_load(initial_openapi_spec.read())
-            # will raise if not an API spec 
+            # will raise if not an API spec
             openapi_spec = convert_to_openapi(maybe_openapi)
-        except: pass # just use the initial schema
+        except:
+            pass  # just use the initial schema
     run_from_source(source, UpdateMode[mode.upper()], openapi_spec, sinks=sinks)
 
 
 @click.command()
-@click.option("-i", "--input-file", required=True,
-              type=click.Path(exists=True, file_okay=True, dir_okay=False,
-                              readable=True, allow_dash=True), help="Path to a packet capture file.")
-@click.option("-o", "--out", required=False, default='recordings.jsonl',
-              type=click.Path(exists=False, file_okay=True, dir_okay=False,
-                              writable=True, allow_dash=True), help="Output file.")
+@click.option(
+    "-i",
+    "--input-file",
+    required=True,
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=False, readable=True, allow_dash=True
+    ),
+    help="Path to a packet capture file.",
+)
+@click.option(
+    "-o",
+    "--out",
+    required=False,
+    default="recordings.jsonl",
+    type=click.Path(
+        exists=False, file_okay=True, dir_okay=False, writable=True, allow_dash=True
+    ),
+    help="Output file.",
+)
 def convert(input_file, out):
     """
     Convert recordings from PCAP to JSONL format.
     """
     return _convert(input_file, out)
 
+
 def _convert(input_file, out):
-    if not input_file.endswith('.pcap'):
+    if not input_file.endswith(".pcap"):
         raise ValueError(
-            'Only .pcap files are accepted as input. Got: {}'.format(input_file))
+            "Only .pcap files are accepted as input. Got: {}".format(input_file)
+        )
 
     request_response_pairs = convert_pcap(input_file)
 
     log("Writing to: %s", out)
 
     counter = 0
-    with open(out, 'w') as f:
+    with open(out, "w") as f:
         for reqres in request_response_pairs:
             sink = StringIO()
             HttpExchangeWriter(sink).write(reqres)
             sink.seek(0)
-            f.write(''.join([x for x in sink])+'\n')
+            f.write("".join([x for x in sink]) + "\n")
             counter += 1
 
     log("Wrote %d lines.", counter)
@@ -158,8 +210,8 @@ def _convert(input_file, out):
 
 cli.add_command(build)  # type: ignore
 cli.add_command(convert)  # type: ignore
-cli.add_command(record) # type: ignore
-cli.add_command(mock) # type: ignore
+cli.add_command(record)  # type: ignore
+cli.add_command(mock)  # type: ignore
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()

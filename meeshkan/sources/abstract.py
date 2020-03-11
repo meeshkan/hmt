@@ -9,7 +9,9 @@ class AbstractSource(abc.ABC):
     """
 
     @abc.abstractmethod
-    async def start(self, loop: asyncio.AbstractEventLoop) -> Tuple[HttpExchangeStream, Optional[asyncio.Task]]:
+    async def start(
+        self, loop: asyncio.AbstractEventLoop
+    ) -> Tuple[HttpExchangeStream, Optional[asyncio.Task]]:
         """Start source task to read HTTP Exchanges.
 
         Arguments:

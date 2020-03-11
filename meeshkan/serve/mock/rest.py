@@ -15,10 +15,9 @@ class RestMiddlewareManager:
     def __init__(self):
         self._endpoints = set([])
 
-
     def get(self):
         return list(self._endpoints)
-    
+
     def clear(self, url=None):
         if not url:
             self._endpoints = set([])
@@ -27,20 +26,33 @@ class RestMiddlewareManager:
 
     def add(self, url):
         self._endpoints.add(url)
-    
-    def spew(self, request: Request, schemas: Mapping[str, OpenAPIObject]) -> Mapping[str, OpenAPIObject]:
+
+    def spew(
+        self, request: Request, schemas: Mapping[str, OpenAPIObject]
+    ) -> Mapping[str, OpenAPIObject]:
         cur_schemas = schemas
         req_io = StringIO()
         # TODO: this is hackish. is there a better way?
-        HttpExchangeWriter(req_io).write(HttpExchange(request=request, response=ResponseBuilder.from_dict(dict(statusCode=200,body='',headers={}))))
+        HttpExchangeWriter(req_io).write(
+            HttpExchange(
+                request=request,
+                response=ResponseBuilder.from_dict(
+                    dict(statusCode=200, body="", headers={})
+                ),
+            )
+        )
         # should only be one line... and why do we join with newline?
         req_io.seek(0)
-        req = json.loads('\n'.join([x for x in req_io]))['request']
+        req = json.loads("\n".join([x for x in req_io]))["request"]
         cs = {k: convert_from_openapi(v) for k, v in cur_schemas.items()}
         for endpoint in self._endpoints:
-            res = requests.post(endpoint, data=json.dumps({'request': req, 'schemas': cs }))
+            res = requests.post(
+                endpoint, data=json.dumps({"request": req, "schemas": cs})
+            )
             cs = json.loads(res.text)
-        out: Mapping[str, OpenAPIObject] = {str(k): convert_to_openapi(v) for k, v in cs.items()}
+        out: Mapping[str, OpenAPIObject] = {
+            str(k): convert_to_openapi(v) for k, v in cs.items()
+        }
         return out
 
 

@@ -11,8 +11,7 @@ from hamcrest import *
 
 exchanges = read_recordings_as_dict()
 
-kafkaSourceConfig = KafkaSourceConfig(
-    broker="'kafka://localhost:9092", topic="example")
+kafkaSourceConfig = KafkaSourceConfig(broker="'kafka://localhost:9092", topic="example")
 
 
 @pytest.fixture()
@@ -21,7 +20,7 @@ def kafka_source(event_loop):
     app = processor.app
     """passing in event_loop helps avoid 'attached to a different loop' error"""
     app.finalize()
-    app.conf.store = 'memory://'
+    app.conf.store = "memory://"
     app.flow_control.resume()
     return processor
 

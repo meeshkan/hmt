@@ -7,7 +7,9 @@ from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 
 @pytest.fixture
 def app():
-    return make_mocking_app("tests/serve/mock/callbacks", "tests/serve/mock/schemas/petstore", PathRouting())
+    return make_mocking_app(
+        "tests/serve/mock/callbacks", "tests/serve/mock/schemas/petstore", PathRouting()
+    )
 
 
 @pytest.mark.gen_test

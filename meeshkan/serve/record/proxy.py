@@ -20,7 +20,9 @@ class ProxyBase(ProxyCallback):
         self._router = router
 
     def handle_stream(self, stream, address):
-        logger.debug("Creating channel for new connection from client {}".format(address))
+        logger.debug(
+            "Creating channel for new connection from client {}".format(address)
+        )
         self._channels[address] = self._create_channel(stream, address)
 
     def on_remove_channel(self, client_address):
@@ -51,7 +53,15 @@ class RecordProxy(ProxyBase):
 
 
 class RecordProxyRunner:
-    def __init__(self, port, log_dir, specs_dir, routing=HeaderRouting(), mode=None, admin_port=None):
+    def __init__(
+        self,
+        port,
+        log_dir,
+        specs_dir,
+        routing=HeaderRouting(),
+        mode=None,
+        admin_port=None,
+    ):
         self._port = port
         self._log_dir = log_dir
         self._specs_dir = specs_dir
@@ -63,10 +73,14 @@ class RecordProxyRunner:
         if self._admin_port:
             start_admin(self._admin_port)
 
-        logger.info('Starting Meeshkan record on http://localhost:%s', self._port)
-        logger.info('Spec generation mode is %s', self._mode.name.lower() if self._mode else 'disabled')
-        with RequestLoggingCallback(log_dir=self._log_dir, specs_dir=self._specs_dir,
-                                    update_mode=self._mode) as callback:
+        logger.info("Starting Meeshkan record on http://localhost:%s", self._port)
+        logger.info(
+            "Spec generation mode is %s",
+            self._mode.name.lower() if self._mode else "disabled",
+        )
+        with RequestLoggingCallback(
+            log_dir=self._log_dir, specs_dir=self._specs_dir, update_mode=self._mode
+        ) as callback:
             server = RecordProxy(callback, self._routing)
             server.listen(self._port)
             tornado.ioloop.IOLoop.instance().start()
