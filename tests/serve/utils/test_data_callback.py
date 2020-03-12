@@ -57,11 +57,12 @@ def test_request_logging_mixed(tmp_dir):
 
     assert "http://another.api.com" == spec.servers[0].url
 
+
 def test_request_logging_mixed_append(tmp_dir):
     specs_dir = os.path.join(tmp_dir, "specs")
     spec_path = os.path.join(specs_dir, "another.api.com_mixed.json")
     os.makedirs(specs_dir)
-    with open(spec_path, 'w') as f:
+    with open(spec_path, "w") as f:
         json.dump(convert_from_openapi(BASE_SCHEMA), f)
 
     with open(spec_path) as f:
