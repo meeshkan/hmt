@@ -12,8 +12,7 @@ from http_types import (
 )
 from openapi_typed_2 import convert_from_openapi, convert_to_openapi
 
-from meeshkan import update_openapi
-from meeshkan.build.builder import BASE_SCHEMA
+from meeshkan.build.builder import BASE_SCHEMA, update_openapi
 
 logger = logging.getLogger(__name__)
 
