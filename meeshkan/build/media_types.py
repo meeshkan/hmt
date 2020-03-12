@@ -25,10 +25,9 @@ def update_text_schema(text_body: str, mode: UpdateMode, schema: Optional[Any] =
     # TODO Better updates
     generic = Schema(_type="string")
     specific = Schema(_type="string", enum=[text_body])
-    return generic if mode == UpdateMode.GEN else Schema(oneOf=list(set([
-            specific,
-            *([] if schema is None else [schema] if schema.oneOf is None else schema.oneOf)
-        ]))
+    # TODO don't merge equal schemas
+    return generic if mode == UpdateMode.GEN else Schema(
+        oneOf=[specific, *([] if schema is None else [schema] if schema.oneOf is None else schema.oneOf)]
     )
 
 
