@@ -29,6 +29,7 @@ def log(*args):
 
 
 @click.group()
+@click.version_option()
 def cli():
     """
     Meeshkan CLI.

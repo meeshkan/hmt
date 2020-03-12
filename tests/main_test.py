@@ -9,6 +9,8 @@ from typing import List
 import os
 from openapi_typed_2 import OpenAPIObject, convert_from_openapi
 import json
+import pkg_resources
+
 
 requests = read_recordings_as_strings()
 
@@ -149,3 +151,12 @@ def test_convert_cmd_without_invocation():
         assert Path(output_file).is_file(), "Expected output file {} to exist".format(
             output_file
         )
+
+
+def test_version():
+    expected_version = pkg_resources.require("meeshkan")[0].version
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["--version"])
+    assert result.exit_code == 0
+    assert result.output == f"cli, version {expected_version}\n"
