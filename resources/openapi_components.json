@@ -1,0 +1,586 @@
+{
+	"components": {
+		"schemas": {
+			"account": {
+				"required": ["_links", "accountId", "balance", "currency", "identifier", "identifierScheme", "name", "nickname", "servicerIdentifier", "servicerScheme"],
+				"properties": {
+					"accountId": {
+						"type": "string"
+					},
+					"identifier": {
+						"type": "string"
+					},
+					"identifierScheme": {
+						"type": "string"
+					},
+					"nickname": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"balance": {
+						"type": "integer"
+					},
+					"currency": {
+						"type": "string"
+					},
+					"servicerScheme": {
+						"type": "string"
+					},
+					"servicerIdentifier": {
+						"type": "string"
+					},
+					"_links": {
+						"required": ["self", "transactions"],
+						"properties": {
+							"self": {
+								"required": ["href"],
+								"properties": {
+									"href": {
+										"type": "string"
+									}
+								},
+								"type": "object"
+							},
+							"transactions": {
+								"required": ["href"],
+								"properties": {
+									"href": {
+										"type": "string"
+									}
+								},
+								"type": "object"
+							}
+						},
+						"type": "object"
+					}
+				},
+				"type": "object"
+			},
+			"payment": {
+				"required": ["amount", "currency", "payerIban", "paymentId", "receiverBic", "receiverIban", "receiverName", "subject", "valueDate"],
+				"properties": {
+					"amount": {
+						"type": "integer"
+					},
+					"subject": {
+						"type": "string"
+					},
+					"currency": {
+						"type": "string"
+					},
+					"payerIban": {
+						"type": "string"
+					},
+					"valueDate": {
+						"type": "string"
+					},
+					"receiverBic": {
+						"type": "string"
+					},
+					"receiverIban": {
+						"type": "string"
+					},
+					"receiverName": {
+						"type": "string"
+					},
+					"paymentId": {
+						"type": "string"
+					}
+				},
+				"type": "object"
+			}
+		}
+	},
+	"x-meeshkan-data": {
+		"account": [{
+			"_links": {
+				"self": {
+					"href": "https://sandbox.apis.op-palvelut.fi/accounts/v3/accounts/FotSkKG8JbX42eoR7b8rvwOy0CcDRNmZ0dZPRYYRVMI.-HP33z0ApCOwjzwl6JuS9w.XZS5PK6uM_ELrWwKrm1elg"
+				},
+				"transactions": {
+					"href": "https://sandbox.apis.op-palvelut.fi/accounts/v3/accounts/FotSkKG8JbX42eoR7b8rvwOy0CcDRNmZ0dZPRYYRVMI.-HP33z0ApCOwjzwl6JuS9w.XZS5PK6uM_ELrWwKrm1elg/transactions"
+				}
+			},
+			"accountId": "FotSkKG8JbX42eoR7b8rvwOy0CcDRNmZ0dZPRYYRVMI.-HP33z0ApCOwjzwl6JuS9w.XZS5PK6uM_ELrWwKrm1elg",
+			"balance": 0,
+			"currency": "EUR",
+			"identifier": "FI2350009421535899",
+			"identifierScheme": "IBAN",
+			"name": "K\u00c4YTT\u00d6TILI",
+			"nickname": "",
+			"servicerIdentifier": "OKOYFIHH",
+			"servicerScheme": "BIC"
+		}, {
+			"_links": {
+				"self": {
+					"href": "https://sandbox.apis.op-palvelut.fi/accounts/v3/accounts/qIJ8zKcZ1sBxmFMNqI0iV5Wbk9yZCQ2AxVJrgCkWOXo.rUQBmWRyAHujwK7HwxW2fA.dVQltitZonWu0AxGZIVOow"
+				},
+				"transactions": {
+					"href": "https://sandbox.apis.op-palvelut.fi/accounts/v3/accounts/qIJ8zKcZ1sBxmFMNqI0iV5Wbk9yZCQ2AxVJrgCkWOXo.rUQBmWRyAHujwK7HwxW2fA.dVQltitZonWu0AxGZIVOow/transactions"
+				}
+			},
+			"accountId": "qIJ8zKcZ1sBxmFMNqI0iV5Wbk9yZCQ2AxVJrgCkWOXo.rUQBmWRyAHujwK7HwxW2fA.dVQltitZonWu0AxGZIVOow",
+			"balance": 2215.81,
+			"currency": "EUR",
+			"identifier": "FI3959986920207073",
+			"identifierScheme": "IBAN",
+			"name": "K\u00c4YTT\u00d6TILI",
+			"nickname": "",
+			"servicerIdentifier": "OKOYFIHH",
+			"servicerScheme": "BIC"
+		}, {
+			"_links": {
+				"self": {
+					"href": "https://sandbox.apis.op-palvelut.fi/accounts/v3/accounts/SMhrf0N_56vFgY3O5YAX7WzrykfknmzXsDA4pk54E2c.XiJoWhfOGdDvzzV7yaVHMQ.dgaxgxGscnCa5B2mjmCTkQ"
+				},
+				"transactions": {
+					"href": "https://sandbox.apis.op-palvelut.fi/accounts/v3/accounts/SMhrf0N_56vFgY3O5YAX7WzrykfknmzXsDA4pk54E2c.XiJoWhfOGdDvzzV7yaVHMQ.dgaxgxGscnCa5B2mjmCTkQ/transactions"
+				}
+			},
+			"accountId": "SMhrf0N_56vFgY3O5YAX7WzrykfknmzXsDA4pk54E2c.XiJoWhfOGdDvzzV7yaVHMQ.dgaxgxGscnCa5B2mjmCTkQ",
+			"balance": 10287.84,
+			"currency": "EUR",
+			"identifier": "FI8958400720010290",
+			"identifierScheme": "IBAN",
+			"name": "K\u00c4YTT\u00d6TILI",
+			"nickname": "",
+			"servicerIdentifier": "OKOYFIHH",
+			"servicerScheme": "BIC"
+		}, {
+			"_links": {
+				"self": {
+					"href": "https://sandbox.apis.op-palvelut.fi/accounts/v3/accounts/kquw7IhxSseY7rm5v_QVhx_Gy-OErL6zIeDwuFad-zc.IRacX4fLggWYzinK-XrRfw.pmg-5bSAiv913lxEQf-pIg"
+				},
+				"transactions": {
+					"href": "https://sandbox.apis.op-palvelut.fi/accounts/v3/accounts/kquw7IhxSseY7rm5v_QVhx_Gy-OErL6zIeDwuFad-zc.IRacX4fLggWYzinK-XrRfw.pmg-5bSAiv913lxEQf-pIg/transactions"
+				}
+			},
+			"accountId": "kquw7IhxSseY7rm5v_QVhx_Gy-OErL6zIeDwuFad-zc.IRacX4fLggWYzinK-XrRfw.pmg-5bSAiv913lxEQf-pIg",
+			"balance": 0,
+			"currency": "EUR",
+			"identifier": "FI2450009421535881",
+			"identifierScheme": "IBAN",
+			"name": "K\u00c4YTT\u00d6TILI",
+			"nickname": "",
+			"servicerIdentifier": "OKOYFIHH",
+			"servicerScheme": "BIC"
+		}, {
+			"_links": {
+				"self": {
+					"href": "https://sandbox.apis.op-palvelut.fi/accounts/v3/accounts/8bZyDdSkChYvwupfsCYjrwnbhZwqxTSXvQNS1cS-dOE.4VAM73btwtleLX3mIPKZwQ.bNebEZwJykot0l1lywXJ9A"
+				},
+				"transactions": {
+					"href": "https://sandbox.apis.op-palvelut.fi/accounts/v3/accounts/8bZyDdSkChYvwupfsCYjrwnbhZwqxTSXvQNS1cS-dOE.4VAM73btwtleLX3mIPKZwQ.bNebEZwJykot0l1lywXJ9A/transactions"
+				}
+			},
+			"accountId": "8bZyDdSkChYvwupfsCYjrwnbhZwqxTSXvQNS1cS-dOE.4VAM73btwtleLX3mIPKZwQ.bNebEZwJykot0l1lywXJ9A",
+			"balance": 0,
+			"currency": "EUR",
+			"identifier": "FI8058400767000550",
+			"identifierScheme": "IBAN",
+			"name": "K\u00c4YTT\u00d6TILI",
+			"nickname": "",
+			"servicerIdentifier": "OKOYFIHH",
+			"servicerScheme": "BIC"
+		}, {
+			"_links": {
+				"self": {
+					"href": "https://sandbox.apis.op-palvelut.fi/accounts/v3/accounts/keOgbHhEhibdBsWA-tIvzP6sJxSHmu8TAn8jobJYGi8.fRjYKsQGy2uy2APaov2uTg.vzjiVF8fiNo_p9ZhFGVglA"
+				},
+				"transactions": {
+					"href": "https://sandbox.apis.op-palvelut.fi/accounts/v3/accounts/keOgbHhEhibdBsWA-tIvzP6sJxSHmu8TAn8jobJYGi8.fRjYKsQGy2uy2APaov2uTg.vzjiVF8fiNo_p9ZhFGVglA/transactions"
+				}
+			},
+			"accountId": "keOgbHhEhibdBsWA-tIvzP6sJxSHmu8TAn8jobJYGi8.fRjYKsQGy2uy2APaov2uTg.vzjiVF8fiNo_p9ZhFGVglA",
+			"balance": 12852.51,
+			"currency": "EUR",
+			"identifier": "FI8859986967004714",
+			"identifierScheme": "IBAN",
+			"name": "K\u00c4YTT\u00d6TILI",
+			"nickname": "",
+			"servicerIdentifier": "OKOYFIHH",
+			"servicerScheme": "BIC"
+		}],
+		"payment": [{
+			"amount": 5,
+			"currency": "EUR",
+			"payerIban": "FI8359986950002741",
+			"paymentId": "b44bea50-6465-11ea-bbe6-0d590387392d",
+			"receiverBic": "string",
+			"receiverIban": "FI4859986920215738",
+			"receiverName": "string",
+			"subject": "Client Test",
+			"valueDate": "2020-01-27T22:59:34Z"
+		}]
+	},
+	"openapi": "3.0.0",
+
+	"info": {
+		"title": "API title",
+		"version": "1.0",
+		"description": "API description"
+	},
+	"paths": {
+		"/v1/payments/{trnopysd}": {
+			"x-meeshkan-type": "upsert",
+			"summary": "Path summary",
+			"description": "Path description",
+			"parameters": [{
+				"name": "trnopysd",
+				"in": "path",
+				"required": true
+			}],
+			"post": {
+				"responses": {
+					"200": {
+						"description": "Response description",
+						"headers": {},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/account"
+								}
+							}
+						},
+						"links": {}
+					}
+				},
+				"summary": "Operation summary",
+				"description": "Operation description",
+				"operationId": "id",
+				"parameters": [{
+					"name": "Accept-Encoding",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Content-Type",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "x-authorization",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Content-Length",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Connection",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "User-Agent",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Host",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "x-api-key",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Accept",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}]
+			}
+		},
+		"/accounts/v3/accounts/eg9Mno2tvmeEE039chWrHw7sk1155oy5Mha8kQp0mYs.sxajtselenSScKPZrBMYjg.SoFWGrHocw1YoNb3zw-vfw": {
+			"x-meeshkan-type": "read",
+			"summary": "Path summary",
+			"description": "Path description",
+			"get": {
+				"responses": {
+					"200": {
+						"description": "Response description",
+						"headers": {
+							"Date": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Connection": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"ETag": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Vary": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Cache-Control": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Proxy-Connection": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Age": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Set-Cookie": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/account"
+								}
+							}
+						},
+						"links": {}
+					}
+				},
+				"summary": "Operation summary",
+				"description": "Operation description",
+				"operationId": "id",
+				"parameters": [{
+					"name": "User-Agent",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Accept-Encoding",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "authorization",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Host",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "x-api-key",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Connection",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Accept",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}]
+			}
+		},
+		"/accounts/v3/accounts": {
+			"x-meeshkan-type": "read",
+			"summary": "Path summary",
+			"description": "Path description",
+			"get": {
+				"responses": {
+					"200": {
+						"description": "Response description",
+						"headers": {
+							"Date": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Connection": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"ETag": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Vary": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Cache-Control": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Proxy-Connection": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Content-Encoding": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Age": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Set-Cookie": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Transfer-Encoding": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"required": ["_links", "accounts"],
+									"properties": {
+										"accounts": {
+											"items": {
+												"$ref": "#/components/schemas/account"
+											},
+											"type": "array"
+										},
+										"_links": {
+											"required": ["self"],
+											"properties": {
+												"self": {
+													"required": ["href"],
+													"properties": {
+														"href": {
+															"type": "string"
+														}
+													},
+													"type": "object"
+												}
+											},
+											"type": "object"
+										}
+									}
+								}
+							}
+						},
+						"links": {}
+					}
+				},
+				"summary": "Operation summary",
+				"description": "Operation description",
+				"operationId": "id",
+				"parameters": [{
+					"name": "User-Agent",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Accept-Encoding",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "authorization",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Host",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "x-api-key",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Connection",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Accept",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}]
+			}
+		}
+	},
+	"servers": [{
+		"url": "https://sandbox.apis.op-palvelut.fi"
+	}]
+}

@@ -71,9 +71,8 @@ class MockServerView(RequestHandler):
         )
 
         logger.debug(request)
-        response = callback_manager(
-            request, self.application.response_matcher.get_response(request)
-        )
+        response = self.application.response_matcher.get_response(request)
+
         for header, value in response.headers.items():
             self.set_header(header, value)
 
