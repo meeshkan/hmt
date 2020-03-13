@@ -1,7 +1,7 @@
 import logging
 import os
 
-import yaml
+import json
 from http_types import (
     Request,
     Response,
@@ -10,6 +10,7 @@ from http_types import (
     RequestBuilder,
     ResponseBuilder,
 )
+from openapi_typed_2 import convert_from_openapi, convert_to_openapi
 
 from ...build.builder import BASE_SCHEMA, update_openapi
 
@@ -55,18 +56,18 @@ class RequestLoggingCallback:
         HttpExchangeWriter(self._logs[host]).write(reqres)
         self._logs[host].flush()
 
-        logger.debug("Updated logs for host %s", host)
+        logger.debug("Logs for %s were updated", host)
 
         if self._update_mode:
             spec_file = os.path.join(
                 self._specs_dir,
-                "{}_{}.yaml".format(host, self._update_mode.name.lower()),
+                "{}_{}.json".format(host, self._update_mode.name.lower()),
             )
 
             if host not in self._specs:
                 if os.path.exists(spec_file) and self._append:
                     with open(spec_file, "r") as f:
-                        self._specs[host] = yaml.load(f)
+                        self._specs[host] = convert_to_openapi(json.load(f))
                 else:
                     self._specs[host] = BASE_SCHEMA
 
@@ -75,9 +76,11 @@ class RequestLoggingCallback:
             )
 
             with open(spec_file, "w") as f:
-                yaml.dump(self._specs[host], f)
+                spec = convert_from_openapi(self._specs[host])
+                json.dump(spec, f)
+                f.flush()
 
-            logger.debug("Updated scheme for host %s", host)
+            logger.debug("Schema for %s was updated", host)
 
     def __enter__(self):
         return self
