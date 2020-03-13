@@ -1,8 +1,9 @@
+from meeshkan.serve.mock.faker.schema_faker import MeeshkanSchemaFaker
 from meeshkan.serve.mock.matcher import valid_schema
-from meeshkan.serve.mock.faker import fake_it
 
 
 def test_faker_1():
+    faker = MeeshkanSchemaFaker()
     schema = {
         "type": "array",
         "items": {
@@ -15,11 +16,13 @@ def test_faker_1():
             },
         },
     }
-    res = fake_it(schema, schema, 0)
+    res = faker.fake_it(schema, schema, 0)
     assert valid_schema(res, schema)
 
 
 def test_faker_2():
+    faker = MeeshkanSchemaFaker()
+
     schema = {
         "$id": "https://example.com/person.schema.json",
         "$schema": "http://json-schema.org/draft-07/schema#",
@@ -35,11 +38,13 @@ def test_faker_2():
             },
         },
     }
-    res = fake_it(schema, schema, 0)
+    res = faker.fake_it(schema, schema, 0)
     assert valid_schema(res, schema)
 
 
 def test_faker_3():
+    faker = MeeshkanSchemaFaker()
+
     schema = {
         "$id": "https://example.com/geographical-location.schema.json",
         "$schema": "http://json-schema.org/draft-07/schema#",
@@ -52,11 +57,13 @@ def test_faker_3():
             "longitude": {"type": "number", "minimum": -180, "maximum": 180},
         },
     }
-    res = fake_it(schema, schema, 0)
+    res = faker.fake_it(schema, schema, 0)
     assert valid_schema(res, schema)
 
 
 def test_faker_4():
+    faker = MeeshkanSchemaFaker()
+
     schema = {
         "$id": "https://example.com/arrays.schema.json",
         "$schema": "http://json-schema.org/draft-07/schema#",
@@ -83,11 +90,13 @@ def test_faker_4():
             }
         },
     }
-    res = fake_it(schema, schema, 0)
+    res = faker.fake_it(schema, schema, 0)
     assert valid_schema(res, schema)
 
 
 def test_faker_5():
+    faker = MeeshkanSchemaFaker()
+
     schema = {"type": "array"}
-    res = fake_it(schema, schema, 0)
+    res = faker.fake_it(schema, schema, 0)
     assert valid_schema(res, schema)

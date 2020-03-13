@@ -1,5 +1,7 @@
 import json
 import logging
+
+from meeshkan.serve.mock.faker.schema_faker import MeeshkanSchemaFaker
 from meeshkan.serve.mock.rest import rest_middleware_manager
 import os
 import yaml
@@ -19,9 +21,6 @@ from meeshkan.serve.mock.matcher import (
     change_refs,
     ref_name,
 )
-from meeshkan.serve.mock.faker import fake_it
-
-fkr = Faker()
 
 from http_types import Request, Response
 
@@ -32,6 +31,8 @@ class ResponseMatcher:
     _schemas: Mapping[str, OpenAPIObject]
 
     def __init__(self, specs_dir):
+        self._text_faker = Faker()
+        self._json_faker = MeeshkanSchemaFaker()
         schemas: Sequence[str] = []
         if not os.path.exists(specs_dir):
             logging.info("OpenAPI schema directory not found %s", specs_dir)
@@ -183,7 +184,7 @@ class ResponseMatcher:
                     )
                 },
             }
-            bodyAsJson = fake_it(to_fake, to_fake, 0)
+            bodyAsJson = self._json_faker.fake_it(to_fake, to_fake, 0)
             return Response(
                 statusCode=statusCode,
                 body=json.dumps(bodyAsJson),
@@ -194,7 +195,7 @@ class ResponseMatcher:
         if "text/plain" in mime_types:
             return Response(
                 statusCode=statusCode,
-                body=fkr.sentence(),
+                body=self._text_faker.sentence(),
                 # TODO: can this be accomplished without a cast?
                 headers=cast(
                     Mapping[str, Union[str, Sequence[str]]],
