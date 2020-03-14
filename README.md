@@ -119,31 +119,9 @@ In the console log above, we see several nifty features of Meeshkan:
 
 1. The tests pass!  Meeshkan has fetched a mini version of stripe and used it for our integration test.
 1. We use Meeshkan to control how the API behaves. For example, we tell it to succeed for one test and fail for two others.
-1. The console gives us information about API coverage, meaning the additional tests we would need to write to have tested the most common outcomes. Here, we are missing the test for a `no_network` outcome, and Meeshkan lets us know. In fact, let's go back and write that test now!
+1. The console gives us information about API coverage, meaning the additional tests we would need to write to have tested the most common outcomes. Here, we are missing the test for a `no_network` outcome, and Meeshkan lets us know.
 
-```python
-# charge_test.py
-import meeshkan_client as meeshkan
-import pytest
-from meeshkan.behaviors import with_codes
-from .charge import charge_for_expensive_services
-
-meeshkan.on()
-meeshkan.use('stripe')
-
-def test_charge_200():
-  meeshkan.transform(with_codes(200))
-  id = charge_for_expensive_services('my_source')
-  assert isinstance(id, str)
-
-def test_failure():
-  for failure_case in [with_codes(400), with_codes(500), no_network()]:
-    meeshkan.transform(failure_case)
-    with pytest.raises(Exception) as e_info:
-      charge_for_expensive_services('my_source')
-```
-
-Behind the scenes, Meeshkan spins up a tiny (smöl) mock server that is responsible for acting like Stripe would.  You can start this server from the command line like so:
+Behind the scenes, Meeshkan spins up a smöl mock server that is responsible for acting like Stripe would.  You can start this server from the command line like so:
 
 ```bash
 meeshkan mock --spec-dir path/to/specs
