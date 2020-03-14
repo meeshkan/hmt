@@ -7,7 +7,7 @@
 
 Meeshkan helps developers write effective integration tests.
 
-## When should you write integration tests?
+## When should you use integration tests?
 
 If your app or service integrates with another app or service, integration testing is a good way to make sure that your app correctly handles input from that service, including unexpected input.
 
