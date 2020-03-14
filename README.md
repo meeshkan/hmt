@@ -5,26 +5,34 @@
 [![PyPi](https://img.shields.io/pypi/pyversions/meeshkan)](https://pypi.org/project/meeshkan/)
 [![License](https://img.shields.io/pypi/l/meeshkan)](LICENSE)
 
-Meeshkan is a tool that mocks HTTP APIs for use in sandboxes as well as for automated and exploratory testing. It uses a combination of API definitions, recorded traffic and code in order to make crafting mocks as enjoyable as possible.
+Meeshkan helps developers write effective integration tests.
 
-[Chat with us on Gitter](https://gitter.im/meeshkan/community) to let us know about questions, problems or ideas!
+## When should you write integration tests?
 
-## What's in this document
+If your app or service integrates with another app or service, integration testing is a good way to make sure that your app correctly handles input from that service, including unexpected input.
 
-- [Installation](#installation)
-- [Getting started with Meeshkan](#getting-started-with-meeshkan)
-  - [Tutorial](#tutorial)
-- [Collect recordings of API traffic](#collect-recordings-of-api-traffic)
-- [Build a Meeshkan spec from recordings](#build-a-meeshkan-spec-from-recordings)
-  - [Building modes](#building-modes)
-- [Mock server traffic using a Meeshkan spec](#mock-server-traffic-using-a-meeshkan-spec)
-- [Development](#development)
-  - [Getting started](#getting-started)
-  - [Tests](#tests)
-  - [Type-checking](#type-checking)
-  - [Automated builds](#automated-builds)
-  - [Publishing Meeshkan as a PyPi package](#publishing-meeshkan-as-a-pypi-package)
-- [Contributing](#contributing)
+## Some nice articles on integration testing
+
+- [Martin Fowler on integration testing](https://martinfowler.com/bliki/IntegrationTest.html)
+- [Geeks for Geeks](https://www.geeksforgeeks.org/software-engineering-integration-testing/)
+- [Unit testing vs integration testing](https://performancelabus.com/unit-vs-integration-testing/)
+
+## How it works
+
+Meeshkan starts from the premise that integrations are always two-sided:
+- on one side, there is your app or service.
+- on the other side, there is an app or service with which you're interacting.
+
+These interactions are brokered through an API.  There are many different types of APIs (REST, gRPC, Kafka, GraphQL, sql) but the basic idea is the same - you send a request and you get a response.
+
+Meeshkan works by building a *stand in*, or mock, of the service with which you integrate.  It does this by monitoring API interactions and using them to reverse engineering a mock whose behavior is *close enough to* that of the original service. *Close enough* means, amongst other things:
+
+- the data it serves back looks more or less like data from the real service.
+- the mock fails when it should fail and succeeds when it should succeed.
+- the mock can throw arbitrary errors or be sluggish.
+- the mock can handle sequences of interactions correctly.
+
+Then, when you test code that calls the service via an API, it will call this mock on a local server instead of calling the real servie. If you are an API provider, you can even use Meeshkan to maintain a sandbox version of your API that developers can use for integration testing.
 
 ## Installation
 Install via [pip](https://pip.pypa.io/en/stable/installing/) (requires **Python 3.6+**):
@@ -40,55 +48,180 @@ $ brew tap meeshkan/tap
 $ brew install meeshkan
 ```
 
+Debian and Ubuntu users can install Meeshkan with `apt-get`:
+- echo "deb [trusted=yes] https://dl.bintray.com/meeshkan/apt all main" | tee -a /etc/apt/sources.list
+- apt-get update -qq && apt-get install -y meeshkan
 
 
-## Getting started with Meeshkan
+## Write your first integration test using Meeshkan
 
-The basic Meeshkan flow is **collect, build and mock.**
-1. To start, **collect** data from recorded server traffic and/or OpenAPI specs.
-1. Then, **build** a schema that unifies these various data sources.
-1. Finally, use this schema to create a **mock** server of an API.
+This guide uses python as an example language, but we have examples for several other languages as well:
 
-### Tutorial
+- [JavaScript]()
+- [Java]()
+- [Go]()
 
-The quickest way to get an overview of Meeshkan is to complete our [interactive tutorial](https://github.com/meeshkan/meeshkan-tutorial). It walks you through the collect, build, and mock flow - while also covering the concepts necessary for development.
+In the example, we'll use a code that integrates with Stripe.  Why Stripe?  Why not!  But Meeshkan can be used for any REST API integration, and we're working hard to build gRPC, GraphQL, and Kafka too.
 
-First, install `meeshkan-tutorial` via [pip](https://pip.pypa.io/en/stable/installing/):
+First, here's our integration code:
 
-```bash
-$ pip install meeshkan-tutorial
-$ meeshkan-tutorial
+```python
+# charge.py
+import stripe
+stripe.api_key = "wouldnt_you_like)to_know"
+
+def charge_for_expensive_services(source):
+  res = stripe.Charge.create(
+    amount=1999,
+    currency="usd",
+    source=source,
+    description="A charge for our most expensive service.",
+  )
+  return res.id
 ```
 
-_Note: This tutorial has been tested on Python 3.6, 3.7, and 3.8._
+And here's our test:
 
-After installing, you can begin the tutorial by invoking from the command line:
+```python
+# charge_test.py
+import meeshkan
+import pytest
+from meeshkan.behaviors import with_codes
+from .charge import charge_for_expensive_services
 
-```bash
-$ meeshkan-tutorial
+meeshkan.on()
+meeshkan.use('stripe')
+
+def test_charge_200():
+  meeshkan.transform(with_codes(200))
+  id = charge_for_expensive_services('my_source')
+  assert isinstance(id, str)
+
+def test_charge_400():
+  meeshkan.transform(with_codes(400))
+  with pytest.raises(Exception) as e_info:
+    charge_for_expensive_services('my_source')
+
+def test_charge_500():
+  meeshkan.transform(with_codes(500))
+  with pytest.raises(Exception) as e_info:
+    charge_for_expensive_services('my_source')
 ```
 
-Once you've run this, you should see:
+When we run `pytest`, we see the following:
 
 ```bash
-                             __    __
-   ____ ___  ___  ___  _____/ /_  / /______ _____
-  / __ `__ \/ _ \/ _ \/ ___/ __ \/ //_/ __ `/ __ \
- / / / / / /  __/  __(__  ) / / / ,< / /_/ / / / /
-/_/ /_/ /_/\___/\___/____/_/ /_/_/|_|\__,_/_/ /_/
-
-
-The tutorial!!
-Press ENTER to continue...
+pytest charge_test.py
+############# something here ##############
 ```
 
-If not, it's probably our fault. Please let us know by [filing an issue on the meeshkan-tutorial repo](https://github.com/meeshkan/meeshkan-tutorial/issues).
+In the console log above, we see several nifty features of Meeshkan:
+
+1. The tests pass!  Meeshkan has fetched a mini version of stripe and used it for our integration test.
+1. We use Meeshkan to control how the API behaves. For example, we tell it to succeed for one test and fail for two others.
+1. The console gives us information about API coverage, meaning the additional tests we would need to write to have tested the most common outcomes. Here, we are missing the test for a `no_network` outcome, and Meeshkan lets us know. In fact, let's go back and write that test now!
+
+```python
+# charge_test.py
+import meeshkan
+import pytest
+from meeshkan.behaviors import with_codes
+from .charge import charge_for_expensive_services
+
+meeshkan.on()
+meeshkan.use('stripe')
+
+def test_charge_200():
+  meeshkan.transform(with_codes(200))
+  id = charge_for_expensive_services('my_source')
+  assert isinstance(id, str)
+
+def test_failure():
+  for failure_case in [with_codes(400), with_codes(500), no_network()]:
+    meeshkan.transform(failure_case)
+    with pytest.raises(Exception) as e_info:
+      charge_for_expensive_services('my_source')
+```
+
+Behind the scenes, Meeshkan spins up a tiny (smöl) mock server that is responsible for acting like Stripe would.  You can start this server from the command line like so:
+
+```bash
+meeshkan mock --spec-dir path/to/specs
+```
+
+More on the CLI usage can be found in the [mocking documentatino](./MOCK.md).
+
+## Making your own mock servers
+
+The easiest way to use Meeshkan is to obtain a pre-existing mock like we do in the example above. However, in most cases, you will need to build your own, ie if your integration is between two microservices.
+
+To make your own mock servers, you can currently import two types of information:
+
+1. Recordings of server traffic in the [`http-types`](https://github.com/http-tyes) format, stored in a `.jsonl` file.
+1. OpenAPI specs describing the server's behavior.
+
+You can work with just one of these sources or both in conjunction.
+
+Assuming that your `.jsonl` files are in a directory called `recordings` and your OpenAPI specs are in a directory called `specs`, you can build a Meeshkan mock using the following command:
+
+```bash
+meeshkan build --recordings-dir recordings/ --specs-dir specs/ --out-dir out/
+```
+
+If you'd like to test this out, you can use [this sample recording.jsonl file]() of the Stripe API in your `recordings/` directory and [this sample OpenAPI spec]() of the Stripe API in your `specs/` directory.
+
+Now, `out/` will contain all of the information Meeshkan needs to create a mock of your service.  This spec can now be used in your test!  Revisiting the python example above, and assuming that it is run from the same directory containing `./out`, we can use this in our test:
+
+```python
+# charge_test.py
+import meeshkan
+import pytest
+from meeshkan.behaviors import with_codes
+from .charge import charge_for_expensive_services
+
+meeshkan.on()
+meeshkan.use('./out')
+
+def test_charge_200():
+  meeshkan.transform(with_codes(200))
+  id = charge_for_expensive_services('my_source')
+  assert isinstance(id, str)
+
+def test_failure():
+  for failure_case in [with_codes(400), with_codes(500), no_network()]:
+    meeshkan.transform(failure_case)
+    with pytest.raises(Exception) as e_info:
+      charge_for_expensive_services('my_source')
+```
+
+Or, we can spin up a meeshkan mock server from the command line:
+
+```bash
+cd ./out && meeshkan mock
+```
+
+Meeshkan also offers an interactive builder mode where you can add or modify your mock's and explore how it works.  You can invoke this by using the --interactive flag, which will open the builder in a browser.
+
+```bash
+meeshkan build --interactive --recordings-dir recordings/ --specs-dir specs/ --out-dir out/
+```
+
+### Building modes
+You can use a mode flag to indicate how the OpenAPI spec should be built, for example:
+
+```bash
+meeshkan build -i path/to/recordings.jsonl --mode gen
+```
+
+Supported modes are:
+* gen [default] - infer a schema from the recorded data
+* replay - replay the recorded data based on exact matching
+
+For more information about building, including mixing together the two modes and editing the created OpenAPI schema, see the [building documentation](./docs/BUILD.md).
 
 ## Collect recordings of API traffic
 
-Let's look at how to build a Meeshkan spec. First, you have to **collect** recordings of server traffic and/or OpenAPI server specs.
-
-To record API traffic, the Meeshkan CLI provides a `record` mode that captures API traffic using a proxy.
+To record API traffic that can be onsumed by Meeshkan, the Meeshkan CLI provides a `record` mode that captures API traffic using a proxy.
 
 ```bash
 $ pip install meeshkan # if not installed yet
@@ -103,49 +236,33 @@ $ curl http://localhost:8000/http://api.example.com
 
 By default, the recording proxy treats the path as the target URL and writes a [`.jsonl`](https://jsonlines.org) file containing logs of all server traffic to a `logs` directory.  All logs are created in the [`http-types`](https://github.com/meeshkan/http-types) format.  The `meeshkan build` tool expects all recordings to be represented in a `.jsonl` file containing recordings represented in the `http-types` format.
 
+The following libraries also exist to record HTTP traffic in the `http-types` format and/or stream it to a sink:
+
+- [express-middleware]()
+- [python-middleware]()
+- [kafka-middleware]()
+- [kong-plugin]()
+- [datadog-plugin]()
+- [apigee-plugin]()
+
 For more information about recording, including direct file writing and kafka streaming, see the [recording documentation](./docs/RECORD.md).
 
-## Build a Meeshkan spec from recordings
+## Community
 
-Using the Meeshkan CLI, you can **build** an OpenAPI schema from a single `.jsonl` file, in addition to any existing OpenAPI specs that describe how a service works.
+[Chat with us on Gitter](https://gitter.im/meeshkan/community) to let us know about questions, problems or ideas!
 
-```bash
-$ pip install meeshkan # if not done yet
-$ meeshkan build -i path/to/recordings.jsonl [-o path/to/output_directory]
-```
 
-The input file should be in [JSON Lines](http://jsonlines.org/) format and every line should be in [http-types](https://meeshkan.github.io/http-types/) JSON format. 
+## Some alternatives and competitors
 
-For an example input file, see [recordings.jsonl](https://github.com/Meeshkan/meeshkan/blob/master/resources/recordings.jsonl). The libraries listed at [http-types](https://meeshkan.github.io/http-types/) can be used to generate input files in your language of choice.
-
-Use dash (`-i -`) to read from standard input:
-
-```bash
-$ meeshkan build -i - < recordings.jsonl
-```
-### Building modes
-You can use a mode flag to indicate how the OpenAPI spec should be built, for example:
-
-```bash
-meeshkan build -i path/to/recordings.jsonl --mode gen
-```
-
-Supported modes are:
-* gen [default] - infer a schema from the recorded data
-* replay - replay the recorded data based on exact matching
-
-For more information about building, including mixing together the two modes and editing the created OpenAPI schema, see the [building documentation](./docs/BUILD.md).
-
-## Mock server traffic using a Meeshkan spec
-
-You can use an OpenAPI spec, such as the one created with `meeshkan build`, to create a **mock** server using Meeshkan.
-
-```bash
-$ pip install meeshkan # if not installed yet
-$ meeshkan mock
-```
-
-For more information about mocking, including adding custom middleware and modifying the mocking schema JIT via an admin API, see the [mocking documentation](./docs/MOCK.md).
+- using a real API for integration testing
+- using a fixture-serving library like
+  - unmock
+  - nock
+  - HTTPretty
+- pact.io
+- hoverfly
+- prism
+- wiremock
 
 ## Development
 
