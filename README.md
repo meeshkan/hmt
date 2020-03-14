@@ -205,7 +205,7 @@ meeshkan build --interactive --recordings-dir recordings/ --specs-dir specs/ --o
 ```
 
 ### Building modes
-You can use a mode flag to indicate how the OpenAPI spec should be built, for example:
+You can use a mode flag to indicate how the spec for the mock server should be built, for example:
 
 ```bash
 meeshkan build -i path/to/recordings.jsonl --mode gen
