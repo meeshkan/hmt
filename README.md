@@ -84,7 +84,7 @@ And here's our test:
 
 ```python
 # charge_test.py
-import meeshkan
+import meeshkan_client as meeshkan
 import pytest
 from meeshkan.behaviors import with_codes
 from .charge import charge_for_expensive_services
@@ -123,7 +123,7 @@ In the console log above, we see several nifty features of Meeshkan:
 
 ```python
 # charge_test.py
-import meeshkan
+import meeshkan_client as meeshkan
 import pytest
 from meeshkan.behaviors import with_codes
 from .charge import charge_for_expensive_services
@@ -174,7 +174,7 @@ Now, `out/` will contain all of the information Meeshkan needs to create a mock 
 
 ```python
 # charge_test.py
-import meeshkan
+import meeshkan_client as meeshkan
 import pytest
 from meeshkan.behaviors import with_codes
 from .charge import charge_for_expensive_services
