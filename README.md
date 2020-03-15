@@ -131,8 +131,8 @@ pytest charge_test.py
 
 In the console log above, we see several nifty features of Meeshkan:
 
-1. The tests pass!  Meeshkan has fetched a mini version of stripe and used it for our integration test.
-1. We use Meeshkan to control how the API behaves. For example, we tell it to succeed for one test and fail for two others.
+1. The tests pass.  Meeshkan has fetched a mock version of stripe and used it for our integration test.
+1. We use Meeshkan to control how the API behaves. For example, we tell it to return a successful response for one test and a failure response for two others.
 1. The console gives us information about API coverage, meaning the additional tests we would need to write to have tested the most common outcomes. Here, we are missing the test for a `no_network` outcome, and Meeshkan lets us know.
 
 Behind the scenes, Meeshkan spins up a smöl mock server that is responsible for acting like Stripe would.  You can start this server from the command line like so:
