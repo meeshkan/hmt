@@ -79,7 +79,7 @@ This guide uses [Python]() as an example language, but we have client libraries 
 
 In the example, we'll use a code that integrates with Stripe.  Why Stripe?  Because we've used Meeshkan to test our integrations with Stripe.  But Meeshkan can be used for any REST API integration, and we're working hard to build gRPC, GraphQL, and Kafka too.
 
-First, here's our integration code:
+First, here's our code that integrates with Stripe:
 
 ```python
 # charge.py
