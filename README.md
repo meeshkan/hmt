@@ -141,7 +141,7 @@ More on the CLI usage can be found in the [mocking documentation](./MOCK.md).
 
 ## Making your own mock servers
 
-The easiest way to use Meeshkan is to obtain a pre-existing mock like we do in the example above. However, in most cases, you will need to build your own. To make your own mock servers, you can currently import two types of information:
+The easiest way to use Meeshkan is to obtain a pre-existing mock like we do in the example above. However, in most cases, you will need to build your own. To make your own mock servers, you can currently use two different sources of information:
 
 1. Recordings of server traffic in the [`http-types`](https://github.com/http-tyes) format, stored in a `.jsonl` file.
 1. OpenAPI specs describing the server's behavior.
