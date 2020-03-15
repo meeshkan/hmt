@@ -127,7 +127,7 @@ pytest charge_test.py
 
 From this short example, we've already seen the main features of Meeshkan:
 
-1. The tests are run against a mock version of Stripe that Meeshkan fetches in the background.
+1. The tests are run against a mock version of Stripe that Meeshkan has fetched.
 1. The mock API's behavior can change on a per-test basis. For example, we tell it to return a successful response for one test and a failure response for two others.
 1. The console gives us information about API coverage. Here, we're alerted that we're missing the test for a `no_network` outcome, and Meeshkan lets us know.
 
