@@ -17,14 +17,6 @@ If your app or service integrates with another app or service, integration testi
 - [Geeks for Geeks intro to integration testing](https://www.geeksforgeeks.org/software-engineering-integration-testing/)
 - [Unit testing vs integration testing](https://performancelabus.com/unit-vs-integration-testing/)
 
-## Basic premise
-
-Meeshkan starts from the premise that integrations are always two-sided:
-- on one side, there is your app or service.
-- on the other side, there is an app or service with which you're interacting.
-
-These interactions are brokered through an API.  There are many different types of APIs (REST, gRPC, Kafka, GraphQL, SQL) but the basic idea is the same - you send a request and you get a response. An *integration test* is any test that triggers requests to and responses from those APIs.
-
 ## How it works
 
 Meeshkan works by building a stand-in, or *mock*, of the service with which you integrate.  It does this by using various sources of information, like API recordings and OpenAPI specs, to automatically create a mock service whose behavior is *close enough* to that of the original service. *Close enough* means, amongst other things:
