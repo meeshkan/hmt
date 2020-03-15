@@ -23,7 +23,7 @@ Meeshkan starts from the premise that integrations are always two-sided:
 - on one side, there is your app or service.
 - on the other side, there is an app or service with which you're interacting.
 
-These interactions are brokered through an API.  There are many different types of APIs (REST, gRPC, Kafka, GraphQL, SQL) but the basic idea is the same - you send a request and you get a response.
+These interactions are brokered through an API.  There are many different types of APIs (REST, gRPC, Kafka, GraphQL, SQL) but the basic idea is the same - you send a request and you get a response. An *integration test* is any test that triggers requests to and responses from those APIs.
 
 ## How it works
 
