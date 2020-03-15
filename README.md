@@ -71,7 +71,7 @@ $ apt-get update -qq && apt-get install -y meeshkan
 
 ## Write your first integration test using Meeshkan
 
-This guide uses [Python]() as an example language, but we have examples for several other languages as well:
+This guide uses [Python]() as an example language, but we have client libraries for several other languages as well:
 
 - [JavaScript]()
 - [Java]()
