@@ -32,7 +32,7 @@ Meeshkan works by building a stand-in, or *mock*, of the service with which you 
 - the mock can throw arbitrary errors or have a delay.
 - the mock can handle sequences of interactions correctly.
 
-Then, when you test code that calls the service via an API, it will call this mock on a local server instead of calling the real servie. If you are an API provider, you can even use Meeshkan to maintain a sandbox version of your API that developers can use for integration testing.
+When you run your integration tests, they will interact with this mock on a local server instead of calling the real service. If you are an API provider, you can even use Meeshkan to maintain a sandbox version of your API that developers can use for integration testing.
 
 ## Installation
 Install via [pip](https://pip.pypa.io/en/stable/installing/) (requires **Python 3.6+**):
