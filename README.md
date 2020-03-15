@@ -127,7 +127,7 @@ Behind the scenes, Meeshkan spins up a smöl mock server that is responsible for
 meeshkan mock --spec-dir path/to/specs
 ```
 
-More on the CLI usage can be found in the [mocking documentatino](./MOCK.md).
+More on the CLI usage can be found in the [mocking documentation](./MOCK.md).
 
 ## Making your own mock servers
 
