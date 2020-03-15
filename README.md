@@ -68,7 +68,7 @@ First, here's our integration code:
 ```python
 # charge.py
 import stripe
-stripe.api_key = "wouldnt_you_like)to_know"
+stripe.api_key = "wouldnt_you_like_to_know"
 
 def charge_for_expensive_services(source):
   res = stripe.Charge.create(
