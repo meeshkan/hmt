@@ -63,9 +63,11 @@ $ brew install meeshkan
 ```
 
 Debian and Ubuntu users can install Meeshkan with `apt-get`:
-- echo "deb [trusted=yes] https://dl.bintray.com/meeshkan/apt all main" | tee -a /etc/apt/sources.list
-- apt-get update -qq && apt-get install -y meeshkan
 
+```bash
+$ echo "deb [trusted=yes] https://dl.bintray.com/meeshkan/apt all main" | tee -a /etc/apt/sources.list
+$ apt-get update -qq && apt-get install -y meeshkan
+```
 
 ## Write your first integration test using Meeshkan
 
