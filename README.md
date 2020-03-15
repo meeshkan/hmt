@@ -182,6 +182,10 @@ Meeshkan also offers an interactive builder mode where you can add or modify you
 meeshkan build --interactive --recordings-dir recordings/ --specs-dir specs/ --out-dir out/
 ```
 
+Below is a screenshot of the Meeshkan mock builder, and [here is a video tutorial]() with more information.
+
+![Dashboard](./dashboard.png)
+
 ### Building modes
 You can use a mode flag to indicate how the spec for the mock server should be built, for example:
 
