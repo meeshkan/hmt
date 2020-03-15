@@ -131,7 +131,7 @@ From this short example, we've already seen the main features of Meeshkan:
 1. The mock API's behavior can change on a per-test basis. For example, we tell it to return a successful response for one test and a failure response for two others.
 1. The console gives us information about API coverage. Here, we're alerted that we're missing the test for a `no_network` outcome, and Meeshkan lets us know.
 
-Behind the scenes, Meeshkan spins up a tiny server that is responsible for mocking the Stripe API.  You can start this server from the command line like so:
+Behind the scenes, Meeshkan spins up a tiny server that is responsible for mocking the API.  You can start this server from the command line like so:
 
 ```bash
 meeshkan mock --spec-dir path/to/specs
