@@ -36,6 +36,18 @@ Meeshkan works by building a stand-in, or *mock*, of the service with which you 
 
 When you run your integration tests, they will interact with this mock on a local server instead of calling the real service. If you are an API provider, you can even use Meeshkan to maintain a sandbox version of your API that developers can use for integration testing.
 
+## Some alternatives and competitors
+
+- using a real API for integration testing (read our article about why we think this is a [bad idea]())
+- using a fixture-serving library like
+  - [unmock](https://github.com/meeshkan/unmock-js)
+  - [nock](https://github.com/nock/nock)
+  - [HTTPretty](https://github.com/gabrielfalcao/HTTPretty)
+- [pact.io](https://pact.io)
+- [hoverfly](https://hoverfly.io/)
+- [prism](https://github.com/stoplightio/prism)
+- [wiremock](http://wiremock.org/)
+
 ## Installation
 Install via [pip](https://pip.pypa.io/en/stable/installing/) (requires **Python 3.6+**):
 
@@ -232,19 +244,6 @@ For more information about recording, including direct file writing and kafka st
 ## Community
 
 [Chat with us on Gitter](https://gitter.im/meeshkan/community) to let us know about questions, problems or ideas!
-
-
-## Some alternatives and competitors
-
-- using a real API for integration testing
-- using a fixture-serving library like
-  - unmock
-  - nock
-  - HTTPretty
-- pact.io
-- hoverfly
-- prism
-- wiremock
 
 ## Development
 
