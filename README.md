@@ -14,7 +14,7 @@ If your app or service integrates with another app or service, integration testi
 ## Some nice articles on integration testing
 
 - [Martin Fowler on integration testing](https://martinfowler.com/bliki/IntegrationTest.html)
-- [Geeks for Geeks](https://www.geeksforgeeks.org/software-engineering-integration-testing/)
+- [Geeks for Geeks intro to integration testing](https://www.geeksforgeeks.org/software-engineering-integration-testing/)
 - [Unit testing vs integration testing](https://performancelabus.com/unit-vs-integration-testing/)
 
 ## How it works
