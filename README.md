@@ -28,7 +28,7 @@ Meeshkan works by building a stand-in, or *mock*, of the service with which you 
 
 When you run your integration tests, they will interact with this mock on a local server instead of calling the real service.
 
-As your tests run, Meeshkan keeps track of the API endpoints that are called on the mock server, informing you of potential additional tests you need to write to make sure you've tested the most important ways that the API can (mis)behave.  We call this **API coverage**. API coverage is like [code coverage](https://en.wikipedia.org/wiki/Code_coverage), except instead of measuring how much of your code is tested, API coverage measures how many potential API behaviors are tested.
+As your tests run, Meeshkan keeps track of the API endpoints that are called on the mock server, informing you of potential additional tests you need to write to make sure you've tested the most important ways that the API can (mis)behave.  We call this **API coverage**. API coverage is like [code coverage](https://en.wikipedia.org/wiki/Code_coverage), except instead of measuring what percentage of your codebase is tested, API coverage measures how many potential outcomes of API-based integrations are tested.
 
 ## Some alternatives and competitors
 
