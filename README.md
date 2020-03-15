@@ -11,7 +11,7 @@ Meeshkan helps developers write effective integration tests.
 
 If your app or service integrates with another app or service, integration testing is a good way to make sure that your app correctly handles input from that service, including unexpected input.
 
-## Some nice articles on integration testing
+## Some useful articles on integration testing
 
 - [Martin Fowler on integration testing](https://martinfowler.com/bliki/IntegrationTest.html)
 - [Geeks for Geeks intro to integration testing](https://www.geeksforgeeks.org/software-engineering-integration-testing/)
