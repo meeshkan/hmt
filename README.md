@@ -75,7 +75,7 @@ This guide uses python as an example language, but we have examples for several 
 - [Java]()
 - [Go]()
 
-In the example, we'll use a code that integrates with Stripe.  Why Stripe?  Why not!  But Meeshkan can be used for any REST API integration, and we're working hard to build gRPC, GraphQL, and Kafka too.
+In the example, we'll use a code that integrates with Stripe.  Why Stripe?  Because we've used Meeshkan to test our integrations with Stripe.  But Meeshkan can be used for any REST API integration, and we're working hard to build gRPC, GraphQL, and Kafka too.
 
 First, here's our integration code:
 
