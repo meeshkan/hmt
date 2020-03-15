@@ -25,7 +25,7 @@ Meeshkan starts from the premise that integrations are always two-sided:
 
 These interactions are brokered through an API.  There are many different types of APIs (REST, gRPC, Kafka, GraphQL, SQL) but the basic idea is the same - you send a request and you get a response.
 
-Meeshkan works by building a stand-in, or *mock*, of the service with which you integrate.  It does this by using various sources of information, like API recordings and OpenAPI specs, to reverse engineering a mock whose behavior is *close enough to* that of the original service. *Close enough* means, amongst other things:
+Meeshkan works by building a stand-in, or *mock*, of the service with which you integrate.  It does this by using various sources of information, like API recordings and OpenAPI specs, to automatically create a mock service whose behavior is *close enough to* that of the original service. *Close enough* means, amongst other things:
 
 - the data it serves back looks more or less like data from the real service.
 - the mock fails when it should fail and succeeds when it should succeed.
