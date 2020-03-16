@@ -8,7 +8,7 @@ To create a mock server from an OpenAPI spec, use the `meeshkan mock` command.
 
 ```bash
 $ pip install meeshkan
-$ meeshkan mock --specs-dir spec_dir/
+$ meeshkan mock --specs spec_file.yaml
 ```
 
 And then, in another terminal window, type:
@@ -17,7 +17,7 @@ And then, in another terminal window, type:
 $ curl http://localhost:8000/https://my.api.com/foo
 ```
 
-Assuming that the directory `spec_dir/` contains an OpenAPI spec with the server `https://my.api.com`, it will return a mock of the resource `GET /foo`.
+Assuming that the directory `spec_file.yaml` is an OpenAPI spec with the server `https://my.api.com`, it will return a mock of the resource `GET /foo`.
 
 More options for the `meeshkan mock` command an be seen by running `meeshkan mock --help`.
 

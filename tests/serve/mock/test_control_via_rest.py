@@ -13,7 +13,7 @@ from meeshkan.serve.utils.routing import HeaderRouting
 def app():
     return make_mocking_app(
         "tests/serve/mock/callbacks",
-        "tests/serve/mock/shemas/petstore",
+        "tests/serve/mock/schemas/petstore",
         HeaderRouting(),
     )
 

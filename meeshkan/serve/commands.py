@@ -29,9 +29,10 @@ _common_server_options = [
     click.option("-a", "--admin-port", default="8888", help="Admin server port."),
     click.option(
         "-s",
-        "--specs-dir",
+        "--specs",
         default=DEFAULT_SPECS_DIR,
-        help="Directory with OpenAPI specifications.",
+        type=click.Path(exists=True, file_okay=True, dir_okay=True, readable=True),
+        help="OpenAPI specification(s) to mock.",
     ),
     click.option("-d", "--daemon", is_flag=True, help="Run meeshkan as a daemon."),
     click.option(
@@ -67,7 +68,7 @@ _mock_options = _common_server_options + [
 @click.group(invoke_without_command=True)
 @add_options(_mock_options)
 @click.pass_context
-def mock(ctx, callback_dir, admin_port, port, specs_dir, header_routing, daemon):
+def mock(ctx, callback_dir, admin_port, port, specs, header_routing, daemon):
     """
     Run a mock server using OpenAPI specifications.
     """
@@ -77,12 +78,12 @@ def mock(ctx, callback_dir, admin_port, port, specs_dir, header_routing, daemon)
 
 @mock.command(name="start")  # type: ignore
 @add_options(_mock_options)
-def start_mock(callback_dir, admin_port, port, specs_dir, header_routing, daemon):
+def start_mock(callback_dir, admin_port, port, specs, header_routing, daemon):
     server = MockServer(
         callback_dir=callback_dir,
         admin_port=admin_port,
         port=port,
-        specs_dir=specs_dir,
+        specs=specs,
         routing=HeaderRouting() if header_routing else PathRouting(),
     )
 

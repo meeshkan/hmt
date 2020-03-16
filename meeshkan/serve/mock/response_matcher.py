@@ -31,19 +31,23 @@ logger = logging.getLogger(__name__)
 class ResponseMatcher:
     _schemas: Mapping[str, OpenAPIObject]
 
-    def __init__(self, specs_dir):
-        schemas: Sequence[str] = []
-        if not os.path.exists(specs_dir):
-            logging.info("OpenAPI schema directory not found %s", specs_dir)
-        else:
+    def __init__(self, specs_dir_or_file):
+        schemas: Sequence[str]
+        if os.path.isfile(specs_dir_or_file):
+            schemas = [specs_dir_or_file]
+        elif os.path.isdir(specs_dir_or_file):
             schemas = [
-                s
-                for s in os.listdir(specs_dir)
+                os.path.join(specs_dir_or_file, s)
+                for s in os.listdir(specs_dir_or_file)
                 if s.endswith("yml") or s.endswith("yaml") or s.endswith("json")
             ]
+        else:
+            raise FileNotFoundError(
+                "OpenAPI schema path not found %s", specs_dir_or_file
+            )
         specs: Sequence[Tuple[str, OpenAPIObject]] = []
         for schema in schemas:
-            with open(os.path.join(specs_dir, schema), encoding="utf8") as schema_file:
+            with open(schema, encoding="utf8") as schema_file:
                 # TODO: validate schema?
                 specs = [
                     *specs,
