@@ -7,7 +7,6 @@ Meeshkan can be used to create a mock server from OpenAPI specifications and opt
 To create a mock server from an OpenAPI spec, use the `meeshkan mock` command.
 
 ```bash
-$ pip install meeshkan
 $ meeshkan mock --specs-dir spec_dir/
 ```
 

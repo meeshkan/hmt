@@ -91,7 +91,6 @@ Let's look at how to build a Meeshkan spec. First, you have to **collect** recor
 To record API traffic, the Meeshkan CLI provides a `record` mode that captures API traffic using a proxy.
 
 ```bash
-$ pip install meeshkan # if not installed yet
 $ meeshkan record
 ```
 
@@ -110,7 +109,6 @@ For more information about recording, including direct file writing and kafka st
 Using the Meeshkan CLI, you can **build** an OpenAPI schema from a single `.jsonl` file, in addition to any existing OpenAPI specs that describe how a service works.
 
 ```bash
-$ pip install meeshkan # if not done yet
 $ meeshkan build -i path/to/recordings.jsonl [-o path/to/output_directory]
 ```
 
@@ -141,7 +139,6 @@ For more information about building, including mixing together the two modes and
 You can use an OpenAPI spec, such as the one created with `meeshkan build`, to create a **mock** server using Meeshkan.
 
 ```bash
-$ pip install meeshkan # if not installed yet
 $ meeshkan mock
 ```
 

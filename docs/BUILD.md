@@ -10,8 +10,7 @@ In case one only has an OpenAPI spec and no server recodings, it is not necessar
 
 To build an OpenAPI spec from recorded HTTP API traffic and other OpenAPI specs, use the `meeshkan build` command.
 
-```
-$ pip install meeshkan
+```sh
 $ meeshkan build -i my_recoding.jsonl -a my_openapi_spec.yml -o result/
 ```
 
