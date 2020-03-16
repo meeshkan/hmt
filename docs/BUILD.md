@@ -1,8 +1,8 @@
 # Building with Meeshkan
 
 Meeshkan builds OpenAPI specs from two possible sources:
+- Recordings of HTTP API traffic serialized in the [`http-types`](https://github.com/meeshkan/http-types) format and written to a [`.jsonl`](https://jsonlines.org) file
 - Other OpenAPI specs
-- Recordings of HTTP API traffic serialized in the [`http-types`](https://github.com/meeshkan/http-types) format and written to a [`.jsonl`](https://jsonlines.org) file.
 
 In case one only has an OpenAPI spec and no server recodings, it is not necessary to run Meeshkan build and you can go directly to the [`meeshkan mock`](./MOCK.md) command.
 
