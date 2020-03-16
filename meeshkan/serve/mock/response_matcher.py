@@ -47,17 +47,10 @@ class ResponseMatcher:
             )
             for schema in schemas:
                 with open(os.path.join(specs_dir, schema), encoding="utf8") as schema_file:
-                    spec = convert_to_openapi((json.loads if schema.endswith("json") else yaml.safe_load)
-                                              (schema_file.read()))
-
-                    storage_manager.add_mock(schema)
+                    dict_spec = (json.loads if schema.endswith("json") else yaml.safe_load)(schema_file.read())
+                    spec = convert_to_openapi(dict_spec)
+                    storage_manager.add_mock(schema, spec)
                     self._schemas[schema] = spec
-
-                    if spec._x is not None and 'x-meeshkan-data' in spec._x:
-                        storage = storage_manager[schema]
-                        for entity, values in spec._x['x-meeshkan-data'].items():
-                            storage.add_entity(entity)
-                            storage[entity].extend(values)
 
 
     def match_error(self, msg: str, req: Request) -> Response:

@@ -2,16 +2,13 @@ from meeshkan.serve.mock.storage import storage_manager
 
 
 def test_clear():
-    storage_manager.default["x"] = "y"
-    assert storage_manager.get("default") is None
+    storage = storage_manager.default
+    storage.default["x"] = "y"
 
-    storage_manager.add_storage("default")
-    storage_manager.get("default")["x"] = "z"
+    storage.add_entity("default")
 
-    assert "y" == storage_manager.default["x"]
-    assert "z" == storage_manager.get("default")["x"]
+    assert "y" == storage.default["x"]
 
-    storage_manager.clear()
+    storage.clear()
 
-    assert "x" not in storage_manager.default
-    assert "z" not in storage_manager.get("default")
+    assert "x" not in storage.default

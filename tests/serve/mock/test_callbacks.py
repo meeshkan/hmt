@@ -24,7 +24,7 @@ def test_no_callback():
         dict(statusCode=200, body="", bodyAsJson={}, headers={})
     )
 
-    new_response = callback_manager(request, response)
+    new_response = callback_manager(request, response, storage_manager.default)
 
     assert response == new_response
 
@@ -50,7 +50,7 @@ def test_json():
         dict(statusCode=200, body="", bodyAsJson={"field": "value"}, headers={})
     )
 
-    new_response = callback_manager(request, response)
+    new_response = callback_manager(request, response, storage_manager.default)
 
     assert 1 == new_response.bodyAsJson["count"]
     assert "value" == new_response.bodyAsJson["field"]
@@ -69,13 +69,13 @@ def test_json():
         )
     )
 
-    new_response = callback_manager(request_set, response)
+    new_response = callback_manager(request_set, response, storage_manager.default)
 
     assert 10 == new_response.bodyAsJson["count"]
     assert "value" == new_response.bodyAsJson["field"]
     assert "count" in new_response.body
 
-    new_response = callback_manager(request, response)
+    new_response = callback_manager(request, response, storage_manager.default)
     assert 11 == new_response.bodyAsJson["count"]
     assert "value" == new_response.bodyAsJson["field"]
     assert "count" in new_response.body
@@ -102,7 +102,7 @@ def test_text():
         dict(statusCode=200, body="Called", bodyAsJson={}, headers={})
     )
 
-    new_response = callback_manager(request, response)
+    new_response = callback_manager(request, response, storage_manager.default)
 
     assert 10 == new_response.headers["x-meeshkan-counter"]
     assert "Called 10 times" == new_response.body
@@ -129,7 +129,7 @@ def test_json_full():
         dict(statusCode=200, body="", bodyAsJson={"field": "value"}, headers={})
     )
 
-    new_response = callback_manager(request, response)
+    new_response = callback_manager(request, response, storage_manager.default)
 
     assert "Hello" == new_response.bodyAsJson["message"]
     assert "value" == new_response.headers["X-Echo-Header"]
@@ -156,7 +156,7 @@ def test_text_full():
         dict(statusCode=200, body="", bodyAsJson={"field": "value"}, headers={})
     )
 
-    new_response = callback_manager(request, response)
+    new_response = callback_manager(request, response, storage_manager.default)
 
     assert "Hello" == new_response.body
     assert "value" == new_response.headers["X-Echo-Header"]

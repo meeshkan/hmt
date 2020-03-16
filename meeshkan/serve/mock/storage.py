@@ -1,5 +1,7 @@
 import logging
 
+from openapi_typed import OpenAPIObject
+
 logger = logging.getLogger(__name__)
 
 
@@ -17,8 +19,8 @@ class Storage:
 
     def clear(self):
         self._default.clear()
-        for storage in self._storages.values():
-            storage.clear()
+        for entity in self._entities.values():
+            entity.clear()
         logger.debug("Storage cleared")
 
     def __getattr__(self, x):
@@ -35,8 +37,13 @@ class StorageManager:
         self._storages = dict()
         self._default = Storage()
 
-    def add_mock(self, mockname):
-        self._storages[mockname] = Storage()
+    def add_mock(self, mockname: str, spec: OpenAPIObject):
+        storage = Storage()
+        self._storages[mockname] = storage
+        if spec._x is not None and 'x-meeshkan-data' in spec._x:
+            for entity, values in spec._x['x-meeshkan-data'].items():
+                storage.add_entity(entity)
+                storage[entity].extend(values)
 
     def __getitem__(self, mockname):
         return self._storages[mockname]
