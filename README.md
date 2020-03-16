@@ -56,7 +56,12 @@ $ brew tap meeshkan/tap
 $ brew install meeshkan
 ```
 
-Debian and Ubuntu users can install Meeshkan with `apt-get`:
+Debian and Ubuntu users can install Meeshkan with `apt`:
+
+```sh
+$ echo "deb [trusted=yes] https://dl.bintray.com/meeshkan/apt all main" | sudo tee -a /etc/apt/sources.list
+$ apt update && apt-get install meeshkan
+```
 
 ```bash
 $ echo "deb [trusted=yes] https://dl.bintray.com/meeshkan/apt all main" | tee -a /etc/apt/sources.list
