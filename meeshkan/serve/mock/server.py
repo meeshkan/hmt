@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
@@ -24,10 +25,10 @@ def make_mocking_app_(
     return Application([(r"/.*", MockServerView, dependencies)])
 
 
-def make_mocking_app(callback_dir: str, specs_dir: str, routing: Routing):
+def make_mocking_app(callback_dir: Optional[str], specs_dir: str, routing: Routing):
 
     # callback_manager = CallbackManager()
-    if callback_dir:
+    if callback_dir is not None:
         callback_manager.load(callback_dir)
 
     response_matcher = ResponseMatcher(specs_dir)
