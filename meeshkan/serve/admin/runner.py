@@ -26,4 +26,4 @@ def start_admin(port):
     app = make_admin_app()
     http_server = HTTPServer(app)
     http_server.listen(port)
-    logger.info("Starting admin endpont on http://localhost:%s/admin", port)
+    logger.info("Starting admin endpoint on http://localhost:%s/admin", port)

@@ -44,5 +44,5 @@ class MockServer:
         app = make_mocking_app(self._callback_dir, self._specs_dir, self._routing)
         http_server = HTTPServer(app)
         http_server.listen(self._port)
-        logger.info("Mock mock is listening on http://localhost:%s", self._port)
+        logger.info("Mock is listening on http://localhost:%s", self._port)
         IOLoop.current().start()
