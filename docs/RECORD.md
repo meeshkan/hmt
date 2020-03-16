@@ -6,8 +6,7 @@ Meeshkan can be used to record HTTP API traffic in a format that `meeshkan build
 
 To start a Meeshkan server that will record HTTP API traffic, use the `meeshkan record` command.
 
-```
-$ pip install meeshkan # if not installed yet
+```sh
 $ meeshkan record
 ```
 This starts Meeshkan as a reverse proxy on the default port of `8000`.
