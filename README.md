@@ -209,6 +209,12 @@ Supported modes are:
 
 For more information about building, including mixing together the two modes and editing the created OpenAPI schema, see the [building documentation](./docs/BUILD.md).
 
+### Callbacks
+
+Meeshkan's ultimate goal is to correctly mock service's persistance layers, and we are getting closer to this every week using Natural Language Processing.  However, Meeshkan cannot currently handle correctly mocking most APIs' persistence mechanisms. This means that if you `POST` information and then try to `GET` it back, you may not be served the correct information.
+
+For more fine-grained control of persistence, Meeshkan has a callback mechanism. To read more about callbacks, check out [the documentation](./MOCK.md#callbacks).
+
 ## Collect recordings of API traffic
 
 To record API traffic that can be onsumed by Meeshkan, the Meeshkan CLI provides a `record` mode that captures API traffic using a proxy.
