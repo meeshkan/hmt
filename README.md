@@ -25,6 +25,7 @@ Meeshkan is a tool that mocks HTTP APIs for use in sandboxes as well as for auto
   - [Automated builds](#automated-builds)
   - [Publishing Meeshkan as a PyPi package](#publishing-meeshkan-as-a-pypi-package)
 - [Contributing](#contributing)
+  - [Code of Conduct](#code-of-conduct)
 
 ## Installation
 Install via [pip](https://pip.pypa.io/en/stable/installing/) (requires **Python 3.6+**):
@@ -159,6 +160,8 @@ For more information about mocking, including adding custom middleware and modif
 
 Here are some useful tips for building and running Meeshkan from source. 
 
+If you run into any issues, please [reach out to our team on Gitter](https://gitter.im/Meeshkan/community).
+
 ### Getting started
 
 1. Clone this repository: `git clone https://github.com/meeshkan/meeshkan`
@@ -238,5 +241,7 @@ To see what the different commands do, see `Command` classes in [setup.py](https
 ## Contributing
 
 Thanks for your interest in contributing! Please take a look at our [development guide](#development) for notes on how to develop the package locally.  A great way to start contributing is to [file an issue](https://github.com/meeshkan/meeshkan/issue) or [make a pull request](https://github.com/meeshkan/meeshkan/pulls).
+
+### Code of Conduct
 
 Please note that this project is governed by the [Meeshkan Community Code of Conduct](https://github.com/Meeshkan/code-of-conduct). By participating, you agree to abide by its terms.
