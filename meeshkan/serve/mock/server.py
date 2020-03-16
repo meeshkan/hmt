@@ -5,7 +5,7 @@ from tornado.ioloop import IOLoop
 from tornado.web import Application
 
 from meeshkan.serve.admin.runner import start_admin
-from meeshkan.serve.mock.callbacks import callback_manager
+from meeshkan.serve.mock.callbacks import CallbackManager, callback_manager
 from meeshkan.serve.mock.response_matcher import ResponseMatcher
 from meeshkan.serve.mock.views import MockServerView
 from meeshkan.serve.utils.routing import Routing, PathRouting
@@ -13,19 +13,26 @@ from meeshkan.serve.utils.routing import Routing, PathRouting
 logger = logging.getLogger(__name__)
 
 
-class MeeshkanApplication(Application):
-    response_matcher: ResponseMatcher
-    router: Routing
+def make_mocking_app_(
+    callback_manager: CallbackManager,
+    response_matcher: ResponseMatcher,
+    router: Routing,
+):
+    dependencies = dict(
+        callback=callback_manager, response_matcher=response_matcher, router=router,
+    )
+    return Application([(r"/.*", MockServerView, dependencies)])
 
 
-def make_mocking_app(callback_dir, specs_dir, routing):
-    app = MeeshkanApplication([(r"/.*", MockServerView)])
+def make_mocking_app(callback_dir: str, specs_dir: str, routing: Routing):
+
+    # callback_manager = CallbackManager()
     if callback_dir:
         callback_manager.load(callback_dir)
 
-    app.response_matcher = ResponseMatcher(specs_dir)
-    app.router = routing
-    return app
+    response_matcher = ResponseMatcher(specs_dir)
+
+    return make_mocking_app_(callback_manager, response_matcher, routing)
 
 
 class MockServer:
