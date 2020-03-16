@@ -225,6 +225,7 @@
 	"paths": {
 		"/v1/payments/{trnopysd}": {
 			"x-meeshkan-type": "upsert",
+			"x-meeshkan-entity": "payment",
 			"summary": "Path summary",
 			"description": "Path description",
 			"parameters": [{
@@ -318,6 +319,7 @@
 		},
 		"/accounts/v3/accounts/eg9Mno2tvmeEE039chWrHw7sk1155oy5Mha8kQp0mYs.sxajtselenSScKPZrBMYjg.SoFWGrHocw1YoNb3zw-vfw": {
 			"x-meeshkan-type": "read",
+			"x-meeshkan-entity": "account",
 			"summary": "Path summary",
 			"description": "Path description",
 			"get": {
@@ -433,6 +435,7 @@
 		},
 		"/accounts/v3/accounts": {
 			"x-meeshkan-type": "read",
+			"x-meeshkan-entity": "account",
 			"summary": "Path summary",
 			"description": "Path description",
 			"get": {
