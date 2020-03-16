@@ -52,7 +52,7 @@ $ apt update && apt-get install meeshkan
 ## Getting started with Meeshkan
 
 The basic Meeshkan flow is **collect, build and mock.**
-1. To start, **collect** data from recorded server traffic and/or OpenAPI specs.
+1. First, **collect** data from recorded server traffic and/or OpenAPI specs.
 1. Then, **build** a schema that unifies these various data sources.
 1. Finally, use this schema to create a **mock** server of an API.
 
@@ -101,30 +101,28 @@ To record API traffic, the Meeshkan CLI provides a `record` mode that captures A
 $ meeshkan record
 ```
 
-This starts Meeshkan as a reverse proxy on the default port of `8000` and creates two directories: `logs` and `specs`. 
+This command starts Meeshkan as a reverse proxy on the default port of `8000` and creates two directories: `logs` and `specs`. 
 
-For example, with [curl](https://curl.haxx.se/), you can use Meeshkan as a proxy like so:
+With [curl](https://curl.haxx.se/), for example, you can use Meeshkan as a proxy like so:
 
 ```bash
 $ curl http://localhost:8000/http://api.example.com
 ```
 
-By default, the recording proxy treats the path as the target URL and writes a [`.jsonl`](https://jsonlines.org) file containing logs of all server traffic to the `logs` directory.  All logs are created in the [`http-types`](https://github.com/meeshkan/http-types) format.  The `meeshkan build` tool expects all recordings to be represented in a `.jsonl` file containing recordings represented in the `http-types` format.
+By default, the recording proxy treats the path as the target URL. It then writes a [`.jsonl`](https://jsonlines.org) file containing logs of all server traffic to the `logs` directory.  All logs are created in the [`http-types`](https://github.com/meeshkan/http-types) format. This is because Meeshkan's `build` tool expects all recordings to be represented in a `.jsonl` file containing recordings represented in the `http-types` format.
 
 For more information about recording, including direct file writing and kafka streaming, see the [recording documentation](./docs/RECORD.md).
 
 ## Build a Meeshkan spec from recordings
 
-Using the Meeshkan CLI, you can **build** an OpenAPI schema from a single `.jsonl` file, in addition to any existing OpenAPI specs that describe how a service works.
+Using the Meeshkan CLI, you can **build** an OpenAPI schema from a single `.jsonl` file, in addition to any existing OpenAPI specs that describe how your service works.
 
 ```bash
 $ pip install meeshkan # if not installed yet
 $ meeshkan build --input-file path/to/recordings.jsonl 
 ```
 
-The input file should be in [JSON Lines](http://jsonlines.org/) format and every line should be in [http-types](https://meeshkan.github.io/http-types/) JSON format. 
-
-For an example input file, see [recordings.jsonl](https://github.com/Meeshkan/meeshkan/blob/master/resources/recordings.jsonl). The libraries listed at [http-types](https://meeshkan.github.io/http-types/) can be used to generate input files in your language of choice.
+_Note: The input file should be in [JSON Lines](http://jsonlines.org/) format and every line should be in [http-types](https://meeshkan.github.io/http-types/) JSON format. For an example input file, see [recordings.jsonl](./resources/recordings.jsonl)._
 
 Optionally, you can also specify an output directory using the `--out` flag followed by the path to this directory. By default, Meeshkan will build the new OpenAPI specifications in the `specs` directory. 
 
@@ -230,13 +228,13 @@ Configuration for CircleCI [build pipeline](https://app.circleci.com/github/Mees
 
 ### Publishing Meeshkan as a PyPi package
 
-To publish Meeshkan as a PyPi package, please do the following steps:
+To publish Meeshkan as a PyPi package, complete the following steps:
 
 1. Bump the version in [setup.py](https://github.com/Meeshkan/meeshkan/tree/master/setup.py) if the version is the same as in the published [package](https://pypi.org/project/meeshkan/). Commit and push.
-1. Run `python setup.py test`, `python setup.py typecheck` and `python setup.py dist` to check everything works
+1. Run `python setup.py test` to check that everything works
 1. To build and upload the package, run `python setup.py upload`. Insert PyPI credentials to upload the package to `PyPI`. The command will also run `git tag` to tag the commit as a release and push the tags to remote.
 
-To see what the different commands do, see `Command` classes in [setup.py](https://github.com/Meeshkan/meeshkan/tree/master/setup.py).
+> To see what the different commands do, see `Command` classes in [setup.py](https://github.com/Meeshkan/meeshkan/tree/master/setup.py).
 
 ## Contributing
 
