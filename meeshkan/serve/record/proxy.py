@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 import tornado.ioloop
 from http_types import Request, Response
@@ -63,6 +64,7 @@ class RecordProxyRunner:
         self._mode = mode
 
     def run(self):
+
         logger.info("Starting Meeshkan record on http://localhost:%s", self._port)
         logger.info(
             "Spec generation mode is %s",
