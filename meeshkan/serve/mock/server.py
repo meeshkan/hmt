@@ -56,6 +56,7 @@ class MockServer:
         callback_dir=None,
         admin_port=None,
         routing=PathRouting(),
+        log_dir: str = "/dev/null",
     ):
         self._callback_dir = callback_dir
         self._admin_port = admin_port
@@ -63,7 +64,7 @@ class MockServer:
         self._specs = specs
         self._routing = routing
         self._scope = scope or Scope()
-        self.log = Log(self._scope)
+        self._log = Log(self._scope)
 
     def run(self) -> None:
         if self._admin_port:
