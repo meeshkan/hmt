@@ -22,7 +22,10 @@ def make_mocking_app_(
     log: Log,
 ):
     dependencies = dict(
-        callback=callback_manager, response_matcher=response_matcher, router=router, log=log
+        callback=callback_manager,
+        response_matcher=response_matcher,
+        router=router,
+        log=log,
     )
     return Application([(r"/.*", MockServerView, dependencies)])
 
