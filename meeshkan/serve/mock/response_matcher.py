@@ -1,5 +1,8 @@
 import json
 import logging
+
+from meeshkan.serve.mock.callbacks import callback_manager
+from meeshkan.serve.mock.faker.schema_faker import MeeshkanSchemaFaker
 from meeshkan.serve.mock.rest import rest_middleware_manager
 import os
 import yaml
@@ -19,11 +22,10 @@ from meeshkan.serve.mock.matcher import (
     change_refs,
     ref_name,
 )
-from meeshkan.serve.mock.faker import fake_it
-
-fkr = Faker()
 
 from http_types import Request, Response
+
+from meeshkan.serve.mock.storage import storage_manager
 
 logger = logging.getLogger(__name__)
 
@@ -32,31 +34,24 @@ class ResponseMatcher:
     _schemas: Mapping[str, OpenAPIObject]
 
     def __init__(self, specs_dir):
-        schemas: Sequence[str] = []
+        self._text_faker = Faker()
+        self._json_faker = MeeshkanSchemaFaker()
+        self._schemas = {}
         if not os.path.exists(specs_dir):
             logging.info("OpenAPI schema directory not found %s", specs_dir)
         else:
-            schemas = [
+            schemas = (
                 s
                 for s in os.listdir(specs_dir)
                 if s.endswith("yml") or s.endswith("yaml") or s.endswith("json")
-            ]
-        specs: Sequence[Tuple[str, OpenAPIObject]] = []
-        for schema in schemas:
-            with open(os.path.join(specs_dir, schema), encoding="utf8") as schema_file:
-                # TODO: validate schema?
-                specs = [
-                    *specs,
-                    (
-                        schema,
-                        convert_to_openapi(
-                            (json.loads if schema.endswith("json") else yaml.safe_load)(
-                                schema_file.read()
-                            )
-                        ),
-                    ),
-                ]
-        self._schemas = {k: v for k, v in specs}
+            )
+            for schema in schemas:
+                with open(os.path.join(specs_dir, schema), encoding="utf8") as schema_file:
+                    dict_spec = (json.loads if schema.endswith("json") else yaml.safe_load)(schema_file.read())
+                    spec = convert_to_openapi(dict_spec)
+                    storage_manager.add_mock(schema, spec)
+                    self._schemas[schema] = spec
+
 
     def match_error(self, msg: str, req: Request) -> Response:
         return self.default_response(
@@ -74,19 +69,7 @@ class ResponseMatcher:
             timestamp=None,
         )
 
-    def get_response(self, request: Request) -> Response:
-        # TODO: tight coupling here
-        # try to decouple...
-        schemas = rest_middleware_manager.spew(request, self._schemas)
-        match = match_request_to_openapi(request, schemas)
-        if len(match) == 0:
-            return self.match_error(
-                "Could not find a open API schema for the host %s." % request.host,
-                request,
-            )
-        match_keys = [x for x in match.keys()]
-        random.shuffle(match_keys)
-        name = match_keys[0]
+    def _match_response(self, request, name, spec, match):
         path_error = "Could not find a path %s on hostname %s." % (
             request.path,
             request.host,
@@ -96,11 +79,12 @@ class ResponseMatcher:
             request.path,
             request.host,
         )
-        if match[name].paths is None:
+
+        if spec.paths is None:
             return self.match_error(path_error, request)
-        if len(match[name].paths.items()) == 0:
+        if len(spec.paths.items()) == 0:
             return self.match_error(path_error, request)
-        path_candidates = [x for x in match[name].paths.values()]
+        path_candidates = [x for x in spec.paths.values()]
         random.shuffle(path_candidates)
         path_candidate = path_candidates[0]
         method = {
@@ -125,7 +109,7 @@ class ResponseMatcher:
         response = potential_responses[0]
         response_1 = response[1]
         response_1 = (
-            get_response_from_ref(match[name], ref_name(response_1))
+            get_response_from_ref(spec, ref_name(response_1))
             if isinstance(response_1, Reference)
             else response_1
         )
@@ -175,15 +159,15 @@ class ResponseMatcher:
                         change_ref(v) if isinstance(v, Reference) else change_refs(v)
                     )
                     for k, v in (
-                        match[name].components.schemas.items()
+                        spec.components.schemas.items()
                         if (name in match)
-                        and (match[name].components is not None)
-                        and (match[name].components.schemas is not None)
+                        and (spec.components is not None)
+                        and (spec.components.schemas is not None)
                         else []
                     )
                 },
             }
-            bodyAsJson = fake_it(to_fake, to_fake, 0)
+            bodyAsJson = self._json_faker.fake_it(to_fake, to_fake, 0)
             return Response(
                 statusCode=statusCode,
                 body=json.dumps(bodyAsJson),
@@ -194,7 +178,7 @@ class ResponseMatcher:
         if "text/plain" in mime_types:
             return Response(
                 statusCode=statusCode,
-                body=fkr.sentence(),
+                body=self._text_faker.sentence(),
                 # TODO: can this be accomplished without a cast?
                 headers=cast(
                     Mapping[str, Union[str, Sequence[str]]],
@@ -207,3 +191,18 @@ class ResponseMatcher:
             "Could not produce content for these mime types %s" % str(mime_types),
             request,
         )
+
+    def get_response(self, request: Request) -> Response:
+        # TODO: tight coupling here
+        # try to decouple...
+        schemas = rest_middleware_manager.spew(request, self._schemas)
+        match = match_request_to_openapi(request, schemas)
+
+        if len(match) == 0:
+            return callback_manager(request, self.match_error(
+                "Could not find a open API schema for the host %s." % request.host,
+                request), storage_manager.default)
+
+        name, spec = random.choice(list(match.items()))
+        response = self._match_response(request, name, spec, match)
+        return callback_manager(request, response, storage_manager[name])
