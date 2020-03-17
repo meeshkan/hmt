@@ -31,7 +31,6 @@ def add_options(options):
 
 _common_server_options = [
     click.option("-p", "--port", default="8000", help="Server port."),
-    click.option("-a", "--admin-port", default="8888", help="Admin server port."),
     click.option(
         "-s",
         "--specs-dir",
@@ -59,13 +58,14 @@ _record_options = _common_server_options + [
 ]
 
 _mock_options = _common_server_options + [
+    click.option("-a", "--admin-port", default="8888", help="Admin server port."),
     click.option(
         "-c",
         "--callback-dir",
         default=None,
         type=click.Path(exists=True, file_okay=False, resolve_path=True),
         help="Directory with callback scripts to modify behavior.",
-    )
+    ),
 ]
 
 
@@ -135,10 +135,9 @@ def record(ctx, port, admin_port, log_dir, header_routing, specs_dir, mode, daem
 
 @record.command(name="start")  # type: ignore
 @add_options(_record_options)
-def start_record(port, admin_port, log_dir, header_routing, specs_dir, mode, daemon):
+def start_record(port, log_dir, header_routing, specs_dir, mode, daemon):
     proxy_runner = RecordProxyRunner(
         port=port,
-        admin_port=admin_port,
         log_dir=log_dir,
         routing=HeaderRouting() if header_routing else PathRouting(),
         specs_dir=specs_dir,
