@@ -2,10 +2,10 @@ import json
 import os
 import time
 from dataclasses import dataclass
-from typing import Optional, Sequence
 from io import StringIO
+from typing import Optional, Sequence
 
-from http_types import Request, Response, HttpExchangeWriter, HttpExchange
+from http_types import HttpExchange, HttpExchangeWriter, Request, Response
 
 from .scope import Scope
 
@@ -50,26 +50,24 @@ class Log:
         req_io = StringIO()
         # TODO: this is hackish. is there a better way?
         HttpExchangeWriter(req_io).write(
-            HttpExchange(
-                request=request,
-                response=response,
-            )
+            HttpExchange(request=request, response=response,)
         )
         # should only be one line... and why do we join with newline?
         req_io.seek(0)
         req = json.loads("\n".join([x for x in req_io]))
         interaction = {
             **req,
-            'meta': {
-                'timestamp': self._interactions[-1].meta.timestamp,
-                **({'scope':  self._interactions[-1].meta.scope} if self._interactions[-1].meta.scope is not None else {})
-            }
+            "meta": {
+                "timestamp": self._interactions[-1].meta.timestamp,
+                **(
+                    {"scope": self._interactions[-1].meta.scope}
+                    if self._interactions[-1].meta.scope is not None
+                    else {}
+                ),
+            },
         }
 
-        self._interactions_as_json = [
-            *self._interactions_as_json,
-            interaction
-        ]
+        self._interactions_as_json = [*self._interactions_as_json, interaction]
         if self._dir is not None:
             with open(os.path.join(self._dir, self._log_file_name), "w") as logfile:
                 logfile.write(json.dumps(self._interactions_as_json, indent=2))
