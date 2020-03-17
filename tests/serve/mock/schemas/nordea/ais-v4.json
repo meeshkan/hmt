@@ -689,6 +689,7 @@
       "AccountListResponse": {
         "title": "AccountListResponse",
         "type": "object",
+        "required": ["group_header", "response"],
         "properties": {
           "group_header": {
             "$ref": "#/components/schemas/ResponseHeader"
