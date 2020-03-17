@@ -53,7 +53,7 @@ class ResponseMatcher:
         matches = match_request_to_openapi(request, specs)
         if len(matches) == 0:
             return self.match_error(
-                "Could not find a open API schema for the host %s." % request.host,
+                "Could not find an OpenAPI schema for the host %s." % request.host,
                 request,
             )
         random.shuffle(matches)
