@@ -7,7 +7,9 @@ from http_types.utils import ResponseBuilder
 from tornado.httpclient import HTTPRequest
 
 from meeshkan.serve.mock.callbacks import callback_manager
+from meeshkan.serve.mock.log import Log
 from meeshkan.serve.mock.response_matcher import ResponseMatcher
+from meeshkan.serve.mock.scope import Scope
 from meeshkan.serve.mock.server import make_mocking_app_
 from meeshkan.serve.utils.routing import HeaderRouting
 
@@ -33,6 +35,7 @@ def app():
         callback_manager=callback_manager,
         response_matcher=response_matcher,
         router=HeaderRouting(),
+        log=Log(Scope()),
     )
     return app
 

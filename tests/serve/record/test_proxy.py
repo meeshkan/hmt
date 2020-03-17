@@ -7,6 +7,8 @@ from http_types import HttpMethod, Protocol
 from tornado.httpclient import HTTPRequest
 from tornado.testing import bind_unused_port
 
+from meeshkan.serve.mock.log import Log
+from meeshkan.serve.mock.scope import Scope
 from meeshkan.serve.mock.server import make_mocking_app
 from meeshkan.serve.mock.specs import load_specs
 from meeshkan.serve.record.proxy import RecordProxy
@@ -20,6 +22,7 @@ def app():
         "tests/serve/mock/callbacks",
         load_specs("tests/serve/mock/schemas/petstore"),
         StaticRouting("http://petstore.swagger.io"),
+        log=Log(Scope()),
     )
 
 

@@ -1,8 +1,10 @@
-from dataclasses import dataclass
-from .scope import ScopeManager
-from typing import Optional, Sequence
-from http_types import Request, Response
 import time
+from dataclasses import dataclass
+from typing import Optional, Sequence
+
+from http_types import Request, Response
+
+from .scope import Scope
 
 
 @dataclass
@@ -21,8 +23,8 @@ class LoggedHttpExchange:
 class Log:
     _interactions: Sequence[LoggedHttpExchange]
 
-    def __init__(self, scope_manager: ScopeManager):
-        self._scope_manager = scope_manager
+    def __init__(self, scope: Scope):
+        self._scope = scope
         self._interactions = []
 
     def put(self, request: Request, response: Response):
@@ -32,7 +34,7 @@ class Log:
                 request=request,
                 response=response,
                 meta=MeeshkanMeta(
-                    timestamp=int(time.time() * 1000), scope=ScopeManager.get()
+                    timestamp=int(time.time() * 1000), scope=self._scope.get()
                 ),
             ),
         ]

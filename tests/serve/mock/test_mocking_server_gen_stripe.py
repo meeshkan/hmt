@@ -2,6 +2,8 @@ import json
 
 import pytest
 
+from meeshkan.serve.mock.log import Log
+from meeshkan.serve.mock.scope import Scope
 from meeshkan.serve.mock.server import make_mocking_app
 from meeshkan.serve.mock.specs import load_specs
 from meeshkan.serve.utils.routing import HeaderRouting
@@ -13,6 +15,7 @@ def app():
         "tests/serve/mock/callbacks",
         load_specs("tests/serve/mock/schemas/stripe"),
         HeaderRouting(),
+        Log(Scope()),
     )
 
 
