@@ -1,13 +1,11 @@
-import os
-import logging
-from openapi_typed_2 import (
-    convert_to_openapi,
-    OpenAPIObject,
-)
-from typing import Sequence
 import json
-import yaml
+import logging
+import os
 from dataclasses import dataclass
+from typing import Sequence
+
+import yaml
+from openapi_typed_2 import OpenAPIObject, convert_to_openapi
 
 
 @dataclass

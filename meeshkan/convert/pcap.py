@@ -1,15 +1,17 @@
 """Code for converting pcap to HttpExchange JSON format."""
 
-from sys import argv
-from typing import List, Optional, Dict, Any, Iterator, Union
-from http_types.utils import RequestBuilder, ResponseBuilder
-from pathlib import Path
 import csv
 import json
-import shutil
-from http_types import Request, Response, HttpExchange
 import re
+import shutil
 import subprocess
+from pathlib import Path
+from sys import argv
+from typing import Any, Dict, Iterator, List, Optional, Union
+
+from http_types import HttpExchange, Request, Response
+from http_types.utils import RequestBuilder, ResponseBuilder
+
 from ..logger import get as getLogger
 
 LOGGER = getLogger(__name__)

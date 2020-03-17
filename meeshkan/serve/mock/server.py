@@ -1,7 +1,5 @@
 import logging
-from typing import Optional
-
-from typing import Sequence
+from typing import Optional, Sequence
 
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
@@ -9,10 +7,10 @@ from tornado.web import Application
 
 from meeshkan.serve.admin.runner import start_admin
 from meeshkan.serve.mock.callbacks import CallbackManager, callback_manager
-from meeshkan.serve.mock.specs import OpenAPISpecification
 from meeshkan.serve.mock.response_matcher import ResponseMatcher
+from meeshkan.serve.mock.specs import OpenAPISpecification
 from meeshkan.serve.mock.views import MockServerView
-from meeshkan.serve.utils.routing import Routing, PathRouting
+from meeshkan.serve.utils.routing import PathRouting, Routing
 
 logger = logging.getLogger(__name__)
 

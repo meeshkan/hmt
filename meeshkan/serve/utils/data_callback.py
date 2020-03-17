@@ -1,13 +1,13 @@
+import json
 import logging
 import os
 
-import json
 from http_types import (
-    Request,
-    Response,
     HttpExchange,
     HttpExchangeWriter,
+    Request,
     RequestBuilder,
+    Response,
     ResponseBuilder,
 )
 from openapi_typed_2 import convert_from_openapi, convert_to_openapi

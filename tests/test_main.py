@@ -1,16 +1,18 @@
-from meeshkan.build.builder import BASE_SCHEMA
-from meeshkan.__main__ import cli, _convert
-from meeshkan.config import DEFAULT_SPECS_DIR
-from click.testing import CliRunner
-from .util import read_recordings_as_strings
-from hamcrest import assert_that, has_key
+import json
+import os
 from pathlib import Path
 from typing import List
-import os
-from openapi_typed_2 import OpenAPIObject, convert_from_openapi
-import json
-import pkg_resources
 
+import pkg_resources
+from click.testing import CliRunner
+from hamcrest import assert_that, has_key
+from openapi_typed_2 import OpenAPIObject, convert_from_openapi
+
+from meeshkan.__main__ import _convert, cli
+from meeshkan.build.builder import BASE_SCHEMA
+from meeshkan.config import DEFAULT_SPECS_DIR
+
+from .util import read_recordings_as_strings
 
 requests = read_recordings_as_strings()
 

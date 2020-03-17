@@ -1,5 +1,6 @@
 import json
 from typing import Any, Dict, List
+
 from http_types import HttpExchange, HttpExchangeBuilder
 
 SAMPLE_RECORDINGS_PATH = "resources/github.jsonl"

@@ -1,15 +1,15 @@
 import logging
-from meeshkan.serve.mock.rest import rest_middleware_manager
-from meeshkan.serve.mock.storage import storage_manager
 
 from tornado.httpserver import HTTPServer
 from tornado.web import Application
 
 from meeshkan.serve.admin.views import (
-    StorageView,
     RestMiddlewaresView,
     RestMiddlewareView,
+    StorageView,
 )
+from meeshkan.serve.mock.rest import rest_middleware_manager
+from meeshkan.serve.mock.storage import storage_manager
 
 logger = logging.getLogger(__name__)
 

@@ -1,8 +1,9 @@
+import logging
 import os
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 import yaml
-import logging
 
 DEFAULT_SPECS_DIR = "specs/"
 

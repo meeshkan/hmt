@@ -1,10 +1,10 @@
+import json
 import logging
 
 from tornado.web import RequestHandler
 
-from ..mock.storage import StorageManager
 from ..mock.rest import RestMiddlewareManager
-import json
+from ..mock.storage import StorageManager
 
 logger = logging.getLogger(__name__)
 

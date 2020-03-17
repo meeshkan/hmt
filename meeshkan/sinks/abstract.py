@@ -1,6 +1,7 @@
 import abc
+from typing import Awaitable, Union
+
 from meeshkan.build.result import BuildResult
-from typing import Union, Awaitable
 
 
 class AbstractSink(abc.ABC):

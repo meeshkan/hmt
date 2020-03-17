@@ -4,8 +4,8 @@ from urllib import parse
 from http_types import RequestBuilder
 from tornado.web import RequestHandler
 
-from .callbacks import CallbackManager
 from ..utils.routing import Routing
+from .callbacks import CallbackManager
 from .response_matcher import ResponseMatcher
 
 logger = logging.getLogger(__name__)

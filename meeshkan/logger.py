@@ -1,6 +1,7 @@
 import logging
 import logging.config
 from typing import List
+
 from .config import setup
 
 # Do not expose anything by default (internal module)

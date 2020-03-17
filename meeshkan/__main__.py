@@ -1,24 +1,25 @@
-from .prepare import ignore_warnings
-
-ignore_warnings()
-
 from io import StringIO
-from http_types.utils import HttpExchangeWriter
-import click
 from typing import Sequence
 
-from meeshkan.build.update_mode import UpdateMode
-from .config import setup, DEFAULT_SPECS_DIR
-from .logger import get as getLogger
-from .build.builder import BASE_SCHEMA, build_schema_async
-from .convert.pcap import convert_pcap
-from .sinks import AbstractSink, FileSystemSink
-from .sources import AbstractSource, KafkaSource, FileSource
-from .sources.kafka import KafkaSourceConfig
+import click
+from http_types.utils import HttpExchangeWriter
 from openapi_typed_2 import OpenAPIObject, convert_to_openapi
 from yaml import safe_load
+
+from meeshkan.build.update_mode import UpdateMode
+
+from .build.builder import BASE_SCHEMA, build_schema_async
+from .config import DEFAULT_SPECS_DIR, setup
+from .convert.pcap import convert_pcap
+from .logger import get as getLogger
 from .meeshkan_types import *
-from .serve.commands import record, mock
+from .prepare import ignore_warnings
+from .serve.commands import mock, record
+from .sinks import AbstractSink, FileSystemSink
+from .sources import AbstractSource, FileSource, KafkaSource
+from .sources.kafka import KafkaSourceConfig
+
+ignore_warnings()
 
 
 LOGGER = getLogger(__name__)

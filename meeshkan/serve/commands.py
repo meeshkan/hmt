@@ -1,17 +1,19 @@
 import os
+from logging import getLogger
 from pathlib import Path
 
 import click
 
-IS_WINDOWS = os.name == "nt"
-
-from logging import getLogger
 from meeshkan.serve.mock.server import MockServer
-from .record.proxy import RecordProxyRunner
-from .utils.routing import PathRouting, HeaderRouting
+
 from ..build.update_mode import UpdateMode
 from ..config import DEFAULT_SPECS_DIR
 from .mock.specs import load_specs
+from .record.proxy import RecordProxyRunner
+from .utils.routing import HeaderRouting, PathRouting
+
+IS_WINDOWS = os.name == "nt"
+
 
 MOCK_PID = Path.home().joinpath(".meeshkan/mock.pid")
 RECORD_PID = Path.home().joinpath(".meeshkan/record.pid")

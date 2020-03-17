@@ -1,7 +1,9 @@
-from meeshkan.sources.kafka import KafkaSourceConfig, KafkaSource
 import pytest
-from ..util import read_recordings_as_dict
 from hamcrest import assert_that, has_length
+
+from meeshkan.sources.kafka import KafkaSource, KafkaSourceConfig
+
+from ..util import read_recordings_as_dict
 
 exchanges = read_recordings_as_dict()
 
