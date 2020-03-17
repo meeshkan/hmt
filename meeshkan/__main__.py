@@ -10,7 +10,6 @@ from meeshkan.build.update_mode import UpdateMode
 
 from .build.builder import BASE_SCHEMA, build_schema_async
 from .config import DEFAULT_SPECS_DIR, setup
-from .convert.pcap import convert_pcap
 from .logger import get as getLogger
 from .meeshkan_types import *
 from .prepare import ignore_warnings
@@ -157,57 +156,7 @@ def build(input_file, out, initial_openapi_spec, mode, source):
     run_from_source(source, UpdateMode[mode.upper()], openapi_spec, sinks=sinks)
 
 
-@click.command()
-@click.option(
-    "-i",
-    "--input-file",
-    required=True,
-    type=click.Path(
-        exists=True, file_okay=True, dir_okay=False, readable=True, allow_dash=True
-    ),
-    help="Path to a packet capture file.",
-)
-@click.option(
-    "-o",
-    "--out",
-    required=False,
-    default="recordings.jsonl",
-    type=click.Path(
-        exists=False, file_okay=True, dir_okay=False, writable=True, allow_dash=True
-    ),
-    help="Output file.",
-)
-def convert(input_file, out):
-    """
-    Convert recordings from PCAP to JSONL format.
-    """
-    return _convert(input_file, out)
-
-
-def _convert(input_file, out):
-    if not input_file.endswith(".pcap"):
-        raise ValueError(
-            "Only .pcap files are accepted as input. Got: {}".format(input_file)
-        )
-
-    request_response_pairs = convert_pcap(input_file)
-
-    log("Writing to: %s", out)
-
-    counter = 0
-    with open(out, "w") as f:
-        for reqres in request_response_pairs:
-            sink = StringIO()
-            HttpExchangeWriter(sink).write(reqres)
-            sink.seek(0)
-            f.write("".join([x for x in sink]) + "\n")
-            counter += 1
-
-    log("Wrote %d lines.", counter)
-
-
 cli.add_command(build)  # type: ignore
-cli.add_command(convert)  # type: ignore
 cli.add_command(record)  # type: ignore
 cli.add_command(mock)  # type: ignore
 
