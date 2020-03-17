@@ -66,13 +66,22 @@ _mock_options = _common_server_options + [
         type=click.Path(exists=True, file_okay=False, resolve_path=True),
         help="Directory with callback scripts to modify behavior.",
     ),
+    click.option(
+        "-l",
+        "--log-dir",
+        default="logs",
+        type=click.Path(exists=False, file_okay=False, resolve_path=True),
+        help="Directory where server logs are written.",
+    ),
 ]
 
 
 @click.group(invoke_without_command=True)
 @add_options(_mock_options)
 @click.pass_context
-def mock(ctx, callback_dir, admin_port, port, specs_dir, header_routing, daemon):
+def mock(
+    ctx, callback_dir, log_dir, admin_port, port, specs_dir, header_routing, daemon
+):
     """
     Run a mock server using OpenAPI specifications.
     """
@@ -82,7 +91,9 @@ def mock(ctx, callback_dir, admin_port, port, specs_dir, header_routing, daemon)
 
 @mock.command(name="start")  # type: ignore
 @add_options(_mock_options)
-def start_mock(callback_dir, admin_port, port, specs_dir, header_routing, daemon):
+def start_mock(
+    callback_dir, log_dir, admin_port, port, specs_dir, header_routing, daemon
+):
     specs = load_specs(specs_dir)
 
     server = MockServer(
@@ -91,6 +102,7 @@ def start_mock(callback_dir, admin_port, port, specs_dir, header_routing, daemon
         port=port,
         specs=specs,
         routing=HeaderRouting() if header_routing else PathRouting(),
+        log_dir=log_dir,
     )
 
     if daemon and (not IS_WINDOWS):

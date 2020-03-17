@@ -5,13 +5,13 @@ from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.web import Application
 
-from meeshkan.serve.admin.runner import start_admin
-from meeshkan.serve.mock.callbacks import CallbackManager, callback_manager
-from meeshkan.serve.mock.response_matcher import ResponseMatcher
-from meeshkan.serve.mock.specs import OpenAPISpecification
-from meeshkan.serve.mock.views import MockServerView
-from meeshkan.serve.utils.routing import PathRouting, Routing
-
+from ..admin.runner import start_admin
+from ..mock.callbacks import CallbackManager, callback_manager
+from ..mock.response_matcher import ResponseMatcher
+from ..mock.specs import OpenAPISpecification
+from ..mock.views import MockServerView
+from ..utils.routing import PathRouting, Routing
+from .log import FileSink, Log
 from .scope import Scope
 
 logger = logging.getLogger(__name__)
@@ -21,15 +21,22 @@ def make_mocking_app_(
     callback_manager: CallbackManager,
     response_matcher: ResponseMatcher,
     router: Routing,
+    log: Log,
 ):
     dependencies = dict(
-        callback=callback_manager, response_matcher=response_matcher, router=router,
+        callback=callback_manager,
+        response_matcher=response_matcher,
+        router=router,
+        log=log,
     )
     return Application([(r"/.*", MockServerView, dependencies)])
 
 
 def make_mocking_app(
-    callback_dir: Optional[str], specs: Sequence[OpenAPISpecification], routing: Routing
+    callback_dir: Optional[str],
+    specs: Sequence[OpenAPISpecification],
+    routing: Routing,
+    log: Log,
 ):
     # callback_manager = CallbackManager()
     if callback_dir is not None:
@@ -37,7 +44,7 @@ def make_mocking_app(
 
     response_matcher = ResponseMatcher(specs)
 
-    return make_mocking_app_(callback_manager, response_matcher, routing)
+    return make_mocking_app_(callback_manager, response_matcher, routing, log)
 
 
 class MockServer:
@@ -49,6 +56,7 @@ class MockServer:
         callback_dir=None,
         admin_port=None,
         routing=PathRouting(),
+        log_dir: str = "/dev/null",
     ):
         self._callback_dir = callback_dir
         self._admin_port = admin_port
@@ -56,11 +64,14 @@ class MockServer:
         self._specs = specs
         self._routing = routing
         self._scope = scope or Scope()
+        self._log = Log(self._scope, FileSink(log_dir))
 
     def run(self) -> None:
         if self._admin_port:
-            start_admin(scope=self._scope, port=self._admin_port)
-        app = make_mocking_app(self._callback_dir, self._specs, self._routing)
+            start_admin(port=self._admin_port, scope=self._scope)
+        app = make_mocking_app(
+            self._callback_dir, self._specs, self._routing, self._log
+        )
         http_server = HTTPServer(app)
         http_server.listen(self._port)
         self.log_startup()

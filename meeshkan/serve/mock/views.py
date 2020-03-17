@@ -6,6 +6,7 @@ from tornado.web import RequestHandler
 
 from ..utils.routing import Routing
 from .callbacks import CallbackManager
+from .log import Log
 from .response_matcher import ResponseMatcher
 
 logger = logging.getLogger(__name__)
@@ -19,10 +20,12 @@ class MockServerView(RequestHandler):
         response_matcher: ResponseMatcher,
         router: Routing,
         callback: CallbackManager,
+        log: Log,
     ):
         self.response_matcher = response_matcher
         self.callback = callback
         self.router = router
+        self.log = log
 
     def set_default_headers(self):
         self.set_header("Content-Type", 'application/json; charset="utf-8"')
@@ -86,5 +89,5 @@ class MockServerView(RequestHandler):
         response = self.callback(request, self.response_matcher.get_response(request))
         for header, value in response.headers.items():
             self.set_header(header, value)
-
+        self.log.put(request, response)
         self.write(response.body)
