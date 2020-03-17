@@ -4,6 +4,7 @@ from tornado.httpserver import HTTPServer
 from tornado.web import Application
 
 from meeshkan.serve.admin.views import (
+    ScopeView,
     StorageView,
     RestMiddlewaresView,
     RestMiddlewareView,
@@ -16,6 +17,7 @@ def make_admin_app():
     return Application(
         [
             (r"/admin/storage", StorageView),
+            (r"/admin/scope", ScopeView),
             (r"/admin/middleware/rest/pregen", RestMiddlewaresView),
             (r"/admin/middleware/rest/pregen/(.+)", RestMiddlewareView),
         ]

@@ -4,6 +4,7 @@ from tornado.web import RequestHandler
 
 from ..mock.storage import storage_manager
 from ..mock.rest import rest_middleware_manager
+from ..mock.scope import scope_manager
 import json
 
 logger = logging.getLogger(__name__)
@@ -17,6 +18,19 @@ class StorageView(RequestHandler):
 
     def delete(self):
         storage_manager.clear()
+
+class ScopeView(RequestHandler):
+    SUPPORTED_METHODS = ["DELETE", "POST", "GET"]
+    
+    def delete(self):
+        scope_manager.clear()
+
+    def post(self):
+        scope_manager.set(self.get_body_argument("name"))
+    
+    def get(self):
+        self.set_header("Content-Type", 'application/json; charset="utf-8"')
+        return self.write(dict() if scope_manager.get() is None else dict(name=scope_manager.get()))
 
 
 class RestMiddlewaresView(RequestHandler):
