@@ -19,9 +19,10 @@ def make_mocking_app_(
     callback_manager: CallbackManager,
     response_matcher: ResponseMatcher,
     router: Routing,
+    log: Log,
 ):
     dependencies = dict(
-        callback=callback_manager, response_matcher=response_matcher, router=router,
+        callback=callback_manager, response_matcher=response_matcher, router=router, log=log
     )
     return Application([(r"/.*", MockServerView, dependencies)])
 
