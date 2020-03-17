@@ -1,10 +1,10 @@
+import json
+
+import pytest
 from tornado.httpclient import HTTPRequest
 
 from meeshkan.serve.admin import make_admin_app
 from meeshkan.serve.mock.scope import Scope
-
-import pytest
-import json
 
 scope = Scope()
 
