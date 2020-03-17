@@ -2,8 +2,8 @@ import logging
 
 from tornado.web import RequestHandler
 
-from ..mock.storage import storage_manager
-from ..mock.rest import rest_middleware_manager
+from ..mock.storage import StorageManager
+from ..mock.rest import RestMiddlewareManager
 import json
 
 logger = logging.getLogger(__name__)
@@ -12,34 +12,43 @@ logger = logging.getLogger(__name__)
 class StorageView(RequestHandler):
     SUPPORTED_METHODS = ["DELETE"]
 
+    def initialize(self, storage_manager: StorageManager):
+        self.storage_manager = storage_manager
+
     def set_default_headers(self):
         self.set_header("Content-Type", 'application/json; charset="utf-8"')
 
     def delete(self):
-        storage_manager.clear()
+        self.storage_manager.clear()
 
 
 class RestMiddlewaresView(RequestHandler):
     SUPPORTED_METHODS = ["DELETE", "GET"]
 
+    def initialize(self, rest_middleware_manager: RestMiddlewareManager):
+        self.rest_middleware_manager = rest_middleware_manager
+
     def set_default_headers(self):
         self.set_header("Content-Type", 'application/json; charset="utf-8"')
 
     def delete(self):
-        rest_middleware_manager.clear()
+        self.rest_middleware_manager.clear()
 
     def get(self):
-        self.write(json.dumps(rest_middleware_manager.get()))
+        self.write(json.dumps(self.rest_middleware_manager.get()))
 
 
 class RestMiddlewareView(RequestHandler):
     SUPPORTED_METHODS = ["DELETE", "POST"]
 
+    def initialize(self, rest_middleware_manager: RestMiddlewareManager):
+        self.rest_middleware_manager = rest_middleware_manager
+
     def set_default_headers(self):
         self.set_header("Content-Type", 'application/json; charset="utf-8"')
 
     def delete(self, url):
-        rest_middleware_manager.clear(url)
+        self.rest_middleware_manager.clear(url)
 
     def post(self, url):
-        rest_middleware_manager.add(url)
+        self.rest_middleware_manager.add(url)
