@@ -1,6 +1,8 @@
 import asyncio
-from typing import Callable, Awaitable, AsyncIterable, Tuple
+from typing import AsyncIterable, Awaitable, Callable, Tuple
+
 from http_types import HttpExchange
+
 from .build.result import BuildResult
 
 HttpExchangeStream = AsyncIterable[HttpExchange]

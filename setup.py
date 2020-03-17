@@ -2,7 +2,7 @@ import os
 import sys
 from shutil import rmtree
 
-from setuptools import setup, Command, find_packages, errors
+from setuptools import Command, errors, find_packages, setup
 
 # Package meta-data.
 NAME = "meeshkan"
@@ -46,6 +46,7 @@ BUNDLE_REQUIREMENTS = [dep for _, bundle_dep in BUNDLES.items() for dep in bundl
 DEV = BUNDLE_REQUIREMENTS + [
     "black==19.10b0",
     "flake8",
+    "isort",
     "mypy",
     "pyhamcrest",
     "pylint",
@@ -113,8 +114,10 @@ TEST_COMMAND = "pytest"
 
 LINT_COMMAND = "flake8 --exclude .git,.venv,__pycache__,build,dist"
 
-FORMAT_COMMAND = "black ."
-FORMAT_CHECK_COMMAND = "black --check ."
+BLACK_FORMAT_COMMAND = "black ."
+ISORT_FORMAT_COMMAND = "isort -y"
+BLACK_CHECK_COMMAND = "black --check ."
+ISORT_CHECK_COMMAND = "isort --check-only"
 
 
 def build():
@@ -133,8 +136,14 @@ def check_style():
     run_sys_command(LINT_COMMAND, "Checking style failed")
 
 
+def enforce_formatting():
+    run_sys_command(ISORT_FORMAT_COMMAND, "Formatting with isort failed")
+    run_sys_command(BLACK_FORMAT_COMMAND, "Formatting with black failed")
+
+
 def check_formatting():
-    run_sys_command(FORMAT_CHECK_COMMAND, "Checking formatting failed")
+    run_sys_command(ISORT_CHECK_COMMAND, "Checking with isort failed")
+    run_sys_command(BLACK_CHECK_COMMAND, "Checking with black failed")
 
 
 class BuildDistCommand(SetupCommand):
@@ -147,6 +156,15 @@ class BuildDistCommand(SetupCommand):
         self.rmdir_if_exists(os.path.join(here, "dist"))
         self.status("Building Source and Wheel (universal) distribution...")
         build()
+
+
+class FormatCommand(SetupCommand):
+    """Enforce formatting."""
+
+    description = "Enforce formatting."
+
+    def run(self):
+        enforce_formatting()
 
 
 class TypeCheckCommand(SetupCommand):
@@ -225,6 +243,8 @@ setup(
     entry_points={"console_scripts": ENTRY_POINTS},
     cmdclass={
         "dist": BuildDistCommand,
+        "format": FormatCommand,
+        "typecheck": TypeCheckCommand,
         "upload": UploadCommand,
         "test": TestCommand,
         "typecheck": TypeCheckCommand,

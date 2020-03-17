@@ -1,11 +1,14 @@
-import logging
-from typing import Mapping
-from openapi_typed_2 import OpenAPIObject, convert_to_openapi, convert_from_openapi
-from http_types import Request
-from http_types.utils import HttpExchangeWriter, ResponseBuilder, HttpExchange
-from io import StringIO
-import requests
 import json
+import logging
+from io import StringIO
+from typing import Sequence
+
+import requests
+from http_types import HttpExchange, Request
+from http_types.utils import HttpExchangeWriter, ResponseBuilder
+from openapi_typed_2 import convert_from_openapi, convert_to_openapi
+
+from meeshkan.serve.mock.specs import OpenAPISpecification
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +30,8 @@ class RestMiddlewareManager:
         self._endpoints.add(url)
 
     def spew(
-        self, request: Request, schemas: Mapping[str, OpenAPIObject]
-    ) -> Mapping[str, OpenAPIObject]:
-        cur_schemas = schemas
+        self, request: Request, specs: Sequence[OpenAPISpecification]
+    ) -> Sequence[OpenAPISpecification]:
         req_io = StringIO()
         # TODO: this is hackish. is there a better way?
         HttpExchangeWriter(req_io).write(
@@ -43,16 +45,16 @@ class RestMiddlewareManager:
         # should only be one line... and why do we join with newline?
         req_io.seek(0)
         req = json.loads("\n".join([x for x in req_io]))["request"]
-        cs = {k: convert_from_openapi(v) for k, v in cur_schemas.items()}
+        cs = {spec.source: convert_from_openapi(spec.api) for spec in specs}
         for endpoint in self._endpoints:
             res = requests.post(
                 endpoint, data=json.dumps({"request": req, "schemas": cs})
             )
             cs = json.loads(res.text)
-        out: Mapping[str, OpenAPIObject] = {
-            str(k): convert_to_openapi(v) for k, v in cs.items()
-        }
-        return out
+        return [
+            OpenAPISpecification(convert_to_openapi(api), source)
+            for source, api in cs.items()
+        ]
 
 
 rest_middleware_manager = RestMiddlewareManager()

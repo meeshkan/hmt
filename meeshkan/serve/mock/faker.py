@@ -2,9 +2,10 @@
 #### FAKER
 ########################
 import random
-from typing import Any
-from faker import Faker
 from functools import reduce
+from typing import Any
+
+from faker import Faker
 
 fkr = Faker()
 __all__ = ["fake_it"]

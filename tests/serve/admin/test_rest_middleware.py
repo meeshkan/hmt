@@ -1,10 +1,10 @@
+import json
+
+import pytest
 from tornado.httpclient import HTTPRequest
 
 from meeshkan.serve.admin import make_admin_app
 from meeshkan.serve.mock.rest import rest_middleware_manager
-
-import pytest
-import json
 
 
 @pytest.fixture

@@ -1,62 +1,34 @@
 import json
 import logging
-from meeshkan.serve.mock.rest import rest_middleware_manager
-import os
-import yaml
 import random
+from typing import Mapping, Sequence, Union, cast
+
 from faker import Faker
-from typing import cast, Mapping, Union, Sequence, Tuple
-from openapi_typed_2 import (
-    convert_from_openapi,
-    OpenAPIObject,
-    Reference,
-    convert_to_openapi,
-)
+from http_types import Request, Response
+from openapi_typed_2 import Reference, convert_from_openapi
+
+from meeshkan.serve.mock.faker import fake_it
 from meeshkan.serve.mock.matcher import (
-    get_response_from_ref,
-    match_request_to_openapi,
     change_ref,
     change_refs,
+    get_response_from_ref,
+    match_request_to_openapi,
     ref_name,
 )
-from meeshkan.serve.mock.faker import fake_it
+from meeshkan.serve.mock.rest import rest_middleware_manager
+from meeshkan.serve.mock.specs import OpenAPISpecification
 
 fkr = Faker()
 
-from http_types import Request, Response
 
 logger = logging.getLogger(__name__)
 
 
 class ResponseMatcher:
-    _schemas: Mapping[str, OpenAPIObject]
+    _specs: Sequence[OpenAPISpecification]
 
-    def __init__(self, specs_dir):
-        schemas: Sequence[str] = []
-        if not os.path.exists(specs_dir):
-            logging.info("OpenAPI schema directory not found %s", specs_dir)
-        else:
-            schemas = [
-                s
-                for s in os.listdir(specs_dir)
-                if s.endswith("yml") or s.endswith("yaml") or s.endswith("json")
-            ]
-        specs: Sequence[Tuple[str, OpenAPIObject]] = []
-        for schema in schemas:
-            with open(os.path.join(specs_dir, schema), encoding="utf8") as schema_file:
-                # TODO: validate schema?
-                specs = [
-                    *specs,
-                    (
-                        schema,
-                        convert_to_openapi(
-                            (json.loads if schema.endswith("json") else yaml.safe_load)(
-                                schema_file.read()
-                            )
-                        ),
-                    ),
-                ]
-        self._schemas = {k: v for k, v in specs}
+    def __init__(self, specs: Sequence[OpenAPISpecification]):
+        self._specs = specs
 
     def match_error(self, msg: str, req: Request) -> Response:
         return self.default_response(
@@ -77,16 +49,15 @@ class ResponseMatcher:
     def get_response(self, request: Request) -> Response:
         # TODO: tight coupling here
         # try to decouple...
-        schemas = rest_middleware_manager.spew(request, self._schemas)
-        match = match_request_to_openapi(request, schemas)
-        if len(match) == 0:
+        specs = rest_middleware_manager.spew(request, self._specs)
+        matches = match_request_to_openapi(request, specs)
+        if len(matches) == 0:
             return self.match_error(
                 "Could not find a open API schema for the host %s." % request.host,
                 request,
             )
-        match_keys = [x for x in match.keys()]
-        random.shuffle(match_keys)
-        name = match_keys[0]
+        random.shuffle(matches)
+        first_match = matches[0]
         path_error = "Could not find a path %s on hostname %s." % (
             request.path,
             request.host,
@@ -96,13 +67,14 @@ class ResponseMatcher:
             request.path,
             request.host,
         )
-        if match[name].paths is None:
+        if first_match.api.paths is None:
             return self.match_error(path_error, request)
-        if len(match[name].paths.items()) == 0:
+        if len(first_match.api.paths.items()) == 0:
             return self.match_error(path_error, request)
-        path_candidates = [x for x in match[name].paths.values()]
+        path_candidates = [x for x in first_match.api.paths.values()]
         random.shuffle(path_candidates)
         path_candidate = path_candidates[0]
+
         method = {
             "get": path_candidate.get,
             "post": path_candidate.post,
@@ -113,7 +85,8 @@ class ResponseMatcher:
             "patch": path_candidate.patch,
             "trace": path_candidate.trace,
         }.get(str(request.method.value), None)
-        if request.method.value is None:
+
+        if method is None:
             return self.match_error(method_error, request)
         responses_error = "While a stub for a specification exists for this endpoint, it contains no responses. That usually means the schema is corrupt or it has been constrained too much (ie asking for a 201 response when it only has 200 and 400)."
         if method.responses is None:
@@ -125,7 +98,7 @@ class ResponseMatcher:
         response = potential_responses[0]
         response_1 = response[1]
         response_1 = (
-            get_response_from_ref(match[name], ref_name(response_1))
+            get_response_from_ref(first_match.api, ref_name(response_1))
             if isinstance(response_1, Reference)
             else response_1
         )
@@ -175,10 +148,9 @@ class ResponseMatcher:
                         change_ref(v) if isinstance(v, Reference) else change_refs(v)
                     )
                     for k, v in (
-                        match[name].components.schemas.items()
-                        if (name in match)
-                        and (match[name].components is not None)
-                        and (match[name].components.schemas is not None)
+                        first_match.api.components.schemas.items()
+                        if (first_match.api.components is not None)
+                        and (first_match.api.components.schemas is not None)
                         else []
                     )
                 },

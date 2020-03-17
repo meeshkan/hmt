@@ -6,6 +6,7 @@ from tornado.httpclient import HTTPRequest
 
 from meeshkan.serve.mock.rest import rest_middleware_manager
 from meeshkan.serve.mock.server import make_mocking_app
+from meeshkan.serve.mock.specs import load_specs
 from meeshkan.serve.utils.routing import HeaderRouting
 
 
@@ -13,7 +14,7 @@ from meeshkan.serve.utils.routing import HeaderRouting
 def app():
     return make_mocking_app(
         "tests/serve/mock/callbacks",
-        "tests/serve/mock/shemas/petstore",
+        load_specs("tests/serve/mock/shemas/petstore"),
         HeaderRouting(),
     )
 

@@ -1,18 +1,23 @@
 import os
+from logging import getLogger
 from pathlib import Path
 
 import click
 
-IS_WINDOWS = os.name == "nt"
-
 from meeshkan.serve.mock.server import MockServer
-from .record.proxy import RecordProxyRunner
-from .utils.routing import PathRouting, HeaderRouting
+
 from ..build.update_mode import UpdateMode
 from ..config import DEFAULT_SPECS_DIR
+from .mock.specs import load_specs
+from .record.proxy import RecordProxyRunner
+from .utils.routing import HeaderRouting, PathRouting
+
+IS_WINDOWS = os.name == "nt"
+
 
 MOCK_PID = Path.home().joinpath(".meeshkan/mock.pid")
 RECORD_PID = Path.home().joinpath(".meeshkan/record.pid")
+logger = getLogger(__name__)
 
 
 def add_options(options):
@@ -78,11 +83,13 @@ def mock(ctx, callback_dir, admin_port, port, specs_dir, header_routing, daemon)
 @mock.command(name="start")  # type: ignore
 @add_options(_mock_options)
 def start_mock(callback_dir, admin_port, port, specs_dir, header_routing, daemon):
+    specs = load_specs(specs_dir)
+
     server = MockServer(
         callback_dir=callback_dir,
         admin_port=admin_port,
         port=port,
-        specs_dir=specs_dir,
+        specs=specs,
         routing=HeaderRouting() if header_routing else PathRouting(),
     )
 

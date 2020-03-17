@@ -1,6 +1,7 @@
 import abc
 import asyncio
-from typing import Tuple, Optional
+from typing import Optional, Tuple
+
 from ..meeshkan_types import HttpExchangeStream
 
 

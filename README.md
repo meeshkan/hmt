@@ -180,18 +180,14 @@ python setup.py test
 
 Configuration for `pytest` is found in [pytest.ini](https://github.com/Meeshkan/meeshkan/tree/master/pytest.ini).
 
-#### `black`
+#### Formatting
 
-Run format checks:
+Formatting is checked by the above mentioned `python setup.py test` command.
 
-```bash
-$ black --check .
-```
+To fix formatting:
 
-Fix formatting:
-
-```bash
-$ black .
+```sh
+$ python setup.py format
 ```
 
 #### `flake8`

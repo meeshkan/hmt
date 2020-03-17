@@ -11,8 +11,9 @@ from http_types.utils import RequestBuilder
 from tornado.iostream import IOStream, SSLIOStream, StreamClosedError
 
 from meeshkan.serve.utils.routing import Routing
-from .proxy_callback import ProxyCallback
+
 from ..utils.http_utils import response_from_bytes
+from .proxy_callback import ProxyCallback
 
 logger = logging.getLogger(__name__)
 

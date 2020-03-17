@@ -6,8 +6,8 @@ import faust
 from http_types.types import HttpExchange
 from http_types.utils import HttpExchangeBuilder
 
-from .abstract import AbstractSource
 from ..meeshkan_types import HttpExchangeStream
+from .abstract import AbstractSource
 
 
 @dataclass(frozen=True)
