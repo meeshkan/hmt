@@ -62,6 +62,7 @@ class RecordProxyRunner:
         self._specs_dir = specs_dir
         self._routing = routing
         self._mode = mode
+
     def run(self):
 
         logger.info("Starting Meeshkan record on http://localhost:%s", self._port)
