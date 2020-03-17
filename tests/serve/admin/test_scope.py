@@ -21,16 +21,24 @@ def setup():
 @pytest.mark.gen_test
 def test_admin_server_scope(http_client, base_url):
     body = "name=foo"
-    req = HTTPRequest(base_url + "/admin/scope", method="POST", body=body, headers={'content-type': 'application/x-www-form-urlencoded', 'content-length': len(body)})
+    req = HTTPRequest(
+        base_url + "/admin/scope",
+        method="POST",
+        body=body,
+        headers={
+            "content-type": "application/x-www-form-urlencoded",
+            "content-length": len(body),
+        },
+    )
     response = yield http_client.fetch(req)
     assert response.code == 200
     req = HTTPRequest(base_url + "/admin/scope")
     response = yield http_client.fetch(req)
     assert response.code == 200
-    assert json.loads(response.body)['name'] == 'foo'
+    assert json.loads(response.body)["name"] == "foo"
     req = HTTPRequest(base_url + "/admin/scope", method="DELETE")
     yield http_client.fetch(req)
     req = HTTPRequest(base_url + "/admin/scope")
     response = yield http_client.fetch(req)
     assert response.code == 200
-    assert not ('name' in json.loads(response.body))
+    assert not ("name" in json.loads(response.body))

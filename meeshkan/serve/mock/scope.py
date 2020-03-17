@@ -18,4 +18,5 @@ class ScopeManager:
     def clear(self):
         self._name = None
 
+
 scope_manager = ScopeManager()

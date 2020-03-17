@@ -23,18 +23,21 @@ class StorageView(RequestHandler):
     def delete(self):
         self.storage_manager.clear()
 
+
 class ScopeView(RequestHandler):
     SUPPORTED_METHODS = ["DELETE", "POST", "GET"]
-    
+
     def delete(self):
         scope_manager.clear()
 
     def post(self):
         scope_manager.set(self.get_body_argument("name"))
-    
+
     def get(self):
         self.set_header("Content-Type", 'application/json; charset="utf-8"')
-        return self.write(dict() if scope_manager.get() is None else dict(name=scope_manager.get()))
+        return self.write(
+            dict() if scope_manager.get() is None else dict(name=scope_manager.get())
+        )
 
 
 class RestMiddlewaresView(RequestHandler):
