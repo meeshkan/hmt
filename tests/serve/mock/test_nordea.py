@@ -10,12 +10,21 @@ from meeshkan.serve.utils.routing import HeaderRouting
 
 logging.basicConfig(level="DEBUG")
 
+routing_headers = {"Host": "api.nordeaopenbanking.com", "X-Meeshkan-Scheme": "https"}
+
 
 @pytest.fixture
 def app():
     return make_mocking_app(
         "tests/serve/mock/callbacks", "tests/serve/mock/schemas/nordea", HeaderRouting()
     )
+
+
+@pytest.mark.gen_test
+def test_nordea_accounts_returns_401(http_client, base_url):
+    req = HTTPRequest(base_url + "/personal/v4/accounts", headers=routing_headers)
+    response = yield http_client.fetch(req)
+    assert response.code == 401, "Expected 401 for a request without headers"
 
 
 @pytest.mark.gen_test
@@ -28,14 +37,10 @@ def test_nordea_accounts(http_client, base_url):
         "X-Nordea-Originating-Host": "blah2",
     }
     req = HTTPRequest(
-        base_url + "/personal/v4/accounts",
-        headers={
-            **headers,
-            **{"Host": "api.nordeaopenbanking.com", "X-Meeshkan-Scheme": "https"},
-        },
+        base_url + "/personal/v4/accounts", headers={**headers, **routing_headers,},
     )
     response = yield http_client.fetch(req)
-    assert response.code == 200
+    assert response.code == 200, "Expected 200 for a valid request"
     rb = json.loads(response.body)
     assert isinstance(rb, dict)
     assert_that(rb, has_key("group_header"))
