@@ -6,6 +6,7 @@ import pytest
 from http_types import HttpMethod, Protocol
 from meeshkan.serve.record.proxy import RecordProxy
 from meeshkan.serve.mock.server import make_mocking_app
+from meeshkan.serve.mock.specs import load_specs
 from meeshkan.serve.utils.data_callback import DataCallback
 from meeshkan.serve.utils.routing import PathRouting, StaticRouting, HeaderRouting
 from tornado.httpclient import HTTPRequest
@@ -16,7 +17,7 @@ from tornado.testing import bind_unused_port
 def app():
     return make_mocking_app(
         "tests/serve/mock/callbacks",
-        "tests/serve/mock/schemas/petstore",
+        load_specs("tests/serve/mock/schemas/petstore"),
         StaticRouting("http://petstore.swagger.io"),
     )
 

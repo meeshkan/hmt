@@ -2,13 +2,16 @@ import pytest
 
 from meeshkan.serve.mock.server import make_mocking_app
 from meeshkan.serve.utils.routing import PathRouting
+from meeshkan.serve.mock.specs import load_specs
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 
 
 @pytest.fixture
 def app():
     return make_mocking_app(
-        "tests/serve/mock/callbacks", "tests/serve/mock/schemas/petstore", PathRouting()
+        "tests/serve/mock/callbacks",
+        load_specs("tests/serve/mock/schemas/petstore"),
+        PathRouting(),
     )
 
 
