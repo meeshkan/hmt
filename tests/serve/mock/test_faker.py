@@ -1,5 +1,5 @@
-from meeshkan.serve.mock.matcher import valid_schema
 from meeshkan.serve.mock.faker import fake_it
+from meeshkan.serve.mock.matcher import valid_schema
 
 
 def test_faker_1():

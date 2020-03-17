@@ -1,26 +1,25 @@
 import json
 import logging
-from meeshkan.serve.mock.rest import rest_middleware_manager
 import random
+from typing import Mapping, Sequence, Union, cast
+
 from faker import Faker
-from typing import cast, Mapping, Union, Sequence
-from openapi_typed_2 import (
-    convert_from_openapi,
-    Reference,
-)
+from http_types import Request, Response
+from openapi_typed_2 import Reference, convert_from_openapi
+
+from meeshkan.serve.mock.faker import fake_it
 from meeshkan.serve.mock.matcher import (
-    get_response_from_ref,
-    match_request_to_openapi,
     change_ref,
     change_refs,
+    get_response_from_ref,
+    match_request_to_openapi,
     ref_name,
 )
-from meeshkan.serve.mock.faker import fake_it
+from meeshkan.serve.mock.rest import rest_middleware_manager
 from meeshkan.serve.mock.specs import OpenAPISpecification
 
 fkr = Faker()
 
-from http_types import Request, Response
 
 logger = logging.getLogger(__name__)
 

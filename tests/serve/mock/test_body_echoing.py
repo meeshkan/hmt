@@ -1,9 +1,9 @@
 import pytest
+from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 
 from meeshkan.serve.mock.server import make_mocking_app
-from meeshkan.serve.utils.routing import PathRouting
 from meeshkan.serve.mock.specs import load_specs
-from tornado.httpclient import AsyncHTTPClient, HTTPRequest
+from meeshkan.serve.utils.routing import PathRouting
 
 
 @pytest.fixture
