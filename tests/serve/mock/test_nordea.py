@@ -1,4 +1,5 @@
 import json
+import logging
 
 import pytest
 from tornado.httpclient import HTTPRequest
@@ -6,6 +7,8 @@ from hamcrest import assert_that, has_key
 
 from meeshkan.serve.mock.server import make_mocking_app
 from meeshkan.serve.utils.routing import HeaderRouting
+
+logging.basicConfig(level="DEBUG")
 
 
 @pytest.fixture
@@ -17,9 +20,19 @@ def app():
 
 @pytest.mark.gen_test
 def test_nordea_accounts(http_client, base_url):
+    headers = {
+        "Signature": "fake-signature",
+        "X-IBM-Client-ID": "fake-client-id",
+        "X-IBM-Client-Secret": "fake-client-secret",
+        "X-Nordea-Originating-Date": "blah",
+        "X-Nordea-Originating-Host": "blah2",
+    }
     req = HTTPRequest(
         base_url + "/personal/v4/accounts",
-        headers={"Host": "api.nordeaopenbanking.com", "X-Meeshkan-Scheme": "https"},
+        headers={
+            **headers,
+            **{"Host": "api.nordeaopenbanking.com", "X-Meeshkan-Scheme": "https"},
+        },
     )
     response = yield http_client.fetch(req)
     assert response.code == 200
