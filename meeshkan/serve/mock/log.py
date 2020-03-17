@@ -23,18 +23,32 @@ class LoggedHttpExchange:
     meta: MeeshkanMeta
 
 
+class AbstractSink:
+    def write(self, interactions):
+        pass
+
+
+class FileSink(AbstractSink):
+    def __init__(self, log_dir: str):
+        self._dir = log_dir
+        if not os.path.exists(self._dir):
+            os.mkdir(self._dir)
+        self._log_file_name = "%d.log.json" % int(time.time() * 1000)
+
+    def write(self, interactions):
+        with open(os.path.join(self._dir, self._log_file_name), "w") as logfile:
+            logfile.write(json.dumps(interactions, indent=2))
+
+
 class Log:
     _interactions: Sequence[LoggedHttpExchange]
 
-    def __init__(self, scope: Scope, log_dir: Optional[str] = None):
+    def __init__(self, scope: Scope, sink: Optional[AbstractSink] = None):
         self._scope = scope
-        self._dir = log_dir
+        self._sink = sink
         self._interactions = []
         self._interactions_as_json = []
         self._log_file_name = "%d.log.json" % int(time.time() * 1000)
-        if self._dir is not None:
-            if not os.path.exists(self._dir):
-                os.mkdir(self._dir)
 
     def put(self, request: Request, response: Response):
         self._interactions = [
@@ -68,6 +82,5 @@ class Log:
         }
 
         self._interactions_as_json = [*self._interactions_as_json, interaction]
-        if self._dir is not None:
-            with open(os.path.join(self._dir, self._log_file_name), "w") as logfile:
-                logfile.write(json.dumps(self._interactions_as_json, indent=2))
+        if self._sink is not None:
+            self._sink.write(self._interactions_as_json)

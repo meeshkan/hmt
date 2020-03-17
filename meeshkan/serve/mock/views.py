@@ -89,5 +89,5 @@ class MockServerView(RequestHandler):
         response = self.callback(request, self.response_matcher.get_response(request))
         for header, value in response.headers.items():
             self.set_header(header, value)
-
+        self.log.put(request, response)
         self.write(response.body)
