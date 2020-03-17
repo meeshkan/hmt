@@ -1,11 +1,9 @@
 import logging
-import requests
-import json
 
 logger = logging.getLogger(__name__)
 
 
-class ScopeManager:
+class Scope:
     def __init__(self):
         self._name = None
 
@@ -17,6 +15,3 @@ class ScopeManager:
 
     def clear(self):
         self._name = None
-
-
-scope_manager = ScopeManager()
