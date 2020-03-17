@@ -3,12 +3,14 @@ import lenses
 from lenses import lens
 import jsonschema
 from meeshkan.build.operation import operation_from_string
+from meeshkan.serve.mock.specs import OpenAPISpecification
 from dataclasses import replace
 import json
 import re
 from http_types import Request
 from typing import (
     cast,
+    List,
     Sequence,
     Tuple,
     TypeVar,
@@ -775,8 +777,8 @@ def truncate_path(path: str, o: OpenAPIObject, i: Request,) -> str:
 
 
 def match_request_to_openapi(
-    req: Request, r: Mapping[str, OpenAPIObject]
-) -> Mapping[str, OpenAPIObject]:
+    req: Request, specs: Sequence[OpenAPISpecification]
+) -> List[OpenAPISpecification]:
     def _path_item_modifier(oai: OpenAPIObject) -> Callable[[PathItem], PathItem]:
         def __path_item_modifier(path_item: PathItem) -> PathItem:
             return reduce(
@@ -809,10 +811,11 @@ def match_request_to_openapi(
             )
         )
 
-    return lens.Values().modify(_oai_modifier)(
+    d = lens.Values().modify(_oai_modifier)(
         {
-            k: v
-            for k, v in r.items()
-            if len(match_urls(req.protocol.value, req.host, v)) > 0
+            spec.source: spec.api
+            for spec in specs
+            if len(match_urls(req.protocol.value, req.host, spec.api)) > 0
         }
     )
+    return [OpenAPISpecification(api, source) for (source, api) in d.items()]

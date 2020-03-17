@@ -225,6 +225,7 @@ setup(
     entry_points={"console_scripts": ENTRY_POINTS},
     cmdclass={
         "dist": BuildDistCommand,
+        "typecheck": TypeCheckCommand,
         "upload": UploadCommand,
         "test": TestCommand,
         "typecheck": TypeCheckCommand,
