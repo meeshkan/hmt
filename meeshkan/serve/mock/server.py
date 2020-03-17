@@ -11,7 +11,7 @@ from ..mock.response_matcher import ResponseMatcher
 from ..mock.specs import OpenAPISpecification
 from ..mock.views import MockServerView
 from ..utils.routing import PathRouting, Routing
-from .log import FileSink, Log
+from .log import FileSink, Log, NoSink
 from .scope import Scope
 
 logger = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ class MockServer:
         callback_dir=None,
         admin_port=None,
         routing=PathRouting(),
-        log_dir: str = "/dev/null",
+        log_dir: Optional[str] = None,
     ):
         self._callback_dir = callback_dir
         self._admin_port = admin_port
@@ -64,7 +64,7 @@ class MockServer:
         self._specs = specs
         self._routing = routing
         self._scope = scope or Scope()
-        self._log = Log(self._scope, FileSink(log_dir))
+        self._log = Log(self._scope, NoSink() if log_dir is None else FileSink(log_dir))
 
     def run(self) -> None:
         if self._admin_port:

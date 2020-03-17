@@ -69,7 +69,7 @@ _mock_options = _common_server_options + [
     click.option(
         "-l",
         "--log-dir",
-        default="logs",
+        default=None,
         type=click.Path(exists=False, file_okay=False, resolve_path=True),
         help="Directory where server logs are written.",
     ),

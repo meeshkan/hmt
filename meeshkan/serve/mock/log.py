@@ -28,6 +28,11 @@ class AbstractSink:
         pass
 
 
+class NoSink(AbstractSink):
+    def write(self, interactions):
+        pass
+
+
 class FileSink(AbstractSink):
     def __init__(self, log_dir: str):
         self._dir = log_dir
