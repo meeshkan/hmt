@@ -1,0 +1,15 @@
+{
+  "paths" : {
+    "$paths" : {
+      "$method" : {
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : "schema"
+            }
+          }
+        }
+      }
+    }
+  }
+}
