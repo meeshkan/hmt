@@ -4,18 +4,20 @@ import pytest
 from tornado.httpclient import HTTPRequest
 
 from meeshkan.serve.admin import make_admin_app
-from meeshkan.serve.mock.scope import scope_manager
+from meeshkan.serve.mock.scope import Scope
+
+scope = Scope()
 
 
 @pytest.fixture
 def app():
-    return make_admin_app()
+    return make_admin_app(scope=scope)
 
 
 @pytest.fixture(autouse=True)
 def setup():
     yield True
-    scope_manager.clear()
+    scope.clear()
 
 
 @pytest.mark.gen_test

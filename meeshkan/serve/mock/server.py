@@ -12,6 +12,8 @@ from meeshkan.serve.mock.specs import OpenAPISpecification
 from meeshkan.serve.mock.views import MockServerView
 from meeshkan.serve.utils.routing import PathRouting, Routing
 
+from .scope import Scope
+
 logger = logging.getLogger(__name__)
 
 
@@ -40,17 +42,24 @@ def make_mocking_app(
 
 class MockServer:
     def __init__(
-        self, port, specs, callback_dir=None, admin_port=None, routing=PathRouting()
+        self,
+        port,
+        specs,
+        scope: Optional[Scope] = None,
+        callback_dir=None,
+        admin_port=None,
+        routing=PathRouting(),
     ):
         self._callback_dir = callback_dir
         self._admin_port = admin_port
         self._port = port
         self._specs = specs
         self._routing = routing
+        self._scope = scope or Scope()
 
     def run(self) -> None:
         if self._admin_port:
-            start_admin(self._admin_port)
+            start_admin(scope=self._scope, port=self._admin_port)
         app = make_mocking_app(self._callback_dir, self._specs, self._routing)
         http_server = HTTPServer(app)
         http_server.listen(self._port)
