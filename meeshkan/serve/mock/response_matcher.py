@@ -103,6 +103,7 @@ class ResponseMatcher:
         path_candidates = [x for x in match[name].paths.values()]
         random.shuffle(path_candidates)
         path_candidate = path_candidates[0]
+
         method = {
             "get": path_candidate.get,
             "post": path_candidate.post,
@@ -113,7 +114,8 @@ class ResponseMatcher:
             "patch": path_candidate.patch,
             "trace": path_candidate.trace,
         }.get(str(request.method.value), None)
-        if request.method.value is None:
+
+        if method is None:
             return self.match_error(method_error, request)
         responses_error = "While a stub for a specification exists for this endpoint, it contains no responses. That usually means the schema is corrupt or it has been constrained too much (ie asking for a 201 response when it only has 200 and 400)."
         if method.responses is None:
