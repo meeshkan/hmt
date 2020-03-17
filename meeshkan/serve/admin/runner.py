@@ -40,4 +40,4 @@ def start_admin(port):
     app = make_admin_app()
     http_server = HTTPServer(app)
     http_server.listen(port)
-    logger.info("⚙ Admin   http://localhost:%s/admin", port)
+    logger.info("• Admin   http://localhost:%s/admin", port)
