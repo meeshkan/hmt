@@ -4,10 +4,10 @@ from tornado.httpserver import HTTPServer
 from tornado.web import Application
 
 from meeshkan.serve.admin.views import (
-    ScopeView,
-    StorageView,
     RestMiddlewaresView,
     RestMiddlewareView,
+    ScopeView,
+    StorageView,
 )
 from meeshkan.serve.mock.rest import rest_middleware_manager
 from meeshkan.serve.mock.storage import storage_manager
