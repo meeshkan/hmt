@@ -8,7 +8,7 @@ from click.testing import CliRunner
 from hamcrest import assert_that, has_key
 from openapi_typed_2 import OpenAPIObject, convert_from_openapi
 
-from meeshkan.__main__ import _convert, cli
+from meeshkan.__main__ import cli
 from meeshkan.build.builder import BASE_SCHEMA
 from meeshkan.config import DEFAULT_SPECS_DIR
 
@@ -103,56 +103,6 @@ def test_build_cmd():
 
     assert runner_result.exit_code == 0
     assert len(runner_result.output) == 0
-
-
-def test_convert_cmd():
-    runner = CliRunner()
-
-    # Absolute path, can be accessed in Click's "isolated filesystem"
-    input_file = Path("tests/convert/recordings/recordings.pcap").resolve()
-    output_file = "recordings.jsonl"
-
-    with runner.isolated_filesystem():
-
-        assert not Path(
-            output_file
-        ).is_file(), "Expected output file {} to not exist".format(output_file)
-
-        runner_result = runner.invoke(
-            cli, ["convert", "-i", str(input_file), "-o", output_file]
-        )
-
-        assert Path(output_file).is_file(), "Expected output file {} to exist".format(
-            output_file
-        )
-
-        assert runner_result.exit_code == 0
-
-
-######
-## TODO: these tests are basically identical, with the one below
-## only existing to get a more complete error log in case the one
-## above is broken.
-
-
-def test_convert_cmd_without_invocation():
-    runner = CliRunner()
-
-    # Absolute path, can be accessed in Click's "isolated filesystem"
-    input_file = Path("tests/convert/recordings/recordings.pcap").resolve()
-    output_file = "recordings.jsonl"
-
-    with runner.isolated_filesystem():
-
-        assert not Path(
-            output_file
-        ).is_file(), "Expected output file {} to not exist".format(output_file)
-
-        runner_result = _convert(str(input_file), output_file)
-
-        assert Path(output_file).is_file(), "Expected output file {} to exist".format(
-            output_file
-        )
 
 
 def test_version():

@@ -5,11 +5,14 @@ from tornado.httpclient import HTTPRequest
 
 from meeshkan.serve.admin import make_admin_app
 from meeshkan.serve.mock.rest import rest_middleware_manager
+from meeshkan.serve.mock.scope import Scope
+
+scope = Scope()
 
 
 @pytest.fixture
 def app():
-    return make_admin_app()
+    return make_admin_app(scope)
 
 
 @pytest.fixture(autouse=True)

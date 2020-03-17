@@ -103,7 +103,7 @@ Here is a list of integrations that exist or are in development:
 | Integration | Description | Status |
 | ----------- | ----------- | ------ |
 | [`express-middleware`](https://github.com/meeshkan/express-middleware) | Log files from express apps using a variety of transport layers, including the file system and Apache Kafka. | Stable |
-| `wireshark` | Run `meeshkan convert my-file.pcap` to convert a Wireshark `.pcap` file to `http-types` format. | Stable |
+| `wireshark` | Convert a Wireshark `.pcap` file to `http-types` format. | Stable |
 | Kong plugin | Log requests and responses to the Kong API Gateway using a variety of transport layers, including the file system and Apache Kafka. | In development |
 | AWS API Gateway Plugin | Log requests and responses to the AWS API Gateway using a variety of transport layers, including the file system and Apache Kafka. | In development |
 | Apigee Plugin | Log requests and responses to the Apigee API Gateway using a variety of transport layers, including the file system and Apache Kafka. | In development |

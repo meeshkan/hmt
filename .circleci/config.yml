@@ -17,12 +17,6 @@ jobs: # A basic unit of work in a run
     steps: # steps that comprise the `build` job
       - checkout # check out source code to working directory
       - run:
-          name: Install tshark
-          command: |
-            sudo apt-get update
-            sudo apt-get dist-upgrade
-            sudo apt-get install -y tshark
-      - run:
           name: Install Node.js and yarn
           command: |
             curl -sL https://deb.nodesource.com/setup_10.x | sudo bash -
