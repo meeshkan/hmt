@@ -31,9 +31,6 @@ def log(*args):
 @click.group()
 @click.version_option()
 def cli():
-    """
-    Meeshkan CLI.
-    """
     setup()  # Ensure setup is done before invoking the CLI.
 
 
