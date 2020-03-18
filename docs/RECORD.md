@@ -37,7 +37,6 @@ To stop Meeshkan without losing your any of your data, type `Ctrl + C` or anothe
 By default, Meeshkan uses **path routing** to intercept HTTP API calls. Path routing is done by appending the URL you wish to call to the URL of the recording server.
 
 ```bash
-$ pip meeshkan # if not installed yet 
 $ meeshkan record
 ```
 

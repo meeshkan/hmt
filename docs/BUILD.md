@@ -28,7 +28,6 @@ For an example input file, see [recordings.jsonl](https://github.com/Meeshkan/me
 Once you've ensured that your files are formatted correctly, use the `meeshkan build` command to build an OpenAPI schema from your `.jsonl` file:
 
 ```bash
-$ pip install meeshkan # if not installed yet
 $ meeshkan build --input-file path/to/recordings.jsonl 
 ```
 
