@@ -1,11 +1,12 @@
 from http_types import RequestBuilder
 
+from meeshkan.serve.mock.faker import MeeshkanDataFaker
 from meeshkan.serve.mock.faker.schema_faker import MeeshkanSchemaFaker
 from meeshkan.serve.mock.matcher import valid_schema
 
 
 def test_faker_1():
-    faker = MeeshkanSchemaFaker()
+    faker = MeeshkanDataFaker()
 
     request = RequestBuilder.from_dict(dict(method="post",  protocol="http", path="/", host="api.com"))
 
@@ -24,9 +25,31 @@ def test_faker_1():
     res = faker.fake_it(request, schema, schema, 0)
     assert valid_schema(res, schema)
 
+def test_faker_data():
+    faker = MeeshkanDataFaker()
+
+    request = RequestBuilder.from_dict(dict(method="post",  protocol="http", path="/", host="api.com"))
+
+    schema = {
+        "definitions":
+            {"item": {
+            "type": "object",
+            "required": ["foo", "baz"],
+            "properties": {
+                "foo": {"type": "number"},
+                "bar": {"type": "string"},
+                "baz": {"type": "string"},
+            }}},
+        "type": "array",
+        "items": {
+            "$ref": "#/definitions/item",
+            },
+        }
+    res = faker.fake_it(request, schema, schema, 0)
+    assert valid_schema(res, schema)
 
 def test_faker_2():
-    faker = MeeshkanSchemaFaker()
+    faker = MeeshkanDataFaker()
 
     request = RequestBuilder.from_dict(dict(method="post",  protocol="http", path="/", host="api.com"))
 
@@ -50,7 +73,7 @@ def test_faker_2():
 
 
 def test_faker_3():
-    faker = MeeshkanSchemaFaker()
+    faker = MeeshkanDataFaker()
 
     request = RequestBuilder.from_dict(dict(method="post",  protocol="http", path="/", host="api.com"))
 
@@ -71,7 +94,7 @@ def test_faker_3():
 
 
 def test_faker_4():
-    faker = MeeshkanSchemaFaker()
+    faker = MeeshkanDataFaker()
 
     request = RequestBuilder.from_dict(dict(method="post",  protocol="http", path="/", host="api.com"))
 
@@ -106,7 +129,7 @@ def test_faker_4():
 
 
 def test_faker_5():
-    faker = MeeshkanSchemaFaker()
+    faker = MeeshkanDataFaker()
 
     request = RequestBuilder.from_dict(dict(method="post",  protocol="http", path="/", host="api.com"))
 

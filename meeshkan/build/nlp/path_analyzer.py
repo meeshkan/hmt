@@ -7,11 +7,10 @@ class PathItemTypes(Enum):
     ID=2
     GROUP_ID=3#page numbers or something
 
-
 class PathAnalyzer:
     def __init__(self):
         pass
 
-    def extract_values(self, path):
+    def extract_values(self, path): #path="/payemnts/35234"
         return {PathItemTypes.ENTITY: "payment", PathItemTypes.ACTION: "confirm",
                 PathItemTypes.ID: None, PathItemTypes.GROUP_ID: None}

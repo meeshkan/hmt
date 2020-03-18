@@ -1,8 +1,9 @@
 import sys
+
+from meeshkan.build.nlp.schema_normalizer.schema_paths.parse_openapi_schema import parse_schema
+from meeshkan.build.nlp.schema_normalizer.schema_paths.schema_compare import compare_nested_schema
+
 sys.path.append('..')
-from schema_paths.parse_openapi_schema import parse_schema
-from schema_paths.schema_compare import compare_nested_schema
-from schema_paths.schema_compare import compare_nested_schema
 
 
 def check_and_create_ref(specs, path_tuple):
@@ -25,7 +26,7 @@ def check_and_create_ref(specs, path_tuple):
     # Now we need to compare the two schemas for best refernce
     best_tuple = compare_nested_schema(nested_paths_dict[path_tuple[0]], nested_paths_dict[path_tuple[1]])
                                     
-    print(best_tuple)
+    return best_tuple
     
     
 

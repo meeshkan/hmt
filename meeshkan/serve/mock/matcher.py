@@ -448,7 +448,8 @@ def valid_schema(to_validate: Any, schema: Any) -> bool:
     try:
         jsonschema.validate(to_validate, schema)
         return True
-    except Exception:
+    except Exception as e:
+        raise e
         # print(e)
         return False
 

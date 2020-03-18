@@ -2,7 +2,7 @@ import json
 import logging
 
 from meeshkan.serve.mock.callbacks import callback_manager
-from meeshkan.serve.mock.faker.schema_faker import MeeshkanSchemaFaker
+from meeshkan.serve.mock.faker import MeeshkanFaker
 from meeshkan.serve.mock.rest import rest_middleware_manager
 import os
 import yaml
@@ -35,7 +35,6 @@ class ResponseMatcher:
 
     def __init__(self, specs_dir):
         self._text_faker = Faker()
-        self._json_faker = MeeshkanSchemaFaker()
         self._schemas = {}
         if not os.path.exists(specs_dir):
             logging.info("OpenAPI schema directory not found %s", specs_dir)
@@ -100,39 +99,35 @@ class ResponseMatcher:
         if request.method.value is None:
             return self.match_error(method_error, request)
         responses_error = "While a stub for a specification exists for this endpoint, it contains no responses. That usually means the schema is corrupt or it has been constrained too much (ie asking for a 201 response when it only has 200 and 400)."
-        if method.responses is None:
+        if method.responses is None or len(method.responses) == 0:
             return self.match_error(responses_error, request)
-        potential_responses = [r for r in method.responses.items()]
-        random.shuffle(potential_responses)
-        if len(potential_responses) == 0:
-            return self.match_error(responses_error, request)
-        response = potential_responses[0]
-        response_1 = response[1]
-        response_1 = (
-            get_response_from_ref(spec, ref_name(response_1))
-            if isinstance(response_1, Reference)
-            else response_1
+        status_code, response = random.choice([r for r in method.responses.items()])
+        status_code = int(status_code if status_code != "default" else 400)
+
+        response = (
+            get_response_from_ref(spec, ref_name(response))
+            if isinstance(response, Reference)
+            else response
         )
-        if response_1 is None:
+        if response is None:
             return self.match_error(responses_error, request)
         headers: Mapping[str, Union[str, Sequence[str]]] = {}
-        if response_1.headers is not None:
+        if response.headers is not None:
             # TODO: can't handle references yet, need to fix
             headers = (
                 {}
             )  # { k: (faker(v['schema'], v['schema'], 0) if 'schema' in v else '***') for k,v in headers.items() }
-        statusCode = int(response[0] if response[0] != "default" else 400)
-        if (response_1.content is None) or len(response_1.content.items()) == 0:
+        if (response.content is None) or len(response.content.items()) == 0:
             return Response(
-                statusCode=statusCode,
+                statusCode=status_code,
                 body="",
                 headers=headers,
                 bodyAsJson=None,
                 timestamp=None,
             )
-        mime_types = response_1.content.keys()
+        mime_types = response.content.keys()
         if "application/json" in mime_types:
-            content = response_1.content["application/json"]
+            content = response.content["application/json"]
             if content.schema is None:
                 return self.match_error("Could not find schema", request)
             schema = content.schema
@@ -142,7 +137,7 @@ class ResponseMatcher:
             new_headers: Mapping[str, Union[str, Sequence[str]]] = {**headers, **ct}
             if schema is None:
                 return Response(
-                    statusCode=statusCode,
+                    statusCode=status_code,
                     body="",
                     bodyAsJson="",
                     headers=new_headers,
@@ -167,9 +162,9 @@ class ResponseMatcher:
                     )
                 },
             }
-            bodyAsJson = self._json_faker.fake_it(to_fake, to_fake, 0)
+            bodyAsJson = self._json_faker.fake_it(request, to_fake, to_fake, 0)
             return Response(
-                statusCode=statusCode,
+                statusCode=status_code,
                 body=json.dumps(bodyAsJson),
                 bodyAsJson=bodyAsJson,
                 headers=new_headers,
@@ -177,7 +172,7 @@ class ResponseMatcher:
             )
         if "text/plain" in mime_types:
             return Response(
-                statusCode=statusCode,
+                statusCode=status_code,
                 body=self._text_faker.sentence(),
                 # TODO: can this be accomplished without a cast?
                 headers=cast(

@@ -1,0 +1,506 @@
+{
+	"openapi": "3.0.0",
+
+	"info": {
+		"title": "API title",
+		"version": "1.0",
+		"description": "API description"
+	},
+	"paths": {
+		"/v1/payments/{trnopysd}": {
+			"summary": "Path summary",
+			"description": "Path description",
+			"parameters": [{
+				"name": "trnopysd",
+				"in": "path",
+				"required": true
+			}],
+			"post": {
+				"responses": {
+					"200": {
+						"description": "Response description",
+						"headers": {},
+						"content": {
+							"application/json": {
+								"schema": {
+									"required": ["amount", "currency", "payerIban", "paymentId", "receiverBic", "receiverIban", "receiverName", "subject", "valueDate"],
+									"properties": {
+										"amount": {
+											"type": "integer"
+										},
+										"subject": {
+											"type": "string"
+										},
+										"currency": {
+											"type": "string"
+										},
+										"payerIban": {
+											"type": "string"
+										},
+										"valueDate": {
+											"type": "string"
+										},
+										"receiverBic": {
+											"type": "string"
+										},
+										"receiverIban": {
+											"type": "string"
+										},
+										"receiverName": {
+											"type": "string"
+										},
+										"paymentId": {
+											"type": "string"
+										}
+									},
+									"type": "object"
+								}
+							}
+						},
+						"links": {}
+					}
+				},
+				"summary": "Operation summary",
+				"description": "Operation description",
+				"operationId": "id",
+				"parameters": [{
+					"name": "Accept-Encoding",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Content-Type",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "x-authorization",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Content-Length",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Connection",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "User-Agent",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Host",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "x-api-key",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Accept",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}]
+			}
+		},
+		"/accounts/v3/accounts/eg9Mno2tvmeEE039chWrHw7sk1155oy5Mha8kQp0mYs.sxajtselenSScKPZrBMYjg.SoFWGrHocw1YoNb3zw-vfw": {
+			"summary": "Path summary",
+			"description": "Path description",
+			"get": {
+				"responses": {
+					"200": {
+						"description": "Response description",
+						"headers": {
+							"Date": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Connection": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"ETag": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Vary": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Cache-Control": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Proxy-Connection": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Age": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Set-Cookie": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"required": ["_links", "accountId", "balance", "currency", "identifier", "identifierScheme", "name", "nickname", "servicerIdentifier", "servicerScheme"],
+									"properties": {
+										"accountId": {
+											"type": "string"
+										},
+										"identifier": {
+											"type": "string"
+										},
+										"identifierScheme": {
+											"type": "string"
+										},
+										"nickname": {
+											"type": "string"
+										},
+										"name": {
+											"type": "string"
+										},
+										"balance": {
+											"type": "integer"
+										},
+										"currency": {
+											"type": "string"
+										},
+										"servicerScheme": {
+											"type": "string"
+										},
+										"servicerIdentifier": {
+											"type": "string"
+										},
+										"_links": {
+											"required": ["self", "transactions"],
+											"properties": {
+												"self": {
+													"required": ["href"],
+													"properties": {
+														"href": {
+															"type": "string"
+														}
+													},
+													"type": "object"
+												},
+												"transactions": {
+													"required": ["href"],
+													"properties": {
+														"href": {
+															"type": "string"
+														}
+													},
+													"type": "object"
+												}
+											},
+											"type": "object"
+										}
+									},
+									"type": "object"
+								}
+							}
+						},
+						"links": {}
+					}
+				},
+				"summary": "Operation summary",
+				"description": "Operation description",
+				"operationId": "id",
+				"parameters": [{
+					"name": "User-Agent",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Accept-Encoding",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "authorization",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Host",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "x-api-key",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Connection",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Accept",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}]
+			}
+		},
+		"/accounts/v3/accounts": {
+			"summary": "Path summary",
+			"description": "Path description",
+			"get": {
+				"responses": {
+					"200": {
+						"description": "Response description",
+						"headers": {
+							"Date": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Connection": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"ETag": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Vary": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Cache-Control": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Proxy-Connection": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Content-Encoding": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Age": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Set-Cookie": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Transfer-Encoding": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"required": ["_links", "accounts"],
+									"properties": {
+										"accounts": {
+											"items": {
+												"required": ["_links", "accountId", "balance", "currency", "identifier", "identifierScheme", "name", "nickname", "servicerIdentifier", "servicerScheme"],
+												"properties": {
+													"accountId": {
+														"type": "string"
+													},
+													"identifier": {
+														"type": "string"
+													},
+													"identifierScheme": {
+														"type": "string"
+													},
+													"nickname": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													},
+													"balance": {
+														"type": "number"
+													},
+													"currency": {
+														"type": "string"
+													},
+													"servicerScheme": {
+														"type": "string"
+													},
+													"servicerIdentifier": {
+														"type": "string"
+													},
+													"_links": {
+														"required": ["self", "transactions"],
+														"properties": {
+															"self": {
+																"required": ["href"],
+																"properties": {
+																	"href": {
+																		"type": "string"
+																	}
+																},
+																"type": "object"
+															},
+															"transactions": {
+																"required": ["href"],
+																"properties": {
+																	"href": {
+																		"type": "string"
+																	}
+																},
+																"type": "object"
+															}
+														},
+														"type": "object"
+													}
+												},
+												"type": "object"
+											},
+											"type": "array"
+										},
+										"_links": {
+											"required": ["self"],
+											"properties": {
+												"self": {
+													"required": ["href"],
+													"properties": {
+														"href": {
+															"type": "string"
+														}
+													},
+													"type": "object"
+												}
+											},
+											"type": "object"
+										}
+									},
+									"type": "object"
+								}
+							}
+						},
+						"links": {}
+					}
+				},
+				"summary": "Operation summary",
+				"description": "Operation description",
+				"operationId": "id",
+				"parameters": [{
+					"name": "User-Agent",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Accept-Encoding",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "authorization",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Host",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "x-api-key",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Connection",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}, {
+					"name": "Accept",
+					"in": "header",
+					"required": false,
+					"schema": {
+						"type": "string"
+					}
+				}]
+			}
+		}
+	},
+	"servers": [{
+		"url": "https://sandbox.apis.op-palvelut.fi"
+	}]
+}

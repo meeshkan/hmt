@@ -1,11 +1,10 @@
 import sys
 
-sys.path.append('..')
-from schema_paths.schema_to_vector import generate_schema_vectors
-from schema_paths.schema_to_vector import split_type, split_level
-from schema_paths.schema_to_vector import _object, _array, _string, _integer, _number, _boolean, _unknown
+from meeshkan.build.nlp.schema_normalizer.schema_paths.schema_to_fields import schema_remove_types
+from meeshkan.build.nlp.schema_normalizer.schema_paths.schema_to_vector import split_level, _object, _array
 
-from schema_paths.schema_to_fields import schema_remove_types
+sys.path.append('..')
+
 
 def create_schema_levels(obj):
     # obj is list object
