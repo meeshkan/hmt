@@ -1,5 +1,3 @@
-import json
-
 import pytest
 from tornado.httpclient import HTTPClientError, HTTPRequest
 
@@ -44,7 +42,7 @@ def test_mocking_server_pets(http_client, base_url, test_sink):
 
 
 @pytest.mark.gen_test
-def test_mocking_server_pets(http_client, base_url, test_sink):
+def test_mocking_server_pets_bad_path(http_client, base_url, test_sink):
     req = HTTPRequest(base_url + "/fewewsdfeaf", headers={"Host": "bad.api.io"})
     try:
         yield http_client.fetch(req)
