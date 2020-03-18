@@ -1,11 +1,3 @@
-import json
-import logging
-
-import requests
-
-logger = logging.getLogger(__name__)
-
-
 class Scope:
     def __init__(self):
         self._name = None

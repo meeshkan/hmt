@@ -205,7 +205,7 @@ def match_urls(protocol: str, host: str, o: OpenAPIObject) -> Sequence[str]:
         protocol {str} -- like http or https
         host {str} -- like api.foo.com
         o {OpenAPIObject} -- schema from which the mock URLs are taken
-    
+
     Returns:
         A list of URLs that match the OpenAPI spec.
     """
@@ -465,7 +465,7 @@ def get_required_request_body_schemas(
         )
         # automatically ignore not required for now
         .Prism(
-            lambda s: None if s.required == False else s, lambda a: a, ignore_none=True
+            lambda s: None if s.required is False else s, lambda a: a, ignore_none=True
         )
         .add_lens(content_o)
         .Values()
@@ -643,7 +643,7 @@ def get_matching_parameters(
 def maybeJson(maybe: str) -> Any:
     try:
         return json.loads(maybe)
-    except:
+    except json.JSONDecodeError:
         return maybe
 
 
@@ -651,14 +651,14 @@ def path_parameter_match(
     part: str, vname: str, path_item: PathItem, operation: str, oas: OpenAPIObject,
 ) -> bool:
     """Matches part of a path against a path parameter with name vname
-    
+
     Arguments:
         part {str} -- part of a path, ie an id
         vname {str} -- name of a parameter
         path_item {PathItem} -- a path item maybe containing the parameter
         operation {MethodNames} -- the name of the operation to check in case the parameter is in the operation
         oas {OpenAPIObject} -- the schema to traverse to find definitions
-    
+
     Returns:
         bool -- Did we get a match
     """
@@ -682,6 +682,7 @@ def path_parameter_match(
 
 
 path_param_regex = re.compile(r"^\{[^}]+\}")
+
 
 # TODO: this is a boolean nightmare
 # what we want is

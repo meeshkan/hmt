@@ -1,8 +1,7 @@
-from io import StringIO
+import asyncio
 from typing import Sequence
 
 import click
-from http_types.utils import HttpExchangeWriter
 from openapi_typed_2 import OpenAPIObject, convert_to_openapi
 from yaml import safe_load
 

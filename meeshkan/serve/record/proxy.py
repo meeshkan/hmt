@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 import tornado.ioloop
 from http_types import Request, Response
