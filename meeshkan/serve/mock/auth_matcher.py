@@ -10,6 +10,8 @@ from openapi_typed_2.openapi import (
 from .matcher import truncate_path
 from .specs import OpenAPISpecification
 
+SecuritySchemeMatch = Tuple[SecurityScheme, OpenAPISpecification]
+
 
 def matches_to_oauth2(
     truncated_path: str, scheme: OAuth2SecurityScheme
@@ -51,7 +53,7 @@ def match_request_to_security_scheme(
 
 def match_to_security_schemes(
     req: Request, specs: Sequence[OpenAPISpecification]
-) -> Sequence[Tuple[SecurityScheme, OpenAPISpecification]]:
+) -> Sequence[SecuritySchemeMatch]:
     return [
         (security_match, spec)
         for spec in specs
