@@ -149,7 +149,7 @@ def status_mocking():
 @click.group(invoke_without_command=True)
 @add_options(_record_options)
 @click.pass_context
-def record(ctx, port, admin_port, log_dir, header_routing, specs_dir, mode, daemon):
+def record(ctx, port, log_dir, header_routing, specs_dir, mode, daemon):
     """
     Record HTTP traffic from a reverse proxy.
     """
