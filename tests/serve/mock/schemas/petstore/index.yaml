@@ -30,7 +30,7 @@ paths:
               schema:
                 type: string
           content:
-            application/json:    
+            application/json:
               schema:
                 $ref: "#/components/schemas/Pets"
     post:
@@ -42,10 +42,10 @@ paths:
         '201':
           description: Null response
         default:
-          description: unexpected error 
-          content: 
-            application/json: 
-              schema: 
+          description: unexpected error
+          content:
+            application/json:
+              schema:
                 $ref: "#/components/schemas/Error"
   /pets/{petId}:
     get:
