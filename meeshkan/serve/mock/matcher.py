@@ -339,6 +339,29 @@ def change_refs(j: Schema) -> Schema:
             change_ref(item) if isinstance(item, Reference) else change_refs(item)
             for item in j.items
         ],
+        _not=None
+        if j._not is None
+        else change_ref(j._not)
+        if isinstance(j._not, Reference)
+        else change_refs(j._not),
+        anyOf=None
+        if j.anyOf is None
+        else [
+            change_ref(item) if isinstance(item, Reference) else change_refs(item)
+            for item in j.anyOf
+        ],
+        allOf=None
+        if j.allOf is None
+        else [
+            change_ref(item) if isinstance(item, Reference) else change_refs(item)
+            for item in j.allOf
+        ],
+        oneOf=None
+        if j.oneOf is None
+        else [
+            change_ref(item) if isinstance(item, Reference) else change_refs(item)
+            for item in j.oneOf
+        ],
         properties=None
         if j.properties is None
         else {
@@ -439,6 +462,10 @@ def get_required_request_body_schemas(
             else s,
             lambda a: a,
             ignore_none=True,
+        )
+        # automatically ignore not required for now
+        .Prism(
+            lambda s: None if s.required == False else s, lambda a: a, ignore_none=True
         )
         .add_lens(content_o)
         .Values()
