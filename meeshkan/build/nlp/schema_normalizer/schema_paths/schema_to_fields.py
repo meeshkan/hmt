@@ -1,12 +1,10 @@
 '''
     This module is to parse the schema features and return the list of schema fields
 '''
-
-import sys
 import re
-sys.path.append('..')
-from schema_paths.schema_to_vector import split_type, split_level
-from schema_paths.schema_to_vector import _object, _array, _string, _integer, _number, _boolean, _unknown
+#sys.path.append('..')
+from meeshkan.build.nlp.schema_normalizer.schema_paths.schema_to_vector import split_type, split_level
+from meeshkan.build.nlp.schema_normalizer.schema_paths.schema_to_vector import _object, _array, _string, _integer, _number, _boolean, _unknown
 
 def split_by_type(obj):
     return obj.split(split_type)

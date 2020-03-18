@@ -2,8 +2,8 @@ import os
 import sys
 import json
 
-sys.path.append('..')
-from schema_paths.schema_reference import check_and_create_ref
+#sys.path.append('..')
+from meeshkan.build.nlp.schema_normalizer.schema_paths.schema_reference import check_and_create_ref
 
 
 

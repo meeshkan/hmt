@@ -1,6 +1,3 @@
-import json
-import json
-import sys
 
 
 def exact_match(list1, list2):
