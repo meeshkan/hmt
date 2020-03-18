@@ -28,7 +28,17 @@ def make_sandbox_url(base_url, path: str):
 
 
 class TestNordea:
-    @pytest.mark.skip("OAuth security scheme not implemented")
+    @pytest.mark.skip("Returning 302 for invalid auth not implemented")
+    @pytest.mark.gen_test
+    async def test_nordea_authorize_returns_302(self, http_client, base_url):
+        redirect_uri = "http://httpbin.org/get"
+        query = f"state=fake&client_id=CLIENT_ID&scope=ACCOUNTS_BASIC,ACCOUNTS_BALANCES,ACCOUNTS_DETAILS,ACCOUNTS_TRANSACTIONS,PAYMENTS_MULTIPLE, CARDS_INFORMATION, CARDS_TRANSACTIONS&duration=129600&redirect_uri={redirect_uri}&country=FI"
+        url = make_sandbox_url(base_url, path=f"/personal/v4/authorize?{query}")
+        req = HTTPRequest(url, follow_redirects=False)
+        response = await http_client.fetch(req)
+        assert response.code == 302, "Expected redirect for auth"
+
+    @pytest.mark.skip("Returning 401 for invalid auth not implemented")
     @pytest.mark.gen_test
     async def test_nordea_accounts_returns_401(self, http_client, base_url):
         url = make_sandbox_url(base_url, path="/personal/v4/accounts")
