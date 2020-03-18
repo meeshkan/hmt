@@ -5,6 +5,7 @@ Meeshkan can be used to create a mock server from OpenAPI specifications and opt
 ## What's in this document
 
 - [The `meeshkan mock` command](#the-meeshkan-mock-command)
+    - [Making requests](#making-requests)
 - [Daemon mode](#daemon-mode)
 - [Callbacks](#callbacks)
     - [Function arguments](#function-arguments)
@@ -15,13 +16,19 @@ Meeshkan can be used to create a mock server from OpenAPI specifications and opt
 
 ## The `meeshkan mock` command
 
-To create a mock server from an OpenAPI spec, use the `meeshkan mock` command.
+To create your mock server, use the `meeshkan mock` command and include the path to the directory that your OpenAPI spec is in:
 
 ```bash
-$ meeshkan mock spec/dir/or/file
+$ meeshkan mock path/to/dir/
 ```
 
-_Note: The `--specs-dir` flag is telling Meeshkan to search for the OpenAPI spec inside the `specs` directory._
+Alternatively, you can also designate a path to one specific file:
+
+```bash
+$ meeshkan mock path/to/openapi.yml
+```
+
+### Making requests
 
 Keep this running. Then, in another terminal window, make a request using [curl](https://curl.haxx.se/):
 
@@ -29,7 +36,7 @@ Keep this running. Then, in another terminal window, make a request using [curl]
 $ curl http://localhost:8000/https://my.api.com/users
 ```
 
-Assuming that the directory `specs` contains an OpenAPI spec with the server `https://my.api.com`, this will return a mock of the resource `GET /users`.
+Assuming that your OpenAPI spec has the server `https://my.api.com`, this will return a mock of the resource `GET /users`.
 
 > More options for the `meeshkan mock` command an be seen by running `meeshkan mock --help`.
 

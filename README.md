@@ -118,7 +118,6 @@ For more information about recording, including direct file writing and kafka st
 Using the Meeshkan CLI, you can **build** an OpenAPI schema from a single `.jsonl` file, in addition to any existing OpenAPI specs that describe how your service works.
 
 ```bash
-$ pip install meeshkan # if not installed yet
 $ meeshkan build --input-file path/to/recordings.jsonl 
 ```
 
@@ -149,8 +148,10 @@ For more information about building, including mixing together the two modes and
 You can use an OpenAPI spec, such as the one created with `meeshkan build`, to create a **mock** server using Meeshkan.
 
 ```bash
-$ meeshkan mock
+$ meeshkan mock path/to/dir/
 ```
+
+_Note: You can specify a path to the directory your OpenAPI spec is in or a path to one specific file._
 
 For more information about mocking, including adding custom middleware and modifying the mocking schema JIT via an admin API, see the [mocking documentation](./docs/MOCK.md).
 
