@@ -1,11 +1,12 @@
 import json
-import logging
 import os
 from dataclasses import dataclass
-from typing import Sequence
+from typing import Sequence, Union
 
+import requests
 import yaml
 from openapi_typed_2 import OpenAPIObject, convert_to_openapi
+from requests.exceptions import RequestException
 
 
 @dataclass
@@ -16,27 +17,50 @@ class OpenAPISpecification:
     source: str
 
 
-def load_specs(specs_dir: str) -> Sequence[OpenAPISpecification]:
-    if not os.path.exists(specs_dir):
-        logging.info("OpenAPI schema directory not found %s", specs_dir)
-        return []
+def load_spec(spec_source: str, is_http: bool) -> OpenAPISpecification:
+    spec_text: str
+    if is_http:
+        try:
+            response = requests.get(spec_source)
+            spec_text = response.text
+        except RequestException:
+            raise Exception(f"Failed to load {spec_source}")
+    else:
+        with open(spec_source, encoding="utf8") as spec_file:
+            spec_text = spec_file.read()
+
+    return OpenAPISpecification(
+        convert_to_openapi(
+            (json.loads if spec_source.endswith("json") else yaml.safe_load)(spec_text)
+        ),
+        spec_source,
+    )
+
+
+def load_specs(specs: Union[str, Sequence[str]]) -> Sequence[OpenAPISpecification]:
+    if isinstance(specs, str):
+        specs = (specs,)
+
     specs_with_sources = []
-    specs_paths = [
-        s
-        for s in os.listdir(specs_dir)
-        if s.endswith("yml") or s.endswith("yaml") or s.endswith("json")
-    ]
-    for spec_path in specs_paths:
-        full_spec_path = os.path.join(specs_dir, spec_path)
-        with open(full_spec_path, encoding="utf8") as spec_file:
-            specs_with_sources.append(
-                OpenAPISpecification(
-                    convert_to_openapi(
-                        (json.loads if spec_path.endswith("json") else yaml.safe_load)(
-                            spec_file.read()
-                        )
-                    ),
-                    spec_path,
-                )
-            )
+
+    for spec in specs:
+        is_http = spec.startswith("http://") or spec.startswith("https://")
+
+        if is_http or os.path.isfile(spec):
+            specs_paths = [spec]
+        elif os.path.isdir(spec):
+            specs_paths = [
+                os.path.join(spec, dir_entry)
+                for dir_entry in os.listdir(spec)
+                if dir_entry.endswith("yml")
+                or dir_entry.endswith("yaml")
+                or dir_entry.endswith("json")
+            ]
+        else:
+            raise Exception(f"OpenAPI specification {spec} not found")
+
+        for spec_source in specs_paths:
+            loaded_spec = load_spec(spec_source, is_http)
+            specs_with_sources.append(loaded_spec)
+
     return specs_with_sources
