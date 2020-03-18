@@ -244,7 +244,6 @@ setup(
     cmdclass={
         "dist": BuildDistCommand,
         "format": FormatCommand,
-        "typecheck": TypeCheckCommand,
         "upload": UploadCommand,
         "test": TestCommand,
         "typecheck": TypeCheckCommand,
