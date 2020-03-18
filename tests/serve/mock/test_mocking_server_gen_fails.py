@@ -10,7 +10,7 @@ from meeshkan.serve.mock.specs import load_specs
 from meeshkan.serve.utils.routing import HeaderRouting
 
 
-class TestSink(AbstractSink):
+class MockSink(AbstractSink):
     def __init__(self):
         self.interactions = []
 
@@ -20,7 +20,7 @@ class TestSink(AbstractSink):
 
 @pytest.fixture
 def test_sink():
-    return TestSink()
+    return MockSink()
 
 
 @pytest.fixture
