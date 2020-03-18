@@ -68,22 +68,53 @@ all_methods: Sequence[str] = [
 
 
 def omit_method_from_path_item(p: PathItem, a: str) -> PathItem:
+    return mutate_method_in_path_item(p, a, lambda _: None)
+
+
+def none_if_no_responses(o: Operation) -> Optional[Operation]:
+    return None if len(o.responses) == 0 else o
+
+
+def _keep_only_400_level_responses(o: Optional[Operation]) -> Optional[Operation]:
     return (
-        replace(p, get=None)
+        o
+        if o is None
+        else none_if_no_responses(
+            replace(
+                o,
+                responses={
+                    k: v
+                    for k, v in o.responses.items()
+                    if (k != "default") and (int(k) >= 400) and (int(k) < 500)
+                },
+            )
+        )
+    )
+
+
+def keep_only_400_level_responses(p: PathItem, a: str) -> PathItem:
+    return mutate_method_in_path_item(p, a, _keep_only_400_level_responses)
+
+
+def mutate_method_in_path_item(
+    p: PathItem, a: str, c: Callable[[Optional[Operation]], Optional[Operation]]
+) -> PathItem:
+    return (
+        replace(p, get=c(p.get))
         if a == "get"
-        else replace(p, post=None)
+        else replace(p, post=c(p.post))
         if a == "post"
-        else replace(p, put=None)
+        else replace(p, put=c(p.put))
         if a == "put"
-        else replace(p, delete=None)
+        else replace(p, delete=c(p.delete))
         if a == "delete"
-        else replace(p, patch=None)
+        else replace(p, patch=c(p.patch))
         if a == "patch"
-        else replace(p, trace=None)
+        else replace(p, trace=c(p.trace))
         if a == "trace"
-        else replace(p, options=None)
+        else replace(p, options=c(p.options))
         if a == "options"
-        else replace(p, head=None)
+        else replace(p, head=c(p.head))
     )
 
 
@@ -484,10 +515,12 @@ def valid_schema(to_validate: Any, schema: Any) -> bool:
         return False
 
 
-def keep_method_if_required_request_body_is_present(
+def keep_method_if_required_request_body_is_present_else_keep_or_add_400_level_code(
     req: Request, oai: OpenAPIObject,
 ) -> Callable[[PathItem], PathItem]:
-    def _keep_method_if_required_request_body_is_present(p: PathItem) -> PathItem:
+    def _keep_method_if_required_request_body_is_present_else_keep_or_add_400_level_code(
+        p: PathItem,
+    ) -> PathItem:
         out = (
             p
             if (operation_from_string(p, req.method.value) is None)
@@ -521,35 +554,41 @@ def keep_method_if_required_request_body_is_present(
                 )
                 == 0
             )
-            else omit_method_from_path_item(p, req.method.value)
+            else keep_only_400_level_responses(p, req.method.value)
         )
         return out
 
-    return _keep_method_if_required_request_body_is_present
+    return (
+        _keep_method_if_required_request_body_is_present_else_keep_or_add_400_level_code
+    )
 
 
-def keep_method_if_required_header_parameters_are_present(
+def keep_method_if_required_header_parameters_are_present_else_keep_or_add_400_level_code(
     req: Request, oai: OpenAPIObject,
 ) -> Callable[[PathItem], PathItem]:
-    def _keep_method_if_required_header_parameters_are_present(p: PathItem) -> PathItem:
-        out = keep_method_if_required_query_or_header_parameters_are_present(
+    def _keep_method_if_required_header_parameters_are_present_else_keep_or_add_400_level_code(
+        p: PathItem,
+    ) -> PathItem:
+        out = keep_method_if_required_query_or_header_parameters_are_present_else_keep_or_add_400_level_code(
             True, req, oai, p
         )
         return out
 
-    return _keep_method_if_required_header_parameters_are_present
+    return _keep_method_if_required_header_parameters_are_present_else_keep_or_add_400_level_code
 
 
-def keep_method_if_required_query_parameters_are_present(
+def keep_method_if_required_query_parameters_are_present_else_keep_or_add_400_level_code(
     req: Request, oai: OpenAPIObject,
 ) -> Callable[[PathItem], PathItem]:
-    def _keep_method_if_required_query_parameters_are_present(p: PathItem) -> PathItem:
-        out = keep_method_if_required_query_or_header_parameters_are_present(
+    def _keep_method_if_required_query_parameters_are_present_else_keep_or_add_400_level_code(
+        p: PathItem,
+    ) -> PathItem:
+        out = keep_method_if_required_query_or_header_parameters_are_present_else_keep_or_add_400_level_code(
             False, req, oai, p
         )
         return out
 
-    return _keep_method_if_required_query_parameters_are_present
+    return _keep_method_if_required_query_parameters_are_present_else_keep_or_add_400_level_code
 
 
 def _json_schema_from_required_parameters(
@@ -566,7 +605,7 @@ def _json_schema_from_required_parameters(
     }
 
 
-def keep_method_if_required_query_or_header_parameters_are_present(
+def keep_method_if_required_query_or_header_parameters_are_present_else_keep_or_add_400_level_code(
     header: bool, req: Request, oai: OpenAPIObject, p: PathItem
 ) -> PathItem:
     return (
@@ -579,7 +618,7 @@ def keep_method_if_required_query_or_header_parameters_are_present(
                 oai,
             ),
         )
-        else omit_method_from_path_item(p, req.method.value)
+        else keep_only_400_level_responses(p, req.method.value)
     )
 
 
@@ -813,9 +852,15 @@ def match_request_to_openapi(
             return reduce(
                 lambda a, b: b(a),
                 [
-                    keep_method_if_required_header_parameters_are_present(req, oai),
-                    keep_method_if_required_query_parameters_are_present(req, oai),
-                    keep_method_if_required_request_body_is_present(req, oai),
+                    keep_method_if_required_header_parameters_are_present_else_keep_or_add_400_level_code(
+                        req, oai
+                    ),
+                    keep_method_if_required_query_parameters_are_present_else_keep_or_add_400_level_code(
+                        req, oai
+                    ),
+                    keep_method_if_required_request_body_is_present_else_keep_or_add_400_level_code(
+                        req, oai
+                    ),
                 ],
                 get_path_item_with_method(req.method.value, path_item),
             )

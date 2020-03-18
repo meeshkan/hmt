@@ -38,20 +38,19 @@ class TestNordea:
         response = await http_client.fetch(req)
         assert response.code == 302, "Expected redirect for auth"
 
-    @pytest.mark.skip("Returning 401 for invalid auth not implemented")
     @pytest.mark.gen_test
-    async def test_nordea_accounts_returns_401(self, http_client, base_url):
+    async def test_nordea_accounts_returns_40x(self, http_client, base_url):
         url = make_sandbox_url(base_url, path="/personal/v4/accounts")
         req = HTTPRequest(url)
         try:
             await http_client.fetch(req)
             pytest.fail("Expected failure without auth")
         except HTTPClientError as e:
-            assert e.code == 401, "Expected 401 without auth"
+            assert (e.code >= 400) and (e.code < 500), "Expected 400-level without auth"
 
     @pytest.mark.skip("Returns randomly different status codes for a valid request")
     @pytest.mark.gen_test
-    async def test_nordea_accounts(self, http_client, base_url):
+    async def test_nordea_accounts(smatelf, http_client, base_url):
         headers = {
             "Signature": "fake-signature",
             "X-IBM-Client-ID": "fake-client-id",
