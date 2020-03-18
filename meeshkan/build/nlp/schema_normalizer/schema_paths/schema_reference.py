@@ -24,8 +24,12 @@ def check_and_create_ref(specs, path_tuple):
     
     # Now we need to compare the two schemas for best refernce
     best_tuple = compare_nested_schema(nested_paths_dict[path_tuple[0]], nested_paths_dict[path_tuple[1]])
-                                    
     print(best_tuple)
+                                    
+    if isinstance(best_tuple, list) and len(best_tuple) > 0:
+        ref_component = create_ref_path(best_tuple[0])
+        print(ref_component)
+
     
     
 
