@@ -1,12 +1,12 @@
+from http_types import Request, RequestBuilder
 from openapi_typed_2.openapi import OAuth2SecurityScheme
+
 from meeshkan.serve.mock.auth_matcher import (
     match_request_to_security_scheme,
     matches_to_oauth2,
 )
-
 from meeshkan.serve.mock.matcher import truncate_path
 from meeshkan.serve.mock.specs import load_specs
-from http_types import Request, RequestBuilder
 
 spec = load_specs("tests/serve/mock/schemas/nordea")[0]
 

@@ -808,7 +808,7 @@ def truncate_path(path: str, o: OpenAPIObject, i: Request,) -> str:
 
 def match_request_to_openapi(
     req: Request, specs: Sequence[OpenAPISpecification]
-) -> List[OpenAPISpecification]:
+) -> Sequence[OpenAPISpecification]:
     def _path_item_modifier(oai: OpenAPIObject) -> Callable[[PathItem], PathItem]:
         def __path_item_modifier(path_item: PathItem) -> PathItem:
             return reduce(

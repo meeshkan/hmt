@@ -1,14 +1,14 @@
+from typing import Optional, Union
+
+from http_types import Request
 from openapi_typed_2.openapi import (
     AuthorizationCodeOAuthFlow,
     OAuth2SecurityScheme,
     SecurityScheme,
 )
-from http_types import Request
-from typing import Union, Optional
 
-from six import i
-from .specs import OpenAPISpecification
 from .matcher import truncate_path
+from .specs import OpenAPISpecification
 
 
 def matches_to_oauth2(
