@@ -7,7 +7,7 @@ Meeshkan can be used to create a mock server from OpenAPI specifications and opt
 To create a mock server from an OpenAPI spec, use the `meeshkan mock` command.
 
 ```bash
-$ meeshkan mock --specs-dir spec_dir/
+$ meeshkan mock spec/dir/or/file
 ```
 
 And then, in another terminal window, type:
@@ -30,7 +30,7 @@ All other command line arguments stay the same.
 
 To stop meeshkan daemon run:
 ```bash
-$ meeshkan mock stop
+$ meeshkan mock --kill
 ```
 
 ## Callbacks

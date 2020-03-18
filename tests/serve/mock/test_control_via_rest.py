@@ -16,7 +16,7 @@ from meeshkan.serve.utils.routing import HeaderRouting
 def app():
     return make_mocking_app(
         "tests/serve/mock/callbacks",
-        load_specs("tests/serve/mock/shemas/petstore"),
+        load_specs("tests/serve/mock/schemas/petstore"),
         HeaderRouting(),
         Log(Scope()),
     )
