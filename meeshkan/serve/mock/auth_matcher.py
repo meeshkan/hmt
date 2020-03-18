@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, Sequence, Tuple
 
 from http_types import Request
 from openapi_typed_2.openapi import (
@@ -47,3 +47,14 @@ def match_request_to_security_scheme(
                 return scheme
 
     return None
+
+
+def match_to_security_schemes(
+    req: Request, specs: Sequence[OpenAPISpecification]
+) -> Sequence[Tuple[SecurityScheme, OpenAPISpecification]]:
+    return [
+        (security_match, spec)
+        for spec in specs
+        for security_match in (match_request_to_security_scheme(req, spec),)
+        if security_match is not None
+    ]
