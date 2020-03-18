@@ -39,7 +39,7 @@ class ResponseMatcher:
     def default_response(self, msg):
         json_resp = {"message": msg}
         return Response(
-            statusCode=500,
+            statusCode=501,
             body=json.dumps(json_resp),
             bodyAsJson=json_resp,
             headers={},

@@ -1,0 +1,31 @@
+openapi: "3.0.0"
+info:
+  version: 0.0.0
+  title: Bad
+  license:
+    name: MIT
+servers:
+  - url: http://bad.api.io
+paths:
+  /:
+    get:
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
