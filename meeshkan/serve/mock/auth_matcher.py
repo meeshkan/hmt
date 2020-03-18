@@ -1,4 +1,4 @@
-from typing import Optional, Union, Sequence, Tuple
+from typing import Optional, Sequence, Tuple, Union
 
 from http_types import Request
 from openapi_typed_2.openapi import (
