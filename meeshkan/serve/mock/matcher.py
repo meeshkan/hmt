@@ -841,11 +841,12 @@ def match_request_to_openapi(
             )
         )
 
-    d = lens.Values().modify(_oai_modifier)(
-        {
-            spec.source: spec.api
-            for spec in specs
-            if len(match_urls(req.protocol.value, req.host, spec.api)) > 0
-        }
-    )
-    return [OpenAPISpecification(api, source) for (source, api) in d.items()]
+    specs_with_matching_urls = {
+        spec.source: spec.api
+        for spec in specs
+        if len(match_urls(req.protocol.value, req.host, spec.api)) > 0
+    }
+
+    filtered = {k: _oai_modifier(v) for k, v in specs_with_matching_urls.items()}
+
+    return [OpenAPISpecification(api, source) for (source, api) in filtered.items()]
