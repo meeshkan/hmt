@@ -49,13 +49,16 @@ def load_specs(specs: Union[str, Sequence[str]]) -> Sequence[OpenAPISpecificatio
         if is_http or os.path.isfile(spec):
             specs_paths = [spec]
         elif os.path.isdir(spec):
-            specs_paths = [
-                os.path.join(spec, dir_entry)
-                for dir_entry in os.listdir(spec)
-                if dir_entry.endswith("yml")
-                or dir_entry.endswith("yaml")
-                or dir_entry.endswith("json")
-            ]
+            specs_paths = []
+            for dir_path, dirs, files in os.walk(spec):
+                for filename in files:
+                    if (
+                        filename.endswith("yml")
+                        or filename.endswith("yaml")
+                        or filename.endswith("json")
+                    ):
+                        full_path = os.path.join(dir_path, filename)
+                        specs_paths.append(full_path)
         else:
             raise Exception(f"OpenAPI specification {spec} not found")
 
