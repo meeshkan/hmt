@@ -53,7 +53,7 @@ def write_build_result(directory: str, result: BuildResult) -> None:
 
     openapi_object = result['openapi']
 
-    schema_json = cast(str, json.dumps(convert_from_openapi(openapi_object)))
+    schema_json = cast(str, json.dumps(convert_from_openapi(openapi_object), indent=2))
 
     with openapi_output.open('wb') as f:
         LOGGER.debug("Writing to: %s\n", str(openapi_output))
