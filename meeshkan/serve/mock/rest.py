@@ -47,9 +47,7 @@ class RestMiddlewareManager:
         req = json.loads("\n".join([x for x in req_io]))["request"]
         cs = {spec.source: convert_from_openapi(spec.api) for spec in specs}
         for endpoint in self._endpoints:
-            res = requests.post(
-                endpoint, json={"request": req, "schemas": cs}
-            )
+            res = requests.post(endpoint, json={"request": req, "schemas": cs})
             cs = res.json()
         return [
             OpenAPISpecification(convert_to_openapi(api), source)
