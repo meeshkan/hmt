@@ -19,7 +19,7 @@ def app():
     )
 
 
-@pytest.mark.gen_test
+@pytest.mark.gen_test(timeout=15)
 # @pytest.mark.skip("takes too long due to a timeout, need to investigate")
 def test_mocking_server_customers(http_client, base_url):
     response = yield http_client.fetch(
