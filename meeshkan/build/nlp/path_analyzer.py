@@ -1,16 +1,21 @@
 from enum import Enum
+from typing import Optional
 
+from dataclasses import dataclass
+from entity_extractor import EntityExtractor
+from gib_detect import id_classifier
 
-class PathItemTypes(Enum):
-    ENTITY=0
-    ACTION=1
-    ID=2
-    GROUP_ID=3#page numbers or something
+@dataclass(frozen=True)
+class PathItems:
+    entity: Optional[str]
+    action: Optional[str]
+    id: Optional[str]
+    group_id: Optional[str]
+
 
 class PathAnalyzer:
     def __init__(self):
-        pass
+        self._entity_extractor = EntityExtractor()
 
     def extract_values(self, path): #path="/payemnts/35234"
-        return {PathItemTypes.ENTITY: "payment", PathItemTypes.ACTION: "confirm",
-                PathItemTypes.ID: None, PathItemTypes.GROUP_ID: None}
+        return PathItems(entity=self._entity_extractor.get_entity_from_url(path), id=id_classifier(path), action=None, group_id=None)
