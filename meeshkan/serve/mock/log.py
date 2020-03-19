@@ -66,16 +66,11 @@ class Log:
                 ),
             ),
         ]
-        req_io = StringIO()
-        # TODO: this is hackish. is there a better way?
-        HttpExchangeWriter(req_io).write(
+        exchange = HttpExchangeWriter.to_dict(
             HttpExchange(request=request, response=response,)
         )
-        # should only be one line... and why do we join with newline?
-        req_io.seek(0)
-        req = json.loads("\n".join([x for x in req_io]))
         interaction = {
-            **req,
+            **exchange,
             "meta": {
                 "timestamp": self._interactions[-1].meta.timestamp,
                 **(

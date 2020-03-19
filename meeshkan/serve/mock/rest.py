@@ -32,19 +32,7 @@ class RestMiddlewareManager:
     def spew(
         self, request: Request, specs: Sequence[OpenAPISpecification]
     ) -> Sequence[OpenAPISpecification]:
-        req_io = StringIO()
-        # TODO: this is hackish. is there a better way?
-        HttpExchangeWriter(req_io).write(
-            HttpExchange(
-                request=request,
-                response=ResponseBuilder.from_dict(
-                    dict(statusCode=200, body="", headers={})
-                ),
-            )
-        )
-        # should only be one line... and why do we join with newline?
-        req_io.seek(0)
-        req = json.loads("\n".join([x for x in req_io]))["request"]
+        req = HttpExchangeWriter.to_dict(request)
         cs = {spec.source: convert_from_openapi(spec.api) for spec in specs}
         for endpoint in self._endpoints:
             res = requests.post(endpoint, json={"request": req, "schemas": cs})
