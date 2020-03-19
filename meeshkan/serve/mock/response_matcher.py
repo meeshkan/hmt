@@ -7,7 +7,6 @@ from faker import Faker
 from http_types import Request, Response
 from openapi_typed_2 import Reference, convert_from_openapi
 
-from .security import match_to_security_schemes
 from .faker import fake_it
 from .matcher import (
     change_ref,
@@ -17,6 +16,7 @@ from .matcher import (
     ref_name,
 )
 from .rest import rest_middleware_manager
+from .security import match_to_security_schemes
 from .specs import OpenAPISpecification
 
 fkr = Faker()
