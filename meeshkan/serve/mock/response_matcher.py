@@ -61,7 +61,11 @@ class ResponseMatcher:
             logger.debug("Matched to security scheme, returning response.")
             return maybe_security_response
 
+        logger.debug("Matching to paths")
+
         matches = match_request_to_openapi(request, specs)
+
+        logger.debug("Found %d matching specs", len(matches))
         if len(matches) == 0:
             return self.match_error(
                 "Could not find an OpenAPI schema for the host %s." % request.host,
@@ -69,6 +73,8 @@ class ResponseMatcher:
             )
 
         match = random.choice(matches)
+
+        logger.debug("Proceeding with document title %s", match.api.info.title)
 
         path_error = "Could not find a path %s on hostname %s." % (
             request.path,
