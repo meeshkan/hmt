@@ -1,5 +1,6 @@
 import logging
 
+from http_types import Request
 from openapi_typed import OpenAPIObject
 
 logger = logging.getLogger(__name__)
@@ -30,6 +31,31 @@ class Storage:
 
     def __getitem__(self, x):
         return self._entities[x]
+
+    def __contains__(self, x):
+        return x in self._entities
+
+    def query(self, entity, request: Request):
+        return self._entities[entity]
+
+    def query_one(self, entity, request: Request):
+        return self._entities[entity][0] if len(self._entities[entity]) > 0 else {}
+
+    def insert_from_request(self, entity, request):
+        self._entities[entity].append(request)
+
+    def upsert_from_request(self, entity, request):
+        id_field = '{}Id'.format(entity)
+        for entity in self._entities:
+            if entity[id_field] == request[id_field]:
+                self._merge(entity[id_field], request[id_field])
+                return
+
+        self.insert_from_request(entity, request)
+
+    def _merge(self, entity1, entity2):
+        for k, v in entity2:
+            entity1[k] = v
 
 
 class StorageManager:

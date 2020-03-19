@@ -1,3 +1,4 @@
+from faker import Faker
 from http_types import RequestBuilder
 
 from meeshkan.serve.mock.faker.schema_faker import MeeshkanSchemaFaker
@@ -5,9 +6,9 @@ from meeshkan.serve.mock.matcher import valid_schema
 
 
 def test_faker_1():
-    faker = MeeshkanSchemaFaker()
 
     request = RequestBuilder.from_dict(dict(method="post",  protocol="http", path="/", host="api.com"))
+    faker = MeeshkanSchemaFaker(Faker(), request, None)
 
     schema = {
         "type": "array",
@@ -21,14 +22,13 @@ def test_faker_1():
             },
         },
     }
-    res = faker.fake_it(request, schema, schema, 0)
+    res = faker.fake_it(schema, schema, 0)
     assert valid_schema(res, schema)
 
 
 def test_faker_2():
-    faker = MeeshkanSchemaFaker()
-
     request = RequestBuilder.from_dict(dict(method="post",  protocol="http", path="/", host="api.com"))
+    faker = MeeshkanSchemaFaker(Faker(), request, None)
 
     schema = {
         "$id": "https://example.com/person.schema.json",
@@ -45,14 +45,14 @@ def test_faker_2():
             },
         },
     }
-    res = faker.fake_it(request, schema, schema, 0)
+    res = faker.fake_it(schema, schema, 0)
     assert valid_schema(res, schema)
 
 
 def test_faker_3():
-    faker = MeeshkanSchemaFaker()
 
     request = RequestBuilder.from_dict(dict(method="post",  protocol="http", path="/", host="api.com"))
+    faker = MeeshkanSchemaFaker(Faker(), request, None)
 
     schema = {
         "$id": "https://example.com/geographical-location.schema.json",
@@ -66,14 +66,13 @@ def test_faker_3():
             "longitude": {"type": "number", "minimum": -180, "maximum": 180},
         },
     }
-    res = faker.fake_it(request, schema, schema, 0)
+    res = faker.fake_it(schema, schema, 0)
     assert valid_schema(res, schema)
 
 
 def test_faker_4():
-    faker = MeeshkanSchemaFaker()
-
     request = RequestBuilder.from_dict(dict(method="post",  protocol="http", path="/", host="api.com"))
+    faker = MeeshkanSchemaFaker(Faker(), request, None)
 
     schema = {
         "$id": "https://example.com/arrays.schema.json",
@@ -101,15 +100,14 @@ def test_faker_4():
             }
         },
     }
-    res = faker.fake_it(request, schema, schema, 0)
+    res = faker.fake_it(schema, schema, 0)
     assert valid_schema(res, schema)
 
 
 def test_faker_5():
-    faker = MeeshkanSchemaFaker()
-
     request = RequestBuilder.from_dict(dict(method="post",  protocol="http", path="/", host="api.com"))
+    faker = MeeshkanSchemaFaker(Faker(), request, None)
 
     schema = {"type": "array"}
-    res = faker.fake_it(request, schema, schema, 0)
+    res = faker.fake_it(schema, schema, 0)
     assert valid_schema(res, schema)

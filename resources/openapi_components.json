@@ -224,7 +224,6 @@
 	},
 	"paths": {
 		"/v1/payments/{trnopysd}": {
-			"x-meeshkan-type": "upsert",
 			"x-meeshkan-entity": "payment",
 			"summary": "Path summary",
 			"description": "Path description",
@@ -234,6 +233,7 @@
 				"required": true
 			}],
 			"post": {
+				"x-meeshkan-operation": "upsert",
 				"responses": {
 					"200": {
 						"description": "Response description",
@@ -318,11 +318,11 @@
 			}
 		},
 		"/accounts/v3/accounts/eg9Mno2tvmeEE039chWrHw7sk1155oy5Mha8kQp0mYs.sxajtselenSScKPZrBMYjg.SoFWGrHocw1YoNb3zw-vfw": {
-			"x-meeshkan-type": "read",
 			"x-meeshkan-entity": "account",
 			"summary": "Path summary",
 			"description": "Path description",
 			"get": {
+				"x-meeshkan-type": "read",
 				"responses": {
 					"200": {
 						"description": "Response description",
@@ -439,6 +439,7 @@
 			"summary": "Path summary",
 			"description": "Path description",
 			"get": {
+				"x-meeshkan-type": "read",
 				"responses": {
 					"200": {
 						"description": "Response description",
