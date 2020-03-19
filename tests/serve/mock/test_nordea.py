@@ -35,11 +35,9 @@ class TestNordea:
         query = f"state=fake&client_id=CLIENT_ID&scope=ACCOUNTS_BASIC,ACCOUNTS_BALANCES,ACCOUNTS_DETAILS,ACCOUNTS_TRANSACTIONS,PAYMENTS_MULTIPLE,CARDS_INFORMATION,CARDS_TRANSACTIONS&duration=129600&redirect_uri={redirect_uri}&country=FI"
         url = make_sandbox_url(base_url, path=f"/personal/v4/authorize?{query}")
         req = HTTPRequest(url, follow_redirects=False)
-        try:
+        with pytest.raises(HTTPClientError) as e:  # type: ignore
             await http_client.fetch(req)
-            pytest.fail()
-        except HTTPClientError as e:
-            assert_that(e.code, is_(302))
+        assert_that(e.value.code, is_(302))
 
     @pytest.mark.skip("Returning 401 for invalid auth not implemented")
     @pytest.mark.gen_test
