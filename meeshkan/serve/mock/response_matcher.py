@@ -7,16 +7,17 @@ from faker import Faker
 from http_types import Request, Response
 from openapi_typed_2 import Reference, convert_from_openapi
 
-from meeshkan.serve.mock.faker import fake_it
-from meeshkan.serve.mock.matcher import (
+from .auth_matcher import match_to_security_schemes
+from .faker import fake_it
+from .matcher import (
     change_ref,
     change_refs,
     get_response_from_ref,
     match_request_to_openapi,
     ref_name,
 )
-from meeshkan.serve.mock.rest import rest_middleware_manager
-from meeshkan.serve.mock.specs import OpenAPISpecification
+from .rest import rest_middleware_manager
+from .specs import OpenAPISpecification
 
 fkr = Faker()
 
@@ -50,6 +51,14 @@ class ResponseMatcher:
         # TODO: tight coupling here
         # try to decouple...
         specs = rest_middleware_manager.spew(request, self._specs)
+
+        logger.debug("Matching to security schemes of %d specs", len(specs))
+        maybe_security_response = match_to_security_schemes(request, specs)
+
+        if maybe_security_response is not None:
+            logger.debug("Matched to security scheme, returning response.")
+            return maybe_security_response
+
         matches = match_request_to_openapi(request, specs)
         if len(matches) == 0:
             return self.match_error(
