@@ -241,7 +241,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/account"
+									"$ref": "#/components/schemas/payment"
 								}
 							}
 						},

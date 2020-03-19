@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from http_types import Request
 from openapi_typed import OpenAPIObject
@@ -16,7 +17,7 @@ class Storage:
         return self._default
 
     def add_entity(self, name):
-        self._entities[name] = list()
+        self._entities[name] = dict()
 
     def clear(self):
         self._default.clear()
@@ -36,26 +37,42 @@ class Storage:
         return x in self._entities
 
     def query(self, entity, request: Request):
-        return self._entities[entity]
+        return list(self._entities[entity].values())
 
     def query_one(self, entity, request: Request):
-        return self._entities[entity][0] if len(self._entities[entity]) > 0 else {}
+        id_field = self.id_field(entity)
+        if id_field in request.bodyAsJson:
+            return self._entities[entity].get(request.bodyAsJson[id_field], {})
 
     def insert_from_request(self, entity, request):
-        self._entities[entity].append(request)
+        id_field = self.id_field(entity)
+        id_value = request.bodyAsJson.get(id_field, str(uuid.uuid1()))
+        entity_val = request.bodyAsJson
+        entity_val[id_field] = id_value
+        self._entities[entity][id_value] = entity_val
+        return entity_val
 
-    def upsert_from_request(self, entity, request):
-        id_field = '{}Id'.format(entity)
-        for entity in self._entities:
-            if entity[id_field] == request[id_field]:
-                self._merge(entity[id_field], request[id_field])
-                return
+    def insert(self, name, entity):
+        id_field = self.id_field(name)
+        self._entities[name][entity[id_field]] = entity
 
-        self.insert_from_request(entity, request)
+    def upsert_from_request(self, entity, request: Request):
+        id_field = self.id_field(entity)
+        entities = self._entities[entity]
+        req_body = request.bodyAsJson
+        if not id_field in req_body or not req_body[id_field] in entities:
+            return self.insert_from_request(entity, request)
+
+        return self._merge(entities[req_body[id_field]], req_body)
+
 
     def _merge(self, entity1, entity2):
-        for k, v in entity2:
+        for k, v in entity2.items():
             entity1[k] = v
+        return entity1
+
+    def id_field(self, entity):
+        return '{}Id'.format(entity)
 
 
 class StorageManager:
@@ -69,7 +86,8 @@ class StorageManager:
         if spec._x is not None and 'x-meeshkan-data' in spec._x:
             for entity, values in spec._x['x-meeshkan-data'].items():
                 storage.add_entity(entity)
-                storage[entity].extend(values)
+                for val in values:
+                    storage.insert(entity, val)
 
     def __getitem__(self, mockname):
         return self._storages[mockname]

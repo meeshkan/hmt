@@ -242,7 +242,7 @@ class MeeshkanSchemaFaker(MeeshkanFakerBase):
                 },
             }
             self._top_schema = to_fake
-            self._update_data(method)
+            self._generated_data = self._update_data(method)
             bodyAsJson = self.fake_it(to_fake, 0)
             return Response(
                 statusCode=status_code,
