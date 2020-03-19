@@ -1,8 +1,9 @@
-import sys
-sys.path.append('..')
-from schema_paths.parse_openapi_schema import parse_schema
-from schema_paths.schema_compare import compare_nested_schema
-from schema_paths.schema_compare import compare_nested_schema
+#import sys
+#sys.path.append('..')
+from meeshkan.build.nlp.schema_normalizer.schema_paths.parse_openapi_schema import parse_schema
+from meeshkan.build.nlp.schema_normalizer.schema_paths.schema_compare import compare_nested_schema
+from meeshkan.build.nlp.schema_normalizer.schema_paths.schema_to_vector import generate_nested_object
+
 
 
 def check_and_create_ref(specs, path_tuple):
@@ -24,14 +25,37 @@ def check_and_create_ref(specs, path_tuple):
     
     # Now we need to compare the two schemas for best refernce
     best_tuple = compare_nested_schema(nested_paths_dict[path_tuple[0]], nested_paths_dict[path_tuple[1]])
-    print(best_tuple)
                                     
     if isinstance(best_tuple, list) and len(best_tuple) > 0:
         ref_component = create_ref_path(best_tuple[0])
-        print(ref_component)
+        ref_component_obj = create_ref_obj(all_paths_dict, path_tuple, best_tuple[0], ref_component[0])
 
+        
     
-    
+def create_ref_obj(all_paths_dict, path_tuple, tuple1, component_name):
+    # Now we are going to make reference to the same matched nested structure so 
+    # for convenience let us just refer to the first element of the path tuple
+
+    ref_index = 1
+    # Te beow loop will run only once.
+    for method, schema in all_paths_dict[path_tuple[ref_index]][0].items():
+        root_property = tuple1[ref_index]
+        if root_property == '$schema':
+            return generate_component_dict(schema, component_name)
+        else:
+            nested_schema = generate_nested_object(schema, root_property)
+            return generate_component_dict(nested_schema, component_name)
+        
+            
+        
+
+
+def generate_component_dict(schema, component_name):
+    obj_list = [component_name, 'schema', 'components']
+    obj_dict = schema
+    for item in obj_list:
+        obj_dict = {item : obj_dict}
+    return obj_dict
 
 
 

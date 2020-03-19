@@ -92,6 +92,22 @@ def generate_new_object(obj, structure_list, len_of_list):
         return generate_new_object(obj[structure_list[-len_of_list]], structure_list, len_of_list - 1)
 
 
+def generate_nested_object(obj, parent_path):
+    if not isinstance(obj, dict):
+        raise TypeError('The object is not a type dict')
+
+    structure_list = create_object_structure(parent_path)
+    if len(structure_list) < 2:
+        raise ValueError('The parent path is not correct')
+    len_of_list = len(structure_list)
+    new_obj = generate_new_object(obj, structure_list, len_of_list)
+    # To check if the new object is of type array then we need to nest inside 'items'
+    if new_obj['type'] == _array:
+        if new_obj.get('items') is not None:
+            return new_obj['items']
+    return new_obj
+
+
 
 def generate_child_vectors(obj, parent=None):
     if check_object(obj):
