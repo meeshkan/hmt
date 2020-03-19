@@ -1,6 +1,7 @@
-from entity_extractor import EntityExtractor
-from path_analyzer import PathAnalyzer
-from entity_extractor import EntityExtractor
+#from meeshkan.build.nlp.entity_extractor import EntityExtractor
+#from meeshkan.build.nlp.entity_extractor import EntityExtractor
+from meeshkan.build.nlp.path_analyzer import PathAnalyzer
+#from entity_extractor import EntityExtractor
 #from path_analyzer import PathItem
 
 
@@ -29,7 +30,7 @@ def test_transferwise():
     
     path_item1 = analyzer.extract_values('/v3/profiles/saf45gdrg4gsdf/transfers/sdfsr456ygh56ujhgf/payments')
     assert 'payment' == path_item1.entity
-    assert  'sdfsr456ygh56ujhgf'== path_item1.id # TODO change it because it is not id for payment 
+    assert  path_item1.id is None
     
     path_item2 = analyzer.extract_values('/v1/delivery-estimates/GcfU8g0c_pxJXR8spP3uc4jMX')
     assert 'estimate' == path_item2.entity
@@ -41,6 +42,5 @@ def test_transferwise():
     
     path_item4 = analyzer.extract_values('/v3/profiles/QyIDwj820w8-TY.8vlH6Nvrzd0fFiaS/borderless-accounts/QyIDwj820w8-TY.8vlH6Nvrzd0fFiaS/statement.json')
     assert 'statement' == path_item4.entity
-    assert  'QyIDwj820w8-TY.8vlH6Nvrzd0fFiaS'== path_item4.id# TODO
-    
+    assert  path_item4.id is None     
    

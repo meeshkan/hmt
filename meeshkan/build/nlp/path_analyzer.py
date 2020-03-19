@@ -3,8 +3,8 @@ from typing import Optional
 import re
 
 from dataclasses import dataclass
-from entity_extractor import EntityExtractor
-from gib_detect import IdClassifier
+from meeshkan.build.nlp.entity_extractor import EntityExtractor
+from  meeshkan.build.nlp.gib_detect import IdClassifier
 
 @dataclass(frozen=True)
 class PathItems:
@@ -22,6 +22,11 @@ class PathAnalyzer:
     def extract_values(self, path):
         path_list=path.split('/')[1:]
         nopunc_string=[]
+        #  before this loop we have a list like ['border_account', 'jl865khh_hgyuf']
+        #now we are trying to convert 'boeder_account' to ['border','account']
+        # but we shouldnot touch id.
+        #here we check for component in the list if it contain numbers then it is id and we should not touch it
+        # if not => remove punctuation=> split to the parts
         for i in path_list:
             if len(re.findall('[0-9]+', i))!=0 :
                  nopunc_string.append(i)

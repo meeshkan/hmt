@@ -2,7 +2,7 @@
 #!/usr/bin/python
 
 import pickle
-import gibberish_detector.gib_detect_train as gib_detect_train
+import meeshkan.build.nlp.gibberish_detector.gib_detect_train as gib_detect_train
 #from entity_extractor import split_path
 
 
@@ -13,7 +13,7 @@ class IdClassifier:
 
     def __init__(self):
          #path='/v3/profiles/saf45gdrg4gsdf/transfers/sdfsr456ygh56ujhgf/payments'
-         self.model_data = pickle.load(open('gibberish_detector/gib_model.pki', 'rb'))
+         self.model_data = pickle.load(open('../../../meeshkan/build/nlp/gibberish_detector/gib_model.pki', 'rb'))
 
     def id_classifier(self, path_list):
          id=[]
