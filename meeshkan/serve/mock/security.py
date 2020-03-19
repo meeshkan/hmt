@@ -1,12 +1,9 @@
-from typing import Optional, Sequence, Tuple
+from typing import Optional, Sequence
 
 from http_types import Request, Response
-from openapi_typed_2.openapi import OAuth2SecurityScheme, SecurityScheme
+from openapi_typed_2.openapi import OAuth2SecurityScheme, OpenAPIObject
 
 from .matcher import truncate_path
-from .specs import OpenAPISpecification
-
-SecuritySchemeMatch = Tuple[SecurityScheme, OpenAPISpecification]
 
 
 def generate_code():
@@ -50,16 +47,25 @@ def matches_to_oauth2(
 
 
 def match_request_to_security_scheme(
-    req: Request, spec: OpenAPISpecification
+    req: Request, spec: OpenAPIObject
 ) -> Optional[Response]:
-    components = spec.api.components
+    """Match request to an OpenAPI document's security schemes if present.
+
+    Arguments:
+        req {Request} -- HttpRequest
+        spec {OpenAPIObject} -- OpenAPI document
+
+    Returns:
+        Optional[Response] -- [description]
+    """
+    components = spec.components
 
     if components is None or components.securitySchemes is None:
         return None
 
     security_schemes = components.securitySchemes
 
-    truncated_path = truncate_path(req.pathname, spec.api, req)
+    truncated_path = truncate_path(req.pathname, spec, req)
 
     for _, scheme in security_schemes.items():
         if isinstance(scheme, OAuth2SecurityScheme):
@@ -70,12 +76,15 @@ def match_request_to_security_scheme(
 
 
 def match_to_security_schemes(
-    req: Request, specs: Sequence[OpenAPISpecification]
+    req: Request, specs: Sequence[OpenAPIObject]
 ) -> Optional[Response]:
 
-    for spec in specs:
-        maybe_response = match_request_to_security_scheme(req, spec)
-        if maybe_response is not None:
-            return maybe_response
+    matches_iterator = (
+        match
+        for spec in specs
+        for match in (match_request_to_security_scheme(req, spec),)
+        if match is not None
+    )
 
-    return None
+    # Return first match when found, otherwise None
+    return next(matches_iterator, None)

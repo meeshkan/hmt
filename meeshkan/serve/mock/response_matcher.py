@@ -7,7 +7,7 @@ from faker import Faker
 from http_types import Request, Response
 from openapi_typed_2 import Reference, convert_from_openapi
 
-from .auth_matcher import match_to_security_schemes
+from .security import match_to_security_schemes
 from .faker import fake_it
 from .matcher import (
     change_ref,
@@ -53,7 +53,9 @@ class ResponseMatcher:
         specs = rest_middleware_manager.spew(request, self._specs)
 
         logger.debug("Matching to security schemes of %d specs", len(specs))
-        maybe_security_response = match_to_security_schemes(request, specs)
+        maybe_security_response = match_to_security_schemes(
+            request, [spec.api for spec in specs]
+        )
 
         if maybe_security_response is not None:
             logger.debug("Matched to security scheme, returning response.")
