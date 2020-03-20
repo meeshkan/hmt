@@ -1,21 +1,38 @@
+'''The MIT License (MIT)
 
+Copyright (c) 2015 Rob Renaud
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+'''
 #!/usr/bin/python
 
 import pickle
-import meeshkan.build.nlp.gibberish_detector.gib_detect_train as gib_detect_train
-#from entity_extractor import split_path
+import meeshkan.build.nlp.gib_detect_train as gib_detect_train
 
 
-#model_data = pickle.load(open('gibberish_detector/gib_model.pki', 'rb'))
-
-
-class IdClassifier:
+class GibDetector:
 
     def __init__(self):
-         #path='/v3/profiles/saf45gdrg4gsdf/transfers/sdfsr456ygh56ujhgf/payments'
-         self.model_data = pickle.load(open('../../../meeshkan/build/nlp/gibberish_detector/gib_model.pki', 'rb'))
 
-    def id_classifier(self, path_list):
+         self.model_data = pickle.load(open('../../../meeshkan/build/nlp/gib_model.pki', 'rb'))
+
+    def gib_detector(self, path_list):
          id=[]
          for item in path_list:
              l =item

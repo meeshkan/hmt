@@ -4,7 +4,7 @@ import re
 
 from dataclasses import dataclass
 from meeshkan.build.nlp.entity_extractor import EntityExtractor
-from  meeshkan.build.nlp.gib_detect import IdClassifier
+from  meeshkan.build.nlp.gib_detect import GibDetector
 
 @dataclass(frozen=True)
 class PathItems:
@@ -17,7 +17,7 @@ class PathItems:
 class PathAnalyzer:
     def __init__(self):
         self._entity_extractor = EntityExtractor()
-        self._id_classifier = IdClassifier()
+        self._gib_detector = GibDetector()
 
     def extract_values(self, path):
         path_list=path.split('/')[1:]
@@ -36,7 +36,7 @@ class PathAnalyzer:
                      nopunc_string.append(word)
         pos= {value:index for index,value in enumerate(nopunc_string)}
         maybe_entity = self._entity_extractor._split_pathes(path_list)[-1]
-        maybe_id = self._id_classifier.id_classifier(path_list)
+        maybe_id = self._gib_detector.gib_detector(path_list)
        # print(type(maybe_id))
         if maybe_id is not None:
             if pos[maybe_id]==pos[maybe_entity]+1:
