@@ -35,7 +35,7 @@ REQUIRED = [
     # mock
     "tornado==5.1.1",
     "urllib3==1.25.6",
-    "daemonocle",
+    "meeshkan-daemonocle",
 ]
 
 BUNDLES = {}
