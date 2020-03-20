@@ -2,9 +2,10 @@ import json
 import logging
 import os
 import random
-from typing import Mapping
 
 import yaml
+from typing import Mapping, Sequence, Union, cast
+
 from faker import Faker
 from http_types import Request, Response
 from openapi_typed_2 import (
@@ -15,17 +16,29 @@ from openapi_typed_2 import (
 from meeshkan.serve.mock.callbacks import callback_manager
 from meeshkan.serve.mock.faker import MeeshkanFaker
 from meeshkan.serve.mock.faker.faker_exception import FakerException
+from http_types import Request, Response
+
 from meeshkan.serve.mock.matcher import (
     match_request_to_openapi,
+    change_ref,
+    change_refs,
+    get_response_from_ref,
+    match_request_to_openapi,
+    ref_name,
 )
 from meeshkan.serve.mock.rest import rest_middleware_manager
 from meeshkan.serve.mock.storage import storage_manager
+from meeshkan.serve.mock.rest import rest_middleware_manager
+from meeshkan.serve.mock.specs import OpenAPISpecification
+
+fkr = Faker()
+
 
 logger = logging.getLogger(__name__)
 
 
 class ResponseMatcher:
-    _schemas: Mapping[str, OpenAPIObject]
+    _specs: Sequence[OpenAPISpecification]
 
     def __init__(self, specs_dir):
         self._text_faker = Faker()
@@ -54,7 +67,7 @@ class ResponseMatcher:
     def default_response(self, msg):
         json_resp = {"message": msg}
         return Response(
-            statusCode=500,
+            statusCode=501,
             body=json.dumps(json_resp),
             bodyAsJson=json_resp,
             headers={},

@@ -1,39 +1,43 @@
-from functools import reduce
-import lenses
-from lenses import lens
-import jsonschema
-from meeshkan.build.operation import operation_from_string
-from dataclasses import replace
 import json
 import re
-from http_types import Request
+from dataclasses import replace
+from functools import reduce
 from typing import (
-    cast,
+    Any,
+    Callable,
+    List,
+    Mapping,
+    Optional,
     Sequence,
     Tuple,
     TypeVar,
-    Callable,
-    Optional,
-    Mapping,
     Union,
-    Any,
-)
-from openapi_typed_2 import (
-    convert_from_openapi,
-    OpenAPIObject,
-    Responses,
-    MediaType,
-    Response,
-    RequestBody,
-    Header,
-    Operation,
-    Parameter,
-    Components,
-    Reference,
-    Schema,
-    PathItem,
+    cast,
 )
 from urllib.parse import urlparse
+
+import jsonschema
+import lenses
+from http_types import Request
+from lenses import lens
+from openapi_typed_2 import (
+    Components,
+    Header,
+    MediaType,
+    OpenAPIObject,
+    Operation,
+    Parameter,
+    PathItem,
+    Reference,
+    RequestBody,
+    Response,
+    Responses,
+    Schema,
+    convert_from_openapi,
+)
+
+from meeshkan.build.operation import operation_from_string
+from meeshkan.serve.mock.specs import OpenAPISpecification
 
 C = TypeVar("C")
 D = TypeVar("D")
@@ -201,7 +205,7 @@ def match_urls(protocol: str, host: str, o: OpenAPIObject) -> Sequence[str]:
         protocol {str} -- like http or https
         host {str} -- like api.foo.com
         o {OpenAPIObject} -- schema from which the mock URLs are taken
-    
+
     Returns:
         A list of URLs that match the OpenAPI spec.
     """
@@ -335,6 +339,29 @@ def change_refs(j: Schema) -> Schema:
             change_ref(item) if isinstance(item, Reference) else change_refs(item)
             for item in j.items
         ],
+        _not=None
+        if j._not is None
+        else change_ref(j._not)
+        if isinstance(j._not, Reference)
+        else change_refs(j._not),
+        anyOf=None
+        if j.anyOf is None
+        else [
+            change_ref(item) if isinstance(item, Reference) else change_refs(item)
+            for item in j.anyOf
+        ],
+        allOf=None
+        if j.allOf is None
+        else [
+            change_ref(item) if isinstance(item, Reference) else change_refs(item)
+            for item in j.allOf
+        ],
+        oneOf=None
+        if j.oneOf is None
+        else [
+            change_ref(item) if isinstance(item, Reference) else change_refs(item)
+            for item in j.oneOf
+        ],
         properties=None
         if j.properties is None
         else {
@@ -435,6 +462,10 @@ def get_required_request_body_schemas(
             else s,
             lambda a: a,
             ignore_none=True,
+        )
+        # automatically ignore not required for now
+        .Prism(
+            lambda s: None if s.required is False else s, lambda a: a, ignore_none=True
         )
         .add_lens(content_o)
         .Values()
@@ -611,7 +642,7 @@ def get_matching_parameters(
 def maybeJson(maybe: str) -> Any:
     try:
         return json.loads(maybe)
-    except:
+    except json.JSONDecodeError:
         return maybe
 
 
@@ -619,14 +650,14 @@ def path_parameter_match(
     part: str, vname: str, path_item: PathItem, operation: str, oas: OpenAPIObject,
 ) -> bool:
     """Matches part of a path against a path parameter with name vname
-    
+
     Arguments:
         part {str} -- part of a path, ie an id
         vname {str} -- name of a parameter
         path_item {PathItem} -- a path item maybe containing the parameter
         operation {MethodNames} -- the name of the operation to check in case the parameter is in the operation
         oas {OpenAPIObject} -- the schema to traverse to find definitions
-    
+
     Returns:
         bool -- Did we get a match
     """
@@ -650,6 +681,7 @@ def path_parameter_match(
 
 
 path_param_regex = re.compile(r"^\{[^}]+\}")
+
 
 # TODO: this is a boolean nightmare
 # what we want is
@@ -774,8 +806,8 @@ def truncate_path(path: str, o: OpenAPIObject, i: Request,) -> str:
 
 
 def match_request_to_openapi(
-    req: Request, r: Mapping[str, OpenAPIObject]
-) -> Mapping[str, OpenAPIObject]:
+    req: Request, specs: Sequence[OpenAPISpecification]
+) -> List[OpenAPISpecification]:
     def _path_item_modifier(oai: OpenAPIObject) -> Callable[[PathItem], PathItem]:
         def __path_item_modifier(path_item: PathItem) -> PathItem:
             return reduce(
@@ -808,10 +840,11 @@ def match_request_to_openapi(
             )
         )
 
-    return lens.Values().modify(_oai_modifier)(
+    d = lens.Values().modify(_oai_modifier)(
         {
-            k: v
-            for k, v in r.items()
-            if len(match_urls(req.protocol.value, req.host, v)) > 0
+            spec.source: spec.api
+            for spec in specs
+            if len(match_urls(req.protocol.value, req.host, spec.api)) > 0
         }
     )
+    return [OpenAPISpecification(api, source) for (source, api) in d.items()]

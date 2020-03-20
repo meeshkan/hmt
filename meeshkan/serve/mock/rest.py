@@ -1,11 +1,14 @@
-import logging
-from typing import Mapping
-from openapi_typed_2 import OpenAPIObject, convert_to_openapi, convert_from_openapi
-from http_types import Request
-from http_types.utils import HttpExchangeWriter, ResponseBuilder, HttpExchange, fixup_entries_for_serialization
-from io import StringIO
-import requests
 import json
+import logging
+from io import StringIO
+from typing import Sequence, Mapping
+
+import requests
+from http_types import HttpExchange, Request
+from http_types.utils import HttpExchangeWriter, ResponseBuilder
+from openapi_typed_2 import convert_from_openapi, convert_to_openapi
+
+from meeshkan.serve.mock.specs import OpenAPISpecification
 
 from meeshkan.serve.mock.storage import storage_manager
 
@@ -29,35 +32,19 @@ class RestMiddlewareManager:
         self._endpoints.add(url)
 
     def spew(
-        self, request: Request, schemas: Mapping[str, OpenAPIObject]
-    ) -> Mapping[str, OpenAPIObject]:
-        if len(self._endpoints) == 0:
-            return schemas
-
-        # req_io = StringIO()
-        # # TODO: this is hackish. is there a better way?
-        # HttpExchangeWriter(req_io).write(
-        #     HttpExchange(
-        #         request=request,
-        #         response=ResponseBuilder.from_dict(
-        #             dict(statusCode=200, body="", headers={})
-        #         ),
-        #     )
-        # )
-        # # should only be one line... and why do we join with newline?
-        # req_io.seek(0)
-        # req = json.loads("\n".join([x for x in req_io]))["request"]
-        cs = {k: convert_from_openapi(v) for k, v in schemas.items()}
+        self, request: Request, specs: Sequence[OpenAPISpecification]
+    ) -> Sequence[OpenAPISpecification]:
+        req = HttpExchangeWriter.to_dict(request)
+        cs = {spec.source: convert_from_openapi(spec.api) for spec in specs}
         for endpoint in self._endpoints:
-            res = requests.post(
-                endpoint, data=json.dumps({"request": fixup_entries_for_serialization(request), "schemas": cs})
-            )
-            cs = json.loads(res.text)
-        out: Mapping[str, OpenAPIObject] = {}
+            res = requests.post(endpoint, json={"request": req, "schemas": cs})
+            cs = res.json()
+
+        out: Mapping[str, OpenAPISpecification] = {}
         for name, dict_spec in cs.items():
             spec = convert_to_openapi(dict_spec)
             storage_manager.add_mock(name, spec)
-            out[name] = spec
+            out[name] = OpenAPISpecification(spec, name)
         return out
 
 

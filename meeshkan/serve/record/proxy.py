@@ -3,9 +3,9 @@ import logging
 import tornado.ioloop
 from http_types import Request, Response
 
-from meeshkan.serve.admin.runner import start_admin
 from meeshkan.serve.utils.data_callback import RequestLoggingCallback
 from meeshkan.serve.utils.routing import HeaderRouting
+
 from .channel import Channel
 from .proxy_callback import ProxyCallback
 
@@ -54,24 +54,15 @@ class RecordProxy(ProxyBase):
 
 class RecordProxyRunner:
     def __init__(
-        self,
-        port,
-        log_dir,
-        specs_dir,
-        routing=HeaderRouting(),
-        mode=None,
-        admin_port=None,
+        self, port, log_dir, specs_dir, routing=HeaderRouting(), mode=None,
     ):
         self._port = port
         self._log_dir = log_dir
         self._specs_dir = specs_dir
         self._routing = routing
         self._mode = mode
-        self._admin_port = admin_port
 
     def run(self):
-        if self._admin_port:
-            start_admin(self._admin_port)
 
         logger.info("Starting Meeshkan record on http://localhost:%s", self._port)
         logger.info(

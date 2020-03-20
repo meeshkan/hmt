@@ -1,8 +1,10 @@
-from typing import AsyncIterable, Tuple, TextIO
+import asyncio
+from typing import AsyncIterable, TextIO, Tuple
+
 from http_types.types import HttpExchange
 from http_types.utils import HttpExchangeReader
+
 from .abstract import AbstractSource
-import asyncio
 
 
 class FileSource(AbstractSource):

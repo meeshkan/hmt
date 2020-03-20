@@ -2,7 +2,7 @@ from meeshkan.serve.mock.callbacks import callback
 
 
 @callback("api.com", "post", "/counter")
-def counter_callback(request_body, response_body, storage):
+def counter_callback_post(request_body, response_body, storage):
     if "set" in request_body:
         storage.default["called"] = request_body["set"]
     else:
@@ -12,7 +12,7 @@ def counter_callback(request_body, response_body, storage):
 
 
 @callback("api.com", "get", "/text_counter", format="text")
-def counter_callback(query, response_body, storage, response_headers):
+def counter_callback_get(query, response_body, storage, response_headers):
     if "set" in query:
         storage.default["called"] = query["set"]
     else:

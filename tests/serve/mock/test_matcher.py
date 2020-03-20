@@ -1,155 +1,179 @@
-from meeshkan.serve.mock.matcher import match_request_to_openapi
-from openapi_typed_2 import OpenAPIObject, convert_to_openapi
-from http_types import RequestBuilder
-from typing import Dict
 import json
+from typing import Sequence
 
-store: Dict[str, OpenAPIObject] = {
-    "foo": convert_to_openapi(
-        {
-            "openapi": "",
-            "servers": [
-                {"url": "api.foo.com"}
-            ],  # we omit the protocol and it should still match
-            "info": {"title": "", "version": ""},
-            "paths": {
-                "/user": {
-                    "get": {"responses": {"200": {"description": "userget"}}},
-                    "post": {"responses": {"200": {"description": "userpost"}}},
-                    "description": "",
-                },
-                "/user/{id}": {
-                    "parameters": [
-                        {
-                            "name": "id",
-                            "in": "path",
-                            "required": True,
-                            "schema": {"type": "integer"},
-                        },
-                    ],
-                    "get": {"responses": {"200": {"description": "useridget"}}},
-                    "post": {"responses": {"201": {"description": "useridpost"}}},
-                },
-                "/user/{id}/name": {
-                    "get": {"responses": {"200": {"description": "useridnameget"}}},
-                    "post": {"responses": {"201": {"description": "useridnamepost"}}},
-                    "description": "",
-                },
-            },
-        }
-    ),
-    "bar": convert_to_openapi(
-        {
-            "openapi": "",
-            "servers": [{"url": "https://api.bar.com/v1"}],
-            "info": {"title": "", "version": ""},
-            "paths": {
-                "/guest": {
-                    "get": {"responses": {"200": {"description": "guestget"}}},
-                    "post": {"responses": {"200": {"description": "guestpost"}}},
-                    "description": "",
-                },
-                "/guest/{id}": {
-                    "get": {"responses": {"200": {"description": "guestidget"}}},
-                    "post": {"responses": {"201": {"description": "guestidpost"}}},
-                    "description": "",
-                },
-                "/guest/{id}/name": {
-                    "get": {"responses": {"200": {"description": "guestidnameget"}}},
-                    "post": {"responses": {"201": {"description": "guestidnamepost"}}},
-                    "description": "",
-                },
-            },
-        }
-    ),
-    "baz": convert_to_openapi(
-        {
-            "openapi": "",
-            "servers": [{"url": "https://api.baz.com"}],
-            "info": {"title": "", "version": ""},
-            "paths": {
-                "/guest": {
-                    "parameters": [
-                        {
-                            "in": "query",
-                            "required": True,
-                            "name": "hello",
-                            "schema": {"type": "string", "pattern": "^[0-9]+$"},
-                        },
-                    ],
-                    "get": {"responses": {"200": {"description": "guestget"}}},
-                    "post": {
+from http_types import RequestBuilder
+from openapi_typed_2 import convert_to_openapi
+
+from meeshkan.serve.mock.matcher import match_request_to_openapi
+from meeshkan.serve.mock.specs import OpenAPISpecification
+
+store: Sequence[OpenAPISpecification] = [
+    OpenAPISpecification(
+        convert_to_openapi(
+            {
+                "openapi": "",
+                "servers": [
+                    {"url": "api.foo.com"}
+                ],  # we omit the protocol and it should still match
+                "info": {"title": "", "version": ""},
+                "paths": {
+                    "/user": {
+                        "get": {"responses": {"200": {"description": "userget"}}},
+                        "post": {"responses": {"200": {"description": "userpost"}}},
+                        "description": "",
+                    },
+                    "/user/{id}": {
                         "parameters": [
                             {
-                                "in": "query",
+                                "name": "id",
+                                "in": "path",
                                 "required": True,
-                                "name": "thinking",
-                                "schema": {"type": "string"},
+                                "schema": {"type": "integer"},
                             },
                         ],
-                        "responses": {"200": {"description": "guestpost"}},
+                        "get": {"responses": {"200": {"description": "useridget"}}},
+                        "post": {"responses": {"201": {"description": "useridpost"}}},
                     },
-                    "description": "",
+                    "/user/{id}/name": {
+                        "get": {"responses": {"200": {"description": "useridnameget"}}},
+                        "post": {
+                            "responses": {"201": {"description": "useridnamepost"}}
+                        },
+                        "description": "",
+                    },
                 },
-                "/guest/{id}": {
-                    "parameters": [
-                        {
-                            "in": "query",
-                            "required": True,
-                            "name": "a",
-                            "schema": {"type": "string"},
+            }
+        ),
+        "foo",
+    ),
+    OpenAPISpecification(
+        convert_to_openapi(
+            {
+                "openapi": "",
+                "servers": [{"url": "https://api.bar.com/v1"}],
+                "info": {"title": "", "version": ""},
+                "paths": {
+                    "/guest": {
+                        "get": {"responses": {"200": {"description": "guestget"}}},
+                        "post": {"responses": {"200": {"description": "guestpost"}}},
+                        "description": "",
+                    },
+                    "/guest/{id}": {
+                        "get": {"responses": {"200": {"description": "guestidget"}}},
+                        "post": {"responses": {"201": {"description": "guestidpost"}}},
+                        "description": "",
+                    },
+                    "/guest/{id}/name": {
+                        "get": {
+                            "responses": {"200": {"description": "guestidnameget"}}
                         },
-                        {
-                            "in": "query",
-                            "required": True,
-                            "name": "b",
-                            "schema": {"type": "string"},
+                        "post": {
+                            "responses": {"201": {"description": "guestidnamepost"}}
                         },
-                        {"in": "query", "name": "c", "schema": {"type": "string"}},
-                    ],
-                    "get": {"responses": {"200": {"description": "guestidget"}}},
-                    "post": {
+                        "description": "",
+                    },
+                },
+            }
+        ),
+        "bar",
+    ),
+    OpenAPISpecification(
+        convert_to_openapi(
+            {
+                "openapi": "",
+                "servers": [{"url": "https://api.baz.com"}],
+                "info": {"title": "", "version": ""},
+                "paths": {
+                    "/guest": {
                         "parameters": [
                             {
-                                "in": "header",
+                                "in": "query",
                                 "required": True,
-                                "name": "zz",
+                                "name": "hello",
+                                "schema": {"type": "string", "pattern": "^[0-9]+$"},
+                            },
+                        ],
+                        "get": {"responses": {"200": {"description": "guestget"}}},
+                        "post": {
+                            "parameters": [
+                                {
+                                    "in": "query",
+                                    "required": True,
+                                    "name": "thinking",
+                                    "schema": {"type": "string"},
+                                },
+                            ],
+                            "responses": {"200": {"description": "guestpost"}},
+                        },
+                        "description": "",
+                    },
+                    "/guest/{id}": {
+                        "parameters": [
+                            {
+                                "in": "query",
+                                "required": True,
+                                "name": "a",
                                 "schema": {"type": "string"},
                             },
                             {
                                 "in": "query",
                                 "required": True,
-                                "name": "zzz",
+                                "name": "b",
                                 "schema": {"type": "string"},
                             },
                             {"in": "query", "name": "c", "schema": {"type": "string"}},
                         ],
-                        "responses": {"201": {"description": "guestidpost"}},
+                        "get": {"responses": {"200": {"description": "guestidget"}}},
+                        "post": {
+                            "parameters": [
+                                {
+                                    "in": "header",
+                                    "required": True,
+                                    "name": "zz",
+                                    "schema": {"type": "string"},
+                                },
+                                {
+                                    "in": "query",
+                                    "required": True,
+                                    "name": "zzz",
+                                    "schema": {"type": "string"},
+                                },
+                                {
+                                    "in": "query",
+                                    "name": "c",
+                                    "schema": {"type": "string"},
+                                },
+                            ],
+                            "responses": {"201": {"description": "guestidpost"}},
+                        },
+                        "description": "",
                     },
-                    "description": "",
-                },
-                "/guest/{id}/name": {
-                    "get": {"responses": {"200": {"description": "guestidnameget"}}},
-                    "post": {
-                        "requestBody": {
-                            "content": {
-                                "application/json": {
-                                    "schema": {
-                                        "type": "object",
-                                        "required": ["age"],
-                                        "properties": {"age": {"type": "integer"}},
+                    "/guest/{id}/name": {
+                        "get": {
+                            "responses": {"200": {"description": "guestidnameget"}}
+                        },
+                        "post": {
+                            "requestBody": {
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "required": ["age"],
+                                            "properties": {"age": {"type": "integer"}},
+                                        },
                                     },
                                 },
                             },
+                            "responses": {"201": {"description": "guestidnamepost"}},
                         },
-                        "responses": {"201": {"description": "guestidnamepost"}},
+                        "description": "",
                     },
-                    "description": "",
                 },
-            },
-        }
+            }
+        ),
+        "baz",
     ),
-}
+]
 
 
 def test_matcher_1():
@@ -166,21 +190,24 @@ def test_matcher_1():
             }
         ),
         store,
-    ) == {
-        "foo": convert_to_openapi(
-            {
-                "openapi": "",
-                "servers": [{"url": "api.foo.com"}],
-                "info": {"title": "", "version": ""},
-                "paths": {
-                    "/user": {
-                        "get": {"responses": {"200": {"description": "userget"}}},
-                        "description": "",
+    ) == [
+        OpenAPISpecification(
+            convert_to_openapi(
+                {
+                    "openapi": "",
+                    "servers": [{"url": "api.foo.com"}],
+                    "info": {"title": "", "version": ""},
+                    "paths": {
+                        "/user": {
+                            "get": {"responses": {"200": {"description": "userget"}}},
+                            "description": "",
+                        },
                     },
-                },
-            }
-        ),
-    }
+                }
+            ),
+            "foo",
+        )
+    ]
 
 
 def test_matcher_2():
@@ -228,16 +255,19 @@ def test_matcher_3():
             }
         ),
         store,
-    ) == {
-        "foo": convert_to_openapi(
-            {
-                "openapi": "",
-                "servers": [{"url": "api.foo.com"}],
-                "info": {"title": "", "version": ""},
-                "paths": {},
-            }
+    ) == [
+        OpenAPISpecification(
+            convert_to_openapi(
+                {
+                    "openapi": "",
+                    "servers": [{"url": "api.foo.com"}],
+                    "info": {"title": "", "version": ""},
+                    "paths": {},
+                }
+            ),
+            "foo",
         )
-    }
+    ]
 
 
 def test_matcher_4():
@@ -254,28 +284,31 @@ def test_matcher_4():
             }
         ),
         store,
-    ) == {
-        "foo": convert_to_openapi(
-            {
-                "openapi": "",
-                "servers": [{"url": "api.foo.com"}],
-                "info": {"title": "", "version": ""},
-                "paths": {
-                    "/user/{id}": {
-                        "parameters": [
-                            {
-                                "name": "id",
-                                "in": "path",
-                                "required": True,
-                                "schema": {"type": "integer"},
-                            },
-                        ],
-                        "get": {"responses": {"200": {"description": "useridget"}}},
+    ) == [
+        OpenAPISpecification(
+            convert_to_openapi(
+                {
+                    "openapi": "",
+                    "servers": [{"url": "api.foo.com"}],
+                    "info": {"title": "", "version": ""},
+                    "paths": {
+                        "/user/{id}": {
+                            "parameters": [
+                                {
+                                    "name": "id",
+                                    "in": "path",
+                                    "required": True,
+                                    "schema": {"type": "integer"},
+                                },
+                            ],
+                            "get": {"responses": {"200": {"description": "useridget"}}},
+                        },
                     },
-                },
-            }
+                }
+            ),
+            "foo",
         ),
-    }
+    ]
 
 
 def test_matcher_5():
@@ -292,16 +325,19 @@ def test_matcher_5():
             }
         ),
         store,
-    ) == {
-        "foo": convert_to_openapi(
-            {
-                "openapi": "",
-                "servers": [{"url": "api.foo.com"}],
-                "info": {"title": "", "version": ""},
-                "paths": {},
-            }
-        ),
-    }
+    ) == [
+        OpenAPISpecification(
+            convert_to_openapi(
+                {
+                    "openapi": "",
+                    "servers": [{"url": "api.foo.com"}],
+                    "info": {"title": "", "version": ""},
+                    "paths": {},
+                }
+            ),
+            "foo",
+        )
+    ]
 
 
 def test_matcher_6():
@@ -318,16 +354,19 @@ def test_matcher_6():
             }
         ),
         store,
-    ) == {
-        "foo": convert_to_openapi(
-            {
-                "openapi": "",
-                "servers": [{"url": "api.foo.com"}],
-                "info": {"title": "", "version": ""},
-                "paths": {"/user": {"description": ""}},
-            }
-        ),
-    }
+    ) == [
+        OpenAPISpecification(
+            convert_to_openapi(
+                {
+                    "openapi": "",
+                    "servers": [{"url": "api.foo.com"}],
+                    "info": {"title": "", "version": ""},
+                    "paths": {"/user": {"description": ""}},
+                }
+            ),
+            "foo",
+        )
+    ]
 
 
 def test_matcher_7():
@@ -346,13 +385,15 @@ def test_matcher_7():
             ),
             store,
         )
-        == {}
+        == []
     )
 
 
 def test_matcher_8():
-    assert (
-        match_request_to_openapi(
+    (baz_spec,) = (spec for spec in store if spec.source == "baz")
+    (matched_spec,) = (
+        spec
+        for spec in match_request_to_openapi(
             RequestBuilder.from_dict(
                 {
                     "headers": {},
@@ -365,16 +406,16 @@ def test_matcher_8():
                 }
             ),
             store,
-        )["baz"]
-        .paths["/guest"]
-        .get
-        == store["baz"].paths["/guest"].get
+        )
+        if spec.source == "baz"
     )
+    assert matched_spec.api.paths["/guest"].get == baz_spec.api.paths["/guest"].get
 
 
 def test_matcher_9():
-    assert (
-        match_request_to_openapi(
+    (matched_spec,) = (
+        spec
+        for spec in match_request_to_openapi(
             RequestBuilder.from_dict(
                 {
                     "headers": {},
@@ -387,11 +428,10 @@ def test_matcher_9():
                 }
             ),
             store,
-        )["baz"]
-        .paths["/guest"]
-        .get
-        is None
+        )
+        if spec.source == "baz"
     )
+    assert matched_spec.api.paths["/guest"].get is None
 
 
 def test_matcher_10():
@@ -409,16 +449,18 @@ def test_matcher_10():
                 }
             ),
             store,
-        )["baz"]
-        .paths["/guest"]
+        )[0]
+        .api.paths["/guest"]
         .get
         is None
     )
 
 
 def test_matcher_11():
-    assert (
-        match_request_to_openapi(
+    (baz_spec,) = (spec for spec in store if spec.source == "baz")
+    (matched_spec,) = (
+        spec
+        for spec in match_request_to_openapi(
             RequestBuilder.from_dict(
                 {
                     "headers": {},
@@ -433,10 +475,12 @@ def test_matcher_11():
                 }
             ),
             store,
-        )["baz"]
-        .paths["/guest/{id}/name"]
-        .post
-        == store["baz"].paths["/guest/{id}/name"].post
+        )
+        if spec.source == "baz"
+    )
+    assert (
+        matched_spec.api.paths["/guest/{id}/name"].post
+        == baz_spec.api.paths["/guest/{id}/name"].post
     )
 
 
@@ -457,16 +501,18 @@ def test_matcher_12():
                 }
             ),
             store,
-        )["baz"]
-        .paths["/guest/{id}/name"]
+        )[0]
+        .api.paths["/guest/{id}/name"]
         .post
         is None
     )
 
 
 def test_matcher_13():
-    assert (
-        match_request_to_openapi(
+    (baz_spec,) = (spec for spec in store if spec.source == "baz")
+    (matched_spec,) = (
+        spec
+        for spec in match_request_to_openapi(
             RequestBuilder.from_dict(
                 {
                     "headers": {"zz": "top"},
@@ -479,10 +525,12 @@ def test_matcher_13():
                 }
             ),
             store,
-        )["baz"]
-        .paths["/guest/{id}"]
-        .post
-        == store["baz"].paths["/guest/{id}"].post
+        )
+        if spec.source == "baz"
+    )
+    assert (
+        matched_spec.api.paths["/guest/{id}"].post
+        == baz_spec.api.paths["/guest/{id}"].post
     )
 
 
@@ -501,8 +549,8 @@ def test_matcher_14():
                 }
             ),
             store,
-        )["baz"]
-        .paths["/guest/{id}"]
+        )[0]
+        .api.paths["/guest/{id}"]
         .post
         is None
     )
@@ -522,18 +570,23 @@ def test_matcher_15():
             }
         ),
         store,
-    ) == {
-        "bar": convert_to_openapi(
-            {
-                "openapi": "",
-                "servers": [{"url": "https://api.bar.com/v1"}],
-                "info": {"title": "", "version": ""},
-                "paths": {
-                    "/guest/{id}": {
-                        "post": {"responses": {"201": {"description": "guestidpost"}}},
-                        "description": "",
+    ) == [
+        OpenAPISpecification(
+            convert_to_openapi(
+                {
+                    "openapi": "",
+                    "servers": [{"url": "https://api.bar.com/v1"}],
+                    "info": {"title": "", "version": ""},
+                    "paths": {
+                        "/guest/{id}": {
+                            "post": {
+                                "responses": {"201": {"description": "guestidpost"}}
+                            },
+                            "description": "",
+                        },
                     },
-                },
-            }
+                }
+            ),
+            "baz",
         )
-    }
+    ]

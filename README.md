@@ -2,8 +2,8 @@
 
 [![CircleCI](https://circleci.com/gh/meeshkan/meeshkan.svg?style=shield)](https://circleci.com/gh/meeshkan/meeshkan)
 [![PyPI](https://img.shields.io/pypi/dm/meeshkan.svg)](https://pypi.org/project/meeshkan/)
-[![PyPi](https://img.shields.io/pypi/pyversions/meeshkan)](https://pypi.org/project/meeshkan/)
-[![License](https://img.shields.io/pypi/l/meeshkan)](LICENSE)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://black.readthedocs.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 Meeshkan is a tool that mocks HTTP APIs for use in sandboxes as well as for automated and exploratory testing. It uses a combination of API definitions, recorded traffic and code in order to make crafting mocks as enjoyable as possible.
 
@@ -25,6 +25,7 @@ Meeshkan is a tool that mocks HTTP APIs for use in sandboxes as well as for auto
   - [Automated builds](#automated-builds)
   - [Publishing Meeshkan as a PyPi package](#publishing-meeshkan-as-a-pypi-package)
 - [Contributing](#contributing)
+  - [Code of Conduct](#code-of-conduct)
 
 ## Installation
 Install via [pip](https://pip.pypa.io/en/stable/installing/) (requires **Python 3.6+**):
@@ -51,7 +52,7 @@ $ apt update && apt-get install meeshkan
 ## Getting started with Meeshkan
 
 The basic Meeshkan flow is **collect, build and mock.**
-1. To start, **collect** data from recorded server traffic and/or OpenAPI specs.
+1. First, **collect** data from recorded server traffic and/or OpenAPI specs.
 1. Then, **build** a schema that unifies these various data sources.
 1. Finally, use this schema to create a **mock** server of an API.
 
@@ -100,38 +101,40 @@ To record API traffic, the Meeshkan CLI provides a `record` mode that captures A
 $ meeshkan record
 ```
 
-This starts Meeshkan as a reverse proxy on the default port of `8000`.  For example, with curl, you can use Meeshkan as a proxy like so:
+This command starts Meeshkan as a reverse proxy on the default port of `8000` and creates two directories: `logs` and `specs`. 
+
+With [curl](https://curl.haxx.se/), for example, you can use Meeshkan as a proxy like so:
 
 ```bash
 $ curl http://localhost:8000/http://api.example.com
 ```
 
-By default, the recording proxy treats the path as the target URL and writes a [`.jsonl`](https://jsonlines.org) file containing logs of all server traffic to a `logs` directory.  All logs are created in the [`http-types`](https://github.com/meeshkan/http-types) format.  The `meeshkan build` tool expects all recordings to be represented in a `.jsonl` file containing recordings represented in the `http-types` format.
+By default, the recording proxy treats the path as the target URL. It then writes a [`.jsonl`](https://jsonlines.org) file containing logs of all server traffic to the `logs` directory.  All logs are created in the [`http-types`](https://github.com/meeshkan/http-types) format. This is because Meeshkan's `build` tool expects all recordings to be represented in a `.jsonl` file containing recordings represented in the `http-types` format.
 
 For more information about recording, including direct file writing and kafka streaming, see the [recording documentation](./docs/RECORD.md).
 
 ## Build a Meeshkan spec from recordings
 
-Using the Meeshkan CLI, you can **build** an OpenAPI schema from a single `.jsonl` file, in addition to any existing OpenAPI specs that describe how a service works.
+Using the Meeshkan CLI, you can **build** an OpenAPI schema from a single `.jsonl` file, in addition to any existing OpenAPI specs that describe how your service works.
 
 ```bash
-$ meeshkan build -i path/to/recordings.jsonl [-o path/to/output_directory]
+$ meeshkan build --input-file path/to/recordings.jsonl 
 ```
 
-The input file should be in [JSON Lines](http://jsonlines.org/) format and every line should be in [http-types](https://meeshkan.github.io/http-types/) JSON format. 
+_Note: The input file should be in [JSON Lines](http://jsonlines.org/) format and every line should be in [http-types](https://meeshkan.github.io/http-types/) JSON format. For an example input file, see [recordings.jsonl](./resources/recordings.jsonl)._
 
-For an example input file, see [recordings.jsonl](https://github.com/Meeshkan/meeshkan/blob/master/resources/recordings.jsonl). The libraries listed at [http-types](https://meeshkan.github.io/http-types/) can be used to generate input files in your language of choice.
+Optionally, you can also specify an output directory using the `--out` flag followed by the path to this directory. By default, Meeshkan will build the new OpenAPI specifications in the `specs` directory. 
 
-Use dash (`-i -`) to read from standard input:
+Use dash (`--input-file -`) to read from standard input:
 
 ```bash
-$ meeshkan build -i - < recordings.jsonl
+$ meeshkan build --input-file - < recordings.jsonl
 ```
 ### Building modes
 You can use a mode flag to indicate how the OpenAPI spec should be built, for example:
 
 ```bash
-meeshkan build -i path/to/recordings.jsonl --mode gen
+meeshkan build --input-file path/to/recordings.jsonl --mode gen
 ```
 
 Supported modes are:
@@ -145,14 +148,18 @@ For more information about building, including mixing together the two modes and
 You can use an OpenAPI spec, such as the one created with `meeshkan build`, to create a **mock** server using Meeshkan.
 
 ```bash
-$ meeshkan mock
+$ meeshkan mock path/to/dir/
 ```
+
+_Note: You can specify a path to the directory your OpenAPI spec is in or a path to one specific file._
 
 For more information about mocking, including adding custom middleware and modifying the mocking schema JIT via an admin API, see the [mocking documentation](./docs/MOCK.md).
 
 ## Development
 
 Here are some useful tips for building and running Meeshkan from source. 
+
+If you run into any issues, please [reach out to our team on Gitter](https://gitter.im/Meeshkan/community).
 
 ### Getting started
 
@@ -180,18 +187,14 @@ python setup.py test
 
 Configuration for `pytest` is found in [pytest.ini](https://github.com/Meeshkan/meeshkan/tree/master/pytest.ini).
 
-#### `black`
+#### Formatting
 
-Run format checks:
+Formatting is checked by the above mentioned `python setup.py test` command.
 
-```bash
-$ black --check .
-```
+To fix formatting:
 
-Fix formatting:
-
-```bash
-$ black .
+```sh
+$ python setup.py format
 ```
 
 #### `flake8`
@@ -226,16 +229,18 @@ Configuration for CircleCI [build pipeline](https://app.circleci.com/github/Mees
 
 ### Publishing Meeshkan as a PyPi package
 
-To publish Meeshkan as a PyPi package, please do the following steps:
+To publish Meeshkan as a PyPi package, complete the following steps:
 
 1. Bump the version in [setup.py](https://github.com/Meeshkan/meeshkan/tree/master/setup.py) if the version is the same as in the published [package](https://pypi.org/project/meeshkan/). Commit and push.
-1. Run `python setup.py test`, `python setup.py typecheck` and `python setup.py dist` to check everything works
+1. Run `python setup.py test` to check that everything works
 1. To build and upload the package, run `python setup.py upload`. Insert PyPI credentials to upload the package to `PyPI`. The command will also run `git tag` to tag the commit as a release and push the tags to remote.
 
-To see what the different commands do, see `Command` classes in [setup.py](https://github.com/Meeshkan/meeshkan/tree/master/setup.py).
+> To see what the different commands do, see `Command` classes in [setup.py](https://github.com/Meeshkan/meeshkan/tree/master/setup.py).
 
 ## Contributing
 
 Thanks for your interest in contributing! Please take a look at our [development guide](#development) for notes on how to develop the package locally.  A great way to start contributing is to [file an issue](https://github.com/meeshkan/meeshkan/issue) or [make a pull request](https://github.com/meeshkan/meeshkan/pulls).
+
+### Code of Conduct
 
 Please note that this project is governed by the [Meeshkan Community Code of Conduct](https://github.com/Meeshkan/code-of-conduct). By participating, you agree to abide by its terms.
