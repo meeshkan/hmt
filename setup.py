@@ -185,9 +185,8 @@ class TestCommand(SetupCommand):
         self.status("Checking formatting...")
         check_formatting()
 
-        # FIXME
-        # self.status("Checking style...")
-        # check_style()
+        self.status("Checking style...")
+        check_style()
 
         self.status("Checking types...")
         type_check()

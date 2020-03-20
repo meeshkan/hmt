@@ -10,7 +10,7 @@ from meeshkan.build.update_mode import UpdateMode
 from .build.builder import BASE_SCHEMA, build_schema_async
 from .config import DEFAULT_SPECS_DIR, setup
 from .logger import get as getLogger
-from .meeshkan_types import *
+from .meeshkan_types import BuildResultStream
 from .prepare import ignore_warnings
 from .serve.commands import mock, record
 from .sinks import AbstractSink, FileSystemSink
@@ -150,7 +150,7 @@ def build(input_file, out, initial_openapi_spec, mode, source):
             maybe_openapi = safe_load(initial_openapi_spec.read())
             # will raise if not an API spec
             openapi_spec = convert_to_openapi(maybe_openapi)
-        except:
+        except Exception:
             pass  # just use the initial schema
     run_from_source(source, UpdateMode[mode.upper()], openapi_spec, sinks=sinks)
 

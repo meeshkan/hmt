@@ -2,7 +2,6 @@ import json
 import os
 import time
 from dataclasses import dataclass
-from io import StringIO
 from typing import Optional, Sequence
 
 from http_types import HttpExchange, HttpExchangeWriter, Request, Response
