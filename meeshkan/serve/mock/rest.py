@@ -1,11 +1,9 @@
-import json
 import logging
-from io import StringIO
 from typing import Sequence
 
 import requests
-from http_types import HttpExchange, Request
-from http_types.utils import HttpExchangeWriter, ResponseBuilder
+from http_types import Request
+from http_types.utils import HttpExchangeWriter
 from openapi_typed_2 import convert_from_openapi, convert_to_openapi
 
 from meeshkan.serve.mock.specs import OpenAPISpecification
