@@ -30,7 +30,7 @@ class MeeshkanDataFaker(MeeshkanSchemaFaker):
             return self.fake_it(self._top_schema["definitions"][name], depth)
 
     def _update_data(self, method: Operation):
-        if 'x-meeshkan-operation' not in method._x:
+        if method._x is None or 'x-meeshkan-operation' not in method._x:
             return None
 
         if method._x['x-meeshkan-operation'] == 'read':
