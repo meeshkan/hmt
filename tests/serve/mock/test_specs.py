@@ -13,7 +13,7 @@ def assert_on_petstore_spec(
 ):
     assert len(specs) == 1
     spec = specs[0]
-    assert expected_source == spec.source
+    assert expected_source == spec.source.replace("\\", "/")  # for windows
     assert "Swagger Petstore" == spec.api.info.title
 
 
