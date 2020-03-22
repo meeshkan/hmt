@@ -1,4 +1,5 @@
 import os
+import sys
 from logging import getLogger
 from pathlib import Path
 
@@ -31,12 +32,6 @@ def add_options(options):
 
 _common_server_options = [
     click.option("-p", "--port", default="8000", help="Server port."),
-    click.option(
-        "-s",
-        "--specs-dir",
-        default=DEFAULT_SPECS_DIR,
-        help="Directory with OpenAPI specifications.",
-    ),
     click.option("-d", "--daemon", is_flag=True, help="Run meeshkan as a daemon."),
     click.option(
         "-r",
@@ -48,6 +43,12 @@ _common_server_options = [
 
 _record_options = _common_server_options + [
     click.option("-l", "--log-dir", default="./logs", help="API calls logs direcotry"),
+    click.option(
+        "-s",
+        "--specs-dir",
+        default=DEFAULT_SPECS_DIR,
+        help="Directory with OpenAPI specifications.",
+    ),
     click.option(
         "-m",
         "--mode",
@@ -66,6 +67,7 @@ _mock_options = _common_server_options + [
         type=click.Path(exists=True, file_okay=False, resolve_path=True),
         help="Directory with callback scripts to modify behavior.",
     ),
+    click.option("-k", "--kill", is_flag=True, help="Stop the mock daemon."),
     click.option(
         "-l",
         "--log-dir",
@@ -73,28 +75,40 @@ _mock_options = _common_server_options + [
         type=click.Path(exists=False, file_okay=False, resolve_path=True),
         help="Directory where server logs are written.",
     ),
+    click.option(
+        "-s", "--status", is_flag=True, help="Show the status of the mock daemon."
+    ),
 ]
 
 
-@click.group(invoke_without_command=True)
+@click.command()
 @add_options(_mock_options)
-@click.pass_context
+@click.argument("specifications", nargs=-1)
 def mock(
-    ctx, callback_dir, log_dir, admin_port, port, specs_dir, header_routing, daemon
+    callback_dir,
+    log_dir,
+    admin_port,
+    port,
+    header_routing,
+    daemon,
+    kill,
+    status,
+    specifications,
 ):
     """
     Run a mock server using OpenAPI specifications.
     """
-    if ctx.invoked_subcommand is None:
-        ctx.forward(start_mock)
+    if kill:
+        stop_mocking()
+        sys.exit(0)
+    elif status:
+        status_mocking()
+        sys.exit(0)
 
-
-@mock.command(name="start")  # type: ignore
-@add_options(_mock_options)
-def start_mock(
-    callback_dir, log_dir, admin_port, port, specs_dir, header_routing, daemon
-):
-    specs = load_specs(specs_dir)
+    try:
+        specs = load_specs(specifications)
+    except Exception as e:
+        raise click.ClickException(str(e))
 
     server = MockServer(
         callback_dir=callback_dir,
@@ -116,7 +130,6 @@ def start_mock(
         server.run()
 
 
-@mock.command(name="stop")  # type: ignore
 def stop_mocking():
     if not IS_WINDOWS:
         import daemonocle
@@ -125,7 +138,6 @@ def stop_mocking():
         daemon.stop()
 
 
-@mock.command(name="status")  # type: ignore
 def status_mocking():
     if not IS_WINDOWS:
         import daemonocle
@@ -137,7 +149,7 @@ def status_mocking():
 @click.group(invoke_without_command=True)
 @add_options(_record_options)
 @click.pass_context
-def record(ctx, port, admin_port, log_dir, header_routing, specs_dir, mode, daemon):
+def record(ctx, port, log_dir, header_routing, specs_dir, mode, daemon):
     """
     Record HTTP traffic from a reverse proxy.
     """

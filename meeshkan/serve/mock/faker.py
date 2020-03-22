@@ -12,6 +12,7 @@ __all__ = ["fake_it"]
 _LO = -99999999
 _HI = 99999999
 
+
 # to prevent too-nested objects
 def sane_depth(n):
     return max([0, 3 - n])
