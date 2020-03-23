@@ -5,7 +5,6 @@ from functools import reduce
 from typing import (
     Any,
     Callable,
-    List,
     Mapping,
     Optional,
     Sequence,

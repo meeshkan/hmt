@@ -1,5 +1,3 @@
-import re
-
 from hamcrest import assert_that, has_entry, instance_of, is_, matches_regexp
 from http_types import RequestBuilder, Response
 
