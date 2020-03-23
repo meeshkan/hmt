@@ -100,3 +100,5 @@ class MockServer:
                             + spec.api.servers[0].url
                             + path
                         )
+
+        logger.info("✓ Meeshkan is running")
