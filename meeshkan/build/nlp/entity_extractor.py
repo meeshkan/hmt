@@ -49,8 +49,13 @@ class EntityExtractorNLP:
         return path_list
 
     def get_entity_from_url(self, path):
-        return self.nlp(self._split_pathes([path])[-1])[0].lemma_
+        pathes = self._split_pathes([path])
+        if len(pathes) > 0:
+            return self.nlp(pathes[-1])[0].lemma_
+        else:
+            return None
         # return self._mapping.get(path)
+
 
     def _is_stop_word(self, path_item):
         for stop_word in self.STOP_WORDS:

@@ -4,6 +4,7 @@ from unittest.mock import Mock
 import pytest
 from http_types import HttpMethod, Protocol
 from http_types.utils import ResponseBuilder
+from meeshkan.serve.mock.specs import load_specs
 from tornado.httpclient import HTTPRequest
 
 from meeshkan.serve.mock.callbacks import callback_manager
@@ -27,7 +28,7 @@ get_response_mock = Mock(return_value=response)
 @pytest.fixture
 def app():
     callback_manager.load("tests/serve/mock/callbacks")
-    response_matcher = ResponseMatcher("tests/serve/mock/schemas/petstore")
+    response_matcher = ResponseMatcher(load_specs("tests/serve/mock/schemas/petstore"))
 
     response_matcher.get_response = get_response_mock
 

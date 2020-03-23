@@ -1,38 +1,19 @@
 import json
 import logging
-import os
 import random
-
-import yaml
-from typing import Mapping, Sequence, Union, cast
+from typing import Sequence
 
 from faker import Faker
 from http_types import Request, Response
-from openapi_typed_2 import (
-    OpenAPIObject,
-    convert_to_openapi,
-)
-
 from meeshkan.serve.mock.callbacks import callback_manager
 from meeshkan.serve.mock.faker import MeeshkanFaker
 from meeshkan.serve.mock.faker.faker_exception import FakerException
-from http_types import Request, Response
-
 from meeshkan.serve.mock.matcher import (
     match_request_to_openapi,
-    change_ref,
-    change_refs,
-    get_response_from_ref,
-    match_request_to_openapi,
-    ref_name,
 )
 from meeshkan.serve.mock.rest import rest_middleware_manager
-from meeshkan.serve.mock.storage import storage_manager
-from meeshkan.serve.mock.rest import rest_middleware_manager
 from meeshkan.serve.mock.specs import OpenAPISpecification
-
-fkr = Faker()
-
+from meeshkan.serve.mock.storage import storage_manager
 
 logger = logging.getLogger(__name__)
 
@@ -40,32 +21,16 @@ logger = logging.getLogger(__name__)
 class ResponseMatcher:
     _specs: Sequence[OpenAPISpecification]
 
-    def __init__(self, specs_dir):
-        self._text_faker = Faker()
-        self._schemas = {}
-        if not os.path.exists(specs_dir):
-            logging.info("OpenAPI schema directory not found %s", specs_dir)
-        else:
-            schemas = (
-                s
-                for s in os.listdir(specs_dir)
-                if s.endswith("yml") or s.endswith("yaml") or s.endswith("json")
-            )
-            for schema in schemas:
-                with open(os.path.join(specs_dir, schema), encoding="utf8") as schema_file:
-                    dict_spec = (json.loads if schema.endswith("json") else yaml.safe_load)(schema_file.read())
-                    spec = convert_to_openapi(dict_spec)
-                    storage_manager.add_mock(schema, spec)
-                    self._schemas[schema] = spec
+    def __init__(self, specs: Sequence[OpenAPISpecification]):
+        self._specs = specs
+        self._fkr = Faker()
 
-    def match_error(self, msg: str, req: Request) -> Response:
-        return self.default_response(
-            "%s. Here is the full request: host=%s, path=%s, method=%s."
-            % (msg, req.host, req.path, req.method.value)
-        )
+        for spec in specs:
+            storage_manager.add_mock(spec.source, spec.api)
 
-    def default_response(self, msg):
-        json_resp = {"message": msg}
+    def match_error(self, msg: str, req: Request):
+        json_resp = {"message": "%s. Here is the full request: host=%s, path=%s, method=%s."
+                                % (msg, req.host, req.path, req.method.value)}
         return Response(
             statusCode=501,
             body=json.dumps(json_resp),
@@ -74,9 +39,9 @@ class ResponseMatcher:
             timestamp=None,
         )
 
-    def _match_response(self, request, name, spec):
+    def _match_response(self, request, spec, storage):
         try:
-            return MeeshkanFaker(self._text_faker, request, spec, storage_manager[name]).execute()
+            return MeeshkanFaker(self._fkr, request, spec, storage).execute()
         except FakerException as e:
             return self.match_error(str(e), request)
 
@@ -89,7 +54,7 @@ class ResponseMatcher:
             )
             return self.match_error(method_error, request)
 
-        schemas = rest_middleware_manager.spew(request, self._schemas)
+        schemas = rest_middleware_manager.spew(request, self._specs)
         match = match_request_to_openapi(request, schemas)
 
         if len(match) == 0:
@@ -97,13 +62,14 @@ class ResponseMatcher:
                 "Could not find a open API schema for the host %s." % request.host,
                 request), storage_manager.default)
 
-        name, spec = random.choice(list(match.items()))
-        if spec.paths is None or len(spec.paths.items()) == 0:
+        spec = random.choice(match)
+        if spec.api.paths is None or len(spec.api.paths.items()) == 0:
             path_error = "Could not find a path %s on hostname %s." % (
                 request.path,
                 request.host,
             )
             return self.match_error(path_error, request)
 
-        response = self._match_response(request, name, spec)
-        return callback_manager(request, response, storage_manager[name])
+        storage = storage_manager[spec.source]
+        response = self._match_response(request, spec.api, storage)
+        return callback_manager(request, response, storage)

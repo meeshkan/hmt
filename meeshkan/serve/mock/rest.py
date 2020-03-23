@@ -1,7 +1,7 @@
 import json
 import logging
 from io import StringIO
-from typing import Sequence, Mapping
+from typing import Sequence, Mapping, List
 
 import requests
 from http_types import HttpExchange, Request
@@ -40,11 +40,11 @@ class RestMiddlewareManager:
             res = requests.post(endpoint, json={"request": req, "schemas": cs})
             cs = res.json()
 
-        out: Mapping[str, OpenAPISpecification] = {}
+        out: List[OpenAPISpecification] = []
         for name, dict_spec in cs.items():
             spec = convert_to_openapi(dict_spec)
             storage_manager.add_mock(name, spec)
-            out[name] = OpenAPISpecification(spec, name)
+            out.append(OpenAPISpecification(spec, name))
         return out
 
 

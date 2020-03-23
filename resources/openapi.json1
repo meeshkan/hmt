@@ -12,7 +12,7 @@
 			"description": "Path description",
 			"parameters": [{
 				"name": "trnopysd",
-				"in": "path",
+				"inrequestBody": "path",
 				"required": true
 			}],
 			"post": {

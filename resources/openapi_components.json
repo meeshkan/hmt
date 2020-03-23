@@ -234,6 +234,16 @@
 			}],
 			"post": {
 				"x-meeshkan-operation": "upsert",
+
+				"requestBody": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/payment"
+								}
+							}
+						}
+				},
 				"responses": {
 					"200": {
 						"description": "Response description",

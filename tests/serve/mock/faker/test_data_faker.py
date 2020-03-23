@@ -4,12 +4,13 @@ from http_types import RequestBuilder
 from meeshkan.serve.mock.faker import MeeshkanDataFaker
 from meeshkan.serve.mock.faker.schema_faker import MeeshkanSchemaFaker
 from meeshkan.serve.mock.matcher import valid_schema
+from meeshkan.serve.mock.storage import Storage
 
 
 def test_faker_1():
 
     request = RequestBuilder.from_dict(dict(method="post",  protocol="http", path="/", host="api.com"))
-    faker = MeeshkanSchemaFaker(Faker(), request, None)
+    faker = MeeshkanSchemaFaker(Faker(), request, Storage())
 
     schema = {
         "type": "array",
