@@ -2,7 +2,7 @@ import json
 import logging
 
 import pytest
-from hamcrest import assert_that, has_key
+from hamcrest import assert_that, has_key, is_
 from tornado.httpclient import HTTPClientError, HTTPRequest
 
 from meeshkan.serve.mock.log import Log
@@ -11,6 +11,7 @@ from meeshkan.serve.mock.server import make_mocking_app
 from meeshkan.serve.mock.specs import load_specs
 from meeshkan.serve.utils.routing import PathRouting
 
+logger = logging.getLogger(__name__)
 logging.basicConfig(level="DEBUG")
 
 routing = PathRouting()
@@ -28,15 +29,15 @@ def make_sandbox_url(base_url, path: str):
 
 
 class TestNordea:
-    @pytest.mark.skip("Returning 302 for invalid auth not implemented")
     @pytest.mark.gen_test
     async def test_nordea_authorize_returns_302(self, http_client, base_url):
         redirect_uri = "http://httpbin.org/get"
-        query = f"state=fake&client_id=CLIENT_ID&scope=ACCOUNTS_BASIC,ACCOUNTS_BALANCES,ACCOUNTS_DETAILS,ACCOUNTS_TRANSACTIONS,PAYMENTS_MULTIPLE, CARDS_INFORMATION, CARDS_TRANSACTIONS&duration=129600&redirect_uri={redirect_uri}&country=FI"
+        query = f"state=fake&client_id=CLIENT_ID&scope=ACCOUNTS_BASIC,ACCOUNTS_BALANCES,ACCOUNTS_DETAILS,ACCOUNTS_TRANSACTIONS,PAYMENTS_MULTIPLE,CARDS_INFORMATION,CARDS_TRANSACTIONS&duration=129600&redirect_uri={redirect_uri}&country=FI"
         url = make_sandbox_url(base_url, path=f"/personal/v4/authorize?{query}")
         req = HTTPRequest(url, follow_redirects=False)
-        response = await http_client.fetch(req)
-        assert response.code == 302, "Expected redirect for auth"
+        with pytest.raises(HTTPClientError) as e:  # type: ignore
+            await http_client.fetch(req)
+        assert_that(e.value.code, is_(302))
 
     @pytest.mark.skip("Returning 401 for invalid auth not implemented")
     @pytest.mark.gen_test

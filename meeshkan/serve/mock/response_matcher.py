@@ -7,16 +7,17 @@ from faker import Faker
 from http_types import Request, Response
 from openapi_typed_2 import Reference, convert_from_openapi
 
-from meeshkan.serve.mock.faker import fake_it
-from meeshkan.serve.mock.matcher import (
+from .faker import fake_it
+from .matcher import (
     change_ref,
     change_refs,
     get_response_from_ref,
     match_request_to_openapi,
     ref_name,
 )
-from meeshkan.serve.mock.rest import rest_middleware_manager
-from meeshkan.serve.mock.specs import OpenAPISpecification
+from .rest import rest_middleware_manager
+from .security import match_to_security_schemes
+from .specs import OpenAPISpecification
 
 fkr = Faker()
 
@@ -50,30 +51,44 @@ class ResponseMatcher:
         # TODO: tight coupling here
         # try to decouple...
         specs = rest_middleware_manager.spew(request, self._specs)
+
+        logger.debug("Matching to security schemes of %d specs", len(specs))
+        maybe_security_response = match_to_security_schemes(
+            request, [spec.api for spec in specs]
+        )
+
+        if maybe_security_response is not None:
+            logger.debug("Matched to security scheme, returning response.")
+            return maybe_security_response
+
+        logger.debug("Matching to paths")
+
         matches = match_request_to_openapi(request, specs)
+
+        logger.debug("Found %d matching specs", len(matches))
         if len(matches) == 0:
             return self.match_error(
                 "Could not find an OpenAPI schema for the host %s." % request.host,
                 request,
             )
-        random.shuffle(matches)
-        first_match = matches[0]
+
+        match = random.choice(matches)
+
+        logger.debug("Proceeding with document title %s", match.api.info.title)
+
         path_error = "Could not find a path %s on hostname %s." % (
             request.path,
             request.host,
         )
-        method_error = "Could not find a method %s for path %s on hostname %s." % (
-            request.method.value,
-            request.path,
-            request.host,
-        )
-        if first_match.api.paths is None:
+
+        if match.api.paths is None:
             return self.match_error(path_error, request)
-        if len(first_match.api.paths.items()) == 0:
+        if len(match.api.paths.items()) == 0:
             return self.match_error(path_error, request)
-        path_candidates = [x for x in first_match.api.paths.values()]
-        random.shuffle(path_candidates)
-        path_candidate = path_candidates[0]
+
+        path_candidates = [x for x in match.api.paths.values()]
+
+        path_candidate = random.choice(path_candidates)
 
         method = {
             "get": path_candidate.get,
@@ -86,19 +101,27 @@ class ResponseMatcher:
             "trace": path_candidate.trace,
         }.get(str(request.method.value), None)
 
+        method_error = "Could not find a method %s for path %s on hostname %s." % (
+            request.method.value,
+            request.path,
+            request.host,
+        )
+
         if method is None:
             return self.match_error(method_error, request)
         responses_error = "While a stub for a specification exists for this endpoint, it contains no responses. That usually means the schema is corrupt or it has been constrained too much (ie asking for a 201 response when it only has 200 and 400)."
         if method.responses is None:
             return self.match_error(responses_error, request)
         potential_responses = [r for r in method.responses.items()]
-        random.shuffle(potential_responses)
+
         if len(potential_responses) == 0:
             return self.match_error(responses_error, request)
+
+        response = random.choice(potential_responses)
         response = potential_responses[0]
         response_1 = response[1]
         response_1 = (
-            get_response_from_ref(first_match.api, ref_name(response_1))
+            get_response_from_ref(match.api, ref_name(response_1))
             if isinstance(response_1, Reference)
             else response_1
         )
@@ -148,9 +171,9 @@ class ResponseMatcher:
                         change_ref(v) if isinstance(v, Reference) else change_refs(v)
                     )
                     for k, v in (
-                        first_match.api.components.schemas.items()
-                        if (first_match.api.components is not None)
-                        and (first_match.api.components.schemas is not None)
+                        match.api.components.schemas.items()
+                        if (match.api.components is not None)
+                        and (match.api.components.schemas is not None)
                         else []
                     )
                 },
