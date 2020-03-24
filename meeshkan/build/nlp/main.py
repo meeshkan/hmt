@@ -21,3 +21,7 @@ path_tuple = ('/accounts/v3/accounts/eg9Mno2tvmeEE039chWrHw7sk1155oy5Mha8kQp0mYs
 updated, specs = check_and_create_ref(specs, path_tuple)
 print(specs)
 print(updated)
+
+if updated:
+    with open('changed.json', 'w') as f:
+        f.write(json.dumps(specs))
