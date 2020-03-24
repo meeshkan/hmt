@@ -109,7 +109,7 @@ def create_ref_obj(all_paths_dict, path_tuple, tuple1, component_name):
 
 
 def generate_component_dict(schema, component_name):
-    obj_list = [component_name, 'schema', 'components']
+    obj_list = [component_name, 'schemas', 'components']
     obj_dict = schema
     for item in obj_list:
         obj_dict = {item : obj_dict}
@@ -119,7 +119,7 @@ def generate_component_dict(schema, component_name):
 
 def create_ref_path(tuple1):
     schema_name = None
-    schema_comp = '#/components/schema/'
+    schema_comp = '#/components/schemas/'
     for item in tuple1:
         if item != '$schema':
             item = item.split('#')
