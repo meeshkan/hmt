@@ -3,12 +3,20 @@ from http_types import RequestBuilder
 
 from meeshkan.serve.mock.faker.schema_faker import MeeshkanSchemaFaker
 from meeshkan.serve.mock.matcher import valid_schema
+from meeshkan.serve.mock.storage import storage_manager
+from openapi_typed_2 import OpenAPIObject, PathItem, convert_to_OpenAPIObject
 
+
+def get_spec(schema):
+    return convert_to_OpenAPIObject({"openapi": "3.0",
+                                     "info": {"title": "Title", "version": "1.1.1"},
+                                     "paths": {"/":
+                                                   {"get": {"responses": {"200": {"description": "some",
+                                                                                  "content": {"application/json": {"schema": schema}}}}}}}})
 
 def test_faker_1():
 
-    request = RequestBuilder.from_dict(dict(method="post",  protocol="http", path="/", host="api.com"))
-    faker = MeeshkanSchemaFaker(Faker(), request, None)
+    request = RequestBuilder.from_dict(dict(method="get",  protocol="http", path="/", host="api.com"))
 
     schema = {
         "type": "array",
@@ -22,13 +30,12 @@ def test_faker_1():
             },
         },
     }
-    res = faker.fake_it(schema, schema, 0)
-    assert valid_schema(res, schema)
+    res = MeeshkanSchemaFaker(Faker(), request, get_spec(schema), storage_manager.default).execute()
+    assert valid_schema(res.bodyAsJson, schema)
 
 
 def test_faker_2():
-    request = RequestBuilder.from_dict(dict(method="post",  protocol="http", path="/", host="api.com"))
-    faker = MeeshkanSchemaFaker(Faker(), request, None)
+    request = RequestBuilder.from_dict(dict(method="get",  protocol="http", path="/", host="api.com"))
 
     schema = {
         "$id": "https://example.com/person.schema.json",
@@ -45,14 +52,13 @@ def test_faker_2():
             },
         },
     }
-    res = faker.fake_it(schema, schema, 0)
-    assert valid_schema(res, schema)
+    res = MeeshkanSchemaFaker(Faker(), request, get_spec(schema), storage_manager.default).execute()
+    assert valid_schema(res.bodyAsJson, schema)
 
 
 def test_faker_3():
 
-    request = RequestBuilder.from_dict(dict(method="post",  protocol="http", path="/", host="api.com"))
-    faker = MeeshkanSchemaFaker(Faker(), request, None)
+    request = RequestBuilder.from_dict(dict(method="get",  protocol="http", path="/", host="api.com"))
 
     schema = {
         "$id": "https://example.com/geographical-location.schema.json",
@@ -66,13 +72,12 @@ def test_faker_3():
             "longitude": {"type": "number", "minimum": -180, "maximum": 180},
         },
     }
-    res = faker.fake_it(schema, schema, 0)
-    assert valid_schema(res, schema)
+    res = MeeshkanSchemaFaker(Faker(), request, get_spec(schema), storage_manager.default).execute()
+    assert valid_schema(res.bodyAsJson, schema)
 
 
 def test_faker_4():
-    request = RequestBuilder.from_dict(dict(method="post",  protocol="http", path="/", host="api.com"))
-    faker = MeeshkanSchemaFaker(Faker(), request, None)
+    request = RequestBuilder.from_dict(dict(method="get",  protocol="http", path="/", host="api.com"))
 
     schema = {
         "$id": "https://example.com/arrays.schema.json",
@@ -100,14 +105,13 @@ def test_faker_4():
             }
         },
     }
-    res = faker.fake_it(schema, schema, 0)
-    assert valid_schema(res, schema)
+    res = MeeshkanSchemaFaker(Faker(), request, get_spec(schema), storage_manager.default).execute()
+    assert valid_schema(res.bodyAsJson, schema)
 
 
 def test_faker_5():
-    request = RequestBuilder.from_dict(dict(method="post",  protocol="http", path="/", host="api.com"))
-    faker = MeeshkanSchemaFaker(Faker(), request, None)
+    request = RequestBuilder.from_dict(dict(method="get",  protocol="http", path="/", host="api.com"))
 
     schema = {"type": "array"}
-    res = faker.fake_it(schema, schema, 0)
-    assert valid_schema(res, schema)
+    res = MeeshkanSchemaFaker(Faker(), request, get_spec(schema), storage_manager.default).execute()
+    assert valid_schema(res.bodyAsJson, schema)
