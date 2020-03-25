@@ -5,7 +5,7 @@ from tornado.web import RequestHandler
 
 from ..mock.rest import RestMiddlewareManager
 from ..mock.scope import Scope
-from ..mock.storage import StorageManager
+from ..mock.data import StorageManager
 
 logger = logging.getLogger(__name__)
 

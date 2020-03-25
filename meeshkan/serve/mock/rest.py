@@ -10,7 +10,7 @@ from openapi_typed_2 import convert_from_openapi, convert_to_openapi
 
 from meeshkan.serve.mock.specs import OpenAPISpecification
 
-from meeshkan.serve.mock.storage import storage_manager
+from meeshkan.serve.mock.data import storage_manager
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +34,9 @@ class RestMiddlewareManager:
     def spew(
         self, request: Request, specs: Sequence[OpenAPISpecification]
     ) -> Sequence[OpenAPISpecification]:
+        if len(self._endpoints) == 0:
+            return specs
+
         req = HttpExchangeWriter.to_dict(request)
         cs = {spec.source: convert_from_openapi(spec.api) for spec in specs}
         for endpoint in self._endpoints:

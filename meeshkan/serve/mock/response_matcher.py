@@ -13,7 +13,7 @@ from meeshkan.serve.mock.matcher import (
 )
 from meeshkan.serve.mock.rest import rest_middleware_manager
 from meeshkan.serve.mock.specs import OpenAPISpecification
-from meeshkan.serve.mock.storage import storage_manager
+from meeshkan.serve.mock.data import storage_manager
 
 logger = logging.getLogger(__name__)
 

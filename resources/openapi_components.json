@@ -223,12 +223,13 @@
 		"description": "API description"
 	},
 	"paths": {
-		"/v1/payments/{trnopysd}": {
+		"/v1/payments/{action}": {
 			"x-meeshkan-entity": "payment",
+			"x-meeshkan-id-path": "paymentId",
 			"summary": "Path summary",
 			"description": "Path description",
 			"parameters": [{
-				"name": "trnopysd",
+				"name": "action",
 				"in": "path",
 				"required": true
 			}],
@@ -327,12 +328,18 @@
 				}]
 			}
 		},
-		"/accounts/v3/accounts/eg9Mno2tvmeEE039chWrHw7sk1155oy5Mha8kQp0mYs.sxajtselenSScKPZrBMYjg.SoFWGrHocw1YoNb3zw-vfw": {
+		"/accounts/v3/accounts/{id}": {
 			"x-meeshkan-entity": "account",
+			"x-meeshkan-id-path": "accountId",
 			"summary": "Path summary",
 			"description": "Path description",
+			"parameters": [{
+				"name": "id",
+				"in": "path",
+				"required": true
+			}],
 			"get": {
-				"x-meeshkan-type": "read",
+				"x-meeshkan-operation": "read",
 				"responses": {
 					"200": {
 						"description": "Response description",
@@ -444,12 +451,12 @@
 			}
 		},
 		"/accounts/v3/accounts": {
-			"x-meeshkan-type": "read",
 			"x-meeshkan-entity": "account",
+			"x-meeshkan-id-path": "accountId",
 			"summary": "Path summary",
 			"description": "Path description",
 			"get": {
-				"x-meeshkan-type": "read",
+				"x-meeshkan-operation": "read",
 				"responses": {
 					"200": {
 						"description": "Response description",

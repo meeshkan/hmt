@@ -3,7 +3,7 @@ from http_types import Request
 from openapi_typed_2 import OpenAPIObject, Any, Operation
 
 from meeshkan.serve.mock.faker.schema_faker import MeeshkanSchemaFaker
-from meeshkan.serve.mock.storage import Storage
+from meeshkan.serve.mock.data import Storage
 
 
 

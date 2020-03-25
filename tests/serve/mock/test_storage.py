@@ -1,4 +1,4 @@
-from meeshkan.serve.mock.storage import storage_manager
+from meeshkan.serve.mock.data import storage_manager
 
 
 def test_clear():

@@ -8,7 +8,7 @@ from dataclasses import asdict
 
 from http_types.utils import ResponseBuilder
 
-from .storage import storage_manager
+from .data import storage_manager
 
 logger = logging.getLogger(__name__)
 

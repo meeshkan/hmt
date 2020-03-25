@@ -12,7 +12,7 @@ from http_types import Request, Response
 from meeshkan.serve.mock.faker.faker_base import MeeshkanFakerBase
 from meeshkan.serve.mock.faker.faker_exception import FakerException
 from meeshkan.serve.mock.matcher import get_response_from_ref, ref_name, change_ref, change_refs
-from meeshkan.serve.mock.storage import Storage
+from meeshkan.serve.mock.data import Storage
 from openapi_typed_2 import convert_from_openapi, Reference, OpenAPIObject
 
 
@@ -180,6 +180,9 @@ class MeeshkanSchemaFaker(MeeshkanFakerBase):
         path_candidate = random.choice([x for x in self._spec.paths.values()])
         self._entity_name = path_candidate._x.get('x-meeshkan-entity', None) if path_candidate._x is not None else None
         method = getattr(path_candidate, self._request.method.value, None)
+
+        if method is None:
+            raise FakerException(self.responses_error)
 
         self._generated_data = self._update_data(method)
 
