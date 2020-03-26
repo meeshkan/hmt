@@ -20,7 +20,7 @@ def test_opbank_returns_500():
         with pytest.raises(PaymentException):
             my_client.confirm_payment(payment)
 
-def test_opbank_returns_200(mocker):
+def test_opbank_returns_200():
     mocker = opbank.mock(path="/personal/v4/*").filter(status(200))
     with meeshkan.intercept_with(response_gen)
         payment_result = my_client.confirm_payment(payment)
