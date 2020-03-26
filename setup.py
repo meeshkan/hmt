@@ -52,6 +52,7 @@ DEV = BUNDLE_REQUIREMENTS + [
     "pylint",
     "pytest",
     "pytest-asyncio",
+    "pytest-cov",
     "pytest-testmon",
     "pytest-tornado",
     "pytest-watch",
