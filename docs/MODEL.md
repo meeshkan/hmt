@@ -11,18 +11,17 @@ Below, we go through examples of how models and data generators can help testing
 ```python
 from models import opbank
 
-# Add maps and filters to control generated data
-# Type of mocker is `Callable[[Request], Generator[Response]]`
-# but it has `map`, `filter`, etc.
-@given(mocker=opbank.mock(path="/personal/v4/*").filter(status(500)))
-def test_opbank_returns_500(mocker):
+def test_opbank_returns_500():
+    # Add maps and filters to control generated data
+    # Type of mocker is `Callable[[Request], Generator[Response]]`
+    # but it has `map`, `filter`, etc.
+    mocker = opbank.mock(path="/personal/v4/*").filter(status(500))
     with meeshkan.intercept_with(mocker):  # Intercept HTTP traffic when used as a context manager
         with pytest.raises(PaymentException):
             my_client.confirm_payment(payment)
 
-# The decorator does not really have any purpose here, it's only for readability
-@given(mocker=opbank.mock(path="/personal/v4/*").filter(status(200)))
 def test_opbank_returns_200(mocker):
+    mocker = opbank.mock(path="/personal/v4/*").filter(status(200))
     with meeshkan.intercept_with(response_gen)
         payment_result = my_client.confirm_payment(payment)
     
@@ -38,20 +37,25 @@ def test_opbank_returns_200(mocker):
 
 ### Dockerized
 
+To run a Meeshkan `Model` in Docker, you can use a following `Dockerfile`:
+
 ```Dockerfile
 FROM python-3.8.0
+
 RUN pip install meeshkan
+
 # File containing a class inheriting `BaseModel`
-ADD models.py 
-# Specify path to class
+ADD models.py
+
+EXPOSE 8000
+
+# Specify path to class in CMD
 CMD ["meeshkan", "mock", "models:OpBank"]
 ```
 
-TODO: How to interact with generators? REST API?
+This will start a Meeshkan mock server at port 8000.
 
-### Other languages
-
-TODO: How to interact with the running server? Pyro over socket (HTTP)?
+TODO: How to interact with generators?
 
 ## API server testing
 
@@ -66,33 +70,46 @@ from meeshkan.models import Model
 openapi = load_openapi("openapi.yaml")
 model = Model.fromOpenAPI(openapi)
 
-# Generator of requests and response "context". Context is used, for example, for validating responses.
+# Generator of HttpRequest objects.
 request_gen = model.requests()
 
-# Generate example request along with response context. 
-req, res_ctx = request_gen.example()
+# Generate example request
+req = request_gen.example()
 
 # Send request to locally running server
 res = req.send("http://localhost:8000")
 
-# Validate response against the context. For example, check that status code is one of those listed in 
-res_ctx.validate(res)
+# Validate response against the request. For example, check that status code is one of those listed as valid responses for the given request.
+model.validate(req, res)
 ```
 
-To run tests, you want to use `given` from Hypothesis library to generate test cases. For example:
+To run property-based tests, you use `given` from Hypothesis library to generate test cases. For example:
 
 ```python
 # Run 100 tests with different values for request and response context
 @given(req=model.requests())
 def test_everything(req):
-    req, res_ctx = req
     res = req.send("http://localhost:8000")
-    assert res_ctx.validate(res)
+    assert model.validate(res)
 ```
 
-To test specific cases, you can use all the tricks provided by [Hypothesis strategies](https://hypothesis.readthedocs.io/en/latest/data.html#adapting-strategies). For example, you can use `map()`, `filter()` and `flatmap()` to cover 
+To test specific cases, you can use all the tricks provided by [Hypothesis strategies](https://hypothesis.readthedocs.io/en/latest/data.html#adapting-strategies) to only generate requests you want to test. For example, you can use `map()`, `filter()`, `flatmap()`, and [`assume`](https://hypothesis.readthedocs.io/en/latest/details.html#hypothesis.assume).
+
+```python
+def add_auth(req):
+    req.headers.Authorization = `"Bearer XYZ"
+    return req
+
+request_gen = model.request()
+    .map(add_auth)
+    .filter(matches_path("/v1/accounts/*"))
+
+@given(req=request_gen)
+def test_always_returns_valid(req):
+    res = req.send("http://localhost:8000")
+    assert model.validate(res)
+    assert res.status_code == 200
+```
 
 
-
-
-TODO: Stateful testing?
+### Stateful testing
