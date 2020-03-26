@@ -1,8 +1,10 @@
 # Meeshkan model
 
-Every API mocked by Meeshkan is an instance of `Model`. `Model` is essentially a **data generator**. Under the Hood, `Model` class is powered by [Hypothesis](https://hypothesis.readthedocs.io/en/latest/data.html) package for property-based testing. Below, we go through examples of how models can cover different use-cases.
+Every API mocked by Meeshkan is an instance of `Model`. `Model` is a **data generator**. Under the Hood, `Model` class is powered by [Hypothesis strategies](https://hypothesis.readthedocs.io/en/latest/data.html) generally used for property-based testing (PBT). In Meeshkan, PBT is a first-class citizen. 
 
-## 1. Testing API clients
+Below, we go through examples of how models and data generators can help testing in most use cases.
+
+## API client testing
 
 ### Python
 
@@ -51,36 +53,46 @@ TODO: How to interact with generators? REST API?
 
 TODO: How to interact with the running server? Pyro over socket (HTTP)?
 
-## 2. Testing API server
+## API server testing
 
+### Stateless testing
 
-Example of simple usage:
+Instances of `Model` can be used to generate requests that the API is expected to handle. The following illustrates the basic flow:
 
 ```python
-model = Model.fromOpenAPI(openapi_object)
+from meeshkan.loaders import load_openapi
+from meeshkan.models import Model
 
-# Generator of requests
-request_gen = model.requests
+openapi = load_openapi("openapi.yaml")
+model = Model.fromOpenAPI(openapi)
 
-# Generate example request along with response "context". Context allows validating response.
+# Generator of requests and response "context". Context is used, for example, for validating responses.
+request_gen = model.requests()
+
+# Generate example request along with response context. 
 req, res_ctx = request_gen.example()
 
 # Send request to locally running server
 res = req.send("http://localhost:8000")
 
 # Validate response against the context. For example, check that status code is one of those listed in 
-res.validate(res_ctx)
+res_ctx.validate(res)
 ```
 
-Stateless property-based testing usage:
+To run tests, you want to use `given` from Hypothesis library to generate test cases. For example:
 
 ```python
-model = Model.fromOpenAPI(openapi_object)
-@given(req=model.requests)
+# Run 100 tests with different values for request and response context
+@given(req=model.requests())
 def test_everything(req):
     req, res_ctx = req
     res = req.send("http://localhost:8000")
-    assert res.validate(res_ctx)
+    assert res_ctx.validate(res)
 ```
+
+To test specific cases, you can use all the tricks provided by [Hypothesis strategies](https://hypothesis.readthedocs.io/en/latest/data.html#adapting-strategies). For example, you can use `map()`, `filter()` and `flatmap()` to cover 
+
+
+
 
 TODO: Stateful testing?
