@@ -102,7 +102,7 @@ def add_auth(req):
 
 request_gen = model.request()
     .map(add_auth)
-    .filter(matches_path("/v1/accounts/*"))
+    .filter(matches_path(r"^\/v1\/accounts/"))
 
 @given(req=request_gen)
 def test_always_returns_valid(req):
