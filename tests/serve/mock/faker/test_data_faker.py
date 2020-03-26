@@ -1,10 +1,9 @@
 from faker import Faker
 from http_types import RequestBuilder
+from meeshkan.serve.mock.data.storage import storage_manager
 
 from meeshkan.serve.mock.faker import MeeshkanDataFaker
-from meeshkan.serve.mock.faker.schema_faker import MeeshkanSchemaFaker
 from meeshkan.serve.mock.matcher import valid_schema
-from meeshkan.serve.mock.data import storage_manager
 from openapi_typed_2 import convert_to_OpenAPIObject
 
 

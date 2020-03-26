@@ -9,10 +9,10 @@ from typing import Any, Mapping, Union, Sequence, cast
 import typing
 from faker import Faker
 from http_types import Request, Response
+from meeshkan.serve.mock.data.storage import Storage
 from meeshkan.serve.mock.faker.faker_base import MeeshkanFakerBase
 from meeshkan.serve.mock.faker.faker_exception import FakerException
 from meeshkan.serve.mock.matcher import get_response_from_ref, ref_name, change_ref, change_refs
-from meeshkan.serve.mock.data import Storage
 from openapi_typed_2 import convert_from_openapi, Reference, OpenAPIObject
 
 

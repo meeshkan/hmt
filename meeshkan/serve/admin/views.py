@@ -1,11 +1,11 @@
 import json
 import logging
 
+from meeshkan.serve.mock.data.storage import StorageManager
 from tornado.web import RequestHandler
 
 from ..mock.rest import RestMiddlewareManager
 from ..mock.scope import Scope
-from ..mock.data import StorageManager
 
 logger = logging.getLogger(__name__)
 

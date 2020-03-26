@@ -1,16 +1,12 @@
-import json
 import logging
-from io import StringIO
-from typing import Sequence, Mapping, List
+from typing import Sequence, List
 
 import requests
-from http_types import HttpExchange, Request
-from http_types.utils import HttpExchangeWriter, ResponseBuilder
-from openapi_typed_2 import convert_from_openapi, convert_to_openapi
-
+from http_types import Request
+from http_types.utils import HttpExchangeWriter
+from meeshkan.serve.mock.data.storage import storage_manager
 from meeshkan.serve.mock.specs import OpenAPISpecification
-
-from meeshkan.serve.mock.data import storage_manager
+from openapi_typed_2 import convert_from_openapi, convert_to_openapi
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +28,7 @@ class RestMiddlewareManager:
         self._endpoints.add(url)
 
     def spew(
-        self, request: Request, specs: Sequence[OpenAPISpecification]
+            self, request: Request, specs: Sequence[OpenAPISpecification]
     ) -> Sequence[OpenAPISpecification]:
         if len(self._endpoints) == 0:
             return specs

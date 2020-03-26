@@ -2,10 +2,10 @@ from typing import Any
 
 from faker import Faker
 from http_types import Request
+from meeshkan.serve.mock.data.storage import Storage
 from openapi_typed import OpenAPIObject
 from openapi_typed_2 import Operation
 
-from meeshkan.serve.mock.data import Storage
 
 
 class MeeshkanFakerBase:

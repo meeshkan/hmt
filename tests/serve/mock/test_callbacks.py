@@ -1,7 +1,7 @@
 from http_types.utils import RequestBuilder, ResponseBuilder
 
 from meeshkan.serve.mock.callbacks import callback_manager
-from meeshkan.serve.mock.data import storage_manager
+from meeshkan.serve.mock.data.storage import storage_manager
 
 
 def test_no_callback():
