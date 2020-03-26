@@ -50,7 +50,7 @@ DEV = BUNDLE_REQUIREMENTS + [
     "mypy",
     "pyhamcrest",
     "pylint",
-    "pytest",
+    "pytest>=5.4.1",
     "pytest-asyncio",
     "pytest-testmon",
     "pytest-tornado",
