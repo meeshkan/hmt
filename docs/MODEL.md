@@ -59,8 +59,6 @@ TODO: How to interact with generators?
 
 ## API server testing
 
-### Stateless testing
-
 Instances of `Model` can be used to generate requests that the API is expected to handle. The following illustrates the basic flow:
 
 ```python
@@ -112,4 +110,69 @@ def test_always_returns_valid(req):
 ```
 
 
-### Stateful testing
+## Stateful testing
+
+***Everything below is experimental***
+
+All the examples above were for testing **stateless** APIs, where every request is independent. This is sufficient for most use cases, but sometimes you need stateful behaviour.
+
+### API client testing
+
+**Requirements**
+- *State-dependent draw* strategies
+- *Customizable `next_state(state, operation)`*
+
+### API server testing
+
+**Requirements**
+- Model that can *drive stateful testing*
+- *Commands, preconditions, next_state*
+- Postconditions
+
+*Important: Does not require stateful drawing!*
+
+```python
+
+class StateMachine(BaseStatefulModel, SearchStrategy):
+    """Unlike state machines in stateful PBT that only
+    need to cover `next_state` and `precondition`, this
+    also needs to cover "drawing" to act in mocking.
+    
+    Arguments:
+        BaseStatefulModel {[type]} -- [description]
+        SearchStrategy {[type]} -- [description]
+    """
+    def __init__(self):
+        super().__init__()
+        self._state = {}
+
+    def next_state(self, request, response):
+        # Define all state transitions here
+        ...
+
+    def precondition(self, request) -> bool:
+        # Define preconditions for an operation
+
+    def postcondition(self, request, response) -> bool:
+        # Define postconditions here
+```
+
+```python
+
+model = Mode.fromOpenAPI()
+
+state_machine = StateMachine()
+model.attach(state_machine)
+
+for cmds in commands():
+    # Prepare empty state here
+    prepare()
+
+    results, state, history = model.run(cmds)
+
+
+```
+
+### Custom models
+
+### Storage
