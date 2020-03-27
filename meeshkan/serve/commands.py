@@ -1,3 +1,4 @@
+import functools
 import os
 import sys
 from logging import getLogger
@@ -19,6 +20,18 @@ IS_WINDOWS = os.name == "nt"
 MOCK_PID = Path.home().joinpath(".meeshkan/mock.pid")
 RECORD_PID = Path.home().joinpath(".meeshkan/record.pid")
 logger = getLogger(__name__)
+
+
+def log_exceptions(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            logger.exception(e)
+            sys.exit(1)
+
+    return wrapper
 
 
 def add_options(options):
@@ -84,6 +97,7 @@ _mock_options = _common_server_options + [
 @click.command()
 @add_options(_mock_options)
 @click.argument("specifications", nargs=-1)
+@log_exceptions
 def mock(
     callback_dir,
     log_dir,
@@ -149,6 +163,7 @@ def status_mocking():
 @click.group(invoke_without_command=True)
 @add_options(_record_options)
 @click.pass_context
+@log_exceptions
 def record(ctx, port, log_dir, header_routing, specs_dir, mode, daemon):
     """
     Record HTTP traffic from a reverse proxy.
@@ -159,6 +174,7 @@ def record(ctx, port, log_dir, header_routing, specs_dir, mode, daemon):
 
 @record.command(name="start")  # type: ignore
 @add_options(_record_options)
+@log_exceptions
 def start_record(port, log_dir, header_routing, specs_dir, mode, daemon):
     proxy_runner = RecordProxyRunner(
         port=port,
