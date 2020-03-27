@@ -40,7 +40,7 @@ REQUIRED = [
     "clint",
     "pyfiglet",
     "progress",
-    "psutil>=5.6.3"
+    "psutil>=5.6.3",
 ]
 
 BUNDLES = {}
