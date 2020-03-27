@@ -99,7 +99,7 @@ class Entity:
         if id is None:
             id = self._generate_id()
         entity_val = self._path_config[path_item].extract_entity(request)
-        entity_val = self._id_path.set(entity_val, id)
+        entity_val = self._id_path.update(entity_val, lambda _ : id)
         self._data[id] = entity_val
         return entity_val
 
