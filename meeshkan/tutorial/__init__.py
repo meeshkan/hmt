@@ -198,11 +198,11 @@ class CLI:
         )
 
         with subprocess.Popen(
-                "meeshkan record -r -l __meeshkan__".split(" "),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.DEVNULL,
-                cwd=os.getcwd(),
-                encoding="utf-8",
+            "meeshkan record -r -l __meeshkan__".split(" "),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            cwd=os.getcwd(),
+            encoding="utf-8",
         ) as p:
             try:
                 await self._server_starting("Starting proxy", p)
@@ -254,11 +254,11 @@ class CLI:
                 kill_proc_tree(p)
 
         with subprocess.Popen(
-                "meeshkan mock __meeshkan__/replay -r".split(" "),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.DEVNULL,
-                cwd=os.getcwd(),
-                encoding="utf-8",
+            "meeshkan mock __meeshkan__/replay -r".split(" "),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            cwd=os.getcwd(),
+            encoding="utf-8",
         ) as p:
             try:
                 await self._server_starting("Starting server", p)
@@ -349,11 +349,11 @@ class CLI:
         )
         self.m_print("")
         with subprocess.Popen(
-                "meeshkan mock __meeshkan__/gen -r".split(" "),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.DEVNULL,
-                cwd=os.getcwd(),
-                encoding="utf-8",
+            "meeshkan mock __meeshkan__/gen -r".split(" "),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            cwd=os.getcwd(),
+            encoding="utf-8",
         ) as p:
             try:
                 self.m_print("##############################")
