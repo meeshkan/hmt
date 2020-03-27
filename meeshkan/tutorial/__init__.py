@@ -8,6 +8,7 @@ import time
 from textwrap import wrap
 from urllib import request
 
+import psutil
 from clint.textui import colored, puts
 from progress.spinner import MoonSpinner
 from pyfiglet import Figlet
@@ -84,14 +85,16 @@ with open('__meeshkan__/replay/openapi.json', 'r') as replay_file:
 
 
 async def read_stream(p, server_started):
-    while p.poll() is None:
-        line = p.stdout.readline().decode("utf-8")
-        if "Meeshkan is running" in line:
-            server_started.set_result(0)
-        await asyncio.sleep(0.1)
+    try:
+        while p.poll() is None:
+            line = p.stdout.readline()
+            if "Meeshkan is running" in line:
+                server_started.set_result(0)
+            await asyncio.sleep(0.1)
+    finally:
+        if not server_started.done():
+            server_started.set_result(1)
 
-    if not server_started.done():
-        server_started.set_result(1)
 
 
 async def run_bar(message, timeout, sertver_started, interval=0.1):
@@ -108,6 +111,21 @@ def building():
     # for now do nothing
     pass
 
+def kill_proc_tree(p):
+    parent = psutil.Process(p.pid)
+    children = parent.children(recursive=True)
+    for child in children:
+        try:
+            child.kill()
+        except:
+            pass
+    psutil.wait_procs(children)
+    if p.poll() is None:
+        try:
+            parent.kill()
+        except:
+            pass
+        parent.wait()
 
 class CLI:
     def __init__(self, loop, use_real_input=True, throw_on_non_zero_exit=False):
@@ -178,7 +196,8 @@ class CLI:
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             cwd=os.getcwd(),
-        ) as p:  #
+            encoding="utf-8"
+        ) as p:
             try:
                 await self._server_starting("Starting proxy", p)
 
@@ -226,13 +245,14 @@ class CLI:
                 )
                 self.m_print("")
             finally:
-                p.kill()
+                kill_proc_tree(p)
 
         with subprocess.Popen(
             "meeshkan mock __meeshkan__/replay -r".split(" "),
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             cwd=os.getcwd(),
+            encoding="utf-8"
         ) as p:
             try:
                 await self._server_starting("Starting server", p)
@@ -288,7 +308,7 @@ class CLI:
                 )
                 self.m_print("")
             finally:
-                p.kill()
+                kill_proc_tree(p)
 
         self.m_print("")
         self.m_print("##############################")
@@ -327,6 +347,7 @@ class CLI:
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             cwd=os.getcwd(),
+            encoding="utf-8"
         ) as p:
             try:
                 self.m_print("##############################")
@@ -394,7 +415,7 @@ class CLI:
                 )
                 self.m_print("")
             finally:
-                p.kill()
+                kill_proc_tree(p)
 
         self.m_print("")
         self.m_print("##############################")
@@ -447,6 +468,5 @@ class CLI:
 
 
 def run_tutorial():
-    print(os.getcwd())
     loop = asyncio.get_event_loop()
     loop.run_until_complete(CLI(loop).run())

@@ -1,5 +1,7 @@
+import asyncio
 import functools
 import os
+import selectors
 import sys
 from logging import getLogger
 from pathlib import Path
@@ -72,7 +74,7 @@ _record_options = _common_server_options + [
 ]
 
 _mock_options = _common_server_options + [
-    click.option("-a", "--admin-port", default="8888", help="Admin server port."),
+    click.option("-a", "--admin-port", default="8889", help="Admin server port."),
     click.option(
         "-c",
         "--callback-dir",
@@ -176,6 +178,10 @@ def record(ctx, port, log_dir, header_routing, specs_dir, mode, daemon):
 @add_options(_record_options)
 @log_exceptions
 def start_record(port, log_dir, header_routing, specs_dir, mode, daemon):
+    print(os.getpid())
+    selector = selectors.SelectSelector()
+    loop = asyncio.SelectorEventLoop(selector)
+    asyncio.set_event_loop(loop)
     proxy_runner = RecordProxyRunner(
         port=port,
         log_dir=log_dir,

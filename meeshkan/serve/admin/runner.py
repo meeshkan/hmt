@@ -47,4 +47,4 @@ def start_admin(port, scope: Scope):
     app = make_admin_app(scope)
     http_server = HTTPServer(app)
     http_server.listen(port)
-    logger.info("• Admin   http://localhost:%s/admin", port)
+    logger.info("- Admin   http://localhost:%s/admin", port)
