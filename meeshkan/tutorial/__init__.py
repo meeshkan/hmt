@@ -9,9 +9,10 @@ from textwrap import wrap
 from urllib import request
 
 import psutil
+from pyfiglet import Figlet
+
 from clint.textui import colored, puts
 from progress.spinner import MoonSpinner
-from pyfiglet import Figlet
 
 API_CALLS = """from urllib import request
 from http_types import HttpExchange
@@ -117,13 +118,13 @@ def kill_proc_tree(p):
     for child in children:
         try:
             child.kill()
-        except:
+        except Exception as e:
             pass
     psutil.wait_procs(children)
     if p.poll() is None:
         try:
             parent.kill()
-        except:
+        except Exception as e:
             pass
         parent.wait()
 
