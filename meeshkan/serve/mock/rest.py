@@ -4,7 +4,7 @@ from typing import Sequence, List
 import requests
 from http_types import Request
 from http_types.utils import HttpExchangeWriter
-from meeshkan.serve.mock.data.storage import storage_manager
+from meeshkan.serve.mock.storage.manager import storage_manager
 from meeshkan.serve.mock.specs import OpenAPISpecification
 from openapi_typed_2 import convert_from_openapi, convert_to_openapi
 

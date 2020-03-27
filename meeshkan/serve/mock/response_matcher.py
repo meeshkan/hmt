@@ -6,7 +6,7 @@ from typing import Sequence
 from faker import Faker
 from http_types import Request, Response
 from meeshkan.serve.mock.callbacks import callback_manager
-from meeshkan.serve.mock.data.storage import storage_manager
+from meeshkan.serve.mock.storage.manager import storage_manager
 from meeshkan.serve.mock.faker import MeeshkanFaker
 from meeshkan.serve.mock.faker.faker_exception import FakerException
 from meeshkan.serve.mock.matcher import (

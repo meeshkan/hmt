@@ -1,6 +1,6 @@
 from faker import Faker
 from http_types import Request
-from meeshkan.serve.mock.data.storage import Storage
+from meeshkan.serve.mock.storage.mock_data import MockData
 from openapi_typed_2 import OpenAPIObject, Any, Operation
 
 from meeshkan.serve.mock.faker.schema_faker import MeeshkanSchemaFaker
@@ -8,7 +8,7 @@ from meeshkan.serve.mock.faker.schema_faker import MeeshkanSchemaFaker
 
 
 class MeeshkanDataFaker(MeeshkanSchemaFaker):
-    def __init__(self, text_faker: Faker, request: Request, spec: OpenAPIObject, storage: Storage):
+    def __init__(self, text_faker: Faker, request: Request, spec: OpenAPIObject, storage: MockData):
         super().__init__(text_faker, request, spec, storage)
 
     def fake_ref(self, schema: Any, depth: int):

@@ -1,7 +1,8 @@
 from http_types.utils import RequestBuilder, ResponseBuilder
 
 from meeshkan.serve.mock.callbacks import callback_manager
-from meeshkan.serve.mock.data.storage import storage_manager
+from meeshkan.serve.mock.storage.manager import storage_manager
+from meeshkan.serve.mock.storage.mock_data import MockData
 
 
 def test_no_callback():
@@ -24,14 +25,14 @@ def test_no_callback():
         dict(statusCode=200, body="", bodyAsJson={}, headers={})
     )
 
-    new_response = callback_manager(request, response, storage_manager.default)
+    new_response = callback_manager(request, response, MockData())
 
     assert response == new_response
 
 
 def test_json():
     callback_manager.load("tests/serve/mock/callbacks")
-    storage_manager.clear()
+    storage = MockData()
 
     request = RequestBuilder.from_dict(
         dict(
@@ -50,7 +51,7 @@ def test_json():
         dict(statusCode=200, body="", bodyAsJson={"field": "value"}, headers={})
     )
 
-    new_response = callback_manager(request, response, storage_manager.default)
+    new_response = callback_manager(request, response, storage)
 
     assert 1 == new_response.bodyAsJson["count"]
     assert "value" == new_response.bodyAsJson["field"]
@@ -69,13 +70,13 @@ def test_json():
         )
     )
 
-    new_response = callback_manager(request_set, response, storage_manager.default)
+    new_response = callback_manager(request_set, response, storage)
 
     assert 10 == new_response.bodyAsJson["count"]
     assert "value" == new_response.bodyAsJson["field"]
     assert "count" in new_response.body
 
-    new_response = callback_manager(request, response, storage_manager.default)
+    new_response = callback_manager(request, response, storage)
     assert 11 == new_response.bodyAsJson["count"]
     assert "value" == new_response.bodyAsJson["field"]
     assert "count" in new_response.body
@@ -102,7 +103,7 @@ def test_text():
         dict(statusCode=200, body="Called", bodyAsJson={}, headers={})
     )
 
-    new_response = callback_manager(request, response, storage_manager.default)
+    new_response = callback_manager(request, response, MockData())
 
     assert 10 == new_response.headers["x-meeshkan-counter"]
     assert "Called 10 times" == new_response.body
@@ -110,7 +111,6 @@ def test_text():
 
 def test_json_full():
     callback_manager.load("tests/serve/mock/callbacks")
-    storage_manager.clear()
 
     request = RequestBuilder.from_dict(
         dict(
@@ -129,7 +129,7 @@ def test_json_full():
         dict(statusCode=200, body="", bodyAsJson={"field": "value"}, headers={})
     )
 
-    new_response = callback_manager(request, response, storage_manager.default)
+    new_response = callback_manager(request, response, MockData())
 
     assert "Hello" == new_response.bodyAsJson["message"]
     assert "value" == new_response.headers["X-Echo-Header"]
@@ -156,7 +156,7 @@ def test_text_full():
         dict(statusCode=200, body="", bodyAsJson={"field": "value"}, headers={})
     )
 
-    new_response = callback_manager(request, response, storage_manager.default)
+    new_response = callback_manager(request, response, MockData())
 
     assert "Hello" == new_response.body
     assert "value" == new_response.headers["X-Echo-Header"]

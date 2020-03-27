@@ -9,7 +9,7 @@ from typing import Any, Mapping, Union, Sequence, cast
 import typing
 from faker import Faker
 from http_types import Request, Response
-from meeshkan.serve.mock.data.storage import Storage
+from meeshkan.serve.mock.storage.mock_data import MockData
 from meeshkan.serve.mock.faker.faker_base import MeeshkanFakerBase
 from meeshkan.serve.mock.faker.faker_exception import FakerException
 from meeshkan.serve.mock.matcher import get_response_from_ref, ref_name, change_ref, change_refs
@@ -24,7 +24,7 @@ class MeeshkanSchemaFaker(MeeshkanFakerBase):
                        "That usually means the schema is corrupt or it has been constrained too much "
                        "(ie asking for a 201 response when it only has 200 and 400).")
 
-    def __init__(self, text_faker: Faker, request: Request, spec: OpenAPIObject, storage: Storage):
+    def __init__(self, text_faker: Faker, request: Request, spec: OpenAPIObject, storage: MockData):
         super().__init__(text_faker, request, spec, storage)
 
     # to prevent too-nested objects

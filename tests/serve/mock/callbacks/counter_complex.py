@@ -4,10 +4,10 @@ from meeshkan.serve.mock.callbacks import callback
 @callback("api.com", "post", "/counter")
 def counter_callback_post(request_body, response_body, storage):
     if "set" in request_body:
-        storage.default["called"] = request_body["set"]
+        storage["called"] = request_body["set"]
     else:
-        storage.default["called"] = storage.default.get("called", 0) + 1
-    response_body["count"] = storage.default["called"]
+        storage["called"] = storage.get("called", 0) + 1
+    response_body["count"] = storage["called"]
     return response_body
 
 

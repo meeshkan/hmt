@@ -10,7 +10,7 @@ from meeshkan.serve.admin.views import (
     StorageView,
 )
 from meeshkan.serve.mock.rest import rest_middleware_manager
-from meeshkan.serve.mock.data.storage import storage_manager
+from meeshkan.serve.mock.storage.manager import storage_manager
 from ..mock.scope import Scope
 
 logger = logging.getLogger(__name__)

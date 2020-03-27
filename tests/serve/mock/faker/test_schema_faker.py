@@ -1,21 +1,10 @@
 from faker import Faker
 from http_types import RequestBuilder
-from meeshkan.serve.mock.data.storage import storage_manager
-
 from meeshkan.serve.mock.faker.schema_faker import MeeshkanSchemaFaker
 from meeshkan.serve.mock.matcher import valid_schema
-from openapi_typed_2 import convert_to_OpenAPIObject
-
-
-def get_spec(schema, components=None):
-    spec = {"openapi": "3.0",
-            "info": {"title": "Title", "version": "1.1.1"},
-            "paths": {"/":
-                          {"get": {"responses": {"200": {"description": "some",
-                                                         "content": {"application/json": {"schema": schema}}}}}}}}
-    if components is not None:
-        spec['components'] = components
-    return convert_to_OpenAPIObject(spec)
+from meeshkan.serve.mock.storage.manager import storage_manager
+from meeshkan.serve.mock.storage.mock_data import MockData
+from tests.util import spec
 
 
 def test_faker_1():
@@ -33,7 +22,7 @@ def test_faker_1():
             },
         },
     }
-    res = MeeshkanSchemaFaker(Faker(), request, get_spec(schema), storage_manager.default).execute()
+    res = MeeshkanSchemaFaker(Faker(), request, spec(response_schema=schema), MockData()).execute()
     assert valid_schema(res.bodyAsJson, schema)
 
 
@@ -55,7 +44,7 @@ def test_faker_2():
             },
         },
     }
-    res = MeeshkanSchemaFaker(Faker(), request, get_spec(schema), storage_manager.default).execute()
+    res = MeeshkanSchemaFaker(Faker(), request, spec(response_schema=schema), MockData()).execute()
     assert valid_schema(res.bodyAsJson, schema)
 
 
@@ -74,7 +63,7 @@ def test_faker_3():
             "longitude": {"type": "number", "minimum": -180.0, "maximum": 180.0},
         },
     }
-    res = MeeshkanSchemaFaker(Faker(), request, get_spec(schema), storage_manager.default).execute()
+    res = MeeshkanSchemaFaker(Faker(), request, spec(response_schema=schema), MockData()).execute()
     assert valid_schema(res.bodyAsJson, schema)
 
 
@@ -107,7 +96,9 @@ def test_faker_4():
             },
         }
     }}
-    res = MeeshkanSchemaFaker(Faker(), request, get_spec(schema, components), storage_manager.default).execute()
+    res = MeeshkanSchemaFaker(Faker(), request, spec(response_schema=schema, components=components),
+                              MockData()).execute()
+    schema["components"] = components
     assert valid_schema(res.bodyAsJson, schema)
 
 
@@ -115,5 +106,5 @@ def test_faker_5():
     request = RequestBuilder.from_dict(dict(method="get", protocol="http", path="/", host="api.com"))
 
     schema = {"type": "array"}
-    res = MeeshkanSchemaFaker(Faker(), request, get_spec(schema), storage_manager.default).execute()
+    res = MeeshkanSchemaFaker(Faker(), request, spec(response_schema=schema), MockData()).execute()
     assert valid_schema(res.bodyAsJson, schema)
