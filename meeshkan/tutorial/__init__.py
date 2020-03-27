@@ -113,20 +113,21 @@ def building():
 
 
 def kill_proc_tree(p):
-    parent = psutil.Process(p.pid)
-    children = parent.children(recursive=True)
-    for child in children:
-        try:
-            child.kill()
-        except Exception as e:
-            pass
-    psutil.wait_procs(children)
     if p.poll() is None:
-        try:
-            parent.kill()
-        except Exception as e:
-            pass
-        parent.wait()
+        parent = psutil.Process(p.pid)
+        children = parent.children(recursive=True)
+        for child in children:
+            try:
+                child.kill()
+            except Exception as e:
+                pass
+        psutil.wait_procs(children)
+        if p.poll() is None:
+            try:
+                parent.kill()
+            except Exception as e:
+                pass
+            parent.wait()
 
 
 class CLI:
