@@ -1,3 +1,6 @@
+"""
+    isort:skip_file
+"""
 import asyncio
 import json
 import os
@@ -9,9 +12,10 @@ from textwrap import wrap
 from urllib import request
 
 import psutil
+from pyfiglet import Figlet
+
 from clint.textui import colored, puts
 from progress.spinner import MoonSpinner
-from pyfiglet import Figlet
 
 API_CALLS = """from urllib import request
 from http_types import HttpExchange
