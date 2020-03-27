@@ -90,6 +90,8 @@ async def read_stream(p, server_started):
             server_started.set_result(0)
         await asyncio.sleep(0.1)
 
+    server_started.set_result(1)
+
 
 async def run_bar(message, timeout, sertver_started, interval=0.1):
     bar = MoonSpinner(message)
@@ -433,6 +435,10 @@ class CLI:
         self._loop.create_task(run_bar(message, timeout, server_started))
         try:
             await asyncio.wait_for(server_started, timeout=timeout)
+            if server_started.result() != 0:
+                raise Exception(
+                    "Unable to start Meeshkan. Please, check logs at ~/.meeshkan/logs for details."
+                )
         except asyncio.TimeoutError:
             raise Exception(
                 "Unable to start Meeshkan in 10 seconds. Please, check logs at ~/.meeshkan/logs for details."
