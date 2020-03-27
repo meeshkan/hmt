@@ -4,7 +4,7 @@ import uuid
 from http_types import Request
 from jsonpath_rw import parse
 from meeshkan.build.paths import _match_to_path
-from openapi_typed_2 import PathItem, Operation
+from openapi_typed_2 import PathItem, Operation, Reference
 
 
 class EntityPathItem:
@@ -25,14 +25,14 @@ class EntityPathItem:
                     if "application/json" in method.requestBody.content:
                         schema = method.requestBody.content["application/json"].schema
                         if schema is not None:
-                            entity_path = self._find_entity(schema, "")
+                            entity_path = self._find_entity(schema, "$")
                             if res is not None:
                                 res[method_name] = parse(entity_path)
         return res
 
     def _find_entity(self, schema, path):
-        if "$ref" in schema:
-            name = schema["$ref"].split("/")[3]
+        if isinstance(schema, Reference):
+            name = schema._ref.split("/")[3]
             if name == self._entity_name:
                 return path
         elif schema.get("type", None) == "array":
@@ -57,11 +57,14 @@ class EntityPathItem:
         return None
 
     def extract_id(self, request: Request):
-        id = _match_to_path(self._pathname, request.pathname).get('id', self.id_filter(request))
-        return id
+        match = _match_to_path(self._pathname, request.pathname)
+        if match is None or not "id" in match:
+            return self.id_filter(request)
+
+        return match["id"]
 
     def extract_entity(self, request: Request):
-        found = self._request_entity_selectors[request.method].find(request.bodyAsJson)
+        found = self._request_entity_selectors[request.method.value].find(request.bodyAsJson)
         if len(found) == 0:
             return None
         return found[0].value
