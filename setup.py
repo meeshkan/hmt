@@ -36,6 +36,10 @@ REQUIRED = [
     "tornado==5.1.1",
     "urllib3==1.25.6",
     "meeshkan-daemonocle",
+    # tutorial
+    "clint",
+    "pyfiglet",
+    "progress",
 ]
 
 BUNDLES = {}
