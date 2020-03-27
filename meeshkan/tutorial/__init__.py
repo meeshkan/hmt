@@ -12,7 +12,7 @@ from clint.textui import colored, puts
 from progress.spinner import MoonSpinner
 from pyfiglet import Figlet
 
-API_CALLS = '''from urllib import request
+API_CALLS = """from urllib import request
 from http_types import HttpExchange
 from http_types.utils import RequestBuilder, ResponseBuilder, HttpExchangeWriter
 from io import StringIO
@@ -63,9 +63,9 @@ PATHS = [
 for x, path in enumerate(PATHS):
     print("  ** Calling https://pokeapi.co%s, path %d of %d" % (path, x + 1, len(PATHS)))
     make_pokemon_request(path)
-'''
+"""
 
-MERGE_SPECS = '''from openapi_typed_2 import convert_to_openapi, convert_from_openapi
+MERGE_SPECS = """from openapi_typed_2 import convert_to_openapi, convert_from_openapi
 import json
 from dataclasses import replace
 import os
@@ -80,7 +80,7 @@ with open('__meeshkan__/replay/openapi.json', 'r') as replay_file:
         except: pass # exists
         with open('__meeshkan__/both/openapi.json', 'w') as both_file:
             both_file.write(json.dumps(convert_from_openapi(new), indent=2))
-'''
+"""
 
 
 async def read_stream(p, server_started):
@@ -113,103 +113,136 @@ class CLI:
         self.throw_on_non_zero_exit = throw_on_non_zero_exit
 
     def m_print(self, s):
-        print('\n'.join(wrap(s, width=60)))
+        print("\n".join(wrap(s, width=60)))
 
     def m_input(self, s):
-        text = '\n'.join(wrap(s, width=60))
+        text = "\n".join(wrap(s, width=60))
         if self.use_real_input:
             return input(text)
         time.sleep(2)
-        return ''
+        return ""
 
     async def run(self):
-        f = Figlet(font='slant')
-        print(f.renderText('meeshkan'))
-        puts(colored.cyan('The tutorial!!', bold=True))
-        self.m_input('Press ENTER to continue...')
+        f = Figlet(font="slant")
+        print(f.renderText("meeshkan"))
+        puts(colored.cyan("The tutorial!!", bold=True))
+        self.m_input("Press ENTER to continue...")
         ############################
         self.m_print("")
         self.m_print("##############################")
         self.m_print("")
         self.m_print(
-            "Meeshkan allows you to create mocks of APIs from server traffic and OpenAPI specs.  To start, we'll record some server traffic.  But before we get started, there are a few things you should know.")
+            "Meeshkan allows you to create mocks of APIs from server traffic and OpenAPI specs.  To start, we'll record some server traffic.  But before we get started, there are a few things you should know."
+        )
         self.m_print("")
         self.m_print(
-            "First, Meeshkan will create a directory called __meeshkan__ in the current working directory.  Don't put anything special in there, as it may get overwritten by this tutorial!")
+            "First, Meeshkan will create a directory called __meeshkan__ in the current working directory.  Don't put anything special in there, as it may get overwritten by this tutorial!"
+        )
         self.m_print("")
         self.m_print(
-            "Next, this tutorial makes some network calls to the Pokemon API (pokeapi.co).  Please make sure you have a working internet connection.")
+            "Next, this tutorial makes some network calls to the Pokemon API (pokeapi.co).  Please make sure you have a working internet connection."
+        )
         self.m_print("")
-        i = self.m_input('With that in mind, press ENTER to continue (or the q key followed by ENTER to quit): ')
-        if i == 'q':
+        i = self.m_input(
+            "With that in mind, press ENTER to continue (or the q key followed by ENTER to quit): "
+        )
+        if i == "q":
             self.m_print("If you change your mind, come back anytime.  Goodbye!")
             sys.exit(0)
         self.m_print("")
         self.m_print("##############################")
         self.m_print("")
         self.m_print(
-            "Let's record a bit of server traffic.  We've written a file to `__meeshkan__/api_calls.py` to make our recordings.  Meeshkan expects recordings to be in the http-types format (github.com/meeshkan/http-types), so we'll use that.")
+            "Let's record a bit of server traffic.  We've written a file to `__meeshkan__/api_calls.py` to make our recordings.  Meeshkan expects recordings to be in the http-types format (github.com/meeshkan/http-types), so we'll use that."
+        )
         self.m_print("")
         self.m_print(
-            "Open up `__meeshkan__/api_calls.py`.  You'll see that we call the API 33 times using Meeshkan as a forward proxy.")
+            "Open up `__meeshkan__/api_calls.py`.  You'll see that we call the API 33 times using Meeshkan as a forward proxy."
+        )
         self.m_print("")
         if os.path.exists("__meeshkan__"):
             shutil.rmtree("__meeshkan__")
         os.mkdir("__meeshkan__")
 
-        with open('__meeshkan__/api_calls.py', 'w') as fi:
+        with open("__meeshkan__/api_calls.py", "w") as fi:
             fi.write(API_CALLS)
         self.m_input(
-            "After you've checked out `__meeshkan__/api_calls.py`, press ENTER to launch the proxy and execute the script!")
+            "After you've checked out `__meeshkan__/api_calls.py`, press ENTER to launch the proxy and execute the script!"
+        )
 
-        with subprocess.Popen("meeshkan record -r -l __meeshkan__".split(" "), stdout=subprocess.PIPE,
-                              stderr=subprocess.DEVNULL, cwd=os.getcwd()) as p:  #
+        with subprocess.Popen(
+            "meeshkan record -r -l __meeshkan__".split(" "),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            cwd=os.getcwd(),
+        ) as p:  #
             try:
                 await self._server_starting("Starting proxy", p)
 
                 self.m_print("")
                 self.m_print("##############################")
                 self.m_print("")
-                res = subprocess.call('python __meeshkan__/api_calls.py', shell=True)
+                res = subprocess.call("python __meeshkan__/api_calls.py", shell=True)
                 if self.throw_on_non_zero_exit and (res != 0):
-                    raise ValueError("Test failed at `python __meeshkan__/api_calls.py`")
+                    raise ValueError(
+                        "Test failed at `python __meeshkan__/api_calls.py`"
+                    )
                 self.m_print("")
-                self.m_input("Now, if you check out `__meeshkan__/pokeapi.co.jsonl`, you'll see all of the recorded server traffic. Press ENTER to continue.")
+                self.m_input(
+                    "Now, if you check out `__meeshkan__/pokeapi.co.jsonl`, you'll see all of the recorded server traffic. Press ENTER to continue."
+                )
                 self.m_print("")
                 self.m_print("##############################")
                 self.m_print("")
-                self.m_input("The command `meeshkan build` transforms your recordings into an OpenAPI spec.  The `replay` flag tells Meeshkan to build a spec that's identical to the recorded traffic. Press ENTER to invoke `meeshkan build` in `replay` mode.")
+                self.m_input(
+                    "The command `meeshkan build` transforms your recordings into an OpenAPI spec.  The `replay` flag tells Meeshkan to build a spec that's identical to the recorded traffic. Press ENTER to invoke `meeshkan build` in `replay` mode."
+                )
                 self.m_print("")
                 self.m_print("##############################")
                 self.m_print("")
                 command = "meeshkan build -i __meeshkan__/pokeapi.co-recordings.jsonl -o __meeshkan__/replay -m replay"
                 print("$ {}".format(command))
                 self.m_print("")
-                res = subprocess.call(command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, cwd=os.getcwd())
+                res = subprocess.call(
+                    command,
+                    shell=True,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    cwd=os.getcwd(),
+                )
                 if self.throw_on_non_zero_exit and (res != 0):
                     raise ValueError(f"Test failed at `{command}`")
                 building()
                 self.m_print("")
-                self.m_print("Done.  Now, open up __meeshkan__/replay/openapi.json. Search within this document for `/api/v2/pokemon/10/:`.  This is a translation of the `GET` request you got from the Pokemon API into OpenAPI.")
+                self.m_print(
+                    "Done.  Now, open up __meeshkan__/replay/openapi.json. Search within this document for `/api/v2/pokemon/10/:`.  This is a translation of the `GET` request you got from the Pokemon API into OpenAPI."
+                )
                 self.m_print("")
-                self.m_input("Let's use this spec to create a server that serves back our recordings.  Press ENTER to boot up the mock server.")
+                self.m_input(
+                    "Let's use this spec to create a server that serves back our recordings.  Press ENTER to boot up the mock server."
+                )
                 self.m_print("")
             finally:
                 p.kill()
 
-        with subprocess.Popen("meeshkan mock __meeshkan__/replay -r".split(" "), stdout=subprocess.PIPE,
-                              stderr=subprocess.DEVNULL, cwd=os.getcwd()) as p:
+        with subprocess.Popen(
+            "meeshkan mock __meeshkan__/replay -r".split(" "),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            cwd=os.getcwd(),
+        ) as p:
             try:
                 await self._server_starting("Starting server", p)
                 self.m_print("")
                 self.m_print("##############################")
                 self.m_print("")
                 self.m_input(
-                    "The server is up and running.  Press ENTER to send a `GET` request to the endpoint `/api/v2/pokemon/10/`.")
-                req = request.Request("http://localhost:8000/api/v2/pokemon/10/", headers={
-                    'Host': 'pokeapi.co',
-                    'X-Meeshkan-Scheme': 'https'
-                })
+                    "The server is up and running.  Press ENTER to send a `GET` request to the endpoint `/api/v2/pokemon/10/`."
+                )
+                req = request.Request(
+                    "http://localhost:8000/api/v2/pokemon/10/",
+                    headers={"Host": "pokeapi.co", "X-Meeshkan-Scheme": "https"},
+                )
                 res = request.urlopen(req)
                 body = res.read()
                 self.m_print("")
@@ -219,22 +252,37 @@ class CLI:
                 self.m_print("")
                 # vanilla print as thre should not be any line wraps
                 # may put in function later
-                print(json.dumps(json.loads(body
-                                            if isinstance(body, str)
-                                            else body.decode("utf8")
-                if isinstance(body, bytes)
-                else ""), indent=2))
+                print(
+                    json.dumps(
+                        json.loads(
+                            body
+                            if isinstance(body, str)
+                            else body.decode("utf8")
+                            if isinstance(body, bytes)
+                            else ""
+                        ),
+                        indent=2,
+                    )
+                )
                 self.m_print("..............................")
-                self.m_print("It's the exact same response we got back from the Pokemon API.  Pretty cool, huh?")
+                self.m_print(
+                    "It's the exact same response we got back from the Pokemon API.  Pretty cool, huh?"
+                )
                 self.m_print("")
-                self.m_print("You can try the same thing.  From curl, Postman or your web browser, try calling endpoints like http://localhost:8000/api/v2/ability/ or http://localhost:8000/api/v2/type/2/.  When doing so, make sure to set the following headers:")
+                self.m_print(
+                    "You can try the same thing.  From curl, Postman or your web browser, try calling endpoints like http://localhost:8000/api/v2/ability/ or http://localhost:8000/api/v2/type/2/.  When doing so, make sure to set the following headers:"
+                )
                 self.m_print("")
-                print("""{
+                print(
+                    """{
     "Host": "pokeapi.co",
     "X-Meeshkan-Scheme": "https"
-}""")
+}"""
+                )
                 self.m_print("")
-                self.m_input("Once you're done exploring, press ENTER to turn off the server and continue.")
+                self.m_input(
+                    "Once you're done exploring, press ENTER to turn off the server and continue."
+                )
                 self.m_print("")
             finally:
                 p.kill()
@@ -242,7 +290,9 @@ class CLI:
         self.m_print("")
         self.m_print("##############################")
         self.m_print("")
-        self.m_print("Now, let's build a new spec.  This time, instead of serving back fixed data, we will use the recordings to create _synthetic_ data.   We do this by invoking `meeshkan build --mode gen`.")
+        self.m_print(
+            "Now, let's build a new spec.  This time, instead of serving back fixed data, we will use the recordings to create _synthetic_ data.   We do this by invoking `meeshkan build --mode gen`."
+        )
         self.m_print("")
         self.m_input("Press ENTER to build the new spec.")
         self.m_print("")
@@ -251,7 +301,13 @@ class CLI:
         command = "meeshkan build -i __meeshkan__/pokeapi.co-recordings.jsonl -o __meeshkan__/gen -m gen"
         print("$ {}".format(command))
         self.m_print("")
-        res = subprocess.call(command, shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL, cwd=os.getcwd())
+        res = subprocess.call(
+            command,
+            shell=True,
+            stderr=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            cwd=os.getcwd(),
+        )
         if self.throw_on_non_zero_exit and (res != 0):
             raise ValueError(f"Test failed at `{command}`")
         self.m_print("")
@@ -259,20 +315,28 @@ class CLI:
         self.m_print("")
         self.m_print("Done.  In __meeshkan__/gen/, you'll see a new OpenAPI spec.")
         self.m_print("")
-        self.m_input("Let's use this spec to create some _synthetic_ data.  Press ENTER to reboot the mock server on port 8000.")
+        self.m_input(
+            "Let's use this spec to create some _synthetic_ data.  Press ENTER to reboot the mock server on port 8000."
+        )
         self.m_print("")
-        with subprocess.Popen("meeshkan mock __meeshkan__/gen -r".split(" "), stdout=subprocess.PIPE,
-                              stderr=subprocess.DEVNULL, cwd=os.getcwd()) as p:
+        with subprocess.Popen(
+            "meeshkan mock __meeshkan__/gen -r".split(" "),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            cwd=os.getcwd(),
+        ) as p:
             try:
                 self.m_print("##############################")
                 self.m_print("")
                 await self._server_starting("Starting server", p)
                 self.m_print("")
-                self.m_input("The server is up and running.  Press ENTER to send a `GET` request to the endpoint `/api/v2/pokemon/10/`.")
-                req = request.Request("http://localhost:8000/api/v2/pokemon/10/", headers={
-                    'Host': 'pokeapi.co',
-                    'X-Meeshkan-Scheme': 'https'
-                })
+                self.m_input(
+                    "The server is up and running.  Press ENTER to send a `GET` request to the endpoint `/api/v2/pokemon/10/`."
+                )
+                req = request.Request(
+                    "http://localhost:8000/api/v2/pokemon/10/",
+                    headers={"Host": "pokeapi.co", "X-Meeshkan-Scheme": "https"},
+                )
                 res = request.urlopen(req)
                 body = res.read()
                 self.m_print("")
@@ -282,28 +346,49 @@ class CLI:
                 self.m_print("")
                 # vanilla print as thre should not be any line wraps
                 # may put in function later
-                print(json.dumps(json.loads(body
-                                            if isinstance(body, str)
-                                            else body.decode("utf8")
-                if isinstance(body, bytes)
-                else ""), indent=2))
+                print(
+                    json.dumps(
+                        json.loads(
+                            body
+                            if isinstance(body, str)
+                            else body.decode("utf8")
+                            if isinstance(body, bytes)
+                            else ""
+                        ),
+                        indent=2,
+                    )
+                )
                 self.m_print("..............................")
                 self.m_print("")
-                self.m_print("The data above is synthetic, but it has the same layout as the recorded data.")
+                self.m_print(
+                    "The data above is synthetic, but it has the same layout as the recorded data."
+                )
                 self.m_print("")
-                self.m_print("Why synthetic data?  Well, I'm glad you asked!  Two main reasons.")
+                self.m_print(
+                    "Why synthetic data?  Well, I'm glad you asked!  Two main reasons."
+                )
                 self.m_print("")
-                self.m_print("1. Security breaches are most common when dealing with log files and in test environments.  So, when testing, you never want to use real data if possible.")
-                self.m_print("2. Using synthetic data forces you write tests that focus on business logic rather than focusing on the content of fixtures, which is (in our opinion) a cleaner way to do testing.")
+                self.m_print(
+                    "1. Security breaches are most common when dealing with log files and in test environments.  So, when testing, you never want to use real data if possible."
+                )
+                self.m_print(
+                    "2. Using synthetic data forces you write tests that focus on business logic rather than focusing on the content of fixtures, which is (in our opinion) a cleaner way to do testing."
+                )
                 self.m_print("")
-                self.m_print("From curl, postman or your web browser, try calling http://localhost:8000/api/v2/pokemon/\{id\}/ , where `\{id\}` is _any_ positive integer. And when doing so, make sure to set following two headers:")
+                self.m_print(
+                    "From curl, postman or your web browser, try calling http://localhost:8000/api/v2/pokemon/{id}/ , where `{id}` is _any_ positive integer. And when doing so, make sure to set following two headers:"
+                )
                 self.m_print("")
-                print("""{
+                print(
+                    """{
     "Host": "pokeapi.co",
     "X-Meeshkan-Scheme": "https"
-}""")
+}"""
+                )
                 self.m_print("")
-                self.m_input("You'll see that Meeshkan generates a synthetic response for an arbitrary Pokemon. Once you're done exploring, press ENTER to turn off the server and continue.")
+                self.m_input(
+                    "You'll see that Meeshkan generates a synthetic response for an arbitrary Pokemon. Once you're done exploring, press ENTER to turn off the server and continue."
+                )
                 self.m_print("")
             finally:
                 p.kill()
@@ -311,24 +396,34 @@ class CLI:
         self.m_print("")
         self.m_print("##############################")
         self.m_print("")
-        with open('__meeshkan__/merge_specs.py', 'w') as fi:
+        with open("__meeshkan__/merge_specs.py", "w") as fi:
             fi.write(MERGE_SPECS)
-        self.m_input("Finally, open the file `merge_specs.py` that we created in the __meeshkan__ directory.  It's a script that merges together the two OpenAPI specs - replay and gen - created by Meeshkan.  After you've looked at it, press ENTER to execute it.")
+        self.m_input(
+            "Finally, open the file `merge_specs.py` that we created in the __meeshkan__ directory.  It's a script that merges together the two OpenAPI specs - replay and gen - created by Meeshkan.  After you've looked at it, press ENTER to execute it."
+        )
         self.m_print("")
         self.m_print("$ python __meeshkan__/merge_specs.py")
         self.m_print("")
-        res = subprocess.call('python __meeshkan__/merge_specs.py', shell=True)
+        res = subprocess.call("python __meeshkan__/merge_specs.py", shell=True)
         if self.throw_on_non_zero_exit and (res != 0):
             raise ValueError("Test failed at `python __meeshkan__/merge_specs.p`")
-        self.m_print("Done.  In `__meeshkan__/both/`, you'll see an OpenAPI spec that combines _both_ the fixtures from `__meeshkan__/replay/openapi.json` and the synthetic spec from `__meeshkan__/replay/openapi.json`.")
+        self.m_print(
+            "Done.  In `__meeshkan__/both/`, you'll see an OpenAPI spec that combines _both_ the fixtures from `__meeshkan__/replay/openapi.json` and the synthetic spec from `__meeshkan__/replay/openapi.json`."
+        )
         self.m_print("")
-        self.m_input("Like the other two specs, this one can be used to create a mock server.  Try it yourself!  After this tutorial, run `meeshkan mock -i __meeshkan__/both -r`, making sure to set the same headers as before, and see how the server responds.  Press ENTER to continue.")
+        self.m_input(
+            "Like the other two specs, this one can be used to create a mock server.  Try it yourself!  After this tutorial, run `meeshkan mock -i __meeshkan__/both -r`, making sure to set the same headers as before, and see how the server responds.  Press ENTER to continue."
+        )
         self.m_print("")
         self.m_print("##############################")
         self.m_print("")
-        self.m_print("Thanks for checking out Meeshkan!  There are several other cool features, like callbacks to implement stateful logic and various connectors from libraries and platforms like Express and Kong.")
+        self.m_print(
+            "Thanks for checking out Meeshkan!  There are several other cool features, like callbacks to implement stateful logic and various connectors from libraries and platforms like Express and Kong."
+        )
         self.m_print("")
-        self.m_print("If you have a moment, please fill out our post-tutorial survey on https://meeshkan.typeform.com/to/FpRakX.  Besides helping us improve Meeshkan, it will help us improve this and other tutorials.")
+        self.m_print(
+            "If you have a moment, please fill out our post-tutorial survey on https://meeshkan.typeform.com/to/FpRakX.  Besides helping us improve Meeshkan, it will help us improve this and other tutorials."
+        )
         self.m_print("")
         self.m_print("Take care and happy mocking!")
 
@@ -339,11 +434,12 @@ class CLI:
         try:
             await asyncio.wait_for(server_started, timeout=timeout)
         except asyncio.TimeoutError:
-            raise Exception('Unable to start Meeshkan in 10 seconds. Please, check logs at ~/.meeshkan/logs for details.')
+            raise Exception(
+                "Unable to start Meeshkan in 10 seconds. Please, check logs at ~/.meeshkan/logs for details."
+            )
 
 
 def run_tutorial():
     print(os.getcwd())
     loop = asyncio.get_event_loop()
     loop.run_until_complete(CLI(loop).run())
-
