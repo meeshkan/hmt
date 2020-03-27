@@ -12,9 +12,8 @@ class EntityPathItem:
 
     def __init__(self, entity_name, pathname: str, path_item: PathItem):
         self._entity_name = entity_name
-        self._path = pathname
+        self._pathname = pathname
         self._path_item = path_item
-        self._id_path = parse(path_item._x["x-meeshkan-id-path"])
         self._request_entity_selectors = self._build_request_entity_selectors(path_item)
 
     def _build_request_entity_selectors(self, path_item: PathItem) -> typing.Mapping[str, typing.Callable]:
@@ -57,39 +56,46 @@ class EntityPathItem:
     def id_filter(self, request: Request):
         return None
 
-    def extract_id(self, entity):
-        found = self._id_path.find(entity)
+    def extract_id(self, request: Request):
+        id = _match_to_path(self._pathname, request.pathname).get('id', self.id_filter(request))
+        return id
+
+    def extract_entity(self, request: Request):
+        found = self._request_entity_selectors[request.method].find(request.bodyAsJson)
         if len(found) == 0:
             return None
         return found[0].value
 
 
 class Entity:
-    def __init__(self, name):
+    def __init__(self, name, schema):
         self._name = name
         self._path_config: typing.Dict[str, EntityPathItem] = {}
+        self._id_path = parse(schema._x["x-meeshkan-id-path"])
+
         self._data = dict()
 
     @property
     def name(self):
         return self._name
 
-    def query(self, path_item: str, request: Request):
-        return [x for x in self._data.values() if self._filter(path_item, request)]
+    def add_path(self, pathname: str, path_item: PathItem):
+        self._path_config[pathname] = EntityPathItem(self.name, pathname, path_item)
 
-    def query_one(self, request: Request):
-        id = self._get_id(request)
+    def query(self, path_item: str, request: Request):
+        return [x for x in self._data.values() if self._path_config[path_item].filter(request)]
+
+    def query_one(self, path_item: str, request: Request):
+        id = self._path_config[path_item].extract_id(request)
         return self._data.get(id, {}) if id is not None else {}
 
-    def _get_id(self, path_item, request: Request):
-        id = _match_to_path(self._path, request.pathname).get('id', self._id_filter(request))
-        return id
 
-    def insert_from_request(self, request: Request):
-        id = self._get_id(request)
+
+    def insert_from_request(self, path_item: str, request: Request):
+        id = self._path_config[path_item].extract_id(request)
         if id is None:
             id = self._generate_id()
-        entity_val = self._request_entity_selectors[request.method].find()
+        entity_val = self._path_config[path_item].extract_entity(request)
         entity_val = self._id_path.set(entity_val, id)
         self._data[id] = entity_val
         return entity_val
@@ -98,12 +104,12 @@ class Entity:
         id = self._extract_id(entity)
         self._data[id] = entity
 
-    def upsert_from_request(self, request: Request):
-        id = self._get_id(request)
+    def upsert_from_request(self, path_item: str, request: Request):
+        id = self._path_config[path_item].extract_id(request)
         if id is None:
-            return self.insert_from_request(request)
+            return self.insert_from_request(path_item, request)
         else:
-            entity_val = self._request_entity_selectors[request.method].find()
+            entity_val = self._path_config[path_item].extract_entity(request)
             return self._merge(self._data[id], entity_val)
 
     def __getitem__(self, key):
@@ -131,4 +137,10 @@ class Entity:
         for k, v in entity2.items():
             entity1[k] = v
         return entity1
+
+    def _extract_id(self, entity):
+        found = self._id_path.find(entity)
+        if len(found) == 0:
+            return None
+        return found[0].value
 

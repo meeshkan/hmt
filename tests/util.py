@@ -40,7 +40,7 @@ def spec_dict(path='/', method="get", response_schema={}, request_schema=None, c
         spec['components'] = components
 
     if request_schema is not None:
-        spec[path][method]["requestBody"] = {
+        spec["paths"][path][method]["requestBody"] = {
             "content": {"application/json": {"schema": request_schema}}
         }
     return spec
@@ -60,7 +60,7 @@ def add_item(spec, path='/', method="get", response_schema={}, request_schema=No
         spec['components'] = components
 
     if request_schema is not None:
-        spec[path][method]["requestBody"] = {
+        spec["paths"][path][method]["requestBody"] = {
             "content": {"application/json": {"schema": request_schema}}
         }
 

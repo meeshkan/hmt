@@ -5,15 +5,14 @@ from typing import Sequence
 
 from faker import Faker
 from http_types import Request, Response
+
 from meeshkan.serve.mock.callbacks import callback_manager
-from meeshkan.serve.mock.storage.manager import storage_manager
 from meeshkan.serve.mock.faker import MeeshkanFaker
 from meeshkan.serve.mock.faker.faker_exception import FakerException
-from meeshkan.serve.mock.matcher import (
-    match_request_to_openapi,
-)
+from meeshkan.serve.mock.matcher import match_request_to_openapi
 from meeshkan.serve.mock.rest import rest_middleware_manager
 from meeshkan.serve.mock.specs import OpenAPISpecification
+from meeshkan.serve.mock.storage.manager import storage_manager
 
 logger = logging.getLogger(__name__)
 

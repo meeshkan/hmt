@@ -14,9 +14,9 @@ class StorageManager:
     def add_mock(self, mockname: str, spec: OpenAPIObject):
         storage = MockData()
         self._storages[mockname] = storage
-        for pathname, path_item in spec.paths.items():
-            if path_item._x is not None and "x-meeshkan-entity" in path_item._x:
-                storage.add_entity(Entity(pathname, path_item))
+        if spec.components is not None and spec.components.schemas is not None:
+            for name, schema in spec.components.schemas:
+                storage.add_entity(Entity(name, schema))
 
         if spec._x is not None and 'x-meeshkan-data' in spec._x:
             for entity, values in spec._x['x-meeshkan-data'].items():
