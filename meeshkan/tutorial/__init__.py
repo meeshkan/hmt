@@ -96,7 +96,6 @@ async def read_stream(p, server_started):
             server_started.set_result(1)
 
 
-
 async def run_bar(message, timeout, sertver_started, interval=0.1):
     bar = MoonSpinner(message)
     spent = 0
@@ -110,6 +109,7 @@ async def run_bar(message, timeout, sertver_started, interval=0.1):
 def building():
     # for now do nothing
     pass
+
 
 def kill_proc_tree(p):
     parent = psutil.Process(p.pid)
@@ -126,6 +126,7 @@ def kill_proc_tree(p):
         except:
             pass
         parent.wait()
+
 
 class CLI:
     def __init__(self, loop, use_real_input=True, throw_on_non_zero_exit=False):
@@ -196,7 +197,7 @@ class CLI:
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             cwd=os.getcwd(),
-            encoding="utf-8"
+            encoding="utf-8",
         ) as p:
             try:
                 await self._server_starting("Starting proxy", p)
@@ -252,7 +253,7 @@ class CLI:
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             cwd=os.getcwd(),
-            encoding="utf-8"
+            encoding="utf-8",
         ) as p:
             try:
                 await self._server_starting("Starting server", p)
@@ -347,7 +348,7 @@ class CLI:
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             cwd=os.getcwd(),
-            encoding="utf-8"
+            encoding="utf-8",
         ) as p:
             try:
                 self.m_print("##############################")
