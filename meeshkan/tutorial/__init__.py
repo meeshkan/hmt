@@ -90,7 +90,8 @@ async def read_stream(p, server_started):
             server_started.set_result(0)
         await asyncio.sleep(0.1)
 
-    server_started.set_result(1)
+    if not server_started.done():
+        server_started.set_result(1)
 
 
 async def run_bar(message, timeout, sertver_started, interval=0.1):
