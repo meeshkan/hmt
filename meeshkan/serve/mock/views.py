@@ -4,21 +4,22 @@ from urllib import parse
 from http_types import RequestBuilder
 from tornado.web import RequestHandler
 
+from ..utils.routing import Routing
 from .log import Log
 from .request_processor import RequestProcessor
-from ..utils.routing import Routing
 
 logger = logging.getLogger(__name__)
 
 
 class MockServerView(RequestHandler):
+    _request_processor: RequestProcessor
+    _router: Routing
+    _log: Log
+
     SUPPORTED_METHODS = ["GET", "POST", "HEAD", "DELETE", "PATCH", "PUT", "OPTIONS"]
 
     def initialize(
-        self,
-        request_processor: RequestProcessor,
-        router: Routing,
-        log: Log,
+        self, request_processor: RequestProcessor, router: Routing, log: Log,
     ):
         self._request_processor = request_processor
         self._router = router

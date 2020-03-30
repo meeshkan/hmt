@@ -5,8 +5,8 @@ from typing import Sequence
 
 from faker import Faker
 from http_types import Request, Response
-from meeshkan.serve.mock.callbacks import CallbackManager
 
+from meeshkan.serve.mock.callbacks import CallbackManager
 from meeshkan.serve.mock.faker import DefaultFaker
 from meeshkan.serve.mock.faker.faker_exception import FakerException
 from meeshkan.serve.mock.matcher import match_request_to_openapi
@@ -20,11 +20,13 @@ logger = logging.getLogger(__name__)
 class RequestProcessor:
     _specs: Sequence[OpenAPISpecification]
 
-    def __init__(self,
-                 specs: Sequence[OpenAPISpecification],
-                 storage_manager: StorageManager,
-                 callback_manager: CallbackManager,
-                 rest_middleware_manager: RestMiddlewareManager):
+    def __init__(
+        self,
+        specs: Sequence[OpenAPISpecification],
+        storage_manager: StorageManager,
+        callback_manager: CallbackManager,
+        rest_middleware_manager: RestMiddlewareManager,
+    ):
         self._specs = specs
         self._fkr = Faker()
         self._storage_manager = storage_manager

@@ -56,7 +56,8 @@
 						"type": "object"
 					}
 				},
-				"type": "object"
+				"type": "object",
+				"x-meeshkan-id-path": "accountId"
 			},
 			"payment": {
 				"required": ["amount", "currency", "payerIban", "paymentId", "receiverBic", "receiverIban", "receiverName", "subject", "valueDate"],
@@ -89,7 +90,8 @@
 						"type": "string"
 					}
 				},
-				"type": "object"
+				"type": "object",
+				"x-meeshkan-id-path": "paymentId"
 			}
 		}
 	},
@@ -225,7 +227,6 @@
 	"paths": {
 		"/v1/payments/{action}": {
 			"x-meeshkan-entity": "payment",
-			"x-meeshkan-id-path": "paymentId",
 			"summary": "Path summary",
 			"description": "Path description",
 			"parameters": [{

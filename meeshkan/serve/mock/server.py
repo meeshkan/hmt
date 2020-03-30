@@ -1,27 +1,23 @@
 import logging
 from typing import Optional, Sequence
 
-from meeshkan.serve.mock.rest import RestMiddlewareManager
-from meeshkan.serve.mock.storage.manager import StorageManager
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.web import Application
 
-from .log import FileSink, Log, NoSink
-from .scope import Scope
+from meeshkan.serve.mock.rest import RestMiddlewareManager
+from meeshkan.serve.mock.storage.manager import StorageManager
+
 from ..admin.runner import start_admin
 from ..mock.callbacks import CallbackManager, callback_manager
 from ..mock.request_processor import RequestProcessor
 from ..mock.specs import OpenAPISpecification
 from ..mock.views import MockServerView
 from ..utils.routing import PathRouting, Routing
+from .log import FileSink, Log, NoSink
+from .scope import Scope
 
 logger = logging.getLogger(__name__)
-
-
-
-
-
 
 
 class MockServer:
@@ -49,19 +45,35 @@ class MockServer:
         if callback_dir is not None:
             callback_manager.load(callback_dir)
 
-        self._request_processor = RequestProcessor(self._specs, self._storage_manager,
-                                                   self._callback_manager, self._rest_middleware_manager)
+        self._request_processor = RequestProcessor(
+            self._specs,
+            self._storage_manager,
+            self._callback_manager,
+            self._rest_middleware_manager,
+        )
 
     def run(self) -> None:
         if self._admin_port:
-            start_admin(port=self._admin_port, scope=self._scope)
+            start_admin(
+                port=self._admin_port,
+                scope=self._scope,
+                storage_manager=self._storage_manager,
+                rest_middleware_manager=self._rest_middleware_manager,
+            )
 
-
-        app = Application([(r"/.*", MockServerView, dict(
-            request_processor=self._request_processor,
-            router=self._routing,
-            log=self._log,
-        ))])
+        app = Application(
+            [
+                (
+                    r"/.*",
+                    MockServerView,
+                    dict(
+                        request_processor=self._request_processor,
+                        router=self._routing,
+                        log=self._log,
+                    ),
+                )
+            ]
+        )
 
         http_server = HTTPServer(app)
         http_server.listen(self._port)

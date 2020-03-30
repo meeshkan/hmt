@@ -9,6 +9,8 @@ from meeshkan.serve.admin.views import (
     ScopeView,
     StorageView,
 )
+from meeshkan.serve.mock.rest import RestMiddlewareManager
+from meeshkan.serve.mock.storage.manager import StorageManager
 
 from ..mock.scope import Scope
 
@@ -16,9 +18,9 @@ logger = logging.getLogger(__name__)
 
 
 def make_admin_app(
-    scope,
-    storage_manager,
-    rest_middleware_manager,
+    scope: Scope,
+    storage_manager: StorageManager,
+    rest_middleware_manager: RestMiddlewareManager,
 ):
     storage_view_deps = dict(storage_manager=storage_manager)
     rest_middleware_deps = dict(rest_middleware_manager=rest_middleware_manager)
@@ -41,8 +43,13 @@ def make_admin_app(
     )
 
 
-def start_admin(port, scope: Scope):
-    app = make_admin_app(scope)
+def start_admin(
+    port: int,
+    scope: Scope,
+    storage_manager: StorageManager,
+    rest_middleware_manager: RestMiddlewareManager,
+):
+    app = make_admin_app(scope, storage_manager, rest_middleware_manager)
     http_server = HTTPServer(app)
     http_server.listen(port)
     logger.info("• Admin   http://localhost:%s/admin", port)

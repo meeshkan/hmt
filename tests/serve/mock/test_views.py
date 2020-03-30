@@ -4,11 +4,12 @@ from unittest.mock import Mock
 import pytest
 from http_types import HttpMethod, Protocol
 from http_types.utils import ResponseBuilder
+from tornado.httpclient import HTTPRequest
+
 from meeshkan.serve.mock.log import Log
 from meeshkan.serve.mock.scope import Scope
 from meeshkan.serve.mock.specs import load_specs
 from meeshkan.serve.utils.routing import HeaderRouting
-from tornado.httpclient import HTTPRequest
 
 response = ResponseBuilder.from_dict(
     dict(
@@ -29,6 +30,7 @@ def request_processor(request_processor):
         return rp
 
     return _rp
+
 
 @pytest.fixture
 def app(mocking_app):

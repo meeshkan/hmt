@@ -3,7 +3,7 @@ import uuid
 
 from http_types import Request
 from jsonpath_rw import Fields, parse
-from openapi_typed_2 import Operation, PathItem, Reference
+from openapi_typed_2 import Operation, PathItem, Reference, RequestBody
 
 from meeshkan.build.paths import _match_to_path
 
@@ -31,10 +31,8 @@ class EntityPathItem:
         self._path_item = path_item
         self._request_entity_selectors = self._build_request_entity_selectors(path_item)
 
-    def _build_request_entity_selectors(
-        self, path_item: PathItem
-    ) -> typing.Mapping[str, typing.Callable]:
-        res: typing.Dict[str, typing.Callable] = {}
+    def _build_request_entity_selectors(self, path_item: PathItem) -> typing.Dict:
+        res = {}
         for method_name in self.methods:
             method: Operation = getattr(path_item, method_name)
             if (
@@ -46,8 +44,9 @@ class EntityPathItem:
                     method._x["x-meeshkan-operation"] == "insert"
                     or method._x["x-meeshkan-operation"] == "upsert"
                 ):
-                    if "application/json" in method.requestBody.content:
-                        schema = method.requestBody.content["application/json"].schema
+                    request_body = typing.cast(RequestBody, method.requestBody)
+                    if "application/json" in request_body.content:
+                        schema = request_body.content["application/json"].schema
                         if schema is not None:
                             entity_path = self._find_entity(schema, "$")
                             if res is not None:

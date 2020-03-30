@@ -2,12 +2,14 @@ import json
 from typing import Any, Dict, List
 
 from http_types import HttpExchange, HttpExchangeBuilder
-from meeshkan.serve.mock.log import AbstractSink
 from openapi_typed_2 import convert_to_OpenAPIObject
+
+from meeshkan.serve.mock.log import AbstractSink
 
 SAMPLE_RECORDINGS_PATH = "resources/github.jsonl"
 POKEAPI_RECORDINGS_PATH = "resources/pokeapi.jsonl"
 PETSTORE_YAML_PATH = "resources/petstore.yaml"
+
 
 class MockSink(AbstractSink):
     def __init__(self):
@@ -15,6 +17,7 @@ class MockSink(AbstractSink):
 
     def write(self, interactions):
         self.interactions = interactions
+
 
 def read_recordings_as_strings(requests_path=SAMPLE_RECORDINGS_PATH) -> List[str]:
     with open(requests_path, encoding="utf8") as f:
@@ -103,5 +106,3 @@ def add_item(
         }
 
     return spec
-
-

@@ -9,7 +9,6 @@ from typing import Any, Mapping, Sequence, Union, cast
 
 from faker import Faker
 from http_types import Request, Response
-from meeshkan.serve.utils.opanapi_utils import get_x
 from openapi_typed_2 import OpenAPIObject, Reference, convert_from_openapi
 
 from meeshkan.serve.mock.faker.faker_base import FakerBase
@@ -21,6 +20,7 @@ from meeshkan.serve.mock.matcher import (
     ref_name,
 )
 from meeshkan.serve.mock.storage.mock_data import MockData
+from meeshkan.serve.utils.opanapi_utils import get_x
 
 
 class StatelessFaker(FakerBase):
@@ -201,7 +201,9 @@ class StatelessFaker(FakerBase):
         )
 
     def execute(self):
-        self._path_item, path_candidate = random.choice([x for x in self._spec.paths.items()])
+        self._path_item, path_candidate = random.choice(
+            [x for x in self._spec.paths.items()]
+        )
 
         entity_name = get_x(path_candidate, "x-meeshkan-entity")
         if entity_name is not None:
@@ -227,7 +229,7 @@ class StatelessFaker(FakerBase):
         )
         if response is None:
             raise FakerException(self.responses_error)
-        headers: Mapping[str, Union[str, Sequence[str]]] = {}
+        headers: Mapping[str, str] = {}
         if response.headers is not None:
             # TODO: can't handle references yet, need to fix
             headers = (
@@ -273,10 +275,8 @@ class StatelessFaker(FakerBase):
             raise FakerException(self.responses_error)
 
         schema = content.schema
-        ct: Mapping[str, Union[str, Sequence[str]]] = {
-            "Content-Type": "application/json"
-        }
-        new_headers: Mapping[str, Union[str, Sequence[str]]] = {**headers, **ct}
+        ct: Mapping[str, str] = {"Content-Type": "application/json"}
+        new_headers: Mapping[str, str] = {**headers, **ct}
         if schema is None:
             return self._empty_response(status_code, new_headers)
         to_fake = {
