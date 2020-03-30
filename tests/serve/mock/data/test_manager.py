@@ -1,4 +1,4 @@
-from meeshkan.serve.mock.storage.manager import storage_manager, StorageManager
+from meeshkan.serve.mock.storage.manager import StorageManager, storage_manager
 from tests.util import spec
 
 
@@ -10,7 +10,6 @@ def test_clear():
 
     manager["pokemon"]["x"] = "foo"
     manager["another"]["y"] = "bar"
-
 
     assert "foo" == manager["pokemon"]["x"]
     assert "bar" == manager["another"]["y"]

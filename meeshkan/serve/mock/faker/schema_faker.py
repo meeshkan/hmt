@@ -3,28 +3,43 @@
 ########################
 import json
 import random
-from functools import reduce
-from typing import Any, Mapping, Union, Sequence, cast
-
 import typing
+from functools import reduce
+from typing import Any, Mapping, Sequence, Union, cast
+
 from faker import Faker
 from http_types import Request, Response
-from meeshkan.serve.mock.storage.mock_data import MockData
+from meeshkan.serve.utils.opanapi_utils import get_x
+from openapi_typed_2 import OpenAPIObject, Reference, convert_from_openapi
+
 from meeshkan.serve.mock.faker.faker_base import MeeshkanFakerBase
 from meeshkan.serve.mock.faker.faker_exception import FakerException
-from meeshkan.serve.mock.matcher import get_response_from_ref, ref_name, change_ref, change_refs
-from openapi_typed_2 import convert_from_openapi, Reference, OpenAPIObject
+from meeshkan.serve.mock.matcher import (
+    change_ref,
+    change_refs,
+    get_response_from_ref,
+    ref_name,
+)
+from meeshkan.serve.mock.storage.mock_data import MockData
 
 
 class MeeshkanSchemaFaker(MeeshkanFakerBase):
     _LO = -99999999
     _HI = 99999999
 
-    responses_error = ("While a stub for a specification exists for this endpoint, it contains no responses. "
-                       "That usually means the schema is corrupt or it has been constrained too much "
-                       "(ie asking for a 201 response when it only has 200 and 400).")
+    responses_error = (
+        "While a stub for a specification exists for this endpoint, it contains no responses. "
+        "That usually means the schema is corrupt or it has been constrained too much "
+        "(ie asking for a 201 response when it only has 200 and 400)."
+    )
 
-    def __init__(self, text_faker: Faker, request: Request, spec: OpenAPIObject, storage: MockData):
+    def __init__(
+        self,
+        text_faker: Faker,
+        request: Request,
+        spec: OpenAPIObject,
+        storage: MockData,
+    ):
         super().__init__(text_faker, request, spec, storage)
 
     # to prevent too-nested objects
@@ -42,7 +57,7 @@ class MeeshkanSchemaFaker(MeeshkanFakerBase):
                         self._fkr.name(),
                         random.random()
                         if (isinstance(schema["additionalProperties"], bool))
-                           and (schema["additionalProperties"] is True)
+                        and (schema["additionalProperties"] is True)
                         else self.fake_it(schema["additionalProperties"], depth),
                     )
                     for x in range(random.randint(0, 4))
@@ -50,15 +65,17 @@ class MeeshkanSchemaFaker(MeeshkanFakerBase):
             }
         )
         properties = (
-            [] if "properties" not in schema else [x for x in schema["properties"].keys()]
+            []
+            if "properties" not in schema
+            else [x for x in schema["properties"].keys()]
         )
         random.shuffle(properties)
         properties = (
             []
             if len(properties) == 0
             else properties[
-                 : min([self.sane_depth(depth), random.randint(0, len(properties) - 1)])
-                 ]
+                : min([self.sane_depth(depth), random.randint(0, len(properties) - 1)])
+            ]
         )
         properties = list(
             set(([] if "required" not in schema else schema["required"]) + properties)
@@ -124,7 +141,11 @@ class MeeshkanSchemaFaker(MeeshkanFakerBase):
     def fake_integer(self, schema: Any) -> int:
         mn = self._LO if "minimum" not in schema else schema["minimum"]
         mx = self._HI if "maximum" not in schema else schema["maximum"]
-        return random.choice(schema["enum"]) if "enum" in schema else random.randint(mn, mx)
+        return (
+            random.choice(schema["enum"])
+            if "enum" in schema
+            else random.randint(mn, mx)
+        )
 
     def fake_ref(self, schema: Any, depth: int):
         name = schema["$ref"].split("/")[2]
@@ -132,7 +153,10 @@ class MeeshkanSchemaFaker(MeeshkanFakerBase):
 
     def fake_ref_array(self, schema: Any, depth: int, count: int):
         name = schema["$ref"].split("/")[2]
-        return [self.fake_it(self._top_schema["definitions"][name], depth) for _ in range(count)]
+        return [
+            self.fake_it(self._top_schema["definitions"][name], depth)
+            for _ in range(count)
+        ]
 
     def fake_null(self, schema: Any) -> None:
         return None
@@ -177,8 +201,12 @@ class MeeshkanSchemaFaker(MeeshkanFakerBase):
         )
 
     def execute(self):
-        path_candidate = random.choice([x for x in self._spec.paths.values()])
-        self._entity_name = path_candidate._x.get('x-meeshkan-entity', None) if path_candidate._x is not None else None
+        self._path_item, path_candidate = random.choice([x for x in self._spec.paths.items()])
+
+        entity_name = get_x(path_candidate, "x-meeshkan-entity")
+        if entity_name is not None:
+            self._entity = self._storage.get_entity(entity_name)
+
         method = getattr(path_candidate, self._request.method.value, None)
 
         if method is None:
@@ -213,7 +241,9 @@ class MeeshkanSchemaFaker(MeeshkanFakerBase):
         elif "text/plain" in mime_types:
             return self._fake_text_response(status_code, headers)
         else:
-            raise FakerException("Could not produce content for these mime types %s" % str(mime_types))
+            raise FakerException(
+                "Could not produce content for these mime types %s" % str(mime_types)
+            )
 
     def _empty_response(self, status_code: int, headers: typing.Mapping[str, str]):
         return Response(
@@ -262,7 +292,7 @@ class MeeshkanSchemaFaker(MeeshkanFakerBase):
                 for k, v in (
                     self._spec.components.schemas.items()
                     if (self._spec.components is not None)
-                       and (self._spec.components.schemas is not None)
+                    and (self._spec.components.schemas is not None)
                     else []
                 )
             },

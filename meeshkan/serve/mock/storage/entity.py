@@ -2,13 +2,28 @@ import typing
 import uuid
 
 from http_types import Request
-from jsonpath_rw import parse
+from jsonpath_rw import Fields, parse
+from openapi_typed_2 import Operation, PathItem, Reference
+
 from meeshkan.build.paths import _match_to_path
-from openapi_typed_2 import PathItem, Operation, Reference
+
+
+def replace_path(expression, doc, val):
+    if isinstance(expression, Fields):
+        doc[expression.fields[0]] = val
+    else:
+        occurencies = expression.left.find(doc)
+        if len(occurencies) == 0:
+            raise Exception()
+
+        for place in occurencies:
+            place.value[expression.right.fields[0]] = val
+
+    return doc
 
 
 class EntityPathItem:
-    methods = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']
+    methods = ["get", "put", "post", "delete", "options", "head", "patch", "trace"]
 
     def __init__(self, entity_name, pathname: str, path_item: PathItem):
         self._entity_name = entity_name
@@ -16,12 +31,21 @@ class EntityPathItem:
         self._path_item = path_item
         self._request_entity_selectors = self._build_request_entity_selectors(path_item)
 
-    def _build_request_entity_selectors(self, path_item: PathItem) -> typing.Mapping[str, typing.Callable]:
+    def _build_request_entity_selectors(
+        self, path_item: PathItem
+    ) -> typing.Mapping[str, typing.Callable]:
         res: typing.Dict[str, typing.Callable] = {}
         for method_name in self.methods:
             method: Operation = getattr(path_item, method_name)
-            if method is not None and method._x is not None and "x-meeshkan-operation" in method._x:
-                if method._x["x-meeshkan-operation"] == "insert" or method._x["x-meeshkan-operation"] == "upsert":
+            if (
+                method is not None
+                and method._x is not None
+                and "x-meeshkan-operation" in method._x
+            ):
+                if (
+                    method._x["x-meeshkan-operation"] == "insert"
+                    or method._x["x-meeshkan-operation"] == "upsert"
+                ):
                     if "application/json" in method.requestBody.content:
                         schema = method.requestBody.content["application/json"].schema
                         if schema is not None:
@@ -39,14 +63,31 @@ class EntityPathItem:
             if "items" not in schema:
                 return None
             elif isinstance(schema["items"], list):
-                return next((x for x in (self._find_entity(item, path + "[*]") for item in schema["items"])
-                             if x is not None))
+                return next(
+                    (
+                        x
+                        for x in (
+                            self._find_entity(item, path + "[*]")
+                            for item in schema["items"]
+                        )
+                        if x is not None
+                    )
+                )
             else:
                 return self._find_entity(schema["items"], path + "[*]")
         elif schema.get("type", "object") == "object" and "properties" is schema:
-            return next((x for x in (self._find_entity(schema["properties"][p], "{}.{}".format(path, p)) for p in
-                                     schema["properties"])
-                         if x is not None))
+            return next(
+                (
+                    x
+                    for x in (
+                        self._find_entity(
+                            schema["properties"][p], "{}.{}".format(path, p)
+                        )
+                        for p in schema["properties"]
+                    )
+                    if x is not None
+                )
+            )
 
         return None
 
@@ -57,14 +98,16 @@ class EntityPathItem:
         return None
 
     def extract_id(self, request: Request):
-        match = _match_to_path(self._pathname, request.pathname)
+        match = _match_to_path(request.pathname, self._pathname)
         if match is None or not "id" in match:
             return self.id_filter(request)
 
         return match["id"]
 
     def extract_entity(self, request: Request):
-        found = self._request_entity_selectors[request.method.value].find(request.bodyAsJson)
+        found = self._request_entity_selectors[request.method.value].find(
+            request.bodyAsJson
+        )
         if len(found) == 0:
             return None
         return found[0].value
@@ -86,20 +129,24 @@ class Entity:
         self._path_config[pathname] = EntityPathItem(self.name, pathname, path_item)
 
     def query(self, path_item: str, request: Request):
-        return [x for x in self._data.values() if self._path_config[path_item].filter(request)]
+        return [
+            x
+            for x in self._data.values()
+            if self._path_config[path_item].filter(request)
+        ]
 
     def query_one(self, path_item: str, request: Request):
         id = self._path_config[path_item].extract_id(request)
         return self._data.get(id, {}) if id is not None else {}
 
-
-
     def insert_from_request(self, path_item: str, request: Request):
+        entity_val = self._path_config[path_item].extract_entity(request)
         id = self._path_config[path_item].extract_id(request)
         if id is None:
+            id = self._extract_id(entity_val)
+        if id is None:
             id = self._generate_id()
-        entity_val = self._path_config[path_item].extract_entity(request)
-        entity_val = self._id_path.update(entity_val, lambda _ : id)
+        entity_val = replace_path(self._id_path, entity_val, id)
         self._data[id] = entity_val
         return entity_val
 
@@ -127,11 +174,23 @@ class Entity:
     def __setitem__(self, key, value):
         self._data[key] = value
 
+    def items(self):
+        return self._data.items()
+
+    def values(self):
+        return self._data.values()
+
+    def keys(self):
+        return self._data.keys()
+
     def get(self, key, default=None):
         return self._data.get(key, default)
 
     def clear(self):
         self._data.clear()
+
+    def __len__(self):
+        return len(self._data)
 
     def _generate_id(self):
         return str(uuid.uuid4())
@@ -146,4 +205,3 @@ class Entity:
         if len(found) == 0:
             return None
         return found[0].value
-

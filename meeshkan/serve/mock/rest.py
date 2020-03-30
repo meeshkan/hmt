@@ -29,7 +29,7 @@ class RestMiddlewareManager:
         self._endpoints.add(url)
 
     def spew(
-            self, request: Request, specs: Sequence[OpenAPISpecification]
+        self, request: Request, specs: Sequence[OpenAPISpecification]
     ) -> Sequence[OpenAPISpecification]:
         if len(self._endpoints) == 0:
             return specs

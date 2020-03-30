@@ -28,8 +28,10 @@ class ResponseMatcher:
             storage_manager.add_mock(spec.source, spec.api)
 
     def match_error(self, msg: str, req: Request):
-        json_resp = {"message": "%s. Here is the full request: host=%s, path=%s, method=%s."
-                                % (msg, req.host, req.path, req.method.value)}
+        json_resp = {
+            "message": "%s. Here is the full request: host=%s, path=%s, method=%s."
+            % (msg, req.host, req.path, req.method.value)
+        }
         return Response(
             statusCode=501,
             body=json.dumps(json_resp),
@@ -57,9 +59,14 @@ class ResponseMatcher:
         match = match_request_to_openapi(request, schemas)
 
         if len(match) == 0:
-            return callback_manager(request, self.match_error(
-                "Could not find a open API schema for the host %s." % request.host,
-                request), storage_manager.default)
+            return callback_manager(
+                request,
+                self.match_error(
+                    "Could not find a open API schema for the host %s." % request.host,
+                    request,
+                ),
+                storage_manager.default,
+            )
 
         spec = random.choice(match)
         if spec.api.paths is None or len(spec.api.paths.items()) == 0:

@@ -1,8 +1,9 @@
 import json
 import logging
 
-from meeshkan.serve.mock.storage.manager import StorageManager
 from tornado.web import RequestHandler
+
+from meeshkan.serve.mock.storage.manager import StorageManager
 
 from ..mock.rest import RestMiddlewareManager
 from ..mock.scope import Scope

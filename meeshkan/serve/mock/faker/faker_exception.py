@@ -1,4 +1,3 @@
-
 class FakerException(Exception):
     def __init__(self, *args):
         if args:

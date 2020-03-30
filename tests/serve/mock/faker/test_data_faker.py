@@ -1,15 +1,17 @@
 from faker import Faker
 from http_types import RequestBuilder
-from meeshkan.serve.mock.storage.manager import storage_manager
 
 from meeshkan.serve.mock.faker import MeeshkanDataFaker
 from meeshkan.serve.mock.matcher import valid_schema
+from meeshkan.serve.mock.storage.manager import storage_manager
 from meeshkan.serve.mock.storage.mock_data import MockData
 from tests.util import spec
 
 
 def test_faker_1():
-    request = RequestBuilder.from_dict(dict(method="get", protocol="http", path="/", host="api.com"))
+    request = RequestBuilder.from_dict(
+        dict(method="get", protocol="http", path="/", host="api.com")
+    )
 
     schema = {
         "type": "array",
@@ -23,37 +25,50 @@ def test_faker_1():
             },
         },
     }
-    res = MeeshkanDataFaker(Faker(), request, spec(response_schema=schema), MockData()).execute()
+    res = MeeshkanDataFaker(
+        Faker(), request, spec(response_schema=schema), MockData()
+    ).execute()
     assert valid_schema(res.bodyAsJson, schema)
 
 
 def test_faker_data():
-    request = RequestBuilder.from_dict(dict(method="get", protocol="http", path="/", host="api.com"))
+    request = RequestBuilder.from_dict(
+        dict(method="get", protocol="http", path="/", host="api.com")
+    )
 
     schema = {
         "type": "array",
-        "items": {
-            "$ref": "#/components/schemas/item",
-        },
+        "items": {"$ref": "#/components/schemas/item",},
     }
 
-    components = {"schemas": {
-        "item": {
-            "type": "object",
-            "required": ["foo", "baz"],
-            "properties": {
-                "foo": {"type": "number"},
-                "bar": {"type": "string"},
-                "baz": {"type": "string"},
-            }}}}
+    components = {
+        "schemas": {
+            "item": {
+                "type": "object",
+                "required": ["foo", "baz"],
+                "properties": {
+                    "foo": {"type": "number"},
+                    "bar": {"type": "string"},
+                    "baz": {"type": "string"},
+                },
+            }
+        }
+    }
 
-    faker = MeeshkanDataFaker(Faker(), request, spec(response_schema=schema, components=components), MockData())
+    faker = MeeshkanDataFaker(
+        Faker(),
+        request,
+        spec(response_schema=schema, components=components),
+        MockData(),
+    )
     res = faker.execute()
     assert valid_schema(res.bodyAsJson, faker._top_schema)
 
 
 def test_faker_2():
-    request = RequestBuilder.from_dict(dict(method="get", protocol="http", path="/", host="api.com"))
+    request = RequestBuilder.from_dict(
+        dict(method="get", protocol="http", path="/", host="api.com")
+    )
 
     schema = {
         "$id": "https://example.com/person.schema.json",
@@ -70,12 +85,16 @@ def test_faker_2():
             },
         },
     }
-    res = MeeshkanDataFaker(Faker(), request, spec(response_schema=schema), MockData()).execute()
+    res = MeeshkanDataFaker(
+        Faker(), request, spec(response_schema=schema), MockData()
+    ).execute()
     assert valid_schema(res.bodyAsJson, schema)
 
 
 def test_faker_3():
-    request = RequestBuilder.from_dict(dict(method="get", protocol="http", path="/", host="api.com"))
+    request = RequestBuilder.from_dict(
+        dict(method="get", protocol="http", path="/", host="api.com")
+    )
 
     schema = {
         "$id": "https://example.com/geographical-location.schema.json",
@@ -89,12 +108,16 @@ def test_faker_3():
             "longitude": {"type": "number", "minimum": -180.0, "maximum": 180.0},
         },
     }
-    res = MeeshkanDataFaker(Faker(), request, spec(response_schema=schema), MockData()).execute()
+    res = MeeshkanDataFaker(
+        Faker(), request, spec(response_schema=schema), MockData()
+    ).execute()
     assert valid_schema(res.bodyAsJson, schema)
 
 
 def test_faker_4():
-    request = RequestBuilder.from_dict(dict(method="get", protocol="http", path="/", host="api.com"))
+    request = RequestBuilder.from_dict(
+        dict(method="get", protocol="http", path="/", host="api.com")
+    )
 
     schema = {
         "$id": "https://example.com/arrays.schema.json",
@@ -103,33 +126,47 @@ def test_faker_4():
         "type": "object",
         "properties": {
             "fruits": {"type": "array", "items": {"type": "string"}},
-            "vegetables": {"type": "array", "items": {"$ref": "#/components/schemas/veggie"}},
+            "vegetables": {
+                "type": "array",
+                "items": {"$ref": "#/components/schemas/veggie"},
+            },
+        },
+    }
+    components = {
+        "schemas": {
+            "veggie": {
+                "type": "object",
+                "required": ["veggieName", "veggieLike"],
+                "properties": {
+                    "veggieName": {
+                        "type": "string",
+                        "description": "The name of the vegetable.",
+                    },
+                    "veggieLike": {
+                        "type": "boolean",
+                        "description": "Do I like this vegetable?",
+                    },
+                },
+            }
         }
     }
-    components = {"schemas": {
-        "veggie": {
-            "type": "object",
-            "required": ["veggieName", "veggieLike"],
-            "properties": {
-                "veggieName": {
-                    "type": "string",
-                    "description": "The name of the vegetable.",
-                },
-                "veggieLike": {
-                    "type": "boolean",
-                    "description": "Do I like this vegetable?",
-                },
-            },
-        }
-    }}
-    res = MeeshkanDataFaker(Faker(), request, spec(response_schema=schema, components=components), MockData()).execute()
+    res = MeeshkanDataFaker(
+        Faker(),
+        request,
+        spec(response_schema=schema, components=components),
+        MockData(),
+    ).execute()
     schema["components"] = components
     assert valid_schema(res.bodyAsJson, schema)
 
 
 def test_faker_5():
-    request = RequestBuilder.from_dict(dict(method="get", protocol="http", path="/", host="api.com"))
+    request = RequestBuilder.from_dict(
+        dict(method="get", protocol="http", path="/", host="api.com")
+    )
 
     schema = {"type": "array"}
-    res = MeeshkanDataFaker(Faker(), request, spec(response_schema=schema), MockData()).execute()
+    res = MeeshkanDataFaker(
+        Faker(), request, spec(response_schema=schema), MockData()
+    ).execute()
     assert valid_schema(res.bodyAsJson, schema)
