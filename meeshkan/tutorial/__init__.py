@@ -122,13 +122,13 @@ def kill_proc_tree(p):
         for child in children:
             try:
                 child.kill()
-            except Exception as e:
+            except Exception:
                 pass
         psutil.wait_procs(children)
         if p.poll() is None:
             try:
                 parent.kill()
-            except Exception as e:
+            except Exception:
                 pass
             parent.wait()
 
