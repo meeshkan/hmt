@@ -210,7 +210,7 @@ def path_to_regex(path: str) -> Tuple[Pattern[str], Tuple[str]]:
     # For example: /pets/{id} becomes \/pets\/\{id\}
     escaped_path = re.escape(path)
 
-    param_names = ()  # type: Tuple[str]
+    param_names: Tuple[str] = ()  # type
 
     for match in re.finditer(PATH_PARAMETER_PATTERN, escaped_path):
         full_match = match.group(0)

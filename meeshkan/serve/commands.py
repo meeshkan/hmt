@@ -179,9 +179,6 @@ def record(ctx, port, log_dir, header_routing, specs_dir, mode, daemon):
 @log_exceptions
 def start_record(port, log_dir, header_routing, specs_dir, mode, daemon):
     print(os.getpid())
-    selector = selectors.SelectSelector()
-    loop = asyncio.SelectorEventLoop(selector)
-    asyncio.set_event_loop(loop)
     proxy_runner = RecordProxyRunner(
         port=port,
         log_dir=log_dir,
