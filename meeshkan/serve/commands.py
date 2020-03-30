@@ -72,7 +72,7 @@ _record_options = _common_server_options + [
 ]
 
 _mock_options = _common_server_options + [
-    click.option("-a", "--admin-port", default="8889", help="Admin server port."),
+    click.option("-a", "--admin-port", default="8888", help="Admin server port."),
     click.option(
         "-c",
         "--callback-dir",
