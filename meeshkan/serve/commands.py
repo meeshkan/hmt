@@ -1,7 +1,5 @@
-import asyncio
 import functools
 import os
-import selectors
 import sys
 from logging import getLogger
 from pathlib import Path
