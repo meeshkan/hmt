@@ -1,4 +1,4 @@
-from meeshkan.serve.mock.storage.manager import StorageManager, storage_manager
+from meeshkan.serve.mock.storage.manager import StorageManager
 from tests.util import spec
 
 

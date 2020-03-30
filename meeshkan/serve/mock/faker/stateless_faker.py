@@ -12,7 +12,7 @@ from http_types import Request, Response
 from meeshkan.serve.utils.opanapi_utils import get_x
 from openapi_typed_2 import OpenAPIObject, Reference, convert_from_openapi
 
-from meeshkan.serve.mock.faker.faker_base import MeeshkanFakerBase
+from meeshkan.serve.mock.faker.faker_base import FakerBase
 from meeshkan.serve.mock.faker.faker_exception import FakerException
 from meeshkan.serve.mock.matcher import (
     change_ref,
@@ -23,7 +23,7 @@ from meeshkan.serve.mock.matcher import (
 from meeshkan.serve.mock.storage.mock_data import MockData
 
 
-class MeeshkanSchemaFaker(MeeshkanFakerBase):
+class StatelessFaker(FakerBase):
     _LO = -99999999
     _HI = 99999999
 

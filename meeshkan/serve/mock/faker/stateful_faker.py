@@ -1,12 +1,12 @@
 from faker import Faker
 from http_types import Request
-from meeshkan.serve.mock.faker.schema_faker import MeeshkanSchemaFaker
+from meeshkan.serve.mock.faker.stateless_faker import StatelessFaker
 from meeshkan.serve.mock.storage.mock_data import MockData
 from meeshkan.serve.utils.opanapi_utils import get_x
 from openapi_typed_2 import Any, OpenAPIObject, Operation
 
 
-class MeeshkanDataFaker(MeeshkanSchemaFaker):
+class StatefulFaker(StatelessFaker):
     def __init__(
             self,
             text_faker: Faker,

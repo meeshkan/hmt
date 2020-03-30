@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
+import typing
 from faker import Faker
 from http_types import Request
 from meeshkan.serve.mock.storage.entity import Entity
@@ -9,8 +10,8 @@ from openapi_typed import OpenAPIObject
 from openapi_typed_2 import Operation
 
 
-class MeeshkanFakerBase(ABC):
-    _entity: Entity
+class FakerBase(ABC):
+    _entity: typing.Optional[Entity]
     _text_faker: Faker
     _request: Request
     _spec: OpenAPIObject
@@ -28,6 +29,7 @@ class MeeshkanFakerBase(ABC):
         self._request = request
         self._spec = spec
         self._storage = storage
+        self._entity = None
 
     @abstractmethod
     def execute(self) -> Any:

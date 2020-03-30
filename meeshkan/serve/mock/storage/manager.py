@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 class StorageManager:
     def __init__(self):
         self._storages = dict()
+        self._default = dict()
 
     def add_mock(self, mockname: str, spec: OpenAPIObject):
         storage = MockData()
@@ -31,7 +32,9 @@ class StorageManager:
     def clear(self):
         for storage in self._storages.values():
             storage.clear()
+        self._default.clear()
         logger.debug("All storages cleared")
 
-
-storage_manager = StorageManager()
+    @property
+    def default(self):
+        return self._default

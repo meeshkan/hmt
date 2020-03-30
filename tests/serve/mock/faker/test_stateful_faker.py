@@ -1,9 +1,8 @@
 from faker import Faker
 from http_types import RequestBuilder
 
-from meeshkan.serve.mock.faker import MeeshkanDataFaker
+from meeshkan.serve.mock.faker.stateful_faker import StatefulFaker
 from meeshkan.serve.mock.matcher import valid_schema
-from meeshkan.serve.mock.storage.manager import storage_manager
 from meeshkan.serve.mock.storage.mock_data import MockData
 from tests.util import spec
 
@@ -25,7 +24,7 @@ def test_faker_1():
             },
         },
     }
-    res = MeeshkanDataFaker(
+    res = StatefulFaker(
         Faker(), request, spec(response_schema=schema), MockData()
     ).execute()
     assert valid_schema(res.bodyAsJson, schema)
@@ -55,7 +54,7 @@ def test_faker_data():
         }
     }
 
-    faker = MeeshkanDataFaker(
+    faker = StatefulFaker(
         Faker(),
         request,
         spec(response_schema=schema, components=components),
@@ -85,7 +84,7 @@ def test_faker_2():
             },
         },
     }
-    res = MeeshkanDataFaker(
+    res = StatefulFaker(
         Faker(), request, spec(response_schema=schema), MockData()
     ).execute()
     assert valid_schema(res.bodyAsJson, schema)
@@ -108,7 +107,7 @@ def test_faker_3():
             "longitude": {"type": "number", "minimum": -180.0, "maximum": 180.0},
         },
     }
-    res = MeeshkanDataFaker(
+    res = StatefulFaker(
         Faker(), request, spec(response_schema=schema), MockData()
     ).execute()
     assert valid_schema(res.bodyAsJson, schema)
@@ -150,7 +149,7 @@ def test_faker_4():
             }
         }
     }
-    res = MeeshkanDataFaker(
+    res = StatefulFaker(
         Faker(),
         request,
         spec(response_schema=schema, components=components),
@@ -166,7 +165,7 @@ def test_faker_5():
     )
 
     schema = {"type": "array"}
-    res = MeeshkanDataFaker(
+    res = StatefulFaker(
         Faker(), request, spec(response_schema=schema), MockData()
     ).execute()
     assert valid_schema(res.bodyAsJson, schema)

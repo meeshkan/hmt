@@ -7,13 +7,12 @@ from http_types.utils import HttpExchangeWriter
 from openapi_typed_2 import convert_from_openapi, convert_to_openapi
 
 from meeshkan.serve.mock.specs import OpenAPISpecification
-from meeshkan.serve.mock.storage.manager import storage_manager
-
 logger = logging.getLogger(__name__)
 
 
 class RestMiddlewareManager:
-    def __init__(self):
+    def __init__(self, storage_manager):
+        self._storage_manager = storage_manager
         self._endpoints = set([])
 
     def get(self):
@@ -43,9 +42,6 @@ class RestMiddlewareManager:
         out: List[OpenAPISpecification] = []
         for name, dict_spec in cs.items():
             spec = convert_to_openapi(dict_spec)
-            storage_manager.add_mock(name, spec)
+            self._storage_manager.add_mock(name, spec)
             out.append(OpenAPISpecification(spec, name))
         return out
-
-
-rest_middleware_manager = RestMiddlewareManager()

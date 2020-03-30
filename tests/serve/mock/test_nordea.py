@@ -7,7 +7,6 @@ from tornado.httpclient import HTTPClientError, HTTPRequest
 
 from meeshkan.serve.mock.log import Log
 from meeshkan.serve.mock.scope import Scope
-from meeshkan.serve.mock.server import make_mocking_app
 from meeshkan.serve.mock.specs import load_specs
 from meeshkan.serve.utils.routing import PathRouting
 
@@ -19,8 +18,8 @@ specs = load_specs("tests/serve/mock/schemas/nordea")
 
 
 @pytest.fixture
-def app():
-    return make_mocking_app(None, specs, PathRouting(), log,)
+def app(mocking_app):
+    return mocking_app(None, specs, PathRouting(), log,)
 
 
 def make_sandbox_url(base_url, path: str):

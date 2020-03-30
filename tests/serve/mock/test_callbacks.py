@@ -1,7 +1,6 @@
 from http_types.utils import RequestBuilder, ResponseBuilder
 
 from meeshkan.serve.mock.callbacks import callback_manager
-from meeshkan.serve.mock.storage.manager import storage_manager
 from meeshkan.serve.mock.storage.mock_data import MockData
 
 
@@ -82,7 +81,7 @@ def test_json():
     assert "count" in new_response.body
 
 
-def test_text():
+def test_text(storage_manager):
     callback_manager.load("tests/serve/mock/callbacks")
     storage_manager.clear()
 
@@ -135,7 +134,7 @@ def test_json_full():
     assert "value" == new_response.headers["X-Echo-Header"]
 
 
-def test_text_full():
+def test_text_full(storage_manager):
     callback_manager.load("tests/serve/mock/callbacks")
     storage_manager.clear()
 
