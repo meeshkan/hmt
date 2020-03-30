@@ -1,4 +1,5 @@
 """Code for working with OpenAPI paths, e.g., matching request path to an OpenAPI endpoint with parameter."""
+import typing
 from meeshkan.build.schemadiff import make_schema_diff
 import re
 import random
@@ -210,16 +211,16 @@ def path_to_regex(path: str) -> Tuple[Pattern[str], Tuple[str]]:
     # For example: /pets/{id} becomes \/pets\/\{id\}
     escaped_path = re.escape(path)
 
-    param_names: Tuple[str] = ()  # type
+    param_names: typing.List[str] = []  # type
 
     for match in re.finditer(PATH_PARAMETER_PATTERN, escaped_path):
         full_match = match.group(0)
         param_name = match.group(1)
 
-        param_names = param_names + (param_name, )
+        param_names.append(param_name)
 
         escaped_path = escaped_path.replace(full_match, PATH_PARAMETER_REGEX)
 
     regex_pattern = re.compile(r'^' + escaped_path + r'(?:\?|#|$)')
 
-    return (regex_pattern, param_names)
+    return (regex_pattern, tuple(param_names))
