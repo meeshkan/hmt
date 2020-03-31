@@ -13,8 +13,8 @@ from meeshkan.serve.mock.matcher import match_request_to_openapi
 from meeshkan.serve.mock.rest import RestMiddlewareManager
 from meeshkan.serve.mock.security import match_to_security_schemes
 from meeshkan.serve.mock.specs import OpenAPISpecification
-from meeshkan.serve.mock.storage.mock_data_store import MockDataStore
 from meeshkan.serve.mock.storage.mock_data import MockData
+from meeshkan.serve.mock.storage.mock_data_store import MockDataStore
 
 logger = logging.getLogger(__name__)
 

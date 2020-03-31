@@ -3,8 +3,9 @@ import uuid
 
 from http_types import Request
 from jsonpath_rw import Fields, parse
-from meeshkan.build.paths import _match_to_path
 from openapi_typed_2 import Operation, PathItem, Reference, RequestBody
+
+from meeshkan.build.paths import _match_to_path
 
 
 def replace_path(expression, doc, val):
@@ -40,13 +41,13 @@ class EntityPathItem:
         for method_name in self.methods:
             method: Operation = getattr(path_item, method_name)
             if (
-                    method is not None
-                    and method._x is not None
-                    and "x-meeshkan-operation" in method._x
+                method is not None
+                and method._x is not None
+                and "x-meeshkan-operation" in method._x
             ):
                 if (
-                        method._x["x-meeshkan-operation"] == "insert"
-                        or method._x["x-meeshkan-operation"] == "upsert"
+                    method._x["x-meeshkan-operation"] == "insert"
+                    or method._x["x-meeshkan-operation"] == "upsert"
                 ):
                     request_body = typing.cast(RequestBody, method.requestBody)
                     if "application/json" in request_body.content:
@@ -70,9 +71,9 @@ class EntityPathItem:
                     (
                         x
                         for x in (
-                        self._find_entity(item, path + "[*]")
-                        for item in schema["items"]
-                    )
+                            self._find_entity(item, path + "[*]")
+                            for item in schema["items"]
+                        )
                         if x is not None
                     )
                 )
@@ -83,11 +84,11 @@ class EntityPathItem:
                 (
                     x
                     for x in (
-                    self._find_entity(
-                        schema["properties"][p], "{}.{}".format(path, p)
+                        self._find_entity(
+                            schema["properties"][p], "{}.{}".format(path, p)
+                        )
+                        for p in schema["properties"]
                     )
-                    for p in schema["properties"]
-                )
                     if x is not None
                 )
             )
