@@ -16,7 +16,13 @@ class StatefulFakerData(FakerData):
     """
 
     entity: typing.Optional[Entity]
+    """
+    An entity related to a faked endpoint
+    """
     updated_data: typing.Optional[typing.Any]
+    """
+    It is preserved for requests that do updates and returns updated data
+    """
 
 
 class StatefulFaker(StatelessFaker):

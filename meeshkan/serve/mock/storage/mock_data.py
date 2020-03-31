@@ -22,7 +22,7 @@ class MockData:
     def add_entity(self, entity: Entity):
         self._entities[entity.name] = entity
 
-    def get_entity(self, name):
+    def get_entity(self, name: str) -> Entity:
         return self._entities[name]
 
     def clear(self):

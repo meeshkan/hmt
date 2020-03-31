@@ -33,10 +33,27 @@ class FakerData:
     """
 
     spec: OpenAPISpecification
+    """
+    A faked OpenAPI spec
+    """
     path_item: str
+    """
+    A chosen name of PathItem in spec. 
+    The matcher can return multiple PathItems so we may randomly choose one in the Faker.
+    """
     method: Operation
+    """
+    A chosen http method.
+    """
     schema: typing.Dict
+    """
+    A top-level schema of an http response that is faked. 
+    It includes all required definitions from spec.
+    """
     request: Request
+    """
+    An incoming http request
+    """
 
 
 class StatelessFaker(FakerBase):
@@ -90,9 +107,10 @@ class StatelessFaker(FakerBase):
             return self._empty_response(status_code, headers)
 
         if "application/json" in response.content:
+            ct: Mapping[str, str] = {"Content-Type": "application/json"}
             new_headers: Mapping[str, str] = {
                 **headers,
-                "Content-Type": "application/json",
+                **ct,
             }
             content = response.content["application/json"]
             if content.schema is None:
@@ -151,7 +169,9 @@ class StatelessFaker(FakerBase):
             timestamp=None,
         )
 
-    def _build_full_schema(self, schema: Schema, spec: OpenAPIObject) -> typing.Dict:
+    def _build_full_schema(
+        self, schema: typing.Union[Schema, Reference], spec: OpenAPIObject
+    ) -> typing.Dict:
         return {
             **convert_from_openapi(
                 change_ref(schema)
