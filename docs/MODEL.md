@@ -89,24 +89,24 @@ mock = mock.filter(lambda r: r.status_code == 200)
 
 When `mock` then creates a `SearchStrategy` from a `Request` object, all of the transformations applied to `mock` will be applied to the `SearchStrategy` object.
 
-### Mocker predicate
+### Restricting mockers
 
 When transforming mockers, you may not want to transform responses from all paths but only from specific ones. The solution is to create multiple mockers that accept different paths. `model.mock` accepts a predicate of type `Callable[[Request], bool]`. The predicate defines which requests the mocker should accept as valid requests.
 
 For example, you can create a mocker that only handles calls to paths starting with `/personal/v4`:
 
 ```python
-mocker = model.mock(lambda req: req.path.starts_with("/personal/v4")
+mocker = model.mock(lambda req: req.path.starts_with("/personal/v4"))
 ```
 
 If you then try to generate a search strategy from a request with different path, you will get an exception:
 
 ```python
->>> mocker.strategy_from(RequestBuilder.from_url("https://example.com/personal/v3)
+>>> mocker.strategy_from(RequestBuilder.from_url("https://example.com/personal/v3))
 <MockerException>
 ```
 
-### Using `mock` for intercepting requests
+### Using `mocker` for intercepting requests
 
 How to use `mocker` objects for testing our code? When your code performs a network call, the call needs to be intercepted so a mock can be served in response. Meeshkan provides `intercept_with` method that accepts an instance of `Mocker`. Here's a full example:
 
@@ -138,7 +138,7 @@ def test_opbank_returns_200():
 Alternatively, you can use the interceptor as a decorator:
 
 ```python
-mocker = opbank.mock().filter(lambda res: res.status_code == 200
+mocker = opbank.mock().filter(lambda res: res.status_code == 200)
 
 @meeshkan.intercept_with(mocker)
 def test_opbank_returns_200():
