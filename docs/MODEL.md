@@ -147,6 +147,12 @@ def test_opbank_returns_200():
     assert mocker.called_once
 ```
 
+### Property-based testing
+
+The examples above only ran the test once.
+
+**TODO**
+
 ### Dockerized
 
 To run a Meeshkan `Model` in Docker, you can use a following `Dockerfile`:
