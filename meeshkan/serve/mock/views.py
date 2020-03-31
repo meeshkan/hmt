@@ -20,10 +20,7 @@ class MockServerView(RequestHandler):
     SUPPORTED_METHODS = ["GET", "POST", "HEAD", "DELETE", "PATCH", "PUT", "OPTIONS"]
 
     def initialize(
-        self,
-        request_processor: RequestProcessor,
-        router: Routing,
-        log: Log,
+        self, request_processor: RequestProcessor, router: Routing, log: Log,
     ):
         self._request_processor = request_processor
         self._router = router

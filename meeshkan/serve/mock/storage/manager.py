@@ -1,6 +1,6 @@
 import logging
-
 import typing
+
 from openapi_typed_2 import OpenAPIObject
 
 from meeshkan.serve.mock.storage.entity import Entity
