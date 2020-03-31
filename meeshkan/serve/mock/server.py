@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Sequence
+from typing import Optional
 
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
@@ -9,11 +9,10 @@ from meeshkan.serve.mock.rest import RestMiddlewareManager
 from meeshkan.serve.mock.storage.manager import StorageManager
 
 from ..admin.runner import start_admin
-from ..mock.callbacks import CallbackManager, callback_manager
+from ..mock.callbacks import callback_manager
 from ..mock.request_processor import RequestProcessor
-from ..mock.specs import OpenAPISpecification
 from ..mock.views import MockServerView
-from ..utils.routing import PathRouting, Routing
+from ..utils.routing import PathRouting
 from .log import FileSink, Log, NoSink
 from .scope import Scope
 

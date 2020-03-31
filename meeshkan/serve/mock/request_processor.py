@@ -3,8 +3,8 @@ import logging
 import random
 from typing import Sequence
 
-from faker import Faker
 from http_types import Request, Response
+from openapi_typed_2 import OpenAPIObject
 
 from meeshkan.serve.mock.callbacks import CallbackManager
 from meeshkan.serve.mock.faker import DefaultFaker
@@ -14,6 +14,7 @@ from meeshkan.serve.mock.rest import RestMiddlewareManager
 from meeshkan.serve.mock.security import match_to_security_schemes
 from meeshkan.serve.mock.specs import OpenAPISpecification
 from meeshkan.serve.mock.storage.manager import StorageManager
+from meeshkan.serve.mock.storage.mock_data import MockData
 
 logger = logging.getLogger(__name__)
 
@@ -29,10 +30,10 @@ class RequestProcessor:
         rest_middleware_manager: RestMiddlewareManager,
     ):
         self._specs = specs
-        self._fkr = Faker()
         self._storage_manager = storage_manager
         self._callback_manager = callback_manager
         self._rest_middleware_manager = rest_middleware_manager
+        self._faker = DefaultFaker()
 
         for spec in specs:
             self._storage_manager.add_mock(spec.source, spec.api)
@@ -50,9 +51,9 @@ class RequestProcessor:
             timestamp=None,
         )
 
-    def _match_response(self, request, spec, storage):
+    def _match_response(self, spec: OpenAPIObject, storage: MockData, request: Request):
         try:
-            return DefaultFaker(self._fkr, request, spec, storage).execute()
+            return self._faker.process(spec, storage, request)
         except FakerException as e:
             return self.match_error(str(e), request)
 
@@ -97,5 +98,5 @@ class RequestProcessor:
             return self.match_error(path_error, request)
 
         storage = self._storage_manager[spec.source]
-        response = self._match_response(request, spec.api, storage)
+        response = self._match_response(spec.api, storage, request)
         return self._callback_manager(request, response, storage)

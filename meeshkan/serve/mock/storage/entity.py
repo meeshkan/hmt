@@ -74,7 +74,7 @@ class EntityPathItem:
                 )
             else:
                 return self._find_entity(schema["items"], path + "[*]")
-        elif schema.get("type", "object") == "object" and "properties" is schema:
+        elif schema.get("type", "object") == "object" and "properties" in schema:
             return next(
                 (
                     x
@@ -98,7 +98,7 @@ class EntityPathItem:
 
     def extract_id(self, request: Request):
         match = _match_to_path(request.pathname, self._pathname)
-        if match is None or not "id" in match:
+        if match is None or "id" not in match:
             return self.id_filter(request)
 
         return match["id"]

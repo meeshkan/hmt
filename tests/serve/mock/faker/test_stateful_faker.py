@@ -8,6 +8,8 @@ from tests.util import spec
 
 
 def test_faker_1():
+    faker = StatefulFaker()
+
     request = RequestBuilder.from_dict(
         dict(method="get", protocol="http", path="/", host="api.com")
     )
@@ -24,13 +26,14 @@ def test_faker_1():
             },
         },
     }
-    res = StatefulFaker(
-        Faker(), request, spec(response_schema=schema), MockData()
-    ).execute()
+    res = faker.process(spec(response_schema=schema), MockData(), request)
+
     assert valid_schema(res.bodyAsJson, schema)
 
 
 def test_faker_data():
+    faker = StatefulFaker()
+
     request = RequestBuilder.from_dict(
         dict(method="get", protocol="http", path="/", host="api.com")
     )
@@ -54,17 +57,17 @@ def test_faker_data():
         }
     }
 
-    faker = StatefulFaker(
-        Faker(),
-        request,
-        spec(response_schema=schema, components=components),
-        MockData(),
+    res = faker.process(
+        spec(response_schema=schema, components=components), MockData(), request
     )
-    res = faker.execute()
-    assert valid_schema(res.bodyAsJson, faker._top_schema)
+
+    schema["components"] = components
+    assert valid_schema(res.bodyAsJson, schema)
 
 
 def test_faker_2():
+    faker = StatefulFaker()
+
     request = RequestBuilder.from_dict(
         dict(method="get", protocol="http", path="/", host="api.com")
     )
@@ -84,13 +87,14 @@ def test_faker_2():
             },
         },
     }
-    res = StatefulFaker(
-        Faker(), request, spec(response_schema=schema), MockData()
-    ).execute()
+    res = faker.process(spec(response_schema=schema), MockData(), request)
+
     assert valid_schema(res.bodyAsJson, schema)
 
 
 def test_faker_3():
+    faker = StatefulFaker()
+
     request = RequestBuilder.from_dict(
         dict(method="get", protocol="http", path="/", host="api.com")
     )
@@ -107,13 +111,14 @@ def test_faker_3():
             "longitude": {"type": "number", "minimum": -180.0, "maximum": 180.0},
         },
     }
-    res = StatefulFaker(
-        Faker(), request, spec(response_schema=schema), MockData()
-    ).execute()
+    res = faker.process(spec(response_schema=schema), MockData(), request)
+
     assert valid_schema(res.bodyAsJson, schema)
 
 
 def test_faker_4():
+    faker = StatefulFaker()
+
     request = RequestBuilder.from_dict(
         dict(method="get", protocol="http", path="/", host="api.com")
     )
@@ -149,23 +154,22 @@ def test_faker_4():
             }
         }
     }
-    res = StatefulFaker(
-        Faker(),
-        request,
-        spec(response_schema=schema, components=components),
-        MockData(),
-    ).execute()
+    res = faker.process(
+        spec(response_schema=schema, components=components), MockData(), request
+    )
+
     schema["components"] = components
     assert valid_schema(res.bodyAsJson, schema)
 
 
 def test_faker_5():
+    faker = StatefulFaker()
+
     request = RequestBuilder.from_dict(
         dict(method="get", protocol="http", path="/", host="api.com")
     )
 
     schema = {"type": "array"}
-    res = StatefulFaker(
-        Faker(), request, spec(response_schema=schema), MockData()
-    ).execute()
+    res = faker.process(spec(response_schema=schema), MockData(), request)
+
     assert valid_schema(res.bodyAsJson, schema)

@@ -1,4 +1,3 @@
-import typing
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -11,29 +10,16 @@ from meeshkan.serve.mock.storage.mock_data import MockData
 
 
 class FakerBase(ABC):
-    _entity: typing.Optional[Entity]
     _text_faker: Faker
-    _request: Request
-    _spec: OpenAPIObject
-    _storage: MockData
-    _path_item: str
 
-    def __init__(
-        self,
-        text_faker: Faker,
-        request: Request,
-        spec: OpenAPIObject,
-        storage: MockData,
-    ):
-        self._fkr = text_faker
-        self._request = request
-        self._spec = spec
-        self._storage = storage
-        self._entity = None
+    def __init__(self):
+        self._text_faker = Faker()
 
     @abstractmethod
-    def execute(self) -> Any:
+    def process(self, spec: OpenAPIObject, storage: MockData, request: Request) -> Any:
         pass
 
-    def _update_data(self, method: Operation):
+    def _update_data(
+        self, path_item: str, method: Operation, request: Request, entity: Entity
+    ):
         pass
