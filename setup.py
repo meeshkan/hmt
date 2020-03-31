@@ -35,8 +35,13 @@ REQUIRED = [
     # mock
     "tornado==5.1.1",
     "urllib3==1.25.6",
-    "daemonocle",
-    "jsonpath-rw==1.4.0",
+    "meeshkan-daemonocle",
+    # tutorial
+    "clint",
+    "pyfiglet",
+    "progress",
+    "psutil>=5.6.3",
+    "jsonpath-rw>=1.4.0",
 ]
 
 BUNDLES = {}
@@ -62,7 +67,7 @@ DEV = BUNDLE_REQUIREMENTS + [
     "wheel",
 ]
 
-VERSION = "0.2.19"
+VERSION = "0.2.22"
 
 ENTRY_POINTS = ["meeshkan = meeshkan.__main__:cli"]
 
@@ -186,9 +191,8 @@ class TestCommand(SetupCommand):
         self.status("Checking formatting...")
         check_formatting()
 
-        # FIXME
-        # self.status("Checking style...")
-        # check_style()
+        self.status("Checking style...")
+        check_style()
 
         self.status("Checking types...")
         type_check()

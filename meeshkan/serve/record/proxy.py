@@ -74,4 +74,5 @@ class RecordProxyRunner:
         ) as callback:
             server = RecordProxy(callback, self._routing)
             server.listen(self._port)
+            logger.info("Meeshkan is running")
             tornado.ioloop.IOLoop.instance().start()

@@ -31,21 +31,21 @@ Meeshkan is a tool that mocks HTTP APIs for use in sandboxes as well as for auto
 Install via [pip](https://pip.pypa.io/en/stable/installing/) (requires **Python 3.6+**):
 
 ```bash
-$ pip install meeshkan
+pip install meeshkan
 ```
 
 macOS users can install Meeshkan with [Homebrew](https://brew.sh/):
 
 ```sh
-$ brew tap meeshkan/tap
-$ brew install meeshkan
+brew tap meeshkan/tap
+brew install meeshkan
 ```
 
 Debian and Ubuntu users can install Meeshkan with `apt`:
 
 ```sh
-$ echo "deb [trusted=yes] https://dl.bintray.com/meeshkan/apt all main" | sudo tee -a /etc/apt/sources.list
-$ apt update && apt-get install meeshkan
+echo "deb [trusted=yes] https://dl.bintray.com/meeshkan/apt all main" | tee -a /etc/apt/sources.list
+apt-get -qq update && apt-get install meeshkan
 ```
 
 

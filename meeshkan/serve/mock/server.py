@@ -97,9 +97,11 @@ class MockServer:
                 ]:
                     if getattr(path_item, method):
                         logger.info(
-                            "→ "
+                            "- "
                             + method.upper().ljust(7)
                             + f" http://localhost:{self._port}/"
                             + spec.api.servers[0].url
                             + path
                         )
+
+        logger.info("Meeshkan is running")

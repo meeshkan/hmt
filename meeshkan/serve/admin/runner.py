@@ -52,4 +52,4 @@ def start_admin(
     app = make_admin_app(scope, storage_manager, rest_middleware_manager)
     http_server = HTTPServer(app)
     http_server.listen(port)
-    logger.info("• Admin   http://localhost:%s/admin", port)
+    logger.info("- Admin   http://localhost:%s/admin", port)

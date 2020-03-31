@@ -1,4 +1,5 @@
 import logging
+from dataclasses import asdict
 from urllib import parse
 
 from http_types import RequestBuilder
@@ -19,7 +20,10 @@ class MockServerView(RequestHandler):
     SUPPORTED_METHODS = ["GET", "POST", "HEAD", "DELETE", "PATCH", "PUT", "OPTIONS"]
 
     def initialize(
-        self, request_processor: RequestProcessor, router: Routing, log: Log,
+        self,
+        request_processor: RequestProcessor,
+        router: Routing,
+        log: Log,
     ):
         self._request_processor = request_processor
         self._router = router
@@ -83,11 +87,13 @@ class MockServerView(RequestHandler):
             }
         )
 
-        logger.debug(request)
+        logger.debug("Processing request: %s", asdict(request))
         response = self._request_processor.process(request)
+        logger.debug("Resolved response: %s", asdict(response))
 
         for header, value in response.headers.items():
             self.set_header(header, value)
         self._log.put(request, response)
         self.set_status(response.statusCode)
         self.write(response.body)
+        logger.debug("Handled writing response")

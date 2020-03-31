@@ -11,6 +11,7 @@ from meeshkan.serve.mock.faker import DefaultFaker
 from meeshkan.serve.mock.faker.faker_exception import FakerException
 from meeshkan.serve.mock.matcher import match_request_to_openapi
 from meeshkan.serve.mock.rest import RestMiddlewareManager
+from meeshkan.serve.mock.security import match_to_security_schemes
 from meeshkan.serve.mock.specs import OpenAPISpecification
 from meeshkan.serve.mock.storage.manager import StorageManager
 
@@ -64,8 +65,18 @@ class RequestProcessor:
             )
             return self.match_error(method_error, request)
 
-        schemas = self._rest_middleware_manager.spew(request, self._specs)
-        match = match_request_to_openapi(request, schemas)
+        specs = self._rest_middleware_manager.spew(request, self._specs)
+
+        logger.debug("Matching to security schemes of %d specs", len(specs))
+        maybe_security_response = match_to_security_schemes(
+            request, [spec.api for spec in specs]
+        )
+
+        if maybe_security_response is not None:
+            logger.debug("Matched to security scheme, returning response.")
+            return maybe_security_response
+
+        match = match_request_to_openapi(request, specs)
 
         if len(match) == 0:
             return self._callback_manager(
