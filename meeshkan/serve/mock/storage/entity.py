@@ -177,7 +177,7 @@ class Entity:
         id = self._path_config[path_item].extract_id(request)
         return self._data.get(id, {}) if id is not None else {}
 
-    def insert_from_request(self, path_item: str, request: Request):
+    def insert_from_request(self, path_item: str, request: Request) -> typing.Any:
         """
         Extracts an entity from an http request. It is used to automatically post new data into a mock storage.
         If an entity doesn't contain an id it will be generated automatically.
@@ -203,7 +203,7 @@ class Entity:
         id = self._extract_id(entity)
         self._data[id] = entity
 
-    def upsert_from_request(self, path_item: str, request: Request):
+    def upsert_from_request(self, path_item: str, request: Request) -> typing.Any:
         """
         Either inserts or updates an entity in a storage depending on
         whether an entity with the same id presents in it or not.
@@ -251,7 +251,7 @@ class Entity:
     def _generate_id(self):
         return str(uuid.uuid4())
 
-    def _merge(self, entity1, entity2):
+    def _merge(self, entity1, entity2) -> typing.Any:
         for k, v in entity2.items():
             entity1[k] = v
         return entity1

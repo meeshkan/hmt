@@ -42,7 +42,7 @@ class StatefulFaker(StatelessFaker):
         entity_name = get_x(
             faker_data.spec.api.paths[faker_data.path_item], "x-meeshkan-entity"
         )
-        entity = (
+        entity: typing.Optional[Entity] = (
             self._mock_data_store[faker_data.spec.source].get_entity(entity_name)
             if entity_name is not None
             else None
@@ -91,8 +91,12 @@ class StatefulFaker(StatelessFaker):
             ]
 
     def _update_data(
-        self, path_item: str, method: Operation, request: Request, entity: Entity
-    ):
+        self,
+        path_item: str,
+        method: Operation,
+        request: Request,
+        entity: typing.Optional[Entity],
+    ) -> typing.Any:
         operation_type = ApiOperation(get_x(method, "x-meeshkan-operation", "unknown"))
         if operation_type == ApiOperation.INSERT:
             return entity.insert_from_request(path_item, request)
