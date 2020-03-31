@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 class RestMiddlewareManager:
-    def __init__(self, storage_manager):
-        self._storage_manager = storage_manager
+    def __init__(self, mock_data_store):
+        self._mock_data_store = mock_data_store
         self._endpoints = set([])
 
     def get(self):
@@ -43,6 +43,6 @@ class RestMiddlewareManager:
         out: List[OpenAPISpecification] = []
         for name, dict_spec in cs.items():
             spec = convert_to_openapi(dict_spec)
-            self._storage_manager.add_mock(name, spec)
+            self._mock_data_store.add_mock(name, spec)
             out.append(OpenAPISpecification(spec, name))
         return out

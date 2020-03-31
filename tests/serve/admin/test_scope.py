@@ -10,8 +10,8 @@ scope = Scope()
 
 
 @pytest.fixture
-def app(storage_manager, rest_middleware_manager):
-    return make_admin_app(scope, storage_manager, rest_middleware_manager)
+def app(mock_data_store, rest_middleware_manager):
+    return make_admin_app(scope, mock_data_store, rest_middleware_manager)
 
 
 @pytest.fixture(autouse=True)

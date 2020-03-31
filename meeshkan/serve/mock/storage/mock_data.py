@@ -4,6 +4,13 @@ from meeshkan.serve.mock.storage.entity import Entity
 
 
 class MockData:
+    """
+    The MockData object encapsulated a set of entities specific for a single mock.
+    It also contains a global default key-value storage that can be used in callbacks to store unstructured data.
+    mock_data.entity_name returns an instance of the Entity class if it presents.
+    mock_data["some_name"] returns a value from the global storage.
+    """
+
     def __init__(self):
         self._default = dict()
         self._entities: typing.Dict[str, Entity] = dict()

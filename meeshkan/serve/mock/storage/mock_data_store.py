@@ -10,12 +10,22 @@ from meeshkan.serve.utils.opanapi_utils import get_x
 logger = logging.getLogger(__name__)
 
 
-class StorageManager:
+class MockDataStore:
+    """
+    The MockDataStore object contains instances of the MockData class for each configured mock.
+    """
+
     def __init__(self):
         self._storages: typing.Dict[str, MockData] = dict()
         self._default = dict()
 
     def add_mock(self, mockname: str, spec: OpenAPIObject):
+        """
+        Adds a mock. The method automatically creates entities defined in an OpenAPI spec and populates them with
+        data if it is defined in the spec.
+        :param mockname: a name of a mock
+        :param spec: an OpenAPI spec
+        """
         storage = MockData()
         self._storages[mockname] = storage
         if spec.components is not None and spec.components.schemas is not None:

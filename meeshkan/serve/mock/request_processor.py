@@ -13,7 +13,7 @@ from meeshkan.serve.mock.matcher import match_request_to_openapi
 from meeshkan.serve.mock.rest import RestMiddlewareManager
 from meeshkan.serve.mock.security import match_to_security_schemes
 from meeshkan.serve.mock.specs import OpenAPISpecification
-from meeshkan.serve.mock.storage.manager import StorageManager
+from meeshkan.serve.mock.storage.mock_data_store import MockDataStore
 from meeshkan.serve.mock.storage.mock_data import MockData
 
 logger = logging.getLogger(__name__)
@@ -25,18 +25,18 @@ class RequestProcessor:
     def __init__(
         self,
         specs: Sequence[OpenAPISpecification],
-        storage_manager: StorageManager,
+        mock_data_store: MockDataStore,
         callback_manager: CallbackManager,
         rest_middleware_manager: RestMiddlewareManager,
     ):
         self._specs = specs
-        self._storage_manager = storage_manager
+        self._mock_data_store = mock_data_store
         self._callback_manager = callback_manager
         self._rest_middleware_manager = rest_middleware_manager
         self._faker = DefaultFaker()
 
         for spec in specs:
-            self._storage_manager.add_mock(spec.source, spec.api)
+            self._mock_data_store.add_mock(spec.source, spec.api)
 
     def match_error(self, msg: str, req: Request):
         json_resp = {
@@ -86,7 +86,7 @@ class RequestProcessor:
                     "Could not find an open API schema for the host %s." % request.host,
                     request,
                 ),
-                self._storage_manager.default,
+                self._mock_data_store.default,
             )
 
         spec = random.choice(match)
@@ -97,6 +97,6 @@ class RequestProcessor:
             )
             return self.match_error(path_error, request)
 
-        storage = self._storage_manager[spec.source]
+        storage = self._mock_data_store[spec.source]
         response = self._match_response(spec.api, storage, request)
         return self._callback_manager(request, response, storage)

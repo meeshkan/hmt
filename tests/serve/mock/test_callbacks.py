@@ -81,9 +81,9 @@ def test_json():
     assert "count" in new_response.body
 
 
-def test_text(storage_manager):
+def test_text(mock_data_store):
     callback_manager.load("tests/serve/mock/callbacks")
-    storage_manager.clear()
+    mock_data_store.clear()
 
     request = RequestBuilder.from_dict(
         dict(
@@ -134,9 +134,9 @@ def test_json_full():
     assert "value" == new_response.headers["X-Echo-Header"]
 
 
-def test_text_full(storage_manager):
+def test_text_full(mock_data_store):
     callback_manager.load("tests/serve/mock/callbacks")
-    storage_manager.clear()
+    mock_data_store.clear()
 
     request = RequestBuilder.from_dict(
         dict(

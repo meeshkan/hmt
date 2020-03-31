@@ -9,27 +9,27 @@ from meeshkan.serve.mock.log import Log
 from meeshkan.serve.mock.request_processor import RequestProcessor
 from meeshkan.serve.mock.rest import RestMiddlewareManager
 from meeshkan.serve.mock.specs import OpenAPISpecification
-from meeshkan.serve.mock.storage.manager import StorageManager
+from meeshkan.serve.mock.storage.mock_data_store import MockDataStore
 from meeshkan.serve.mock.views import MockServerView
 from meeshkan.serve.utils.routing import Routing
 from tests.util import MockSink
 
 
 @pytest.fixture()
-def storage_manager():
-    return StorageManager()
+def mock_data_store():
+    return MockDataStore()
 
 
 @pytest.fixture()
-def rest_middleware_manager(storage_manager):
-    return RestMiddlewareManager(storage_manager)
+def rest_middleware_manager(mock_data_store):
+    return RestMiddlewareManager(mock_data_store)
 
 
 @pytest.fixture()
-def request_processor(storage_manager, rest_middleware_manager):
+def request_processor(mock_data_store, rest_middleware_manager):
     def _rp(specs):
         return RequestProcessor(
-            specs, storage_manager, callback_manager, rest_middleware_manager
+            specs, mock_data_store, callback_manager, rest_middleware_manager
         )
 
     return _rp

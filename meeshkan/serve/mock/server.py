@@ -6,7 +6,7 @@ from tornado.ioloop import IOLoop
 from tornado.web import Application
 
 from meeshkan.serve.mock.rest import RestMiddlewareManager
-from meeshkan.serve.mock.storage.manager import StorageManager
+from meeshkan.serve.mock.storage.mock_data_store import MockDataStore
 
 from ..admin.runner import start_admin
 from ..mock.callbacks import callback_manager
@@ -37,8 +37,8 @@ class MockServer:
         self._scope = scope or Scope()
         self._log = Log(self._scope, NoSink() if log_dir is None else FileSink(log_dir))
 
-        self._storage_manager = StorageManager()
-        self._rest_middleware_manager = RestMiddlewareManager(self._storage_manager)
+        self._mock_data_store = MockDataStore()
+        self._rest_middleware_manager = RestMiddlewareManager(self._mock_data_store)
         self._callback_manager = callback_manager
 
         if callback_dir is not None:
@@ -46,7 +46,7 @@ class MockServer:
 
         self._request_processor = RequestProcessor(
             self._specs,
-            self._storage_manager,
+            self._mock_data_store,
             self._callback_manager,
             self._rest_middleware_manager,
         )
@@ -56,7 +56,7 @@ class MockServer:
             start_admin(
                 port=self._admin_port,
                 scope=self._scope,
-                storage_manager=self._storage_manager,
+                mock_data_store=self._mock_data_store,
                 rest_middleware_manager=self._rest_middleware_manager,
             )
 

@@ -3,7 +3,7 @@ import logging
 
 from tornado.web import RequestHandler
 
-from meeshkan.serve.mock.storage.manager import StorageManager
+from meeshkan.serve.mock.storage.mock_data_store import MockDataStore
 
 from ..mock.rest import RestMiddlewareManager
 from ..mock.scope import Scope
@@ -14,14 +14,14 @@ logger = logging.getLogger(__name__)
 class StorageView(RequestHandler):
     SUPPORTED_METHODS = ["DELETE"]
 
-    def initialize(self, storage_manager: StorageManager):
-        self.storage_manager = storage_manager
+    def initialize(self, mock_data_store: MockDataStore):
+        self.mock_data_store = mock_data_store
 
     def set_default_headers(self):
         self.set_header("Content-Type", 'application/json; charset="utf-8"')
 
     def delete(self):
-        self.storage_manager.clear()
+        self.mock_data_store.clear()
 
 
 class ScopeView(RequestHandler):
