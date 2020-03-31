@@ -22,7 +22,7 @@ REQUIRED = [
     "lenses",
     "pyyaml",
     "jsonschema",
-    "dataclasses",  # for 3.6, as it ships with 3.7
+    'dataclasses;python_version<"3.7"',  # for 3.6, as it ships with 3.7
     "faker",
     "requests",
     "typing-extensions",
