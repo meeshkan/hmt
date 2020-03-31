@@ -38,7 +38,7 @@ class FakerData:
     """
     path_item: str
     """
-    A chosen name of PathItem in spec. 
+    A chosen name of PathItem in spec.
     The matcher can return multiple PathItems so we may randomly choose one in the Faker.
     """
     method: Operation
@@ -47,7 +47,7 @@ class FakerData:
     """
     schema: typing.Dict
     """
-    A top-level schema of an http response that is faked. 
+    A top-level schema of an http response that is faked.
     It includes all required definitions from spec.
     """
     request: Request
