@@ -1,4 +1,3 @@
-from faker import Faker
 from http_types import RequestBuilder
 
 from meeshkan.serve.mock.faker.stateless_faker import StatelessFaker

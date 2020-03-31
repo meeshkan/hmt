@@ -37,10 +37,7 @@ def test_faker_data():
         dict(method="get", protocol="http", path="/", host="api.com")
     )
 
-    schema = {
-        "type": "array",
-        "items": {"$ref": "#/components/schemas/item",},
-    }
+    schema = {"type": "array", "items": {"$ref": "#/components/schemas/item"}}
 
     components = {
         "schemas": {
