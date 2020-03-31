@@ -1,6 +1,5 @@
-from faker import Faker
 from http_types import Request
-from openapi_typed_2 import Any, OpenAPIObject, Operation
+from openapi_typed_2 import Any, Operation
 
 from meeshkan.serve.mock.faker.stateless_faker import FakerData, StatelessFaker
 from meeshkan.serve.mock.storage.entity import Entity
