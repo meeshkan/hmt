@@ -1,5 +1,6 @@
 import logging
 
+import typing
 from openapi_typed_2 import OpenAPIObject
 
 from meeshkan.serve.mock.storage.entity import Entity
@@ -11,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class StorageManager:
     def __init__(self):
-        self._storages = dict()
+        self._storages: typing.Dict[str, MockData] = dict()
         self._default = dict()
 
     def add_mock(self, mockname: str, spec: OpenAPIObject):

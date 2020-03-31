@@ -25,7 +25,7 @@ def replace_path(expression, doc, val):
 class EntityPathItem:
     methods = ["get", "put", "post", "delete", "options", "head", "patch", "trace"]
 
-    def __init__(self, entity_name, pathname: str, path_item: PathItem):
+    def __init__(self, entity_name: str, pathname: str, path_item: PathItem):
         self._entity_name = entity_name
         self._pathname = pathname
         self._path_item = path_item

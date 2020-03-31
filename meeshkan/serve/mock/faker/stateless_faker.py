@@ -1,6 +1,3 @@
-########################
-#### FAKER
-########################
 import json
 import random
 import typing
