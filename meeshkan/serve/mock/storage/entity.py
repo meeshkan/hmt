@@ -12,11 +12,10 @@ def replace_path(expression, doc, val):
     if isinstance(expression, Fields):
         doc[expression.fields[0]] = val
     else:
-        occurencies = expression.left.find(doc)
-        if len(occurencies) == 0:
-            raise Exception()
+        occurrencies = expression.left.find(doc)
+        assert len(occurrencies) > 0, "Got empty occurrencies list"
 
-        for place in occurencies:
+        for place in occurrencies:
             place.value[expression.right.fields[0]] = val
 
     return doc
