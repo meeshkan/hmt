@@ -66,7 +66,7 @@ class StatefulFaker(StatelessFaker):
 
     def _fake_ref(self, faker_data: StatefulFakerData, schema: Any, depth: int):
         name = schema["$ref"].split("/")[2]
-        if faker_data.entity is not None and name == faker_data.entity.name:
+        if self._matches_entity(faker_data.entity, name):
             if faker_data.updated_data is not None:
                 return faker_data.updated_data
             else:
@@ -82,7 +82,7 @@ class StatefulFaker(StatelessFaker):
         self, faker_data: StatefulFakerData, schema: Any, depth: int, count: int
     ):
         name = schema["$ref"].split("/")[2]
-        if faker_data.entity is not None and name == faker_data.entity.name:
+        if self._matches_entity(faker_data.entity, name):
             return faker_data.entity.query(faker_data.path_item, faker_data.request)
         else:
             return [
@@ -98,3 +98,6 @@ class StatefulFaker(StatelessFaker):
             return entity.insert_from_request(path_item, request)
         elif operation_type == ApiOperation.UPSERT:
             return entity.upsert_from_request(path_item, request)
+
+    def _matches_entity(self, entity, ref_name):
+        return entity is not None and ref_name == entity.name
