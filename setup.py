@@ -66,7 +66,7 @@ DEV = BUNDLE_REQUIREMENTS + [
     "wheel",
 ]
 
-VERSION = "0.2.23"
+VERSION = "0.2.24"
 
 ENTRY_POINTS = ["meeshkan = meeshkan.__main__:cli"]
 
