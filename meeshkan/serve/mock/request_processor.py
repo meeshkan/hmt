@@ -4,16 +4,14 @@ import random
 from typing import Sequence
 
 from http_types import Request, Response
-from openapi_typed_2 import OpenAPIObject
 
 from meeshkan.serve.mock.callbacks import CallbackManager
-from meeshkan.serve.mock.faker import DefaultFaker
 from meeshkan.serve.mock.faker.faker_exception import FakerException
+from meeshkan.serve.mock.faker.stateful_faker import StatefulFaker
 from meeshkan.serve.mock.matcher import match_request_to_openapi
 from meeshkan.serve.mock.rest import RestMiddlewareManager
 from meeshkan.serve.mock.security import match_to_security_schemes
 from meeshkan.serve.mock.specs import OpenAPISpecification
-from meeshkan.serve.mock.storage.mock_data import MockData
 from meeshkan.serve.mock.storage.mock_data_store import MockDataStore
 
 logger = logging.getLogger(__name__)
@@ -33,7 +31,7 @@ class RequestProcessor:
         self._mock_data_store = mock_data_store
         self._callback_manager = callback_manager
         self._rest_middleware_manager = rest_middleware_manager
-        self._faker = DefaultFaker()
+        self._faker = StatefulFaker(self._mock_data_store)
 
         for spec in specs:
             self._mock_data_store.add_mock(spec.source, spec.api)
@@ -51,9 +49,9 @@ class RequestProcessor:
             timestamp=None,
         )
 
-    def _match_response(self, spec: OpenAPIObject, storage: MockData, request: Request):
+    def _match_response(self, spec: OpenAPISpecification, request: Request):
         try:
-            return self._faker.process(spec, storage, request)
+            return self._faker.process(spec, request)
         except FakerException as e:
             return self.match_error(str(e), request)
 
@@ -98,5 +96,5 @@ class RequestProcessor:
             return self.match_error(path_error, request)
 
         storage = self._mock_data_store[spec.source]
-        response = self._match_response(spec.api, storage, request)
+        response = self._match_response(spec, request)
         return self._callback_manager(request, response, storage)

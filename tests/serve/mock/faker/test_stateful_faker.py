@@ -2,12 +2,12 @@ from http_types import RequestBuilder
 
 from meeshkan.serve.mock.faker.stateful_faker import StatefulFaker
 from meeshkan.serve.mock.matcher import valid_schema
-from meeshkan.serve.mock.storage.mock_data import MockData
+from meeshkan.serve.mock.specs import OpenAPISpecification
 from tests.util import spec
 
 
-def test_faker_1():
-    faker = StatefulFaker()
+def test_faker_1(mock_data_store):
+    faker = StatefulFaker(mock_data_store)
 
     request = RequestBuilder.from_dict(
         dict(method="get", protocol="http", path="/", host="api.com")
@@ -25,13 +25,16 @@ def test_faker_1():
             },
         },
     }
-    res = faker.process(spec(response_schema=schema), MockData(), request)
+    res = faker.process(
+        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        request,
+    )
 
     assert valid_schema(res.bodyAsJson, schema)
 
 
-def test_faker_data():
-    faker = StatefulFaker()
+def test_faker_data(mock_data_store):
+    faker = StatefulFaker(mock_data_store)
 
     request = RequestBuilder.from_dict(
         dict(method="get", protocol="http", path="/", host="api.com")
@@ -54,15 +57,18 @@ def test_faker_data():
     }
 
     res = faker.process(
-        spec(response_schema=schema, components=components), MockData(), request
+        OpenAPISpecification(
+            source="default", api=spec(response_schema=schema, components=components)
+        ),
+        request,
     )
 
     schema["components"] = components
     assert valid_schema(res.bodyAsJson, schema)
 
 
-def test_faker_2():
-    faker = StatefulFaker()
+def test_faker_2(mock_data_store):
+    faker = StatefulFaker(mock_data_store)
 
     request = RequestBuilder.from_dict(
         dict(method="get", protocol="http", path="/", host="api.com")
@@ -83,13 +89,16 @@ def test_faker_2():
             },
         },
     }
-    res = faker.process(spec(response_schema=schema), MockData(), request)
+    res = faker.process(
+        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        request,
+    )
 
     assert valid_schema(res.bodyAsJson, schema)
 
 
-def test_faker_3():
-    faker = StatefulFaker()
+def test_faker_3(mock_data_store):
+    faker = StatefulFaker(mock_data_store)
 
     request = RequestBuilder.from_dict(
         dict(method="get", protocol="http", path="/", host="api.com")
@@ -107,13 +116,16 @@ def test_faker_3():
             "longitude": {"type": "number", "minimum": -180.0, "maximum": 180.0},
         },
     }
-    res = faker.process(spec(response_schema=schema), MockData(), request)
+    res = faker.process(
+        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        request,
+    )
 
     assert valid_schema(res.bodyAsJson, schema)
 
 
-def test_faker_4():
-    faker = StatefulFaker()
+def test_faker_4(mock_data_store):
+    faker = StatefulFaker(mock_data_store)
 
     request = RequestBuilder.from_dict(
         dict(method="get", protocol="http", path="/", host="api.com")
@@ -151,21 +163,27 @@ def test_faker_4():
         }
     }
     res = faker.process(
-        spec(response_schema=schema, components=components), MockData(), request
+        OpenAPISpecification(
+            source="default", api=spec(response_schema=schema, components=components)
+        ),
+        request,
     )
 
     schema["components"] = components
     assert valid_schema(res.bodyAsJson, schema)
 
 
-def test_faker_5():
-    faker = StatefulFaker()
+def test_faker_5(mock_data_store):
+    faker = StatefulFaker(mock_data_store)
 
     request = RequestBuilder.from_dict(
         dict(method="get", protocol="http", path="/", host="api.com")
     )
 
     schema = {"type": "array"}
-    res = faker.process(spec(response_schema=schema), MockData(), request)
+    res = faker.process(
+        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        request,
+    )
 
     assert valid_schema(res.bodyAsJson, schema)

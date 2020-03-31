@@ -23,24 +23,28 @@ from meeshkan.serve.mock.matcher import (
     get_response_from_ref,
     ref_name,
 )
-from meeshkan.serve.mock.storage.entity import Entity
-from meeshkan.serve.mock.storage.mock_data import MockData
-from meeshkan.serve.utils.opanapi_utils import get_x
+from meeshkan.serve.mock.specs import OpenAPISpecification
 
 
-@dataclass
+@dataclass(frozen=True)
 class FakerData:
-    spec: OpenAPIObject
+    """
+    Common data passed through recursion steps in the StatelessFaker object.
+    """
+
+    spec: OpenAPISpecification
     path_item: str
     method: Operation
     schema: typing.Dict
     request: Request
-    entity: typing.Optional[Entity]
-    storage: MockData
-    updated_data: typing.Optional[typing.Any]
 
 
 class StatelessFaker(FakerBase):
+    """
+    A stateless implementation of the BaseFaker interface. Generates random data according to a spec. Doesn't use any kind of
+    internal states and storages.
+    """
+
     _text_faker: Faker
 
     _LO = -99999999
@@ -55,11 +59,9 @@ class StatelessFaker(FakerBase):
     def __init__(self):
         self._text_faker = Faker()
 
-    def process(self, spec: OpenAPIObject, storage: MockData, request: Request) -> Any:
-        path_item, path_candidate = random.choice([x for x in spec.paths.items()])
+    def process(self, spec: OpenAPISpecification, request: Request) -> Any:
+        path_item, path_candidate = random.choice([x for x in spec.api.paths.items()])
 
-        entity_name = get_x(path_candidate, "x-meeshkan-entity")
-        entity = storage.get_entity(entity_name) if entity_name is not None else None
         method = getattr(path_candidate, request.method.value, None)
 
         if method is None:
@@ -72,7 +74,7 @@ class StatelessFaker(FakerBase):
         status_code = int(status_code if status_code != "default" else 400)
 
         response = (
-            get_response_from_ref(spec, ref_name(response))
+            get_response_from_ref(spec.api, ref_name(response))
             if isinstance(response, Reference)
             else response
         )
@@ -100,11 +102,8 @@ class StatelessFaker(FakerBase):
                 spec=spec,
                 path_item=path_item,
                 method=method,
-                schema=self._build_full_schema(content.schema, spec),
+                schema=self._build_full_schema(content.schema, spec.api),
                 request=request,
-                entity=entity,
-                storage=storage,
-                updated_data=None,
             )
 
             return self._fake_json(status_code, new_headers, faker_data)
@@ -288,14 +287,14 @@ class StatelessFaker(FakerBase):
 
     def _fake_ref(self, faker_data: FakerData, schema: Any, depth: int):
         name = schema["$ref"].split("/")[2]
-        return self._fake_it(faker_data.schema["definitions"][name], depth)
+        return self._fake_it(faker_data, faker_data.schema["definitions"][name], depth)
 
     def _fake_ref_array(
         self, faker_data: FakerData, schema: Any, depth: int, count: int
     ):
         name = schema["$ref"].split("/")[2]
         return [
-            self._fake_it(faker_data.schema["definitions"][name], depth)
+            self._fake_it(faker_data, faker_data.schema["definitions"][name], depth)
             for _ in range(count)
         ]
 

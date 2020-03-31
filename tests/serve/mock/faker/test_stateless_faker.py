@@ -2,7 +2,7 @@ from http_types import RequestBuilder
 
 from meeshkan.serve.mock.faker.stateless_faker import StatelessFaker
 from meeshkan.serve.mock.matcher import valid_schema
-from meeshkan.serve.mock.storage.mock_data import MockData
+from meeshkan.serve.mock.specs import OpenAPISpecification
 from tests.util import spec
 
 
@@ -25,7 +25,10 @@ def test_faker_1():
             },
         },
     }
-    res = faker.process(spec(response_schema=schema), MockData(), request)
+    res = faker.process(
+        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        request,
+    )
     assert valid_schema(res.bodyAsJson, schema)
 
 
@@ -51,7 +54,10 @@ def test_faker_2():
             },
         },
     }
-    res = faker.process(spec(response_schema=schema), MockData(), request)
+    res = faker.process(
+        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        request,
+    )
 
     assert valid_schema(res.bodyAsJson, schema)
 
@@ -75,7 +81,10 @@ def test_faker_3():
             "longitude": {"type": "number", "minimum": -180.0, "maximum": 180.0},
         },
     }
-    res = faker.process(spec(response_schema=schema), MockData(), request)
+    res = faker.process(
+        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        request,
+    )
 
     assert valid_schema(res.bodyAsJson, schema)
 
@@ -119,7 +128,10 @@ def test_faker_4():
         }
     }
     res = faker.process(
-        spec(response_schema=schema, components=components), MockData(), request
+        OpenAPISpecification(
+            source="default", api=spec(response_schema=schema, components=components)
+        ),
+        request,
     )
 
     schema["components"] = components
@@ -134,6 +146,9 @@ def test_faker_5():
     )
 
     schema = {"type": "array"}
-    res = faker.process(spec(response_schema=schema), MockData(), request)
+    res = faker.process(
+        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        request,
+    )
 
     assert valid_schema(res.bodyAsJson, schema)

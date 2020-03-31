@@ -5,7 +5,7 @@ from openapi_typed_2 import OpenAPIObject
 
 from meeshkan.serve.mock.storage.entity import Entity
 from meeshkan.serve.mock.storage.mock_data import MockData
-from meeshkan.serve.utils.opanapi_utils import get_x
+from meeshkan.serve.utils.opanapi_ext import get_x
 
 logger = logging.getLogger(__name__)
 

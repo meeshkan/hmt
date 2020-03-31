@@ -1,28 +1,64 @@
-import dataclasses
 import typing
+from dataclasses import dataclass
 
 from http_types import Request
 from openapi_typed_2 import Any, Operation
 
 from meeshkan.serve.mock.faker.stateless_faker import FakerData, StatelessFaker
 from meeshkan.serve.mock.storage.entity import Entity
-from meeshkan.serve.utils.opanapi_utils import get_x
+from meeshkan.serve.utils.opanapi_ext import ApiOperation, get_x
+
+
+@dataclass(frozen=True)
+class StatefulFakerData(FakerData):
+    """
+    Common data passed through recursion steps in the StatefulFaker object.
+    """
+
+    entity: typing.Optional[Entity]
+    updated_data: typing.Optional[typing.Any]
 
 
 class StatefulFaker(StatelessFaker):
+    """
+    A stateful implementation of the BaseFaker interface. It requires an extended spec with x-meeshkan fields defined
+    to automatically implement stateful logic. For specs without meeshkan extensions
+    it works the same way as the StatelessFaker.
+    """
+
+    def __init__(self, mock_data_store):
+        super().__init__()
+        self._mock_data_store = mock_data_store
+
     def _fake_json(
         self, status_code: int, headers: typing.Mapping[str, str], faker_data: FakerData
     ):
-        updated_data = self._update_data(
-            faker_data.path_item,
-            faker_data.method,
-            faker_data.request,
-            faker_data.entity,
+        entity_name = get_x(
+            faker_data.spec.api.paths[faker_data.path_item], "x-meeshkan-entity"
         )
-        faker_data = dataclasses.replace(faker_data, updated_data=updated_data)
+        entity = (
+            self._mock_data_store[faker_data.spec.source].get_entity(entity_name)
+            if entity_name is not None
+            else None
+        )
+
+        updated_data = self._update_data(
+            faker_data.path_item, faker_data.method, faker_data.request, entity,
+        )
+
+        faker_data = StatefulFakerData(
+            spec=faker_data.spec,
+            path_item=faker_data.path_item,
+            method=faker_data.method,
+            schema=faker_data.schema,
+            request=faker_data.request,
+            updated_data=updated_data,
+            entity=entity,
+        )
+
         return super()._fake_json(status_code, headers, faker_data)
 
-    def _fake_ref(self, faker_data: FakerData, schema: Any, depth: int):
+    def _fake_ref(self, faker_data: StatefulFakerData, schema: Any, depth: int):
         name = schema["$ref"].split("/")[2]
         if faker_data.entity is not None and name == faker_data.entity.name:
             if faker_data.updated_data is not None:
@@ -37,7 +73,7 @@ class StatefulFaker(StatelessFaker):
             )
 
     def _fake_ref_array(
-        self, faker_data: FakerData, schema: Any, depth: int, count: int
+        self, faker_data: StatefulFakerData, schema: Any, depth: int, count: int
     ):
         name = schema["$ref"].split("/")[2]
         if faker_data.entity is not None and name == faker_data.entity.name:
@@ -51,8 +87,8 @@ class StatefulFaker(StatelessFaker):
     def _update_data(
         self, path_item: str, method: Operation, request: Request, entity: Entity
     ):
-        operation_type = get_x(method, "x-meeshkan-operation")
-        if operation_type == "insert":
+        operation_type = ApiOperation(get_x(method, "x-meeshkan-operation", "unknown"))
+        if operation_type == ApiOperation.INSERT:
             return entity.insert_from_request(path_item, request)
-        elif operation_type == "upsert":
+        elif operation_type == ApiOperation.UPSERT:
             return entity.upsert_from_request(path_item, request)
