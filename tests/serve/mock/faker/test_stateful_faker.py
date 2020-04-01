@@ -5,7 +5,7 @@ from meeshkan.serve.mock.matcher import valid_schema
 from meeshkan.serve.mock.specs import OpenAPISpecification
 from tests.util import spec
 
-def test_faker_data(mock_data_store):
+def test_fake_array(mock_data_store):
     faker = StatefulFaker(mock_data_store)
 
     request = RequestBuilder.from_dict(
@@ -37,9 +37,10 @@ def test_faker_data(mock_data_store):
 
     schema["components"] = components
     assert valid_schema(res.bodyAsJson, schema)
-    assert 0 == len(schema)
 
-    
+    api = dict_spec(response_schema=schema, components=components)
+
+
 
 def test_sateless_faker_1(mock_data_store):
     faker = StatefulFaker(mock_data_store)
