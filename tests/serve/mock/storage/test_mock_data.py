@@ -31,7 +31,7 @@ def test_add():
 
     spec = convert_to_OpenAPIObject(spec)
 
-    entity = Entity("item", spec.components.schemas["item"])
+    entity = Entity("item", spec)
 
     mock_data = MockData()
     mock_data.add_entity(entity)
@@ -72,7 +72,7 @@ def test_clear():
 
     spec = convert_to_OpenAPIObject(spec)
 
-    entity = Entity("item", spec.components.schemas["item"])
+    entity = Entity("item", spec)
 
     mock_data = MockData()
     mock_data.add_entity(entity)

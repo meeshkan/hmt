@@ -12,16 +12,25 @@ logger = logging.getLogger(__name__)
 
 
 class StorageView(RequestHandler):
-    SUPPORTED_METHODS = ["DELETE"]
+    SUPPORTED_METHODS = ["DELETE", "POST"]
 
     def initialize(self, mock_data_store: MockDataStore):
-        self.mock_data_store = mock_data_store
+        self._mock_data_store = mock_data_store
 
     def set_default_headers(self):
         self.set_header("Content-Type", 'application/json; charset="utf-8"')
 
-    def delete(self):
-        self.mock_data_store.clear()
+    def delete(self, command):
+        if command is not None:
+            self.set_status(501)
+        else:
+            self._mock_data_store.clear()
+
+    def post(self, command):
+        if command == "reset":
+            self._mock_data_store.reset()
+        else:
+            self.set_status(501)
 
 
 class ScopeView(RequestHandler):

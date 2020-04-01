@@ -3,9 +3,17 @@ import uuid
 
 from http_types import Request
 from jsonpath_rw import Fields, parse
-from openapi_typed_2 import Operation, PathItem, Reference, RequestBody
+from openapi_typed_2 import (
+    OpenAPIObject,
+    Operation,
+    PathItem,
+    Reference,
+    RequestBody,
+    convert_from_openapi,
+)
 
 from meeshkan.build.paths import _match_to_path
+from meeshkan.serve.utils.opanapi_ext import get_x
 
 
 def replace_path(expression, doc, val):
@@ -52,14 +60,16 @@ class EntityPathItem:
                     if "application/json" in request_body.content:
                         schema = request_body.content["application/json"].schema
                         if schema is not None:
-                            entity_path = self._find_entity(schema, "$")
+                            entity_path = self._find_entity(
+                                convert_from_openapi(schema), "$"
+                            )
                             if res is not None:
                                 res[method_name] = parse(entity_path)
         return res
 
     def _find_entity(self, schema, path):
-        if isinstance(schema, Reference):
-            name = schema._ref.split("/")[3]
+        if "$ref" in schema:
+            name = schema["$ref"].split("/")[3]
             if name == self._entity_name:
                 return path
         elif schema.get("type", None) == "array":
@@ -139,10 +149,14 @@ class Entity:
     to implement automatic insetion/extraction logic extracted from an OpenAPI spec.
     """
 
-    def __init__(self, name, schema):
+    def __init__(self, name: str, spec: OpenAPIObject):
         self._name = name
+        self._id_path = parse(spec.components.schemas[name]._x["x-meeshkan-id-path"])
+
         self._path_config: typing.Dict[str, EntityPathItem] = {}
-        self._id_path = parse(schema._x["x-meeshkan-id-path"])
+        for pathname, path_item in spec.paths.items():
+            if get_x(path_item, "x-meeshkan-entity") == self.name:
+                self.add_path(pathname, path_item)
 
         self._data = dict()
 
@@ -161,11 +175,8 @@ class Entity:
         :param request:
         :return:
         """
-        return [
-            x
-            for x in self._data.values()
-            if self._path_config[path_item].filter(request)
-        ]
+        filter = self._path_config[path_item].filter(request)
+        return [x for x in self._data.values() if filter(x)]
 
     def query_one(self, path_item: str, request: Request):
         """
@@ -202,6 +213,7 @@ class Entity:
         """
         id = self._extract_id(entity)
         self._data[id] = entity
+        return entity
 
     def upsert_from_request(self, path_item: str, request: Request) -> typing.Any:
         """
@@ -211,11 +223,15 @@ class Entity:
         :param request:
         :return:
         """
-        id = self._path_config[path_item].extract_id(request)
-        if id is None:
-            return self.insert_from_request(path_item, request)
+        entity_val = self._path_config[path_item].extract_entity(request)
+        id = self._extract_id(entity_val)
+        id = self._path_config[path_item].extract_id(request) if id is None else id
+        if id is None or id not in self._data:
+            id = self._generate_id() if id is None else id
+            entity_val = replace_path(self._id_path, entity_val, id)
+            self._data[id] = entity_val
+            return entity_val
         else:
-            entity_val = self._path_config[path_item].extract_entity(request)
             return self._merge(self._data[id], entity_val)
 
     def __getitem__(self, key):

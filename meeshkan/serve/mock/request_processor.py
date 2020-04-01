@@ -34,7 +34,7 @@ class RequestProcessor:
         self._faker = StatefulFaker(self._mock_data_store)
 
         for spec in specs:
-            self._mock_data_store.add_mock(spec.source, spec.api)
+            self._mock_data_store.add_mock(spec)
 
     def match_error(self, msg: str, req: Request):
         json_resp = {

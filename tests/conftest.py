@@ -54,7 +54,7 @@ def mocking_app(request_processor):
                     dict(
                         request_processor=request_processor(specs),
                         router=routing,
-                        log=log,
+                        http_log=log,
                     ),
                 )
             ]

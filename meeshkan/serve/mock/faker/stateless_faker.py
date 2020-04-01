@@ -215,11 +215,7 @@ class StatelessFaker(FakerBase):
                 ]
             }
         )
-        properties = (
-            []
-            if "properties" not in schema
-            else [x for x in schema["properties"].keys()]
-        )
+        properties = list(schema.get("properties", {}).keys())
         random.shuffle(properties)
         properties = (
             []

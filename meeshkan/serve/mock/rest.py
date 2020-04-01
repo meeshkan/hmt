@@ -42,7 +42,7 @@ class RestMiddlewareManager:
 
         out: List[OpenAPISpecification] = []
         for name, dict_spec in cs.items():
-            spec = convert_to_openapi(dict_spec)
-            self._mock_data_store.add_mock(name, spec)
-            out.append(OpenAPISpecification(spec, name))
+            spec = OpenAPISpecification(convert_to_openapi(dict_spec), name)
+            self._mock_data_store.add_mock(spec)
+            out.append(spec)
         return out

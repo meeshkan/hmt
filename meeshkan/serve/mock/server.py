@@ -68,7 +68,7 @@ class MockServer:
                     dict(
                         request_processor=self._request_processor,
                         router=self._routing,
-                        log=self._log,
+                        http_log=self._log,
                     ),
                 )
             ]

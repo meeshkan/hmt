@@ -28,7 +28,7 @@ def make_admin_app(
     return Application(
         [
             (r"/admin/scope", ScopeView, scope_view_deps),
-            (r"/admin/storage", StorageView, storage_view_deps),
+            (r"/admin/storage(?:/(.*))?", StorageView, storage_view_deps),
             (
                 r"/admin/middleware/rest/pregen",
                 RestMiddlewaresView,

@@ -2,6 +2,7 @@
 	"components": {
 		"schemas": {
 			"account": {
+				"x-meeshkan-id-path": "accountId",
 				"required": ["_links", "accountId", "balance", "currency", "identifier", "identifierScheme", "name", "nickname", "servicerIdentifier", "servicerScheme"],
 				"properties": {
 					"accountId": {
@@ -56,11 +57,10 @@
 						"type": "object"
 					}
 				},
-				"type": "object",
-				"x-meeshkan-id-path": "accountId"
+				"type": "object"
 			},
 			"payment": {
-				"required": ["amount", "currency", "payerIban", "paymentId", "receiverBic", "receiverIban", "receiverName", "subject", "valueDate"],
+				"required": [],
 				"properties": {
 					"amount": {
 						"type": "integer"
@@ -331,7 +331,6 @@
 		},
 		"/accounts/v3/accounts/{id}": {
 			"x-meeshkan-entity": "account",
-			"x-meeshkan-id-path": "accountId",
 			"summary": "Path summary",
 			"description": "Path description",
 			"parameters": [{
@@ -453,7 +452,6 @@
 		},
 		"/accounts/v3/accounts": {
 			"x-meeshkan-entity": "account",
-			"x-meeshkan-id-path": "accountId",
 			"summary": "Path summary",
 			"description": "Path description",
 			"get": {

@@ -31,8 +31,7 @@ def test_insert():
 
     spec = convert_to_OpenAPIObject(spec)
 
-    entity = Entity("item", spec.components.schemas["item"])
-    entity.add_path("/items/{id}", spec.paths["/items/{id}"])
+    entity = Entity("item", spec)
     entity.insert({"foo": 10, "bar": "val", "itemId": "id123"})
     res = entity["id123"]
     assert 10 == res["foo"]
@@ -68,8 +67,7 @@ def test_insert_from_request():
 
     spec = convert_to_OpenAPIObject(spec)
 
-    entity = Entity("item", spec.components.schemas["item"])
-    entity.add_path("/items/create", spec.paths["/items/create"])
+    entity = Entity("item", spec)
 
     request = RequestBuilder.from_dict(
         dict(
@@ -132,8 +130,7 @@ def test_upsert_from_request():
 
     spec = convert_to_OpenAPIObject(spec)
 
-    entity = Entity("item", spec.components.schemas["item"])
-    entity.add_path("/items/create", spec.paths["/items/create"])
+    entity = Entity("item", spec)
 
     request = RequestBuilder.from_dict(
         dict(
@@ -208,9 +205,7 @@ def test_query():
 
     spec = convert_to_OpenAPIObject(spec)
 
-    entity = Entity("item", spec.components.schemas["item"])
-    entity.add_path("/items/{id}", spec.paths["/items/{id}"])
-    entity.add_path("/items", spec.paths["/items"])
+    entity = Entity("item", spec)
 
     entity.insert({"foo": 10, "bar": "val", "itemId": "id123"})
     entity.insert({"foo": 20, "bar": "val1", "itemId": "id1234"})

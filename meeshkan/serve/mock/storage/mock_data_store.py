@@ -3,6 +3,7 @@ import typing
 
 from openapi_typed_2 import OpenAPIObject
 
+from meeshkan.serve.mock.specs import OpenAPISpecification
 from meeshkan.serve.mock.storage.entity import Entity
 from meeshkan.serve.mock.storage.mock_data import MockData
 from meeshkan.serve.utils.opanapi_ext import get_x
@@ -18,22 +19,25 @@ class MockDataStore:
     def __init__(self):
         self._storages: typing.Dict[str, MockData] = dict()
         self._default = dict()
+        self._specs = dict()
 
-    def add_mock(self, mockname: str, spec: OpenAPIObject):
+    def add_mock(self, spec: OpenAPISpecification):
         """
         Adds a mock. The method automatically creates entities defined in an OpenAPI spec and populates them with
         data if it is defined in the spec.
         :param mockname: a name of a mock
         :param spec: an OpenAPI spec
         """
-        storage = MockData()
-        self._storages[mockname] = storage
-        if spec.components is not None and spec.components.schemas is not None:
-            for name, schema in spec.components.schemas.items():
-                if get_x(schema, "x-meeshkan-id-path") is not None:
-                    storage.add_entity(Entity(name, schema))
+        self._specs[spec.source] = spec
 
-        for entity, values in get_x(spec, "x-meeshkan-data", dict()).items():
+        storage = MockData()
+        self._storages[spec.source] = storage
+        if spec.api.components is not None and spec.api.components.schemas is not None:
+            for name, schema in spec.api.components.schemas.items():
+                if get_x(schema, "x-meeshkan-id-path") is not None:
+                    storage.add_entity(Entity(name, spec.api))
+
+        for entity, values in get_x(spec.api, "x-meeshkan-data", dict()).items():
             for val in values:
                 storage.get_entity(entity).insert(val)
 
@@ -45,6 +49,15 @@ class MockDataStore:
             storage.clear()
         self._default.clear()
         logger.debug("All storages cleared")
+
+    def reset(self):
+        self.clear()
+        for spec in self._specs.values():
+            storage = self._storages[spec.source]
+            for entity, values in get_x(spec.api, "x-meeshkan-data", dict()).items():
+                entity = storage.get_entity(entity)
+                for val in values:
+                    entity.insert(val)
 
     @property
     def default(self):
