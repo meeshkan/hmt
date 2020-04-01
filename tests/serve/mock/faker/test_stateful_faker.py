@@ -5,34 +5,6 @@ from meeshkan.serve.mock.matcher import valid_schema
 from meeshkan.serve.mock.specs import OpenAPISpecification
 from tests.util import spec
 
-
-def test_faker_1(mock_data_store):
-    faker = StatefulFaker(mock_data_store)
-
-    request = RequestBuilder.from_dict(
-        dict(method="get", protocol="http", path="/", host="api.com")
-    )
-
-    schema = {
-        "type": "array",
-        "items": {
-            "type": "object",
-            "required": ["foo", "baz"],
-            "properties": {
-                "foo": {"type": "number"},
-                "bar": {"type": "string"},
-                "baz": {"type": "string"},
-            },
-        },
-    }
-    res = faker.process(
-        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
-        request,
-    )
-
-    assert valid_schema(res.bodyAsJson, schema)
-
-
 def test_faker_data(mock_data_store):
     faker = StatefulFaker(mock_data_store)
 
@@ -65,9 +37,38 @@ def test_faker_data(mock_data_store):
 
     schema["components"] = components
     assert valid_schema(res.bodyAsJson, schema)
+    assert 0 == len(schema)
+
+    
+
+def test_sateless_faker_1(mock_data_store):
+    faker = StatefulFaker(mock_data_store)
+
+    request = RequestBuilder.from_dict(
+        dict(method="get", protocol="http", path="/", host="api.com")
+    )
+
+    schema = {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "required": ["foo", "baz"],
+            "properties": {
+                "foo": {"type": "number"},
+                "bar": {"type": "string"},
+                "baz": {"type": "string"},
+            },
+        },
+    }
+    res = faker.process(
+        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        request,
+    )
+
+    assert valid_schema(res.bodyAsJson, schema)
 
 
-def test_faker_2(mock_data_store):
+def test_sateless_faker_2(mock_data_store):
     faker = StatefulFaker(mock_data_store)
 
     request = RequestBuilder.from_dict(
@@ -97,7 +98,7 @@ def test_faker_2(mock_data_store):
     assert valid_schema(res.bodyAsJson, schema)
 
 
-def test_faker_3(mock_data_store):
+def test_sateless_faker_3(mock_data_store):
     faker = StatefulFaker(mock_data_store)
 
     request = RequestBuilder.from_dict(
@@ -124,7 +125,7 @@ def test_faker_3(mock_data_store):
     assert valid_schema(res.bodyAsJson, schema)
 
 
-def test_faker_4(mock_data_store):
+def test_sateless_faker_4(mock_data_store):
     faker = StatefulFaker(mock_data_store)
 
     request = RequestBuilder.from_dict(
@@ -173,7 +174,7 @@ def test_faker_4(mock_data_store):
     assert valid_schema(res.bodyAsJson, schema)
 
 
-def test_faker_5(mock_data_store):
+def test_sateless_faker_5(mock_data_store):
     faker = StatefulFaker(mock_data_store)
 
     request = RequestBuilder.from_dict(
