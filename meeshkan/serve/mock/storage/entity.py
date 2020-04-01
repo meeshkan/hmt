@@ -7,7 +7,6 @@ from openapi_typed_2 import (
     OpenAPIObject,
     Operation,
     PathItem,
-    Reference,
     RequestBody,
     convert_from_openapi,
 )

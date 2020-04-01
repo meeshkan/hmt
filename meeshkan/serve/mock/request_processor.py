@@ -33,9 +33,6 @@ class RequestProcessor:
         self._rest_middleware_manager = rest_middleware_manager
         self._faker = StatefulFaker(self._mock_data_store)
 
-        for spec in specs:
-            self._mock_data_store.add_mock(spec)
-
     def match_error(self, msg: str, req: Request):
         json_resp = {
             "message": "%s. Here is the full request: host=%s, path=%s, method=%s."

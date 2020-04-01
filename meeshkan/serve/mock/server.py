@@ -44,6 +44,9 @@ class MockServer:
         if callback_dir is not None:
             callback_manager.load(callback_dir)
 
+        for spec in specs:
+            self._mock_data_store.add_mock(spec)
+
         self._request_processor = RequestProcessor(
             self._specs,
             self._mock_data_store,

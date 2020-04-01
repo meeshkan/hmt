@@ -28,6 +28,9 @@ def rest_middleware_manager(mock_data_store):
 @pytest.fixture()
 def request_processor(mock_data_store, rest_middleware_manager):
     def _rp(specs):
+        for spec in specs:
+            mock_data_store.add_mock(spec)
+
         return RequestProcessor(
             specs, mock_data_store, callback_manager, rest_middleware_manager
         )

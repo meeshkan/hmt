@@ -1,7 +1,6 @@
+import copy
 import logging
 import typing
-
-from openapi_typed_2 import OpenAPIObject
 
 from meeshkan.serve.mock.specs import OpenAPISpecification
 from meeshkan.serve.mock.storage.entity import Entity
@@ -39,7 +38,7 @@ class MockDataStore:
 
         for entity, values in get_x(spec.api, "x-meeshkan-data", dict()).items():
             for val in values:
-                storage.get_entity(entity).insert(val)
+                storage.get_entity(entity).insert(copy.deepcopy(val))
 
     def __getitem__(self, mockname):
         return self._storages[mockname]
@@ -57,7 +56,7 @@ class MockDataStore:
             for entity, values in get_x(spec.api, "x-meeshkan-data", dict()).items():
                 entity = storage.get_entity(entity)
                 for val in values:
-                    entity.insert(val)
+                    entity.insert(copy.deepcopy(val))
 
     @property
     def default(self):

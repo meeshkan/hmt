@@ -40,9 +40,12 @@ class RestMiddlewareManager:
             res = requests.post(endpoint, json={"request": req, "schemas": cs})
             cs = res.json()
 
-        out: List[OpenAPISpecification] = []
-        for name, dict_spec in cs.items():
-            spec = OpenAPISpecification(convert_to_openapi(dict_spec), name)
+        out = [
+            OpenAPISpecification(convert_to_openapi(dict_spec), name)
+            for name, dict_spec in cs.items()
+        ]
+
+        for spec in out:
             self._mock_data_store.add_mock(spec)
-            out.append(spec)
+
         return out
