@@ -26,7 +26,7 @@ REQUIRED = [
     "faker",
     "requests",
     "typing-extensions",
-    "openapi-typed_2>=0.0.3",
+    "openapi-typed_2>=0.0.4",
     "typeguard>=2.7.0",
     "genson",
     "http-types>=0.0.15,<0.1.0",
