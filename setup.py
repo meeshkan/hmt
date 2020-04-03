@@ -53,6 +53,7 @@ DEV = BUNDLE_REQUIREMENTS + [
     "flake8",
     "isort",
     "mypy",
+    "pre-commit",
     "pyhamcrest",
     "pylint",
     "pytest",
