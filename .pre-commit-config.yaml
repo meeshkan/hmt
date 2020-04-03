@@ -3,6 +3,7 @@ repos:
     rev: v2.1.0
     hooks:
       - id: seed-isort-config
+    args: [--exclude=tests/.*\.py]
   - repo: https://github.com/timothycrosley/isort
     rev: 4.3.21
     hooks:
