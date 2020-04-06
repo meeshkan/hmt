@@ -2,7 +2,6 @@ import typing
 import uuid
 
 from http_types import Request
-from jsonpath_rw import Fields, parse
 from openapi_typed_2 import (
     OpenAPIObject,
     Operation,
@@ -11,8 +10,9 @@ from openapi_typed_2 import (
     convert_from_openapi,
 )
 
+from jsonpath_rw import Fields, parse
 from meeshkan.build.paths import _match_to_path
-from meeshkan.serve.utils.opanapi_ext import get_x
+from meeshkan.serve.utils.opanapi_ext import ApiOperation, get_x
 
 
 def replace_path(expression, doc, val):
@@ -46,24 +46,23 @@ class EntityPathItem:
         res = {}
         for method_name in self.methods:
             method: Operation = getattr(path_item, method_name)
-            if (
-                method is not None
-                and method._x is not None
-                and "x-meeshkan-operation" in method._x
-            ):
-                if (
-                    method._x["x-meeshkan-operation"] == "insert"
-                    or method._x["x-meeshkan-operation"] == "upsert"
-                ):
-                    request_body = typing.cast(RequestBody, method.requestBody)
-                    if "application/json" in request_body.content:
-                        schema = request_body.content["application/json"].schema
-                        if schema is not None:
-                            entity_path = self._find_entity(
-                                convert_from_openapi(schema), "$"
-                            )
-                            if res is not None:
-                                res[method_name] = parse(entity_path)
+            operation = (
+                ApiOperation.UNKNOWN
+                if method is None
+                else ApiOperation(
+                    get_x(method, "x-meeshkan-operation", ApiOperation.UNKNOWN)
+                )
+            )
+            if operation == ApiOperation.UPSERT or operation == ApiOperation.INSERT:
+                request_body = typing.cast(RequestBody, method.requestBody)
+                if "application/json" in request_body.content:
+                    schema = request_body.content["application/json"].schema
+                    if schema is not None:
+                        entity_path = self._find_entity(
+                            convert_from_openapi(schema), "$"
+                        )
+                        if res is not None:
+                            res[method_name] = parse(entity_path)
         return res
 
     def _find_entity(self, schema, path):
