@@ -6,7 +6,7 @@ from yaml import safe_load
 
 @pytest.fixture
 def schema():
-    with open("/tests/build/schemas/petstore/index.yaml", "r") as f:
+    with open("tests/build/schemas/petstore/index.yaml", "r") as f:
         oas = convert_to_openapi(safe_load(f.read()))
         return oas
 
@@ -20,6 +20,8 @@ def test_path_to_regex():
     assert_that("/pets/32", matches_regexp(as_regex))
     assert_that("/pets/32?id=3", matches_regexp(as_regex))
     assert_that("/pets/32#reference", matches_regexp(as_regex))
+    assert_that("/pets/32-dmff.kkf9", matches_regexp(as_regex))
+    assert_that("/pets/d%C3%BCsseldorf", matches_regexp(as_regex))
 
     assert_that("/pets/32/", not_(matches_regexp(as_regex)))
 
