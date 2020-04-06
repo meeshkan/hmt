@@ -192,7 +192,7 @@ def find_matching_path(request_path: str, paths: Paths, request_method: str, ope
     return None
 
 
-PATH_PARAMETER_REGEX = r"""(\w+)"""
+PATH_PARAMETER_REGEX = r"""([^/]+)"""
 
 
 def path_to_regex(path: str) -> Tuple[Pattern[str], Tuple[str]]:
