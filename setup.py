@@ -123,7 +123,8 @@ BLACK_FORMAT_COMMAND = "black ."
 ISORT_FORMAT_COMMAND = "isort -y"
 
 BLACK_CHECK_COMMAND = "black --check ."
-ISORT_CHECK_COMMAND = "isort --check-only -vb"
+ISORT_CHECK_COMMAND = "isort --check-only"
+
 
 def build():
     run_sys_command(BUILD_COMMAND, "Build failed")
