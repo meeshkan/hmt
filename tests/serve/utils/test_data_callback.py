@@ -4,11 +4,11 @@ import shutil
 
 import pytest
 from http_types import HttpExchangeReader, RequestBuilder, ResponseBuilder
-from openapi_typed_2 import convert_from_openapi, convert_to_openapi
 
 from meeshkan import UpdateMode
 from meeshkan.build.builder import BASE_SCHEMA
 from meeshkan.serve.utils.data_callback import RequestLoggingCallback
+from openapi_typed_2 import convert_from_openapi, convert_to_openapi
 
 
 @pytest.fixture()

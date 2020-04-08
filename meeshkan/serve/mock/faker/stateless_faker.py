@@ -7,13 +7,6 @@ from typing import Any, Mapping, Sequence, Union, cast
 
 from faker import Faker
 from http_types import Request, Response
-from openapi_typed_2 import (
-    OpenAPIObject,
-    Operation,
-    Reference,
-    Schema,
-    convert_from_openapi,
-)
 
 from meeshkan.serve.mock.faker.faker_base import FakerBase
 from meeshkan.serve.mock.faker.faker_exception import FakerException
@@ -24,6 +17,13 @@ from meeshkan.serve.mock.matcher import (
     ref_name,
 )
 from meeshkan.serve.mock.specs import OpenAPISpecification
+from openapi_typed_2 import (
+    OpenAPIObject,
+    Operation,
+    Reference,
+    Schema,
+    convert_from_openapi,
+)
 
 
 @dataclass(frozen=True)

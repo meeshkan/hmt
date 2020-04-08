@@ -1,9 +1,9 @@
 from http_types import RequestBuilder
-from openapi_typed_2 import convert_to_OpenAPIObject
 
 from meeshkan.serve.mock.faker.stateful_faker import StatefulFaker
 from meeshkan.serve.mock.matcher import valid_schema
 from meeshkan.serve.mock.specs import OpenAPISpecification
+from openapi_typed_2 import convert_to_OpenAPIObject
 from tests.util import spec, spec_dict
 
 

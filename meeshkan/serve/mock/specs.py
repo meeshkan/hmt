@@ -5,8 +5,9 @@ from typing import Sequence, Union
 
 import requests
 import yaml
-from openapi_typed_2 import OpenAPIObject, convert_to_openapi
 from requests.exceptions import RequestException
+
+from openapi_typed_2 import OpenAPIObject, convert_to_openapi
 
 
 @dataclass

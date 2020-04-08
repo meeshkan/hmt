@@ -1,6 +1,7 @@
 from typing import Sequence
 
 import requests_mock
+
 from meeshkan.serve.mock.specs import OpenAPISpecification, load_specs
 
 spec_directory = "tests/serve/mock/schemas/petstore"
