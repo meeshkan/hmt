@@ -6,7 +6,6 @@ from typing import Sequence, Union
 import requests
 from openapi_typed_2 import OpenAPIObject, convert_to_openapi
 from requests.exceptions import RequestException
-
 import yaml
 
 
