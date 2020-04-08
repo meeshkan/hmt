@@ -123,7 +123,7 @@ BLACK_FORMAT_COMMAND = "black ."
 ISORT_FORMAT_COMMAND = "isort -y"
 
 BLACK_CHECK_COMMAND = "black --check ."
-ISORT_CHECK_COMMAND = "isort --check-only"
+ISORT_CHECK_COMMAND = "isort --check-only -vb"
 
 ISORT_VERSION_COMMAND = "isort -v"
 
