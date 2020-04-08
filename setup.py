@@ -121,6 +121,7 @@ LINT_COMMAND = "flake8 --exclude .git,.venv,__pycache__,build,dist"
 
 BLACK_FORMAT_COMMAND = "black ."
 ISORT_FORMAT_COMMAND = "isort -y"
+
 BLACK_CHECK_COMMAND = "black --check ."
 ISORT_CHECK_COMMAND = "isort --check-only"
 
