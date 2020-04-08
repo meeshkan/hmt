@@ -5,6 +5,7 @@ from typing import Mapping, Sequence, Union, cast
 
 from faker import Faker
 from http_types import Request, Response
+
 from openapi_typed_2 import Reference, convert_from_openapi
 
 from .faker import fake_it

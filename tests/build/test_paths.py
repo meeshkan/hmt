@@ -1,4 +1,4 @@
-from meeshkan.build.paths import path_to_regex, find_matching_path
+from meeshkan.build.paths import path_to_regex, find_matching_path, _match_to_path
 from hamcrest import *
 from openapi_typed_2 import convert_to_Operation, convert_to_openapi
 import pytest
@@ -49,4 +49,18 @@ def test_match_paths(schema):
     path_item, parameters = match_result.path, match_result.param_mapping
 
     assert_that(path_item, equal_to(expected_path_item))
+    assert_that(parameters, has_entry('petId', '32'))
+
+def test_match_paths_reference():
+    request_path = "/pets/32#reference"
+    path = '/pets/{petId}#{ref}'
+
+    parameters = _match_to_path(request_path, path)
+
+    assert_that(parameters, has_entry('petId', '32'))
+    assert_that(parameters, has_entry('ref', 'reference'))
+
+    path = '/pets/{petId}'
+
+    parameters = _match_to_path(request_path, path)
     assert_that(parameters, has_entry('petId', '32'))
