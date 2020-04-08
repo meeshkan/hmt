@@ -2,11 +2,11 @@ import typing
 from dataclasses import dataclass
 
 from http_types import Request
+from openapi_typed_2 import Any, Operation
 
 from meeshkan.serve.mock.faker.stateless_faker import FakerData, StatelessFaker
 from meeshkan.serve.mock.storage.entity import Entity
 from meeshkan.serve.utils.opanapi_ext import ApiOperation, get_x
-from openapi_typed_2 import Any, Operation
 
 
 @dataclass(frozen=True)

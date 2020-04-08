@@ -19,9 +19,6 @@ import jsonschema
 import lenses
 from http_types import Request
 from lenses import lens
-
-from meeshkan.build.operation import operation_from_string
-from meeshkan.serve.mock.specs import OpenAPISpecification
 from openapi_typed_2 import (
     Components,
     Header,
@@ -37,6 +34,9 @@ from openapi_typed_2 import (
     Schema,
     convert_from_openapi,
 )
+
+from meeshkan.build.operation import operation_from_string
+from meeshkan.serve.mock.specs import OpenAPISpecification
 
 C = TypeVar("C")
 D = TypeVar("D")
