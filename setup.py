@@ -121,8 +121,11 @@ LINT_COMMAND = "flake8 --exclude .git,.venv,__pycache__,build,dist"
 
 BLACK_FORMAT_COMMAND = "black ."
 ISORT_FORMAT_COMMAND = "isort -y"
+
 BLACK_CHECK_COMMAND = "black --check ."
 ISORT_CHECK_COMMAND = "isort --check-only"
+
+ISORT_VERSION_COMMAND = "isort -v"
 
 
 def build():
@@ -147,6 +150,7 @@ def enforce_formatting():
 
 
 def check_formatting():
+    run_sys_command(ISORT_VERSION_COMMAND, "Can't get isort version")
     run_sys_command(ISORT_CHECK_COMMAND, "Checking with isort failed")
     run_sys_command(BLACK_CHECK_COMMAND, "Checking with black failed")
 
