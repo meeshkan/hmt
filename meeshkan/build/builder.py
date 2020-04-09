@@ -188,7 +188,7 @@ def update_operation(operation: Operation, request: HttpExchange, mode: UpdateMo
         if not isinstance(existing_response, Reference):
             response = update_response(existing_response, mode, request)
         else:
-            raise ValueError('Meeshkan is not smart enough to build responses from references yet. Coming soon!')
+            raise ValueError('Mem is not smart enough to build responses from references yet. Coming soon!')
     else:
         response = build_response(request, mode)
 

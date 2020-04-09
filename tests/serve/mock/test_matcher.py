@@ -560,7 +560,7 @@ def test_matcher_15():
     match_request_to_openapi(
         RequestBuilder.from_dict(
             {
-                "headers": {"X-Meeshkan-Scheme": "https", "Host": "api.bar.com"},
+                "headers": {"X-Mem-Scheme": "https", "Host": "api.bar.com"},
                 "host": "api.bar.com",
                 "path": "/v1/guest/{id}",
                 "pathname": "/v1/guest/{id}",

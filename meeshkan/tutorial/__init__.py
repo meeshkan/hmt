@@ -24,7 +24,7 @@ from io import StringIO
 
 def make_pokemon_request(path):
     req = request.Request('http://localhost:8000%s' % path, headers={
-        'user-agent': 'python', 'Host': 'pokeapi.co', 'X-Meeshkan-Scheme': 'https'
+        'user-agent': 'python', 'Host': 'pokeapi.co', 'X-Mem-Scheme': 'https'
     })
     res = request.urlopen(req)
     res.read()
@@ -92,7 +92,7 @@ async def read_stream(p, server_started):
     try:
         while p.poll() is None:
             line = p.stdout.readline()
-            if "Meeshkan is running" in line:
+            if "Mem is running" in line:
                 server_started.set_result(0)
             await asyncio.sleep(0.1)
     finally:
@@ -159,11 +159,11 @@ class CLI:
         self.m_print("##############################")
         self.m_print("")
         self.m_print(
-            "Meeshkan allows you to create mocks of APIs from server traffic and OpenAPI specs.  To start, we'll record some server traffic.  But before we get started, there are a few things you should know."
+            "Mem allows you to create mocks of APIs from server traffic and OpenAPI specs.  To start, we'll record some server traffic.  But before we get started, there are a few things you should know."
         )
         self.m_print("")
         self.m_print(
-            "First, Meeshkan will create a directory called __meeshkan__ in the current working directory.  Don't put anything special in there, as it may get overwritten by this tutorial!"
+            "First, Mem will create a directory called __meeshkan__ in the current working directory.  Don't put anything special in there, as it may get overwritten by this tutorial!"
         )
         self.m_print("")
         self.m_print(
@@ -180,11 +180,11 @@ class CLI:
         self.m_print("##############################")
         self.m_print("")
         self.m_print(
-            "Let's record a bit of server traffic.  We've written a file to `__meeshkan__/api_calls.py` to make our recordings.  Meeshkan expects recordings to be in the http-types format (github.com/meeshkan/http-types), so we'll use that."
+            "Let's record a bit of server traffic.  We've written a file to `__meeshkan__/api_calls.py` to make our recordings.  Mem expects recordings to be in the http-types format (github.com/meeshkan/http-types), so we'll use that."
         )
         self.m_print("")
         self.m_print(
-            "Open up `__meeshkan__/api_calls.py`.  You'll see that we call the API 33 times using Meeshkan as a forward proxy."
+            "Open up `__meeshkan__/api_calls.py`.  You'll see that we call the API 33 times using Mem as a forward proxy."
         )
         self.m_print("")
         if os.path.exists("__meeshkan__"):
@@ -223,7 +223,7 @@ class CLI:
                 self.m_print("##############################")
                 self.m_print("")
                 self.m_input(
-                    "The command `meeshkan build` transforms your recordings into an OpenAPI spec.  The `replay` flag tells Meeshkan to build a spec that's identical to the recorded traffic. Press ENTER to invoke `meeshkan build` in `replay` mode."
+                    "The command `meeshkan build` transforms your recordings into an OpenAPI spec.  The `replay` flag tells Mem to build a spec that's identical to the recorded traffic. Press ENTER to invoke `meeshkan build` in `replay` mode."
                 )
                 self.m_print("")
                 self.m_print("##############################")
@@ -270,7 +270,7 @@ class CLI:
                 )
                 req = request.Request(
                     "http://localhost:8000/api/v2/pokemon/10/",
-                    headers={"Host": "pokeapi.co", "X-Meeshkan-Scheme": "https"},
+                    headers={"Host": "pokeapi.co", "X-Mem-Scheme": "https"},
                 )
                 res = request.urlopen(req)
                 body = res.read()
@@ -305,7 +305,7 @@ class CLI:
                 print(
                     """{
     "Host": "pokeapi.co",
-    "X-Meeshkan-Scheme": "https"
+    "X-Mem-Scheme": "https"
 }"""
                 )
                 self.m_print("")
@@ -365,7 +365,7 @@ class CLI:
                 )
                 req = request.Request(
                     "http://localhost:8000/api/v2/pokemon/10/",
-                    headers={"Host": "pokeapi.co", "X-Meeshkan-Scheme": "https"},
+                    headers={"Host": "pokeapi.co", "X-Mem-Scheme": "https"},
                 )
                 res = request.urlopen(req)
                 body = res.read()
@@ -412,12 +412,12 @@ class CLI:
                 print(
                     """{
     "Host": "pokeapi.co",
-    "X-Meeshkan-Scheme": "https"
+    "X-Mem-Scheme": "https"
 }"""
                 )
                 self.m_print("")
                 self.m_input(
-                    "You'll see that Meeshkan generates a synthetic response for an arbitrary Pokemon. Once you're done exploring, press ENTER to turn off the server and continue."
+                    "You'll see that Mem generates a synthetic response for an arbitrary Pokemon. Once you're done exploring, press ENTER to turn off the server and continue."
                 )
                 self.m_print("")
             finally:
@@ -429,7 +429,7 @@ class CLI:
         with open("__meeshkan__/merge_specs.py", "w") as fi:
             fi.write(MERGE_SPECS)
         self.m_input(
-            "Finally, open the file `merge_specs.py` that we created in the __meeshkan__ directory.  It's a script that merges together the two OpenAPI specs - replay and gen - created by Meeshkan.  After you've looked at it, press ENTER to execute it."
+            "Finally, open the file `merge_specs.py` that we created in the __meeshkan__ directory.  It's a script that merges together the two OpenAPI specs - replay and gen - created by Mem.  After you've looked at it, press ENTER to execute it."
         )
         self.m_print("")
         self.m_print("$ python __meeshkan__/merge_specs.py")
@@ -448,11 +448,11 @@ class CLI:
         self.m_print("##############################")
         self.m_print("")
         self.m_print(
-            "Thanks for checking out Meeshkan!  There are several other cool features, like callbacks to implement stateful logic and various connectors from libraries and platforms like Express and Kong."
+            "Thanks for checking out Mem!  There are several other cool features, like callbacks to implement stateful logic and various connectors from libraries and platforms like Express and Kong."
         )
         self.m_print("")
         self.m_print(
-            "If you have a moment, please fill out our post-tutorial survey on https://meeshkan.typeform.com/to/FpRakX.  Besides helping us improve Meeshkan, it will help us improve this and other tutorials."
+            "If you have a moment, please fill out our post-tutorial survey on https://meeshkan.typeform.com/to/FpRakX.  Besides helping us improve Mem, it will help us improve this and other tutorials."
         )
         self.m_print("")
         self.m_print("Take care and happy mocking!")
@@ -465,11 +465,11 @@ class CLI:
             await asyncio.wait_for(server_started, timeout=timeout)
             if server_started.result() != 0:
                 raise Exception(
-                    "Unable to start Meeshkan. Please, check logs at ~/.meeshkan/logs for details."
+                    "Unable to start Mem. Please, check logs at ~/.meeshkan/logs for details."
                 )
         except asyncio.TimeoutError:
             raise Exception(
-                "Unable to start Meeshkan in 10 seconds. Please, check logs at ~/.meeshkan/logs for details."
+                "Unable to start Mem in 10 seconds. Please, check logs at ~/.meeshkan/logs for details."
             )
 
 

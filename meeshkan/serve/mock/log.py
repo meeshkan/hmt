@@ -10,7 +10,7 @@ from .scope import Scope
 
 
 @dataclass
-class MeeshkanMeta:
+class MemMeta:
     timestamp: int
     scope: Optional[str]
 
@@ -19,7 +19,7 @@ class MeeshkanMeta:
 class LoggedHttpExchange:
     request: Request
     response: Response
-    meta: MeeshkanMeta
+    meta: MemMeta
 
 
 class AbstractSink:
@@ -60,7 +60,7 @@ class Log:
             LoggedHttpExchange(
                 request=request,
                 response=response,
-                meta=MeeshkanMeta(
+                meta=MemMeta(
                     timestamp=int(time.time() * 1000), scope=self._scope.get()
                 ),
             ),

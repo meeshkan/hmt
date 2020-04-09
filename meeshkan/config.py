@@ -81,7 +81,7 @@ def _remove_non_file_handlers():
 
 def setup(verbose=True):
     """
-    Setup Meeshkan CLI by ensuring necessary directories exist and loggers have been configured.
+    Setup Mem CLI by ensuring necessary directories exist and loggers have been configured.
 
     Keyword Arguments:
         verbose {bool} -- Verbose mode or not (default: {True})

@@ -81,7 +81,7 @@ def test_header_proxy(http_client, base_url):
                 "http://localhost:{}/pets".format(port),
                 headers={
                     "host": "{}:{}".format(host_url.hostname, host_url.port),
-                    "X-Meeshkan-Scheme": "http",
+                    "X-Mem-Scheme": "http",
                 },
             )
         )

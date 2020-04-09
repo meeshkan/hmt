@@ -64,7 +64,7 @@ class RecordProxyRunner:
 
     def run(self):
 
-        logger.info("Starting Meeshkan record on http://localhost:%s", self._port)
+        logger.info("Starting Mem record on http://localhost:%s", self._port)
         logger.info(
             "Spec generation mode is %s",
             self._mode.name.lower() if self._mode else "disabled",
@@ -74,5 +74,5 @@ class RecordProxyRunner:
         ) as callback:
             server = RecordProxy(callback, self._routing)
             server.listen(self._port)
-            logger.info("Meeshkan is running")
+            logger.info("Mem is running")
             tornado.ioloop.IOLoop.instance().start()

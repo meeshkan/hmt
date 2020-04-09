@@ -9,7 +9,7 @@ NAME = "meeshkan"
 DESCRIPTION = "Reverse engineer services with style"
 URL = "http://github.com/meeshkan/meeshkan"
 EMAIL = "dev@meeshkan.com"
-AUTHOR = "Meeshkan Dev Team"
+AUTHOR = "Mem Dev Team"
 REQUIRES_PYTHON = ">=3.6.0"
 
 here = os.path.abspath(os.path.dirname(__file__))

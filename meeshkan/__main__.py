@@ -158,7 +158,7 @@ def build(input_file, out, initial_openapi_spec, mode, source):
 @click.command()
 def tutorial():
     """
-    Run the Meeshkan tutorial.
+    Run the Mem tutorial.
     """
     run_tutorial()
 

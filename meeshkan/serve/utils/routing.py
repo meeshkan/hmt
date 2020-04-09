@@ -50,8 +50,8 @@ class HeaderRouting(Routing):
     ) -> RoutingInfo:
         url = urllib.parse.urlsplit("//{}".format(headers["Host"]))
         scheme = (
-            headers["X-Meeshkan-Scheme"]
-            if "X-Meeshkan-Scheme" in headers
+            headers["X-Mem-Scheme"]
+            if "X-Mem-Scheme" in headers
             else headers["x-meeshkan-scheme"]
             if "x-meeshkan-scheme" in headers
             else inbound_scheme

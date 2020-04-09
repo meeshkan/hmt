@@ -1,6 +1,6 @@
-# Mocking with Meeshkan
+# Mocking with Mem
 
-Meeshkan can be used to create a mock server from OpenAPI specifications and optional custom callback scripts.
+Mem can be used to create a mock server from OpenAPI specifications and optional custom callback scripts.
 
 ## What's in this document
 
@@ -42,7 +42,7 @@ Assuming that your OpenAPI spec has the server `https://my.api.com`, this will r
 
 ## Daemon mode
 
-Meeshkan can be launched as a [daemon](https://docs.docker.com/engine/reference/commandline/dockerd/) by providing the `--daemon` flag to the `meeshkan mock` command:
+Mem can be launched as a [daemon](https://docs.docker.com/engine/reference/commandline/dockerd/) by providing the `--daemon` flag to the `meeshkan mock` command:
 
 ```bash
 $ meeshkan mock --daemon
@@ -50,7 +50,7 @@ $ meeshkan mock --daemon
 
 _Note: All other command line arguments stay the same._
 
-To stop your Meeshkan daemon, run:
+To stop your Mem daemon, run:
 
 ```bash
 $ meeshkan mock --kill
@@ -131,13 +131,13 @@ It can be used to reset the callback storage by calling `DELETE http://[host]:[a
 
 ## JIT OpenAPI schema manipulations
 
-By default, `meeshkan mock` will serve random data based on the full range of possible outcomes specified in an OpenAPI spec. For example, if an endpoint can serve `200` and `403` responses, Meeshkan will randomly choose between the two. 
+By default, `meeshkan mock` will serve random data based on the full range of possible outcomes specified in an OpenAPI spec. For example, if an endpoint can serve `200` and `403` responses, Mem will randomly choose between the two. 
 
 Sometimes, this type of unpredictability is what you want. For instance, when doing a smoke test or end-to-end test. 
 
 However, other times, you would like to mock a more specific scenario. For example, you may want an endpoint to _only_ serve 403, or _always_ omit an optional field in a `200` response.
 
-To achieve this, Meeshkan provides a webhook API that will send the incoming request represented using the [`http-types`](https://github.com/meeshkan/http-types/) format and the OpenAPI scheams in dictionary format to an endpoint. Then, it will use the response from the endpoint as the final schema for mocking. 
+To achieve this, Mem provides a webhook API that will send the incoming request represented using the [`http-types`](https://github.com/meeshkan/http-types/) format and the OpenAPI scheams in dictionary format to an endpoint. Then, it will use the response from the endpoint as the final schema for mocking. 
 
 Here is the API for getting, setting, and deleting webhooks:
 

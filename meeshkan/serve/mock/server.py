@@ -106,4 +106,4 @@ class MockServer:
                             + path
                         )
 
-        logger.info("Meeshkan is running")
+        logger.info("Mem is running")
