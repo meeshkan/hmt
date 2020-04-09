@@ -1,4 +1,4 @@
-from meeshkan.serve.mock.callbacks import callback
+from mem.serve.mock.callbacks import callback
 
 
 @callback("another.api.com", "post", "/echo", format="text", response="full")

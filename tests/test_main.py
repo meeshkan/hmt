@@ -8,9 +8,9 @@ from click.testing import CliRunner
 from hamcrest import assert_that, has_key
 from openapi_typed_2 import OpenAPIObject, convert_from_openapi
 
-from meeshkan.__main__ import cli
-from meeshkan.build.builder import BASE_SCHEMA
-from meeshkan.config import DEFAULT_SPECS_DIR
+from mem.__main__ import cli
+from mem.build.builder import BASE_SCHEMA
+from mem.config import DEFAULT_SPECS_DIR
 
 from .util import read_recordings_as_strings
 
@@ -106,7 +106,7 @@ def test_build_cmd():
 
 
 def test_version():
-    expected_version = pkg_resources.require("meeshkan")[0].version
+    expected_version = pkg_resources.require("mem")[0].version
 
     runner = CliRunner()
     result = runner.invoke(cli, ["--version"])

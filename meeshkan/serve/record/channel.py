@@ -10,7 +10,7 @@ from http_types import Response
 from http_types.utils import RequestBuilder
 from tornado.iostream import IOStream, SSLIOStream, StreamClosedError
 
-from meeshkan.serve.utils.routing import Routing
+from mem.serve.utils.routing import Routing
 
 from ..utils.http_utils import response_from_bytes
 from .proxy_callback import ProxyCallback

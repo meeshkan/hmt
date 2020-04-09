@@ -3,8 +3,8 @@ import logging
 import tornado.ioloop
 from http_types import Request, Response
 
-from meeshkan.serve.utils.data_callback import RequestLoggingCallback
-from meeshkan.serve.utils.routing import HeaderRouting
+from mem.serve.utils.data_callback import RequestLoggingCallback
+from mem.serve.utils.routing import HeaderRouting
 
 from .channel import Channel
 from .proxy_callback import ProxyCallback

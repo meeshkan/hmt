@@ -2,7 +2,7 @@
 	"components": {
 		"schemas": {
 			"account": {
-				"x-meeshkan-id-path": "accountId",
+				"x-mem-id-path": "accountId",
 				"required": ["_links", "accountId", "balance", "currency", "identifier", "identifierScheme", "name", "nickname", "servicerIdentifier", "servicerScheme"],
 				"properties": {
 					"accountId": {
@@ -91,11 +91,11 @@
 					}
 				},
 				"type": "object",
-				"x-meeshkan-id-path": "paymentId"
+				"x-mem-id-path": "paymentId"
 			}
 		}
 	},
-	"x-meeshkan-data": {
+	"x-mem-data": {
 		"account": [{
 			"_links": {
 				"self": {
@@ -226,7 +226,7 @@
 	},
 	"paths": {
 		"/v1/payments/{action}": {
-			"x-meeshkan-entity": "payment",
+			"x-mem-entity": "payment",
 			"summary": "Path summary",
 			"description": "Path description",
 			"parameters": [{
@@ -235,7 +235,7 @@
 				"required": true
 			}],
 			"post": {
-				"x-meeshkan-operation": "upsert",
+				"x-mem-operation": "upsert",
 
 				"requestBody": {
 						"content": {
@@ -330,7 +330,7 @@
 			}
 		},
 		"/accounts/v3/accounts/{id}": {
-			"x-meeshkan-entity": "account",
+			"x-mem-entity": "account",
 			"summary": "Path summary",
 			"description": "Path description",
 			"parameters": [{
@@ -339,7 +339,7 @@
 				"required": true
 			}],
 			"get": {
-				"x-meeshkan-operation": "read",
+				"x-mem-operation": "read",
 				"responses": {
 					"200": {
 						"description": "Response description",
@@ -451,11 +451,11 @@
 			}
 		},
 		"/accounts/v3/accounts": {
-			"x-meeshkan-entity": "account",
+			"x-mem-entity": "account",
 			"summary": "Path summary",
 			"description": "Path description",
 			"get": {
-				"x-meeshkan-operation": "read",
+				"x-mem-operation": "read",
 				"responses": {
 					"200": {
 						"description": "Response description",

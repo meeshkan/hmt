@@ -1,4 +1,4 @@
-from meeshkan.build.paths import path_to_regex, find_matching_path, _match_to_path
+from mem.build.paths import path_to_regex, find_matching_path, _match_to_path
 from hamcrest import *
 from openapi_typed_2 import convert_to_Operation, convert_to_openapi
 import pytest

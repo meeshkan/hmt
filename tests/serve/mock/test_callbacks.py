@@ -1,7 +1,7 @@
 from http_types.utils import RequestBuilder, ResponseBuilder
 
-from meeshkan.serve.mock.callbacks import callback_manager
-from meeshkan.serve.mock.storage.mock_data import MockData
+from mem.serve.mock.callbacks import callback_manager
+from mem.serve.mock.storage.mock_data import MockData
 
 
 def test_no_callback():
@@ -104,7 +104,7 @@ def test_text(mock_data_store):
 
     new_response = callback_manager(request, response, MockData())
 
-    assert 10 == new_response.headers["x-meeshkan-counter"]
+    assert 10 == new_response.headers["x-mem-counter"]
     assert "Called 10 times" == new_response.body
 
 

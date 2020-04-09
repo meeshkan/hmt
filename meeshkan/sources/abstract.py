@@ -2,7 +2,7 @@ import abc
 import asyncio
 from typing import Optional, Tuple
 
-from ..meeshkan_types import HttpExchangeStream
+from ..mem_types import HttpExchangeStream
 
 
 class AbstractSource(abc.ABC):

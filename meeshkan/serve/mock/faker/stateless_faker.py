@@ -15,15 +15,15 @@ from openapi_typed_2 import (
     convert_from_openapi,
 )
 
-from meeshkan.serve.mock.faker.faker_base import FakerBase
-from meeshkan.serve.mock.faker.faker_exception import FakerException
-from meeshkan.serve.mock.matcher import (
+from mem.serve.mock.faker.faker_base import FakerBase
+from mem.serve.mock.faker.faker_exception import FakerException
+from mem.serve.mock.matcher import (
     change_ref,
     change_refs,
     get_response_from_ref,
     ref_name,
 )
-from meeshkan.serve.mock.specs import OpenAPISpecification
+from mem.serve.mock.specs import OpenAPISpecification
 
 
 @dataclass(frozen=True)

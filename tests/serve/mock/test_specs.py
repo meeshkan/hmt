@@ -2,7 +2,7 @@ from typing import Sequence
 
 import requests_mock
 
-from meeshkan.serve.mock.specs import OpenAPISpecification, load_specs
+from mem.serve.mock.specs import OpenAPISpecification, load_specs
 
 spec_directory = "tests/serve/mock/schemas/petstore"
 spec_file_path = f"{spec_directory}/index.yaml"

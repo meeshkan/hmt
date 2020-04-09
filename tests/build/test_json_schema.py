@@ -1,5 +1,5 @@
-from meeshkan.build.json_schema import to_json_schema, to_openapi_json_schema
-from meeshkan.build.update_mode import UpdateMode
+from mem.build.json_schema import to_json_schema, to_openapi_json_schema
+from mem.build.update_mode import UpdateMode
 from ..util import read_recordings_as_dict
 import json
 from hamcrest import *

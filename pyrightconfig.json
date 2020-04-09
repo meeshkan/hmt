@@ -1,4 +1,4 @@
 {
   "typingsPath": "./typings",
-  "include": ["meeshkan"]
+  "include": ["mem"]
 }

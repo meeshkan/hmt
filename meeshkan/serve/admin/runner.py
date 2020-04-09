@@ -3,14 +3,14 @@ import logging
 from tornado.httpserver import HTTPServer
 from tornado.web import Application
 
-from meeshkan.serve.admin.views import (
+from mem.serve.admin.views import (
     RestMiddlewaresView,
     RestMiddlewareView,
     ScopeView,
     StorageView,
 )
-from meeshkan.serve.mock.rest import RestMiddlewareManager
-from meeshkan.serve.mock.storage.mock_data_store import MockDataStore
+from mem.serve.mock.rest import RestMiddlewareManager
+from mem.serve.mock.storage.mock_data_store import MockDataStore
 
 from ..mock.scope import Scope
 

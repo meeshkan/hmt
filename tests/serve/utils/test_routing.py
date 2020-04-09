@@ -1,4 +1,4 @@
-from meeshkan.serve.utils.routing import HeaderRouting, PathRouting
+from mem.serve.utils.routing import HeaderRouting, PathRouting
 
 
 def test_path_routing():

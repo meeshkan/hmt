@@ -11,8 +11,8 @@ from openapi_typed_2 import (
     convert_from_openapi,
 )
 
-from meeshkan.build.paths import _match_to_path
-from meeshkan.serve.utils.opanapi_ext import ApiOperation, get_x
+from mem.build.paths import _match_to_path
+from mem.serve.utils.opanapi_ext import ApiOperation, get_x
 
 
 def replace_path(expression, doc, val):
@@ -50,7 +50,7 @@ class EntityPathItem:
                 ApiOperation.UNKNOWN
                 if method is None
                 else ApiOperation(
-                    get_x(method, "x-meeshkan-operation", ApiOperation.UNKNOWN)
+                    get_x(method, "x-mem-operation", ApiOperation.UNKNOWN)
                 )
             )
             if operation == ApiOperation.UPSERT or operation == ApiOperation.INSERT:
@@ -149,11 +149,11 @@ class Entity:
 
     def __init__(self, name: str, spec: OpenAPIObject):
         self._name = name
-        self._id_path = parse(spec.components.schemas[name]._x["x-meeshkan-id-path"])
+        self._id_path = parse(spec.components.schemas[name]._x["x-mem-id-path"])
 
         self._path_config: typing.Dict[str, EntityPathItem] = {}
         for pathname, path_item in spec.paths.items():
-            if get_x(path_item, "x-meeshkan-entity") == self.name:
+            if get_x(path_item, "x-mem-entity") == self.name:
                 self.add_path(pathname, path_item)
 
         self._data = dict()

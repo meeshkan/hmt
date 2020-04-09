@@ -6,7 +6,7 @@ from pathlib import Path
 
 import click
 
-from meeshkan.serve.mock.server import MockServer
+from mem.serve.mock.server import MockServer
 
 from ..build.update_mode import UpdateMode
 from ..config import DEFAULT_SPECS_DIR
@@ -17,8 +17,8 @@ from .utils.routing import HeaderRouting, PathRouting
 IS_WINDOWS = os.name == "nt"
 
 
-MOCK_PID = Path.home().joinpath(".meeshkan/mock.pid")
-RECORD_PID = Path.home().joinpath(".meeshkan/record.pid")
+MOCK_PID = Path.home().joinpath(".mem/mock.pid")
+RECORD_PID = Path.home().joinpath(".mem/record.pid")
 logger = getLogger(__name__)
 
 
@@ -45,7 +45,7 @@ def add_options(options):
 
 _common_server_options = [
     click.option("-p", "--port", default="8000", help="Server port."),
-    click.option("-d", "--daemon", is_flag=True, help="Run meeshkan as a daemon."),
+    click.option("-d", "--daemon", is_flag=True, help="Run mem as a daemon."),
     click.option(
         "-r",
         "--header-routing",

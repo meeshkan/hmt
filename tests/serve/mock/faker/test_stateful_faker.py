@@ -1,9 +1,9 @@
 from http_types import RequestBuilder
 from openapi_typed_2 import convert_to_OpenAPIObject
 
-from meeshkan.serve.mock.faker.stateful_faker import StatefulFaker
-from meeshkan.serve.mock.matcher import valid_schema
-from meeshkan.serve.mock.specs import OpenAPISpecification
+from mem.serve.mock.faker.stateful_faker import StatefulFaker
+from mem.serve.mock.matcher import valid_schema
+from mem.serve.mock.specs import OpenAPISpecification
 from tests.util import spec, spec_dict
 
 
@@ -21,7 +21,7 @@ def test_fake_array(mock_data_store):
             "item": {
                 "type": "object",
                 "required": ["foo", "bar"],
-                "x-meeshkan-id-path": "itemId",
+                "x-mem-id-path": "itemId",
                 "properties": {
                     "foo": {"type": "number"},
                     "bar": {"type": "string"},
@@ -34,8 +34,8 @@ def test_fake_array(mock_data_store):
     spec = spec_dict(
         path="/items", response_schema=schema, components=components, method="get"
     )
-    spec["paths"]["/items"]["x-meeshkan-entity"] = "item"
-    spec["paths"]["/items"]["get"]["x-meeshkan-operation"] = "read"
+    spec["paths"]["/items"]["x-mem-entity"] = "item"
+    spec["paths"]["/items"]["get"]["x-mem-operation"] = "read"
 
     spec = convert_to_OpenAPIObject(spec)
     mock_data_store.add_mock(OpenAPISpecification(spec, "default"))
@@ -78,7 +78,7 @@ def test_insert(mock_data_store):
             "item": {
                 "type": "object",
                 "required": ["foo"],
-                "x-meeshkan-id-path": "itemId",
+                "x-mem-id-path": "itemId",
                 "properties": {
                     "foo": {"type": "number"},
                     "bar": {"type": "string"},
@@ -96,8 +96,8 @@ def test_insert(mock_data_store):
         components=components,
         method="post",
     )
-    spec["paths"]["/items"]["x-meeshkan-entity"] = "item"
-    spec["paths"]["/items"]["post"]["x-meeshkan-operation"] = "insert"
+    spec["paths"]["/items"]["x-mem-entity"] = "item"
+    spec["paths"]["/items"]["post"]["x-mem-operation"] = "insert"
 
     spec = convert_to_OpenAPIObject(spec)
     mock_data_store.add_mock(OpenAPISpecification(spec, "default"))
@@ -174,7 +174,7 @@ def test_upsert(mock_data_store):
             "item": {
                 "type": "object",
                 "required": ["foo"],
-                "x-meeshkan-id-path": "itemId",
+                "x-mem-id-path": "itemId",
                 "properties": {
                     "foo": {"type": "number"},
                     "bar": {"type": "string"},
@@ -192,8 +192,8 @@ def test_upsert(mock_data_store):
         components=components,
         method="put",
     )
-    spec["paths"]["/items"]["x-meeshkan-entity"] = "item"
-    spec["paths"]["/items"]["put"]["x-meeshkan-operation"] = "upsert"
+    spec["paths"]["/items"]["x-mem-entity"] = "item"
+    spec["paths"]["/items"]["put"]["x-mem-operation"] = "upsert"
 
     spec = convert_to_OpenAPIObject(spec)
     mock_data_store.add_mock(OpenAPISpecification(spec, "default"))

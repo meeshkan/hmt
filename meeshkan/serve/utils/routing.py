@@ -2,7 +2,7 @@ import collections
 import typing
 import urllib.parse
 
-from meeshkan.serve.utils.http_utils import split_path
+from mem.serve.utils.http_utils import split_path
 
 RoutingInfo = collections.namedtuple(
     "RoutingInfo", ["host", "hostname", "path", "scheme", "port"]
@@ -52,8 +52,8 @@ class HeaderRouting(Routing):
         scheme = (
             headers["X-Mem-Scheme"]
             if "X-Mem-Scheme" in headers
-            else headers["x-meeshkan-scheme"]
-            if "x-meeshkan-scheme" in headers
+            else headers["x-mem-scheme"]
+            if "x-mem-scheme" in headers
             else inbound_scheme
         )
         return RoutingInfo(

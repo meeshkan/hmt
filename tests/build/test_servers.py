@@ -1,4 +1,4 @@
-from meeshkan.build.servers import normalize_path_if_matches
+from mem.build.servers import normalize_path_if_matches
 from openapi_typed_2 import Server
 from typing import List
 from hamcrest import *

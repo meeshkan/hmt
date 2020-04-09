@@ -4,9 +4,9 @@ from dataclasses import dataclass
 from http_types import Request
 from openapi_typed_2 import Any, Operation
 
-from meeshkan.serve.mock.faker.stateless_faker import FakerData, StatelessFaker
-from meeshkan.serve.mock.storage.entity import Entity
-from meeshkan.serve.utils.opanapi_ext import ApiOperation, get_x
+from mem.serve.mock.faker.stateless_faker import FakerData, StatelessFaker
+from mem.serve.mock.storage.entity import Entity
+from mem.serve.utils.opanapi_ext import ApiOperation, get_x
 
 
 @dataclass(frozen=True)
@@ -27,8 +27,8 @@ class StatefulFakerData(FakerData):
 
 class StatefulFaker(StatelessFaker):
     """
-    A stateful implementation of the BaseFaker interface. It requires an extended spec with x-meeshkan fields defined
-    to automatically implement stateful logic. For specs without meeshkan extensions
+    A stateful implementation of the BaseFaker interface. It requires an extended spec with x-mem fields defined
+    to automatically implement stateful logic. For specs without mem extensions
     it works the same way as the StatelessFaker.
     """
 
@@ -40,7 +40,7 @@ class StatefulFaker(StatelessFaker):
         self, status_code: int, headers: typing.Mapping[str, str], faker_data: FakerData
     ):
         entity_name = get_x(
-            faker_data.spec.api.paths[faker_data.path_item], "x-meeshkan-entity"
+            faker_data.spec.api.paths[faker_data.path_item], "x-mem-entity"
         )
         entity: typing.Optional[Entity] = (
             self._mock_data_store[faker_data.spec.source].get_entity(entity_name)
@@ -97,7 +97,7 @@ class StatefulFaker(StatelessFaker):
         request: Request,
         entity: typing.Optional[Entity],
     ) -> typing.Any:
-        operation_type = ApiOperation(get_x(method, "x-meeshkan-operation", "unknown"))
+        operation_type = ApiOperation(get_x(method, "x-mem-operation", "unknown"))
         if operation_type == ApiOperation.INSERT:
             return entity.insert_from_request(path_item, request)
         elif operation_type == ApiOperation.UPSERT:

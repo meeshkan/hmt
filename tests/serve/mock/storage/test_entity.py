@@ -1,7 +1,7 @@
 from http_types import RequestBuilder
 from openapi_typed_2 import convert_to_OpenAPIObject
 
-from meeshkan.serve.mock.storage.entity import Entity
+from mem.serve.mock.storage.entity import Entity
 from tests.util import add_item, spec_dict
 
 
@@ -13,7 +13,7 @@ def test_insert():
             "item": {
                 "type": "object",
                 "required": ["foo", "baz"],
-                "x-meeshkan-id-path": "itemId",
+                "x-mem-id-path": "itemId",
                 "properties": {
                     "foo": {"type": "number"},
                     "bar": {"type": "string"},
@@ -26,8 +26,8 @@ def test_insert():
     spec = spec_dict(
         path="/items/{id}", response_schema=schema, components=components, method="get"
     )
-    spec["paths"]["/items/{id}"]["x-meeshkan-entity"] = "item"
-    spec["paths"]["/items/{id}"]["get"]["x-meeshkan-operation"] = "read"
+    spec["paths"]["/items/{id}"]["x-mem-entity"] = "item"
+    spec["paths"]["/items/{id}"]["get"]["x-mem-operation"] = "read"
 
     spec = convert_to_OpenAPIObject(spec)
 
@@ -45,7 +45,7 @@ def test_insert_from_request():
             "item": {
                 "type": "object",
                 "required": ["foo", "baz"],
-                "x-meeshkan-id-path": "itemId",
+                "x-mem-id-path": "itemId",
                 "properties": {
                     "foo": {"type": "number"},
                     "bar": {"type": "string"},
@@ -62,8 +62,8 @@ def test_insert_from_request():
         components=components,
         method="post",
     )
-    spec["paths"]["/items/create"]["x-meeshkan-entity"] = "item"
-    spec["paths"]["/items/create"]["post"]["x-meeshkan-operation"] = "insert"
+    spec["paths"]["/items/create"]["x-mem-entity"] = "item"
+    spec["paths"]["/items/create"]["post"]["x-mem-operation"] = "insert"
 
     spec = convert_to_OpenAPIObject(spec)
 
@@ -108,7 +108,7 @@ def test_upsert_from_request():
             "item": {
                 "type": "object",
                 "required": ["foo", "baz"],
-                "x-meeshkan-id-path": "itemId",
+                "x-mem-id-path": "itemId",
                 "properties": {
                     "foo": {"type": "number"},
                     "bar": {"type": "string"},
@@ -125,8 +125,8 @@ def test_upsert_from_request():
         components=components,
         method="post",
     )
-    spec["paths"]["/items/create"]["x-meeshkan-entity"] = "item"
-    spec["paths"]["/items/create"]["post"]["x-meeshkan-operation"] = "insert"
+    spec["paths"]["/items/create"]["x-mem-entity"] = "item"
+    spec["paths"]["/items/create"]["post"]["x-mem-operation"] = "insert"
 
     spec = convert_to_OpenAPIObject(spec)
 
@@ -174,7 +174,7 @@ def test_query():
             "item": {
                 "type": "object",
                 "required": ["foo", "baz"],
-                "x-meeshkan-id-path": "itemId",
+                "x-mem-id-path": "itemId",
                 "properties": {
                     "foo": {"type": "number"},
                     "bar": {"type": "string"},
@@ -190,8 +190,8 @@ def test_query():
         components=components,
         method="get",
     )
-    spec["paths"]["/items/{id}"]["x-meeshkan-entity"] = "item"
-    spec["paths"]["/items/{id}"]["get"]["x-meeshkan-operation"] = "read"
+    spec["paths"]["/items/{id}"]["x-mem-entity"] = "item"
+    spec["paths"]["/items/{id}"]["get"]["x-mem-operation"] = "read"
 
     add_item(
         spec,
@@ -200,8 +200,8 @@ def test_query():
         components=components,
         method="get",
     )
-    spec["paths"]["/items"]["x-meeshkan-entity"] = "item"
-    spec["paths"]["/items"]["get"]["x-meeshkan-operation"] = "read"
+    spec["paths"]["/items"]["x-mem-entity"] = "item"
+    spec["paths"]["/items"]["get"]["x-mem-operation"] = "read"
 
     spec = convert_to_OpenAPIObject(spec)
 

@@ -1,12 +1,12 @@
 import copy
-from meeshkan.build.update_mode import UpdateMode
+from mem.build.update_mode import UpdateMode
 import json
 import re
 from dataclasses import replace
 from http_types import HttpExchange, Request, Response, RequestBuilder, HttpExchangeBuilder
-from meeshkan.build import build_schema_batch, update_openapi, build_schema_online
-from meeshkan.build.builder import BASE_SCHEMA
-from meeshkan.build.update_mode import UpdateMode
+from mem.build import build_schema_batch, update_openapi, build_schema_online
+from mem.build.builder import BASE_SCHEMA
+from mem.build.update_mode import UpdateMode
 from ..util import read_recordings_as_request_response, POKEAPI_RECORDINGS_PATH
 from openapi_typed_2 import OpenAPIObject, Operation, PathItem, Schema, Response as _Response
 from typeguard import check_type

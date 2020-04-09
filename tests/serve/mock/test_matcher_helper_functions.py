@@ -11,7 +11,7 @@ from openapi_typed_2 import (
     convert_to_Schema,
 )
 
-from meeshkan.serve.mock.matcher import (
+from mem.serve.mock.matcher import (
     get_path_item_with_method,
     match_urls,
     matches,

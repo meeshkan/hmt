@@ -1,10 +1,10 @@
 # Recording with Mem
 
-Mem can be used to record HTTP API traffic in a format that `meeshkan build` can understand.  This format serializes JSON objects in the [`http-types`](https://github.com/meeshkan/http-types) format written to a [`.jsonl`](https://jsonlines.org) file. By default, this file will be called `{hostname}-recordings.jsonl` with `{hostname}` referring to your API's host URL. 
+Mem can be used to record HTTP API traffic in a format that `mem build` can understand.  This format serializes JSON objects in the [`http-types`](https://github.com/mem/http-types) format written to a [`.jsonl`](https://jsonlines.org) file. By default, this file will be called `{hostname}-recordings.jsonl` with `{hostname}` referring to your API's host URL. 
 
 ## What's in this document
 
-- [The `meeshkan record` command](#the-meeshkan-record-command)
+- [The `mem record` command](#the-mem-record-command)
 - [Path vs. header routing](#path-vs-header-routing)
     - [Path routing](#path-routing)
     - [Header routing](#header-routing)
@@ -12,21 +12,21 @@ Mem can be used to record HTTP API traffic in a format that `meeshkan build` can
 - [Ecosystem](#ecosystem)
     - [Client libraries](#client-libraries)
     - [Integrations](#integrations)
-- [Next up: Building with Mem](#next-up-building-with-meeshkan)
+- [Next up: Building with Mem](#next-up-building-with-mem)
 
-## The `meeshkan record` command
+## The `mem record` command
 
-To start a Mem server that will record HTTP API traffic, use the `meeshkan record` command:
+To start a Mem server that will record HTTP API traffic, use the `mem record` command:
 
 ```bash
-$ meeshkan record
+$ mem record
 ```
 
-This starts Mem as a reverse proxy on the default port of `8000`. Running `meeshkan record` will also generate two directories: `logs` and `specs`.
+This starts Mem as a reverse proxy on the default port of `8000`. Running `mem record` will also generate two directories: `logs` and `specs`.
 
-By default, `meeshkan record` records all traffic to the `logs` directory.  You can change the recording directory using the `--log_dir` flag, i.e. `--log_dir path/to/directory`. 
+By default, `mem record` records all traffic to the `logs` directory.  You can change the recording directory using the `--log_dir` flag, i.e. `--log_dir path/to/directory`. 
 
-> More options for the `meeshkan record` command an be seen by running `meeshkan record --help`.
+> More options for the `mem record` command an be seen by running `mem record --help`.
 
 To stop Mem without losing your any of your data, type `Ctrl + C` or another `kill` command.  
 
@@ -37,7 +37,7 @@ To stop Mem without losing your any of your data, type `Ctrl + C` or another `ki
 By default, Mem uses **path routing** to intercept HTTP API calls. Path routing is done by appending the URL you wish to call to the URL of the recording server.
 
 ```bash
-$ meeshkan record
+$ mem record
 ```
 
 Keep this running. Then, in another terminal window, you can use Mem as a proxy with [curl](https://curl.haxx.se/):
@@ -53,7 +53,7 @@ Mem will automatically make an API call using the URL in the path - in this case
 Alternatively, you can run Mem in **header** mode, which uses the host and optionally the schema reported in the header.
 
 ```bash
-$ meeshkan record --header_routing
+$ mem record --header_routing
 ```
 Keep this running. Then, in another terminal window, run:
 
@@ -61,14 +61,14 @@ Keep this running. Then, in another terminal window, run:
 $ curl http://localhost:8000/api/v2/pokemon/ditto -H "Host: pokeapi.co" -H "X-Mem-Scheme: https"
 ```
 
-This instructs meeshkan to call the [Pokemon API](pokeapi.co) and use the HTTPS protocol.
+This instructs mem to call the [Pokemon API](pokeapi.co) and use the HTTPS protocol.
 
 ## Daemon mode
 
-Mem can be launched as a [daemon](https://docs.docker.com/engine/reference/commandline/dockerd/) by providing the `--daemon` flag to the `meeshkan record` command:
+Mem can be launched as a [daemon](https://docs.docker.com/engine/reference/commandline/dockerd/) by providing the `--daemon` flag to the `mem record` command:
 
 ```bash
-$ meeshkan record --daemon
+$ mem record --daemon
 ```
 
 _Note: All other command line arguments remain the same._
@@ -76,24 +76,24 @@ _Note: All other command line arguments remain the same._
 To stop your Mem daemon, run:
 
 ```bash
-$ meeshkan record stop
+$ mem record stop
 ```
 
 ## Ecosystem
 
-In addition to using Mem to record, there is a growing ecosystem of projects that one can use to create `.jsonl` files in the [`http-types`](https://github.com/meeshkan/http-types).  
+In addition to using Mem to record, there is a growing ecosystem of projects that one can use to create `.jsonl` files in the [`http-types`](https://github.com/mem/http-types).  
 
-Here are some other ways that you can create `.jsonl` files of server recordings that are consumable by `meeshkan build`.
+Here are some other ways that you can create `.jsonl` files of server recordings that are consumable by `mem build`.
 
 ### Client libraries
 
-You can use one of the [`http-types`](https://github.com/meeshkan/http-types) client libraries to write recorded traffic as `.jsonl` files. 
+You can use one of the [`http-types`](https://github.com/mem/http-types) client libraries to write recorded traffic as `.jsonl` files. 
 
 Here are the libraries that currently exist:
 
-- [js-http-types](https://github.com/meeshkan/js-http-types) 
-- [java-http-types](https://github.com/meeshkan/java-http-types) 
-- [py-http-types](https://github.com/meeshkan/py-http-types) 
+- [js-http-types](https://github.com/mem/js-http-types) 
+- [java-http-types](https://github.com/mem/java-http-types) 
+- [py-http-types](https://github.com/mem/py-http-types) 
 
 In the future, we hope to build client libraries in C#, C++, Go, Rust, Brainfuck, Haskell and OCaml.
 
@@ -130,7 +130,7 @@ Here is a list of integrations that exist or are in development:
 
 | Integration | Description | Status |
 | ----------- | ----------- | ------ |
-| [`express-middleware`](https://github.com/meeshkan/express-middleware) | Log files from express apps using a variety of transport layers, including the file system and Apache Kafka. | Stable |
+| [`express-middleware`](https://github.com/mem/express-middleware) | Log files from express apps using a variety of transport layers, including the file system and Apache Kafka. | Stable |
 | `wireshark` | Convert a Wireshark `.pcap` file to `http-types` format. | Stable |
 | Kong plugin | Log requests and responses to the Kong API Gateway using a variety of transport layers, including the file system and Apache Kafka. | In development |
 | AWS API Gateway Plugin | Log requests and responses to the AWS API Gateway using a variety of transport layers, including the file system and Apache Kafka. | In development |
@@ -138,6 +138,6 @@ Here is a list of integrations that exist or are in development:
 
 ## Next up: Building with Mem
 
-After you've recorded your API traffic with `meeshkan record`, you can use that data to to build an OpenAPI specification via the Mem CLI. 
+After you've recorded your API traffic with `mem record`, you can use that data to to build an OpenAPI specification via the Mem CLI. 
 
 To learn how, visit our [building documentation](./docs/BUILD.md).

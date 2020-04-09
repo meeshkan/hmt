@@ -35,8 +35,8 @@ from openapi_typed_2 import (
     convert_from_openapi,
 )
 
-from meeshkan.build.operation import operation_from_string
-from meeshkan.serve.mock.specs import OpenAPISpecification
+from mem.build.operation import operation_from_string
+from mem.serve.mock.specs import OpenAPISpecification
 
 C = TypeVar("C")
 D = TypeVar("D")

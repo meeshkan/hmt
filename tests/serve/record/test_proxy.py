@@ -7,12 +7,12 @@ from http_types import HttpMethod, Protocol
 from tornado.httpclient import HTTPRequest
 from tornado.testing import bind_unused_port
 
-from meeshkan.serve.mock.log import Log
-from meeshkan.serve.mock.scope import Scope
-from meeshkan.serve.mock.specs import load_specs
-from meeshkan.serve.record.proxy import RecordProxy
-from meeshkan.serve.utils.data_callback import DataCallback
-from meeshkan.serve.utils.routing import HeaderRouting, PathRouting, StaticRouting
+from mem.serve.mock.log import Log
+from mem.serve.mock.scope import Scope
+from mem.serve.mock.specs import load_specs
+from mem.serve.record.proxy import RecordProxy
+from mem.serve.utils.data_callback import DataCallback
+from mem.serve.utils.routing import HeaderRouting, PathRouting, StaticRouting
 
 
 @pytest.fixture

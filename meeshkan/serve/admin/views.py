@@ -3,7 +3,7 @@ import logging
 
 from tornado.web import RequestHandler
 
-from meeshkan.serve.mock.storage.mock_data_store import MockDataStore
+from mem.serve.mock.storage.mock_data_store import MockDataStore
 
 from ..mock.rest import RestMiddlewareManager
 from ..mock.scope import Scope

@@ -11,7 +11,7 @@ PACKAGE_PATH = Path(os.path.dirname(os.path.realpath(__file__)))  # type: Path
 
 LOG_CONFIG_FILE = PACKAGE_PATH.joinpath("logging.yaml")
 
-BASE_DIR = Path.home().joinpath(".meeshkan")
+BASE_DIR = Path.home().joinpath(".mem")
 LOGS_DIR = BASE_DIR.joinpath("logs")
 
 

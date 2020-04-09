@@ -1,8 +1,8 @@
 from http_types import RequestBuilder
 
-from meeshkan.serve.mock.faker.stateless_faker import StatelessFaker
-from meeshkan.serve.mock.matcher import valid_schema
-from meeshkan.serve.mock.specs import OpenAPISpecification
+from mem.serve.mock.faker.stateless_faker import StatelessFaker
+from mem.serve.mock.matcher import valid_schema
+from mem.serve.mock.specs import OpenAPISpecification
 from tests.util import spec
 
 

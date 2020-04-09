@@ -1,6 +1,6 @@
 import typing
 
-from meeshkan.serve.mock.storage.entity import Entity
+from mem.serve.mock.storage.entity import Entity
 
 
 class MockData:

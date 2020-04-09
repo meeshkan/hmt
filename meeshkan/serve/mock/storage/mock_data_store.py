@@ -2,10 +2,10 @@ import copy
 import logging
 import typing
 
-from meeshkan.serve.mock.specs import OpenAPISpecification
-from meeshkan.serve.mock.storage.entity import Entity
-from meeshkan.serve.mock.storage.mock_data import MockData
-from meeshkan.serve.utils.opanapi_ext import get_x
+from mem.serve.mock.specs import OpenAPISpecification
+from mem.serve.mock.storage.entity import Entity
+from mem.serve.mock.storage.mock_data import MockData
+from mem.serve.utils.opanapi_ext import get_x
 
 logger = logging.getLogger(__name__)
 
@@ -33,10 +33,10 @@ class MockDataStore:
         self._storages[spec.source] = storage
         if spec.api.components is not None and spec.api.components.schemas is not None:
             for name, schema in spec.api.components.schemas.items():
-                if get_x(schema, "x-meeshkan-id-path") is not None:
+                if get_x(schema, "x-mem-id-path") is not None:
                     storage.add_entity(Entity(name, spec.api))
 
-        for entity, values in get_x(spec.api, "x-meeshkan-data", dict()).items():
+        for entity, values in get_x(spec.api, "x-mem-data", dict()).items():
             for val in values:
                 storage.get_entity(entity).insert(copy.deepcopy(val))
 
@@ -53,7 +53,7 @@ class MockDataStore:
         self.clear()
         for spec in self._specs.values():
             storage = self._storages[spec.source]
-            for entity, values in get_x(spec.api, "x-meeshkan-data", dict()).items():
+            for entity, values in get_x(spec.api, "x-mem-data", dict()).items():
                 entity = storage.get_entity(entity)
                 for val in values:
                     entity.insert(copy.deepcopy(val))

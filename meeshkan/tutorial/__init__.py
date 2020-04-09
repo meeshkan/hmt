@@ -75,15 +75,15 @@ import json
 from dataclasses import replace
 import os
 
-with open('__meeshkan__/replay/openapi.json', 'r') as replay_file:
-    with open('__meeshkan__/gen/openapi.json', 'r') as gen_file:
+with open('__mem__/replay/openapi.json', 'r') as replay_file:
+    with open('__mem__/gen/openapi.json', 'r') as gen_file:
         replay = convert_to_openapi(json.loads(replay_file.read()))
         gen = convert_to_openapi(json.loads(gen_file.read()))
         new = replace(replay, paths = { **replay.paths, **gen.paths })
         try:
-            os.mkdir('__meeshkan__/both')
+            os.mkdir('__mem__/both')
         except: pass # exists
-        with open('__meeshkan__/both/openapi.json', 'w') as both_file:
+        with open('__mem__/both/openapi.json', 'w') as both_file:
             both_file.write(json.dumps(convert_from_openapi(new), indent=2))
 """
 
@@ -151,7 +151,7 @@ class CLI:
 
     async def run(self):
         f = Figlet(font="slant")
-        print(f.renderText("meeshkan"))
+        print(f.renderText("mem"))
         puts(colored.cyan("The tutorial!!", bold=True))
         self.m_input("Press ENTER to continue...")
         ############################
@@ -163,7 +163,7 @@ class CLI:
         )
         self.m_print("")
         self.m_print(
-            "First, Mem will create a directory called __meeshkan__ in the current working directory.  Don't put anything special in there, as it may get overwritten by this tutorial!"
+            "First, Mem will create a directory called __mem__ in the current working directory.  Don't put anything special in there, as it may get overwritten by this tutorial!"
         )
         self.m_print("")
         self.m_print(
@@ -180,25 +180,25 @@ class CLI:
         self.m_print("##############################")
         self.m_print("")
         self.m_print(
-            "Let's record a bit of server traffic.  We've written a file to `__meeshkan__/api_calls.py` to make our recordings.  Mem expects recordings to be in the http-types format (github.com/meeshkan/http-types), so we'll use that."
+            "Let's record a bit of server traffic.  We've written a file to `__mem__/api_calls.py` to make our recordings.  Mem expects recordings to be in the http-types format (github.com/mem/http-types), so we'll use that."
         )
         self.m_print("")
         self.m_print(
-            "Open up `__meeshkan__/api_calls.py`.  You'll see that we call the API 33 times using Mem as a forward proxy."
+            "Open up `__mem__/api_calls.py`.  You'll see that we call the API 33 times using Mem as a forward proxy."
         )
         self.m_print("")
-        if os.path.exists("__meeshkan__"):
-            shutil.rmtree("__meeshkan__")
-        os.mkdir("__meeshkan__")
+        if os.path.exists("__mem__"):
+            shutil.rmtree("__mem__")
+        os.mkdir("__mem__")
 
-        with open("__meeshkan__/api_calls.py", "w") as fi:
+        with open("__mem__/api_calls.py", "w") as fi:
             fi.write(API_CALLS)
         self.m_input(
-            "After you've checked out `__meeshkan__/api_calls.py`, press ENTER to launch the proxy and execute the script!"
+            "After you've checked out `__mem__/api_calls.py`, press ENTER to launch the proxy and execute the script!"
         )
 
         with subprocess.Popen(
-            "meeshkan record -r -l __meeshkan__".split(" "),
+            "mem record -r -l __mem__".split(" "),
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             cwd=os.getcwd(),
@@ -210,25 +210,25 @@ class CLI:
                 self.m_print("")
                 self.m_print("##############################")
                 self.m_print("")
-                res = subprocess.call("python __meeshkan__/api_calls.py", shell=True)
+                res = subprocess.call("python __mem__/api_calls.py", shell=True)
                 if self.throw_on_non_zero_exit and (res != 0):
                     raise ValueError(
-                        "Test failed at `python __meeshkan__/api_calls.py`"
+                        "Test failed at `python __mem__/api_calls.py`"
                     )
                 self.m_print("")
                 self.m_input(
-                    "Now, if you check out `__meeshkan__/pokeapi.co.jsonl`, you'll see all of the recorded server traffic. Press ENTER to continue."
+                    "Now, if you check out `__mem__/pokeapi.co.jsonl`, you'll see all of the recorded server traffic. Press ENTER to continue."
                 )
                 self.m_print("")
                 self.m_print("##############################")
                 self.m_print("")
                 self.m_input(
-                    "The command `meeshkan build` transforms your recordings into an OpenAPI spec.  The `replay` flag tells Mem to build a spec that's identical to the recorded traffic. Press ENTER to invoke `meeshkan build` in `replay` mode."
+                    "The command `mem build` transforms your recordings into an OpenAPI spec.  The `replay` flag tells Mem to build a spec that's identical to the recorded traffic. Press ENTER to invoke `mem build` in `replay` mode."
                 )
                 self.m_print("")
                 self.m_print("##############################")
                 self.m_print("")
-                command = "meeshkan build -i __meeshkan__/pokeapi.co-recordings.jsonl -o __meeshkan__/replay -m replay"
+                command = "mem build -i __mem__/pokeapi.co-recordings.jsonl -o __mem__/replay -m replay"
                 print("$ {}".format(command))
                 self.m_print("")
                 res = subprocess.call(
@@ -243,7 +243,7 @@ class CLI:
                 building()
                 self.m_print("")
                 self.m_print(
-                    "Done.  Now, open up __meeshkan__/replay/openapi.json. Search within this document for `/api/v2/pokemon/10/:`.  This is a translation of the `GET` request you got from the Pokemon API into OpenAPI."
+                    "Done.  Now, open up __mem__/replay/openapi.json. Search within this document for `/api/v2/pokemon/10/:`.  This is a translation of the `GET` request you got from the Pokemon API into OpenAPI."
                 )
                 self.m_print("")
                 self.m_input(
@@ -254,7 +254,7 @@ class CLI:
                 kill_proc_tree(p)
 
         with subprocess.Popen(
-            "meeshkan mock __meeshkan__/replay -r".split(" "),
+            "mem mock __mem__/replay -r".split(" "),
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             cwd=os.getcwd(),
@@ -320,14 +320,14 @@ class CLI:
         self.m_print("##############################")
         self.m_print("")
         self.m_print(
-            "Now, let's build a new spec.  This time, instead of serving back fixed data, we will use the recordings to create _synthetic_ data.   We do this by invoking `meeshkan build --mode gen`."
+            "Now, let's build a new spec.  This time, instead of serving back fixed data, we will use the recordings to create _synthetic_ data.   We do this by invoking `mem build --mode gen`."
         )
         self.m_print("")
         self.m_input("Press ENTER to build the new spec.")
         self.m_print("")
         self.m_print("Hang tight, we're building your spec!")
         self.m_print("")
-        command = "meeshkan build -i __meeshkan__/pokeapi.co-recordings.jsonl -o __meeshkan__/gen -m gen"
+        command = "mem build -i __mem__/pokeapi.co-recordings.jsonl -o __mem__/gen -m gen"
         print("$ {}".format(command))
         self.m_print("")
         res = subprocess.call(
@@ -342,14 +342,14 @@ class CLI:
         self.m_print("")
         building()
         self.m_print("")
-        self.m_print("Done.  In __meeshkan__/gen/, you'll see a new OpenAPI spec.")
+        self.m_print("Done.  In __mem__/gen/, you'll see a new OpenAPI spec.")
         self.m_print("")
         self.m_input(
             "Let's use this spec to create some _synthetic_ data.  Press ENTER to reboot the mock server on port 8000."
         )
         self.m_print("")
         with subprocess.Popen(
-            "meeshkan mock __meeshkan__/gen -r".split(" "),
+            "mem mock __mem__/gen -r".split(" "),
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             cwd=os.getcwd(),
@@ -426,23 +426,23 @@ class CLI:
         self.m_print("")
         self.m_print("##############################")
         self.m_print("")
-        with open("__meeshkan__/merge_specs.py", "w") as fi:
+        with open("__mem__/merge_specs.py", "w") as fi:
             fi.write(MERGE_SPECS)
         self.m_input(
-            "Finally, open the file `merge_specs.py` that we created in the __meeshkan__ directory.  It's a script that merges together the two OpenAPI specs - replay and gen - created by Mem.  After you've looked at it, press ENTER to execute it."
+            "Finally, open the file `merge_specs.py` that we created in the __mem__ directory.  It's a script that merges together the two OpenAPI specs - replay and gen - created by Mem.  After you've looked at it, press ENTER to execute it."
         )
         self.m_print("")
-        self.m_print("$ python __meeshkan__/merge_specs.py")
+        self.m_print("$ python __mem__/merge_specs.py")
         self.m_print("")
-        res = subprocess.call("python __meeshkan__/merge_specs.py", shell=True)
+        res = subprocess.call("python __mem__/merge_specs.py", shell=True)
         if self.throw_on_non_zero_exit and (res != 0):
-            raise ValueError("Test failed at `python __meeshkan__/merge_specs.p`")
+            raise ValueError("Test failed at `python __mem__/merge_specs.p`")
         self.m_print(
-            "Done.  In `__meeshkan__/both/`, you'll see an OpenAPI spec that combines _both_ the fixtures from `__meeshkan__/replay/openapi.json` and the synthetic spec from `__meeshkan__/replay/openapi.json`."
+            "Done.  In `__mem__/both/`, you'll see an OpenAPI spec that combines _both_ the fixtures from `__mem__/replay/openapi.json` and the synthetic spec from `__mem__/replay/openapi.json`."
         )
         self.m_print("")
         self.m_input(
-            "Like the other two specs, this one can be used to create a mock server.  Try it yourself!  After this tutorial, run `meeshkan mock -i __meeshkan__/both -r`, making sure to set the same headers as before, and see how the server responds.  Press ENTER to continue."
+            "Like the other two specs, this one can be used to create a mock server.  Try it yourself!  After this tutorial, run `mem mock -i __mem__/both -r`, making sure to set the same headers as before, and see how the server responds.  Press ENTER to continue."
         )
         self.m_print("")
         self.m_print("##############################")
@@ -452,7 +452,7 @@ class CLI:
         )
         self.m_print("")
         self.m_print(
-            "If you have a moment, please fill out our post-tutorial survey on https://meeshkan.typeform.com/to/FpRakX.  Besides helping us improve Mem, it will help us improve this and other tutorials."
+            "If you have a moment, please fill out our post-tutorial survey on https://mem.typeform.com/to/FpRakX.  Besides helping us improve Mem, it will help us improve this and other tutorials."
         )
         self.m_print("")
         self.m_print("Take care and happy mocking!")
@@ -465,11 +465,11 @@ class CLI:
             await asyncio.wait_for(server_started, timeout=timeout)
             if server_started.result() != 0:
                 raise Exception(
-                    "Unable to start Mem. Please, check logs at ~/.meeshkan/logs for details."
+                    "Unable to start Mem. Please, check logs at ~/.mem/logs for details."
                 )
         except asyncio.TimeoutError:
             raise Exception(
-                "Unable to start Mem in 10 seconds. Please, check logs at ~/.meeshkan/logs for details."
+                "Unable to start Mem in 10 seconds. Please, check logs at ~/.mem/logs for details."
             )
 
 

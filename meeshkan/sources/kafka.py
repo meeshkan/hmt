@@ -6,7 +6,7 @@ import faust
 from http_types.types import HttpExchange
 from http_types.utils import HttpExchangeBuilder
 
-from ..meeshkan_types import HttpExchangeStream
+from ..mem_types import HttpExchangeStream
 from .abstract import AbstractSource
 
 
@@ -19,7 +19,7 @@ class KafkaSourceConfig:
 class KafkaSource(AbstractSource):
     def __init__(self, config: KafkaSourceConfig):
         self.app = faust.App(
-            "meeshkan-kafka-source", broker=config.broker, stream_wait_empty=False
+            "mem-kafka-source", broker=config.broker, stream_wait_empty=False
         )
 
         faust_topic = self.app.topic(config.topic, key_type=str, value_type=str)

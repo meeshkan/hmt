@@ -41,7 +41,7 @@ handlers:
         encoding: utf8
 
 loggers:
-    meeshkan:
+    mem:
         level: DEBUG
 
 root:

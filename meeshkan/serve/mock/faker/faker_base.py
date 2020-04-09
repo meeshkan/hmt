@@ -3,7 +3,7 @@ from typing import Any
 
 from http_types import Request
 
-from meeshkan.serve.mock.specs import OpenAPISpecification
+from mem.serve.mock.specs import OpenAPISpecification
 
 
 class FakerBase(ABC):

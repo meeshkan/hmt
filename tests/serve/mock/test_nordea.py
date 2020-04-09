@@ -5,10 +5,10 @@ import pytest
 from hamcrest import assert_that, has_key, is_
 from tornado.httpclient import HTTPClientError, HTTPRequest
 
-from meeshkan.serve.mock.log import Log
-from meeshkan.serve.mock.scope import Scope
-from meeshkan.serve.mock.specs import load_specs
-from meeshkan.serve.utils.routing import PathRouting
+from mem.serve.mock.log import Log
+from mem.serve.mock.scope import Scope
+from mem.serve.mock.specs import load_specs
+from mem.serve.utils.routing import PathRouting
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level="DEBUG")

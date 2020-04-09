@@ -1,6 +1,6 @@
 """Code for working with OpenAPI paths, e.g., matching request path to an OpenAPI endpoint with parameter."""
 import typing
-from meeshkan.build.schemadiff import make_schema_diff
+from mem.build.schemadiff import make_schema_diff
 import re
 import random
 import string

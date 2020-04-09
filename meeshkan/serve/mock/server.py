@@ -5,8 +5,8 @@ from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.web import Application
 
-from meeshkan.serve.mock.rest import RestMiddlewareManager
-from meeshkan.serve.mock.storage.mock_data_store import MockDataStore
+from mem.serve.mock.rest import RestMiddlewareManager
+from mem.serve.mock.storage.mock_data_store import MockDataStore
 
 from ..admin.runner import start_admin
 from ..mock.callbacks import callback_manager

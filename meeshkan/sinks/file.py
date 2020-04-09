@@ -1,5 +1,5 @@
-from meeshkan.build.result import BuildResult
-from meeshkan.build.writer import write_build_result
+from mem.build.result import BuildResult
+from mem.build.writer import write_build_result
 
 from .abstract import AbstractSink
 

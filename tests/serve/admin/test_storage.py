@@ -2,9 +2,9 @@ import pytest
 from openapi_typed_2 import convert_to_OpenAPIObject
 from tornado.httpclient import HTTPClientError, HTTPRequest
 
-from meeshkan.serve.admin import make_admin_app
-from meeshkan.serve.mock.scope import Scope
-from meeshkan.serve.mock.specs import OpenAPISpecification
+from mem.serve.admin import make_admin_app
+from mem.serve.mock.scope import Scope
+from mem.serve.mock.specs import OpenAPISpecification
 from tests.util import spec_dict
 
 scope = Scope()
@@ -30,7 +30,7 @@ def test_storage(mock_data_store, http_client, base_url):
             "item": {
                 "type": "object",
                 "required": ["foo", "baz"],
-                "x-meeshkan-id-path": "itemId",
+                "x-mem-id-path": "itemId",
                 "properties": {
                     "foo": {"type": "number"},
                     "bar": {"type": "string"},
@@ -43,9 +43,9 @@ def test_storage(mock_data_store, http_client, base_url):
     spec = spec_dict(
         path="/items/{id}", response_schema=schema, components=components, method="get"
     )
-    spec["paths"]["/items/{id}"]["x-meeshkan-entity"] = "item"
-    spec["paths"]["/items/{id}"]["get"]["x-meeshkan-operation"] = "read"
-    spec["x-meeshkan-data"] = {"item": [{"foo": 10, "bar": "val", "itemId": "id123"}]}
+    spec["paths"]["/items/{id}"]["x-mem-entity"] = "item"
+    spec["paths"]["/items/{id}"]["get"]["x-mem-operation"] = "read"
+    spec["x-mem-data"] = {"item": [{"foo": 10, "bar": "val", "itemId": "id123"}]}
     spec = convert_to_OpenAPIObject(spec)
 
     mock_data_store.add_mock(OpenAPISpecification(spec, "items"))

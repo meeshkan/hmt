@@ -5,10 +5,10 @@ from shutil import rmtree
 from setuptools import Command, errors, find_packages, setup
 
 # Package meta-data.
-NAME = "meeshkan"
+NAME = "mem"
 DESCRIPTION = "Reverse engineer services with style"
-URL = "http://github.com/meeshkan/meeshkan"
-EMAIL = "dev@meeshkan.com"
+URL = "http://github.com/mem/mem"
+EMAIL = "dev@mem.com"
 AUTHOR = "Mem Dev Team"
 REQUIRES_PYTHON = ">=3.6.0"
 
@@ -35,7 +35,7 @@ REQUIRED = [
     # mock
     "tornado==5.1.1",
     "urllib3==1.25.6",
-    "meeshkan-daemonocle",
+    "mem-daemonocle",
     # tutorial
     "clint",
     "pyfiglet",
@@ -69,7 +69,7 @@ DEV = BUNDLE_REQUIREMENTS + [
 
 VERSION = "0.2.25"
 
-ENTRY_POINTS = ["meeshkan = meeshkan.__main__:cli"]
+ENTRY_POINTS = ["mem = mem.__main__:cli"]
 
 EXTRAS = dict(**BUNDLES, dev=DEV)
 

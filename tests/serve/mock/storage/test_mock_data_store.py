@@ -1,7 +1,7 @@
 from openapi_typed_2 import convert_to_OpenAPIObject
 
-from meeshkan.serve.mock.specs import OpenAPISpecification
-from meeshkan.serve.mock.storage.mock_data_store import MockDataStore
+from mem.serve.mock.specs import OpenAPISpecification
+from mem.serve.mock.storage.mock_data_store import MockDataStore
 from tests.util import spec, spec_dict
 
 
@@ -13,7 +13,7 @@ def test_add_mock_no_data():
             "item": {
                 "type": "object",
                 "required": ["foo", "baz"],
-                "x-meeshkan-id-path": "itemId",
+                "x-mem-id-path": "itemId",
                 "properties": {
                     "foo": {"type": "number"},
                     "bar": {"type": "string"},
@@ -26,8 +26,8 @@ def test_add_mock_no_data():
     spec = spec_dict(
         path="/items/{id}", response_schema=schema, components=components, method="get"
     )
-    spec["paths"]["/items/{id}"]["x-meeshkan-entity"] = "item"
-    spec["paths"]["/items/{id}"]["get"]["x-meeshkan-operation"] = "read"
+    spec["paths"]["/items/{id}"]["x-mem-entity"] = "item"
+    spec["paths"]["/items/{id}"]["get"]["x-mem-operation"] = "read"
 
     spec = convert_to_OpenAPIObject(spec)
 
@@ -50,7 +50,7 @@ def test_add_mock_data():
             "item": {
                 "type": "object",
                 "required": ["foo", "baz"],
-                "x-meeshkan-id-path": "itemId",
+                "x-mem-id-path": "itemId",
                 "properties": {
                     "foo": {"type": "number"},
                     "bar": {"type": "string"},
@@ -63,10 +63,10 @@ def test_add_mock_data():
     spec = spec_dict(
         path="/items/{id}", response_schema=schema, components=components, method="get"
     )
-    spec["paths"]["/items/{id}"]["x-meeshkan-entity"] = "item"
-    spec["paths"]["/items/{id}"]["get"]["x-meeshkan-operation"] = "read"
-    spec["x-meeshkan-data"] = {}
-    spec["x-meeshkan-data"]["item"] = [
+    spec["paths"]["/items/{id}"]["x-mem-entity"] = "item"
+    spec["paths"]["/items/{id}"]["get"]["x-mem-operation"] = "read"
+    spec["x-mem-data"] = {}
+    spec["x-mem-data"]["item"] = [
         {"foo": 10, "bar": "val", "itemId": "id123"},
         {"foo": 20, "bar": "val1", "itemId": "id1234"},
     ]
@@ -105,7 +105,7 @@ def test_reset():
             "item": {
                 "type": "object",
                 "required": ["foo", "baz"],
-                "x-meeshkan-id-path": "itemId",
+                "x-mem-id-path": "itemId",
                 "properties": {
                     "foo": {"type": "number"},
                     "bar": {"type": "string"},
@@ -118,9 +118,9 @@ def test_reset():
     spec = spec_dict(
         path="/items/{id}", response_schema=schema, components=components, method="get"
     )
-    spec["paths"]["/items/{id}"]["x-meeshkan-entity"] = "item"
-    spec["paths"]["/items/{id}"]["get"]["x-meeshkan-operation"] = "read"
-    spec["x-meeshkan-data"] = {"item": [{"foo": 10, "bar": "val", "itemId": "id123"}]}
+    spec["paths"]["/items/{id}"]["x-mem-entity"] = "item"
+    spec["paths"]["/items/{id}"]["get"]["x-mem-operation"] = "read"
+    spec["x-mem-data"] = {"item": [{"foo": 10, "bar": "val", "itemId": "id123"}]}
     spec = convert_to_OpenAPIObject(spec)
 
     store = MockDataStore()

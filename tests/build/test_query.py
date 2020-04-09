@@ -1,5 +1,5 @@
-from meeshkan.build.update_mode import UpdateMode
-from meeshkan.build.param import ParamBuilder, SchemaParameters
+from mem.build.update_mode import UpdateMode
+from mem.build.param import ParamBuilder, SchemaParameters
 from http_types import RequestBuilder
 from openapi_typed_2 import Parameter, Schema
 from typing import cast

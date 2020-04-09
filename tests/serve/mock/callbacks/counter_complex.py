@@ -1,4 +1,4 @@
-from meeshkan.serve.mock.callbacks import callback
+from mem.serve.mock.callbacks import callback
 
 
 @callback("api.com", "post", "/counter")
@@ -17,7 +17,7 @@ def counter_callback_get(query, response_body, storage, response_headers):
         storage.default["called"] = query["set"]
     else:
         storage.default["called"] = storage.default.get("called", 0) + 1
-    response_headers["x-meeshkan-counter"] = storage.default["called"]
+    response_headers["x-mem-counter"] = storage.default["called"]
     return "{} {} times".format(response_body, storage.default["called"])
 
 

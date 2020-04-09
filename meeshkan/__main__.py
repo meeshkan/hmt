@@ -9,7 +9,7 @@ from .build.builder import BASE_SCHEMA, build_schema_async
 from .build.update_mode import UpdateMode
 from .config import DEFAULT_SPECS_DIR, setup
 from .logger import get as getLogger
-from .meeshkan_types import BuildResultStream
+from .mem_types import BuildResultStream
 from .prepare import ignore_warnings
 from .serve.commands import mock, record
 from .sinks import AbstractSink, FileSystemSink
