@@ -43,7 +43,7 @@ jobs: # A basic unit of work in a run
       - run:
           name: Run integretion tests
           command: |
-            git clone https://github.com/mem/mem-examples.git  ../mem-examples
+            git clone https://github.com/meeshkan/mem-examples.git  ../mem-examples
             cd ../mem-examples && python run_all.py
   test-3.7:
     <<: *test-template

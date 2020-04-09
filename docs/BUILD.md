@@ -1,7 +1,7 @@
 # Building with Mem
 
 Mem builds OpenAPI specs from two possible sources:
-- Recordings of HTTP API traffic serialized in the [`http-types`](https://github.com/mem/http-types) format and written to a [`.jsonl`](https://jsonlines.org) file
+- Recordings of HTTP API traffic serialized in the [`http-types`](https://github.com/meeshkan/http-types) format and written to a [`.jsonl`](https://jsonlines.org) file
 - Other OpenAPI specs
 
 In case one only has an OpenAPI spec and no server recodings, it is not necessary to run Mem build and you can go directly to the [`mem mock`](./MOCK.md) command.
@@ -19,9 +19,9 @@ In case one only has an OpenAPI spec and no server recodings, it is not necessar
 
 ## The `mem build` command
 
-⚠️ Before getting started, you should make sure that any recorded HTTP API traffic that you'll use is in the correct format. The `mem build` command expects that recordings are in a single [JSON Lines](http://jsonlines.org/) file and every line should be in the [http-types](https://mem.github.io/http-types/) JSON format.
+⚠️ Before getting started, you should make sure that any recorded HTTP API traffic that you'll use is in the correct format. The `mem build` command expects that recordings are in a single [JSON Lines](http://jsonlines.org/) file and every line should be in the [http-types](https://meeshkan.github.io/http-types/) JSON format.
 
-For an example input file, see [recordings.jsonl](https://github.com/Mem/mem/blob/master/resources/recordings.jsonl). The libraries listed at [http-types](https://mem.github.io/http-types/) can be used to generate input files in your language of choice.
+For an example input file, see [recordings.jsonl](https://github.com/meeshkan/mem/blob/master/resources/recordings.jsonl). The libraries listed at [http-types](https://meeshkan.github.io/http-types/) can be used to generate input files in your language of choice.
 
 ### Building a spec from recorded HTTP API traffic
 
@@ -116,7 +116,7 @@ Mem will build a schema that contains the exact response received as a `200` res
 
 Because Mem writes specs in the OpenAPI format, you can use an OpenAPI manipulation tool or library to edit and blend OpenAPI specs. 
 
-Let's look at one example using [`openapi_typed_2`](https://github.com/mem/openapi_typed_2) to blend together the paths from two different API specs and then write a new spec.
+Let's look at one example using [`openapi_typed_2`](https://github.com/meeshkan/openapi_typed_2) to blend together the paths from two different API specs and then write a new spec.
 
 ```python
 from openapi_typed_2 import convert_to_openapi, convert_from_openapi

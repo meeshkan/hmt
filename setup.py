@@ -7,9 +7,9 @@ from setuptools import Command, errors, find_packages, setup
 # Package meta-data.
 NAME = "mem"
 DESCRIPTION = "Reverse engineer services with style"
-URL = "http://github.com/mem/mem"
-EMAIL = "dev@mem.com"
-AUTHOR = "Mem Dev Team"
+URL = "http://github.com/meeshkan/mem"
+EMAIL = "dev@meeshkan.com"
+AUTHOR = "Meeshkan"
 REQUIRES_PYTHON = ">=3.6.0"
 
 here = os.path.abspath(os.path.dirname(__file__))

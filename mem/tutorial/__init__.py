@@ -180,7 +180,7 @@ class CLI:
         self.m_print("##############################")
         self.m_print("")
         self.m_print(
-            "Let's record a bit of server traffic.  We've written a file to `__mem__/api_calls.py` to make our recordings.  Mem expects recordings to be in the http-types format (github.com/mem/http-types), so we'll use that."
+            "Let's record a bit of server traffic.  We've written a file to `__mem__/api_calls.py` to make our recordings.  Mem expects recordings to be in the http-types format (github.com/meeshkan/http-types), so we'll use that."
         )
         self.m_print("")
         self.m_print(

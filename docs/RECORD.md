@@ -1,6 +1,6 @@
 # Recording with Mem
 
-Mem can be used to record HTTP API traffic in a format that `mem build` can understand.  This format serializes JSON objects in the [`http-types`](https://github.com/mem/http-types) format written to a [`.jsonl`](https://jsonlines.org) file. By default, this file will be called `{hostname}-recordings.jsonl` with `{hostname}` referring to your API's host URL. 
+Mem can be used to record HTTP API traffic in a format that `mem build` can understand.  This format serializes JSON objects in the [`http-types`](https://github.com/meeshkan/http-types) format written to a [`.jsonl`](https://jsonlines.org) file. By default, this file will be called `{hostname}-recordings.jsonl` with `{hostname}` referring to your API's host URL. 
 
 ## What's in this document
 
@@ -81,19 +81,19 @@ $ mem record stop
 
 ## Ecosystem
 
-In addition to using Mem to record, there is a growing ecosystem of projects that one can use to create `.jsonl` files in the [`http-types`](https://github.com/mem/http-types).  
+In addition to using Mem to record, there is a growing ecosystem of projects that one can use to create `.jsonl` files in the [`http-types`](https://github.com/meeshkan/http-types).  
 
 Here are some other ways that you can create `.jsonl` files of server recordings that are consumable by `mem build`.
 
 ### Client libraries
 
-You can use one of the [`http-types`](https://github.com/mem/http-types) client libraries to write recorded traffic as `.jsonl` files. 
+You can use one of the [`http-types`](https://github.com/meeshkan/http-types) client libraries to write recorded traffic as `.jsonl` files. 
 
 Here are the libraries that currently exist:
 
-- [js-http-types](https://github.com/mem/js-http-types) 
-- [java-http-types](https://github.com/mem/java-http-types) 
-- [py-http-types](https://github.com/mem/py-http-types) 
+- [js-http-types](https://github.com/meeshkan/js-http-types) 
+- [java-http-types](https://github.com/meeshkan/java-http-types) 
+- [py-http-types](https://github.com/meeshkan/py-http-types) 
 
 In the future, we hope to build client libraries in C#, C++, Go, Rust, Brainfuck, Haskell and OCaml.
 
@@ -130,7 +130,7 @@ Here is a list of integrations that exist or are in development:
 
 | Integration | Description | Status |
 | ----------- | ----------- | ------ |
-| [`express-middleware`](https://github.com/mem/express-middleware) | Log files from express apps using a variety of transport layers, including the file system and Apache Kafka. | Stable |
+| [`express-middleware`](https://github.com/meeshkan/express-middleware) | Log files from express apps using a variety of transport layers, including the file system and Apache Kafka. | Stable |
 | `wireshark` | Convert a Wireshark `.pcap` file to `http-types` format. | Stable |
 | Kong plugin | Log requests and responses to the Kong API Gateway using a variety of transport layers, including the file system and Apache Kafka. | In development |
 | AWS API Gateway Plugin | Log requests and responses to the AWS API Gateway using a variety of transport layers, including the file system and Apache Kafka. | In development |
