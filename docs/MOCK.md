@@ -70,7 +70,7 @@ This directory can contain multiple Python scripts containing callbacks. A callb
 ```python
 from mem.server.server.callbacks import callback
 
-@callback('mem.com', 'post', '/counter')
+@callback('meeshkan.com', 'post', '/counter')
 def counter_callback(request_body, response_body, storage):
     if 'set' in request_body:
         storage['called'] = request_body['set']
@@ -103,7 +103,7 @@ You may also provide a `format` to a callback decorator. The default `format` is
 ```python
 from mem.server.server.callbacks import callback
 
-@callback('mem.com', 'post', '/counter', format='text')
+@callback('meeshkan.com', 'post', '/counter', format='text')
 def counter_callback(request_body, response_body, storage):
     response_body = 'Response body should be a string'
     return response_body
@@ -117,7 +117,7 @@ If you have to modify response headers, you can provide a `response` type value 
 from mem.server.server.callbacks import callback
 from http_types import Response
 
-@callback('mem.com', 'post', '/counter', response='full')
+@callback('meeshkan.com', 'post', '/counter', response='full')
 def counter_callback(request_body, response_body, storage):
     return Response(statusCode=500, bodyAsJson={'message': 'Not ok'},
                                 headers={'x-custom-header': 'some value'})

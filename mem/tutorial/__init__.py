@@ -452,7 +452,7 @@ class CLI:
         )
         self.m_print("")
         self.m_print(
-            "If you have a moment, please fill out our post-tutorial survey on https://mem.typeform.com/to/FpRakX.  Besides helping us improve Mem, it will help us improve this and other tutorials."
+            "If you have a moment, please fill out our post-tutorial survey on https://meeshkan.typeform.com/to/FpRakX.  Besides helping us improve Mem, it will help us improve this and other tutorials."
         )
         self.m_print("")
         self.m_print("Take care and happy mocking!")
