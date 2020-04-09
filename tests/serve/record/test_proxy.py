@@ -9,7 +9,6 @@ from tornado.testing import bind_unused_port
 
 from meeshkan.serve.mock.log import Log
 from meeshkan.serve.mock.scope import Scope
-from meeshkan.serve.mock.server import make_mocking_app
 from meeshkan.serve.mock.specs import load_specs
 from meeshkan.serve.record.proxy import RecordProxy
 from meeshkan.serve.utils.data_callback import DataCallback
@@ -17,8 +16,8 @@ from meeshkan.serve.utils.routing import HeaderRouting, PathRouting, StaticRouti
 
 
 @pytest.fixture
-def app():
-    return make_mocking_app(
+def app(mocking_app):
+    return mocking_app(
         "tests/serve/mock/callbacks",
         load_specs("tests/serve/mock/schemas/petstore"),
         StaticRouting("http://petstore.swagger.io"),

@@ -6,27 +6,25 @@ from http_types import RequestBuilder
 from tornado.web import RequestHandler
 
 from ..utils.routing import Routing
-from .callbacks import CallbackManager
 from .log import Log
-from .response_matcher import ResponseMatcher
+from .request_processor import RequestProcessor
 
 logger = logging.getLogger(__name__)
 
 
 class MockServerView(RequestHandler):
+    _request_processor: RequestProcessor
+    _router: Routing
+    _log: Log
+
     SUPPORTED_METHODS = ["GET", "POST", "HEAD", "DELETE", "PATCH", "PUT", "OPTIONS"]
 
     def initialize(
-        self,
-        response_matcher: ResponseMatcher,
-        router: Routing,
-        callback: CallbackManager,
-        log: Log,
+        self, request_processor: RequestProcessor, router: Routing, http_log: Log,
     ):
-        self.response_matcher = response_matcher
-        self.callback = callback
-        self.router = router
-        self.log = log
+        self._request_processor = request_processor
+        self._router = router
+        self._http_log = http_log
 
     def set_default_headers(self):
         self.set_header("Content-Type", 'application/json; charset="utf-8"')
@@ -54,7 +52,7 @@ class MockServerView(RequestHandler):
 
     def _serve(self):
         headers = {k: v for k, v in self.request.headers.get_all()}
-        route_info = self.router.route(self.request.path, headers)
+        route_info = self._router.route(self.request.path, headers)
         headers["Host"] = route_info.host
 
         query = parse.parse_qs(self.request.query)
@@ -87,12 +85,12 @@ class MockServerView(RequestHandler):
         )
 
         logger.debug("Processing request: %s", asdict(request))
-        initial_response = self.response_matcher.get_response(request)
-        response = self.callback(request, initial_response)
+        response = self._request_processor.process(request)
         logger.debug("Resolved response: %s", asdict(response))
+
         for header, value in response.headers.items():
             self.set_header(header, value)
-        self.log.put(request, response)
+        self._http_log.put(request, response)
         self.set_status(response.statusCode)
         self.write(response.body)
         logger.debug("Handled writing response")
