@@ -504,7 +504,7 @@ def test_matcher_12():
         )[0]
         .api.paths["/guest/{id}/name"]
         .post
-        is None
+        is not None
     )
 
 
