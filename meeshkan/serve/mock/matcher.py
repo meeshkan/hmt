@@ -814,7 +814,7 @@ def match_request_to_openapi(
                 [
                     keep_method_if_required_header_parameters_are_present(req, oai),
                     keep_method_if_required_query_parameters_are_present(req, oai),
-                    keep_method_if_required_request_body_is_present(req, oai),
+                    #keep_method_if_required_request_body_is_present(req, oai),
                 ],
                 get_path_item_with_method(req.method.value, path_item),
             )
