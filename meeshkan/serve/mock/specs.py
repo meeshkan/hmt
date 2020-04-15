@@ -8,7 +8,6 @@ import yaml
 from openapi_typed_2 import OpenAPIObject, convert_to_openapi
 from requests.exceptions import RequestException
 
-
 @dataclass
 class OpenAPISpecification:
     """An OpenAPI object with information about the source it was created from (such as the file name or URL)."""

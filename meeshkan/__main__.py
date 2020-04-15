@@ -3,6 +3,7 @@ from typing import Sequence
 
 import click
 from openapi_typed_2 import OpenAPIObject, convert_to_openapi
+
 from yaml import safe_load
 
 from .build.builder import BASE_SCHEMA, build_schema_async
