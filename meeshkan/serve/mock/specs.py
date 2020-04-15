@@ -1,10 +1,11 @@
 import json
+import json
 import os
 from dataclasses import dataclass
 from typing import Sequence, Union
-from yaml import safe_load
 
 import requests
+import yaml
 from openapi_typed_2 import OpenAPIObject, convert_to_openapi
 from requests.exceptions import RequestException
 
@@ -30,7 +31,7 @@ def load_spec(spec_source: str, is_http: bool) -> OpenAPISpecification:
 
     return OpenAPISpecification(
         convert_to_openapi(
-            (json.loads if spec_source.endswith("json") else safe_load)(spec_text)
+            (json.loads if spec_source.endswith("json") else yaml.safe_load)(spec_text)
         ),
         spec_source,
     )
