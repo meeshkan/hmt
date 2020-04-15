@@ -2,11 +2,11 @@ import json
 import os
 from dataclasses import dataclass
 from typing import Sequence, Union
+from yaml import safe_load
 
 import requests
 from openapi_typed_2 import OpenAPIObject, convert_to_openapi
 from requests.exceptions import RequestException
-from yaml import safe_load
 
 @dataclass
 class OpenAPISpecification:
