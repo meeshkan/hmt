@@ -9,6 +9,8 @@ import re
 import time
 from dataclasses import replace
 
+import pytest
+from hamcrest import *
 from http_types import (
     HttpExchange,
     HttpExchangeBuilder,
@@ -22,8 +24,6 @@ from openapi_typed_2 import Schema, convert_to_openapi
 from typeguard import check_type
 from yaml import safe_load
 
-import pytest
-from hamcrest import *
 from meeshkan.build import build_schema_batch, build_schema_online, update_openapi
 from meeshkan.build.builder import BASE_SCHEMA
 from meeshkan.build.update_mode import UpdateMode
