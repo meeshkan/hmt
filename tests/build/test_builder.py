@@ -47,7 +47,7 @@ expected_schema = replace(
 
 @pytest.fixture
 def petstore_schema():
-    with open("/tests/build/schemas/petstore/index.yaml", "r") as f:
+    with open("tests/build/schemas/petstore/index.yaml", "r") as f:
         oas = convert_to_openapi(safe_load(f.read()))
         return oas
 
@@ -306,7 +306,7 @@ ACCEPTABLE_TIME = 10  # 10 seconds
 
 def test_builder_speed():
     now = time.time()
-    with open("tests/build/pokeapi/large.jsonl", "r") as recordings:
+    with open("tests/build/recordings/pokeapi/large.jsonl", "r") as recordings:
         http_exchanges = [
             HttpExchangeBuilder.from_dict(json.loads(d))
             for d in recordings.read().split("\n")
