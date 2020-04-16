@@ -1,7 +1,7 @@
 import logging
-from dataclasses import asdict
 from urllib import parse
 
+from dataclasses import asdict
 from http_types import RequestBuilder
 from tornado.web import RequestHandler
 

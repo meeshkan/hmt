@@ -1,7 +1,7 @@
 from http_types import RequestBuilder
-from openapi_typed_2 import convert_to_OpenAPIObject
 
 from meeshkan.serve.mock.storage.entity import Entity
+from openapi_typed_2 import convert_to_OpenAPIObject
 from tests.util import add_item, spec_dict
 
 

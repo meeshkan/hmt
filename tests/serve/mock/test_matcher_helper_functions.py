@@ -1,5 +1,12 @@
 from dataclasses import replace
 
+from meeshkan.serve.mock.matcher import (
+    get_path_item_with_method,
+    match_urls,
+    matches,
+    ref_name,
+    use_if_header,
+)
 from openapi_typed_2 import (
     OpenAPIObject,
     PathItem,
@@ -9,14 +16,6 @@ from openapi_typed_2 import (
     convert_to_Parameter,
     convert_to_PathItem,
     convert_to_Schema,
-)
-
-from meeshkan.serve.mock.matcher import (
-    get_path_item_with_method,
-    match_urls,
-    matches,
-    ref_name,
-    use_if_header,
 )
 
 

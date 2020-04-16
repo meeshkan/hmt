@@ -1,9 +1,9 @@
 import json
 import os
 import time
-from dataclasses import dataclass
 from typing import Optional, Sequence
 
+from dataclasses import dataclass
 from http_types import HttpExchange, HttpExchangeWriter, Request, Response
 
 from .scope import Scope

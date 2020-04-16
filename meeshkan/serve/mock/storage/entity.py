@@ -3,6 +3,9 @@ import uuid
 
 from http_types import Request
 from jsonpath_rw import Fields, parse
+
+from meeshkan.build.paths import _match_to_path
+from meeshkan.serve.utils.opanapi_ext import ApiOperation, get_x
 from openapi_typed_2 import (
     OpenAPIObject,
     Operation,
@@ -10,9 +13,6 @@ from openapi_typed_2 import (
     RequestBody,
     convert_from_openapi,
 )
-
-from meeshkan.build.paths import _match_to_path
-from meeshkan.serve.utils.opanapi_ext import ApiOperation, get_x
 
 
 def replace_path(expression, doc, val):
