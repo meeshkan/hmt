@@ -1,31 +1,34 @@
 import copy
-from meeshkan.build.update_mode import UpdateMode
 import json
 import re
+
+# TODO
+# this sullies the structure of the repo a bit as
+# we are reading from an odd loation
+# given where this test lives
+import time
+
 from dataclasses import replace
 from http_types import (
     HttpExchange,
-    Request,
-    Response,
-    RequestBuilder,
     HttpExchangeBuilder,
+    Request,
+    RequestBuilder,
+    Response,
 )
-from meeshkan.build import build_schema_batch, update_openapi, build_schema_online
-from meeshkan.build.builder import BASE_SCHEMA
-from meeshkan.build.update_mode import UpdateMode
-from ..util import read_recordings_as_request_response, POKEAPI_RECORDINGS_PATH
-from openapi_typed_2 import (
-    OpenAPIObject,
-    Operation,
-    PathItem,
-    Schema,
-    Response as _Response,
-)
+from openapi_typed_2 import OpenAPIObject, Operation, PathItem
+from openapi_typed_2 import Response as _Response
+from openapi_typed_2 import Schema, convert_to_openapi
 from typeguard import check_type
 from yaml import safe_load
-from openapi_typed_2 import convert_to_openapi
+
 import pytest
 from hamcrest import *
+from meeshkan.build import build_schema_batch, build_schema_online, update_openapi
+from meeshkan.build.builder import BASE_SCHEMA
+from meeshkan.build.update_mode import UpdateMode
+
+from ..util import POKEAPI_RECORDINGS_PATH, read_recordings_as_request_response
 
 requests = read_recordings_as_request_response()
 pokeapi_requests = read_recordings_as_request_response(POKEAPI_RECORDINGS_PATH)
@@ -294,12 +297,6 @@ def test_schema_in_replay_mode():
         .schema.oneOf
     )
 
-
-# TODO
-# this sullies the structure of the repo a bit as
-# we are reading from an odd loation
-# given where this test lives
-import time
 
 ACCEPTABLE_TIME = 10  # 10 seconds
 
