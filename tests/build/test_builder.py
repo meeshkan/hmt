@@ -1,11 +1,6 @@
 import copy
 import json
 import re
-
-# TODO
-# this sullies the structure of the repo a bit as
-# we are reading from an odd loation
-# given where this test lives
 import time
 from dataclasses import replace
 
