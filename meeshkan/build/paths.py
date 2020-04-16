@@ -178,8 +178,8 @@ def _match_to_path(request_path: str, path: str) -> Optional[Mapping[str, Any]]:
 
     Examples:
 
->>> _match_to_path("/v1/pets/{id}", "/v1/pets/3")
-{ 'id': 2 }
+    >>> _match_to_path("/v1/pets/32", "/v1/pets/{id}")
+    {'id': '32'}
 
     Arguments:
         request_path {str} -- Request path such as /pets/32

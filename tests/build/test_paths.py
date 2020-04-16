@@ -53,6 +53,15 @@ def test_match_paths(schema):
     assert_that(parameters, has_entry("petId", "32"))
 
 
+def test_match_paths_simple():
+    request_path = "/pets/32"
+    path = "/pets/{id}"
+
+    parameters = _match_to_path(request_path, path)
+
+    assert_that(parameters, has_entry("id", "32"))
+
+
 def test_match_paths_reference():
     request_path = "/pets/32#reference"
     path = "/pets/{petId}#{ref}"
