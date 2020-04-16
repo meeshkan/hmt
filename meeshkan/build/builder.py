@@ -31,7 +31,7 @@ def build_content(body: str, mode: UpdateMode) -> Optional[Tuple[MediaTypeKey, M
 
     Arguments:
         body {str} -- Body.
-        strict {bool} -- Flag whether to use strict required fields inference or mark each field as optional
+        mode {UpdateMode} -- Schema update mode
 
     Returns:
         Optional[Tuple[str, MediaType]] -- None for empty body, tuple of media-type key and media-type otherwise.
@@ -53,6 +53,7 @@ def build_response(exchange: HttpExchange, mode: UpdateMode) -> Response:
 
     Arguments:
         exchange {HttpExchange} -- Request-response pair.
+        mode {UpdateMode} -- Schema update mode
 
     Returns:
         Response -- OpenAPI response object.
@@ -90,6 +91,7 @@ def build_request_body(exchange: HttpExchange, mode: UpdateMode) -> Optional[Req
 
     Arguments:
         exchange {HttpExchange} -- Request-response pair.
+        mode {UpdateMode} -- Schema update mode
 
     Returns:
         RequestBody -- OpenAPI RequestBody object.
@@ -119,6 +121,7 @@ def update_response(response: Response, mode: UpdateMode, exchange: HttpExchange
 
     Arguments:
         response {Response} -- Existing response object.
+        mode {UpdateMode} -- Schema update mode
         exchange {HttpExchange} -- Request-response pair.
 
     Returns:
@@ -176,6 +179,7 @@ def update_request_body(request_body: RequestBody, mode: UpdateMode, exchange: H
 
     Arguments:
         request_body {RequestBody} -- Existing request object.
+        mode {UpdateMode} -- Schema update mode
         exchange {HttpExchange} -- Request-response pair.
 
     Returns:
@@ -215,7 +219,8 @@ def build_operation(exchange: HttpExchange, mode: UpdateMode) -> Operation:
     Operation reference: https://swagger.io/specification/#operationObject
 
     Arguments:
-        request {HttpExchange} -- Request-response pair
+        exchange {HttpExchange} -- Request-response pair
+        mode {UpdateMode} -- Schema update mode
 
     Returns:
         Operation -- Operation object.
@@ -247,6 +252,7 @@ def update_operation(operation: Operation, exchange: HttpExchange, mode: UpdateM
     Arguments:
         operation {Operation} -- Existing Operation object.
         exchange {HttpExchange} -- Request-response pair
+        mode {UpdateMode} -- Schema update mode
 
     Returns:
         Operation -- Updated operation
