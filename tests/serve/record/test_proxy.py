@@ -2,11 +2,11 @@ import json
 import urllib.parse
 from unittest.mock import Mock
 
+import pytest
 from http_types import HttpMethod, Protocol
 from tornado.httpclient import HTTPRequest
 from tornado.testing import bind_unused_port
 
-import pytest
 from meeshkan.serve.mock.log import Log
 from meeshkan.serve.mock.scope import Scope
 from meeshkan.serve.mock.specs import load_specs

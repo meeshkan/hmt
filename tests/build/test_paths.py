@@ -1,8 +1,8 @@
+import pytest
+from hamcrest import *
 from openapi_typed_2 import convert_to_openapi, convert_to_Operation
 from yaml import safe_load
 
-import pytest
-from hamcrest import *
 from meeshkan.build.paths import _match_to_path, find_matching_path, path_to_regex
 
 

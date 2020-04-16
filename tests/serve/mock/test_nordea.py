@@ -1,10 +1,10 @@
 import json
 import logging
 
-from tornado.httpclient import HTTPClientError, HTTPRequest
-
 import pytest
 from hamcrest import assert_that, has_key, is_
+from tornado.httpclient import HTTPClientError, HTTPRequest
+
 from meeshkan.serve.mock.log import Log
 from meeshkan.serve.mock.scope import Scope
 from meeshkan.serve.mock.specs import load_specs

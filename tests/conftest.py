@@ -1,9 +1,10 @@
 import logging
 from typing import Optional, Sequence
 
+import pytest
+from tests.util import MockSink
 from tornado.web import Application
 
-import pytest
 from meeshkan.serve.mock.callbacks import callback_manager
 from meeshkan.serve.mock.log import Log
 from meeshkan.serve.mock.request_processor import RequestProcessor
@@ -12,7 +13,6 @@ from meeshkan.serve.mock.specs import OpenAPISpecification
 from meeshkan.serve.mock.storage.mock_data_store import MockDataStore
 from meeshkan.serve.mock.views import MockServerView
 from meeshkan.serve.utils.routing import Routing
-from tests.util import MockSink
 
 
 @pytest.fixture()

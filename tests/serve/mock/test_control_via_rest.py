@@ -1,9 +1,9 @@
 import json
 
-from tornado.httpclient import HTTPRequest
-
 import pytest
 import requests_mock
+from tornado.httpclient import HTTPRequest
+
 from meeshkan.serve.mock.log import Log
 from meeshkan.serve.mock.scope import Scope
 from meeshkan.serve.mock.specs import load_specs

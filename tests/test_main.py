@@ -5,9 +5,9 @@ from typing import List
 
 import pkg_resources
 from click.testing import CliRunner
+from hamcrest import assert_that, has_key
 from openapi_typed_2 import OpenAPIObject, convert_from_openapi
 
-from hamcrest import assert_that, has_key
 from meeshkan.__main__ import cli
 from meeshkan.build.builder import BASE_SCHEMA
 from meeshkan.config import DEFAULT_SPECS_DIR

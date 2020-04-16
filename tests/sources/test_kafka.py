@@ -1,5 +1,6 @@
 import pytest
 from hamcrest import assert_that, has_length
+
 from meeshkan.sources.kafka import KafkaSource, KafkaSourceConfig
 
 from ..util import read_recordings_as_dict

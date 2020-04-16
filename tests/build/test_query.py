@@ -1,9 +1,9 @@
 from typing import cast
 
+from hamcrest import *
 from http_types import RequestBuilder
 from openapi_typed_2 import Parameter, Schema
 
-from hamcrest import *
 from meeshkan.build.param import ParamBuilder, SchemaParameters
 from meeshkan.build.update_mode import UpdateMode
 
