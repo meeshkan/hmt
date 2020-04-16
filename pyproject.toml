@@ -1,0 +1,3 @@
+[tool.black]
+include = '[meeshkan|tests].*\.pyi?$'
+exclude = 'build\/lib'
