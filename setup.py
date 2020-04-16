@@ -58,7 +58,7 @@ DEV = BUNDLE_REQUIREMENTS + [
     "pre-commit",
     "pyhamcrest",
     "pylint",
-    "pytest",
+    "pytest>=5.4.1",
     "pytest-asyncio",
     "pytest-testmon",
     "pytest-tornado",

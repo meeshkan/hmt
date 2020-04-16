@@ -176,6 +176,11 @@ def _dumb_match_to_path(
 def _match_to_path(request_path: str, path: str) -> Optional[Mapping[str, Any]]:
     """Match a request path such as "/pets/32" to a variable path such as "/pets/{petId}".
 
+    Examples:
+
+    >>> _match_to_path("/v1/pets/32", "/v1/pets/{id}")
+    {'id': '32'}
+
     Arguments:
         request_path {str} -- Request path such as /pets/32
         path {str} -- Path name in OpenAPI format such as /pets/{id}
