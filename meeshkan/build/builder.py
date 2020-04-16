@@ -1,56 +1,56 @@
 import copy
-from sys import path
-from .update_mode import UpdateMode
-from functools import reduce
+import json
+from collections import defaultdict
 from dataclasses import replace
+from functools import reduce
+from sys import path
 from typing import (
     Any,
-    List,
-    Sequence,
-    Iterable,
     AsyncIterable,
-    cast,
-    Tuple,
-    Optional,
-    Union,
-    TypeVar,
-    Type,
+    Iterable,
+    List,
     Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
 )
 from urllib.parse import urlunsplit
-from collections import defaultdict
-import json
 
 from http_types import HttpExchange as HttpExchange
 from openapi_typed_2 import (
-    Info,
-    Paths,
-    MediaType,
     Header,
+    Info,
+    MediaType,
     OpenAPIObject,
-    PathItem,
-    Response,
     Operation,
     Parameter,
+    PathItem,
+    Paths,
     Reference,
-    Server,
+    Response,
     Responses,
+    Server,
 )
 from typeguard import check_type  # type: ignore
 
-from .operation import operation_from_string, new_path_item_at_operation
 from ..logger import get as getLogger
 from .media_types import (
-    infer_media_type_from_nonempty,
-    build_media_type,
-    update_media_type,
     MediaTypeKey,
+    build_media_type,
+    infer_media_type_from_nonempty,
+    update_media_type,
     update_text_schema,
 )
-from .paths import find_matching_path, RequestPathParameters
+from .operation import new_path_item_at_operation, operation_from_string
 from .param import ParamBuilder
-from .servers import normalize_path_if_matches
+from .paths import RequestPathParameters, find_matching_path
 from .result import BuildResult
+from .servers import normalize_path_if_matches
+from .update_mode import UpdateMode
 
 _DEFAULT_PATH_ITEM = {
     "servers": None,

@@ -1,13 +1,14 @@
 """Code for building and inferring media types (application/json, text/plain, etc.) from HTTP exchanges."""
-from .update_mode import UpdateMode
-from http_types import HttpExchange as HttpExchange
-from ..logger import get as getLogger
-from typing import Any, Sequence, cast, Optional
-from openapi_typed_2 import MediaType, Schema, convert_to_Schema
 import json
-from typing_extensions import Literal
-from .json_schema import to_openapi_json_schema
+from typing import Any, Optional, Sequence, cast
 
+from http_types import HttpExchange as HttpExchange
+from openapi_typed_2 import MediaType, Schema, convert_to_Schema
+from typing_extensions import Literal
+
+from ..logger import get as getLogger
+from .json_schema import to_openapi_json_schema
+from .update_mode import UpdateMode
 
 logger = getLogger(__name__)
 

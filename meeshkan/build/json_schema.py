@@ -1,8 +1,10 @@
 import copy
-from .update_mode import UpdateMode
+from typing import Optional
+
 from genson import SchemaBuilder  # type: ignore
 from openapi_typed_2 import Schema, convert_from_openapi
-from typing import Optional
+
+from .update_mode import UpdateMode
 
 
 def decouple_types(s):

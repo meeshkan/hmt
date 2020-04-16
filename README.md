@@ -164,8 +164,9 @@ If you run into any issues, please [reach out to our team on Gitter](https://git
 ### Getting started
 
 1. Clone this repository: `git clone https://github.com/meeshkan/meeshkan`
-1. Create a virtual environment: `virtualenv .venv && source .venv/bin/activate`
+1. Create a virtual environment: `python3 -m venv .venv && source .venv/bin/activate`
 1. Install dependencies: `pip install --upgrade -e '.[dev]'`
+1. Install [`pre-commit`](https://pre-commit.com/) hooks to automatically format code as a git hook: `pre-commit install`
 
 ### Tests
 

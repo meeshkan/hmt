@@ -1,11 +1,13 @@
 """Code for writing builder results to file system.
 """
-from openapi_typed_2 import OpenAPIObject, convert_from_openapi
-from .result import BuildResult
 import json
-from ..logger import get as getLogger
-from typing import cast
 from pathlib import Path
+from typing import cast
+
+from openapi_typed_2 import OpenAPIObject, convert_from_openapi
+
+from ..logger import get as getLogger
+from .result import BuildResult
 
 LOGGER = getLogger(__name__)
 
