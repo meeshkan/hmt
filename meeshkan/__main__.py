@@ -5,9 +5,8 @@ import click
 from openapi_typed_2 import OpenAPIObject, convert_to_openapi
 from yaml import safe_load
 
-from meeshkan.build.update_mode import UpdateMode
-
 from .build.builder import BASE_SCHEMA, build_schema_async
+from .build.update_mode import UpdateMode
 from .config import DEFAULT_SPECS_DIR, setup
 from .logger import get as getLogger
 from .meeshkan_types import BuildResultStream
@@ -16,6 +15,7 @@ from .serve.commands import mock, record
 from .sinks import AbstractSink, FileSystemSink
 from .sources import AbstractSource, FileSource, KafkaSource
 from .sources.kafka import KafkaSourceConfig
+from .tutorial import run_tutorial
 
 ignore_warnings()
 
@@ -155,9 +155,18 @@ def build(input_file, out, initial_openapi_spec, mode, source):
     run_from_source(source, UpdateMode[mode.upper()], openapi_spec, sinks=sinks)
 
 
+@click.command()
+def tutorial():
+    """
+    Run the Meeshkan tutorial.
+    """
+    run_tutorial()
+
+
 cli.add_command(build)  # type: ignore
 cli.add_command(record)  # type: ignore
 cli.add_command(mock)  # type: ignore
+cli.add_command(tutorial)  # type: ignore
 
 if __name__ == "__main__":
     cli()

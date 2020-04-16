@@ -8,8 +8,6 @@ from dataclasses import asdict
 
 from http_types.utils import ResponseBuilder
 
-from .storage import storage_manager
-
 logger = logging.getLogger(__name__)
 
 
@@ -89,12 +87,12 @@ class CallbackManager:
 
         return response
 
-    def __call__(self, request, response):
+    def __call__(self, request, response, storage):
         callback = self._callbacks.get(
             (request.host, request.method.value, request.pathname)
         )
         if callback is not None:
-            out = callback(asdict(request), asdict(response), storage_manager.default)
+            out = callback(asdict(request), asdict(response), storage)
             return ResponseBuilder.from_dict(out)
         else:
             return response

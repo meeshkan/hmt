@@ -1,8 +1,18 @@
-from meeshkan.serve.mock.faker import fake_it
+from http_types import RequestBuilder
+
+from meeshkan.serve.mock.faker.stateless_faker import StatelessFaker
 from meeshkan.serve.mock.matcher import valid_schema
+from meeshkan.serve.mock.specs import OpenAPISpecification
+from tests.util import spec
 
 
 def test_faker_1():
+    faker = StatelessFaker()
+
+    request = RequestBuilder.from_dict(
+        dict(method="get", protocol="http", path="/", host="api.com")
+    )
+
     schema = {
         "type": "array",
         "items": {
@@ -15,11 +25,20 @@ def test_faker_1():
             },
         },
     }
-    res = fake_it(schema, schema, 0)
-    assert valid_schema(res, schema)
+    res = faker.process(
+        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        request,
+    )
+    assert valid_schema(res.bodyAsJson, schema)
 
 
 def test_faker_2():
+    faker = StatelessFaker()
+
+    request = RequestBuilder.from_dict(
+        dict(method="get", protocol="http", path="/", host="api.com")
+    )
+
     schema = {
         "$id": "https://example.com/person.schema.json",
         "$schema": "http://json-schema.org/draft-07/schema#",
@@ -31,15 +50,25 @@ def test_faker_2():
             "age": {
                 "description": "Age in years which must be equal to or greater than zero.",
                 "type": "integer",
-                "minimum": 0,
+                "minimum": 0.0,
             },
         },
     }
-    res = fake_it(schema, schema, 0)
-    assert valid_schema(res, schema)
+    res = faker.process(
+        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        request,
+    )
+
+    assert valid_schema(res.bodyAsJson, schema)
 
 
 def test_faker_3():
+    faker = StatelessFaker()
+
+    request = RequestBuilder.from_dict(
+        dict(method="get", protocol="http", path="/", host="api.com")
+    )
+
     schema = {
         "$id": "https://example.com/geographical-location.schema.json",
         "$schema": "http://json-schema.org/draft-07/schema#",
@@ -48,15 +77,25 @@ def test_faker_3():
         "required": ["latitude", "longitude"],
         "type": "object",
         "properties": {
-            "latitude": {"type": "number", "minimum": -90, "maximum": 90},
-            "longitude": {"type": "number", "minimum": -180, "maximum": 180},
+            "latitude": {"type": "number", "minimum": -90.0, "maximum": 90.0},
+            "longitude": {"type": "number", "minimum": -180.0, "maximum": 180.0},
         },
     }
-    res = fake_it(schema, schema, 0)
-    assert valid_schema(res, schema)
+    res = faker.process(
+        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        request,
+    )
+
+    assert valid_schema(res.bodyAsJson, schema)
 
 
 def test_faker_4():
+    faker = StatelessFaker()
+
+    request = RequestBuilder.from_dict(
+        dict(method="get", protocol="http", path="/", host="api.com")
+    )
+
     schema = {
         "$id": "https://example.com/arrays.schema.json",
         "$schema": "http://json-schema.org/draft-07/schema#",
@@ -64,9 +103,14 @@ def test_faker_4():
         "type": "object",
         "properties": {
             "fruits": {"type": "array", "items": {"type": "string"}},
-            "vegetables": {"type": "array", "items": {"$ref": "#/definitions/veggie"}},
+            "vegetables": {
+                "type": "array",
+                "items": {"$ref": "#/components/schemas/veggie"},
+            },
         },
-        "definitions": {
+    }
+    components = {
+        "schemas": {
             "veggie": {
                 "type": "object",
                 "required": ["veggieName", "veggieLike"],
@@ -81,13 +125,30 @@ def test_faker_4():
                     },
                 },
             }
-        },
+        }
     }
-    res = fake_it(schema, schema, 0)
-    assert valid_schema(res, schema)
+    res = faker.process(
+        OpenAPISpecification(
+            source="default", api=spec(response_schema=schema, components=components)
+        ),
+        request,
+    )
+
+    schema["components"] = components
+    assert valid_schema(res.bodyAsJson, schema)
 
 
 def test_faker_5():
+    faker = StatelessFaker()
+
+    request = RequestBuilder.from_dict(
+        dict(method="get", protocol="http", path="/", host="api.com")
+    )
+
     schema = {"type": "array"}
-    res = fake_it(schema, schema, 0)
-    assert valid_schema(res, schema)
+    res = faker.process(
+        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        request,
+    )
+
+    assert valid_schema(res.bodyAsJson, schema)

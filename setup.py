@@ -1,8 +1,9 @@
 import os
 import sys
+from distutils import errors
 from shutil import rmtree
 
-from setuptools import Command, errors, find_packages, setup
+from setuptools import Command, find_packages, setup
 
 # Package meta-data.
 NAME = "meeshkan"
@@ -22,20 +23,26 @@ REQUIRED = [
     "lenses",
     "pyyaml",
     "jsonschema",
-    "dataclasses",  # for 3.6, as it ships with 3.7
+    'dataclasses;python_version<"3.7"',  # for 3.6, as it ships with 3.7
     "faker",
     "requests",
     "typing-extensions",
-    "openapi-typed_2>=0.0.2",
+    "openapi-typed_2>=0.0.4",
     "typeguard>=2.7.0",
     "genson",
-    "http-types>=0.0.14,<0.1.0",
+    "http-types>=0.0.15,<0.1.0",
     # kafka
     "faust",
     # mock
     "tornado==5.1.1",
     "urllib3==1.25.6",
     "meeshkan-daemonocle",
+    # tutorial
+    "clint",
+    "pyfiglet",
+    "progress",
+    "psutil>=5.6.3",
+    "jsonpath-rw>=1.4.0",
 ]
 
 BUNDLES = {}
@@ -61,7 +68,7 @@ DEV = BUNDLE_REQUIREMENTS + [
     "wheel",
 ]
 
-VERSION = "0.2.22"
+VERSION = "0.2.25"
 
 ENTRY_POINTS = ["meeshkan = meeshkan.__main__:cli"]
 
@@ -116,8 +123,9 @@ LINT_COMMAND = "flake8 --exclude .git,.venv,__pycache__,build,dist"
 
 BLACK_FORMAT_COMMAND = "black ."
 ISORT_FORMAT_COMMAND = "isort -y"
+
 BLACK_CHECK_COMMAND = "black --check ."
-ISORT_CHECK_COMMAND = "isort --check-only"
+ISORT_CHECK_COMMAND = "pipenv run isort --check-only"
 
 
 def build():

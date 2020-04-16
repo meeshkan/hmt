@@ -5,14 +5,13 @@ from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 
 from meeshkan.serve.mock.log import Log
 from meeshkan.serve.mock.scope import Scope
-from meeshkan.serve.mock.server import make_mocking_app
 from meeshkan.serve.mock.specs import load_specs
 from meeshkan.serve.utils.routing import HeaderRouting
 
 
 @pytest.fixture
-def app():
-    return make_mocking_app(
+def app(mocking_app):
+    return mocking_app(
         "tests/serve/mock/end-to-end/opbank/callbacks",
         load_specs("tests/serve/mock/end-to-end/opbank/schemas"),
         HeaderRouting(),
