@@ -128,14 +128,6 @@ def _dumb_match_to_path(request_path: str, paths: Paths, request_method: str, op
         return (new_path, path, matches)
     return (request_path, None, None)
 
-# content of mymodule.py
-def something():
-    """ a doctest in a docstring
-    >>> something()
-    42
-    """
-    return 41
-
 def _match_to_path(request_path: str, path: str) -> Optional[Mapping[str, Any]]:
     """Match a request path such as "/pets/32" to a variable path such as "/pets/{petId}".
 
