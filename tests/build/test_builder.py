@@ -7,8 +7,8 @@ import re
 # we are reading from an odd loation
 # given where this test lives
 import time
-
 from dataclasses import replace
+
 from http_types import (
     HttpExchange,
     HttpExchangeBuilder,

@@ -1,6 +1,6 @@
-from hamcrest import assert_that, has_entry, instance_of, is_, matches_regexp
 from http_types import RequestBuilder, Response
 
+from hamcrest import assert_that, has_entry, instance_of, is_, matches_regexp
 from meeshkan.serve.mock.matcher import truncate_path
 from meeshkan.serve.mock.security import (
     match_request_to_security_scheme,

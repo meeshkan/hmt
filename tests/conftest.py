@@ -1,9 +1,9 @@
 import logging
 from typing import Optional, Sequence
 
-import pytest
 from tornado.web import Application
 
+import pytest
 from meeshkan.serve.mock.callbacks import callback_manager
 from meeshkan.serve.mock.log import Log
 from meeshkan.serve.mock.request_processor import RequestProcessor

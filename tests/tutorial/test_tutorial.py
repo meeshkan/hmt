@@ -1,5 +1,4 @@
 import pytest
-
 from meeshkan.tutorial import CLI
 
 

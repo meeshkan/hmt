@@ -1,6 +1,7 @@
-from openapi_typed_2 import PathItem, Operation, Optional
-from typing import Callable, Mapping
 from dataclasses import replace
+from typing import Callable, Mapping
+
+from openapi_typed_2 import Operation, Optional, PathItem
 
 
 def operation_from_string(p: PathItem, s: str) -> Optional[Operation]:

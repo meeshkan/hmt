@@ -1,7 +1,7 @@
-import pytest
 from openapi_typed_2 import convert_to_OpenAPIObject
 from tornado.httpclient import HTTPClientError, HTTPRequest
 
+import pytest
 from meeshkan.serve.admin import make_admin_app
 from meeshkan.serve.mock.scope import Scope
 from meeshkan.serve.mock.specs import OpenAPISpecification
