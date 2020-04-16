@@ -1,7 +1,6 @@
 from typing import Optional, Sequence
 
 from http_types import Request, Response
-
 from openapi_typed_2.openapi import OAuth2SecurityScheme, OpenAPIObject
 
 from .matcher import truncate_path

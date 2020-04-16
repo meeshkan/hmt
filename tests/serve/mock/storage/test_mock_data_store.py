@@ -1,6 +1,7 @@
+from openapi_typed_2 import convert_to_OpenAPIObject
+
 from meeshkan.serve.mock.specs import OpenAPISpecification
 from meeshkan.serve.mock.storage.mock_data_store import MockDataStore
-from openapi_typed_2 import convert_to_OpenAPIObject
 from tests.util import spec, spec_dict
 
 
