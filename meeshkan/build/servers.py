@@ -1,7 +1,8 @@
-from openapi_typed_2 import Server
-from http_types import Request
 from typing import List, Optional, Sequence
 from urllib.parse import urlparse
+
+from http_types import Request
+from openapi_typed_2 import Server
 
 
 def normalize_path_if_matches(

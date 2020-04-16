@@ -1,9 +1,9 @@
 from http_types import RequestBuilder
+from tests.util import spec
 
 from meeshkan.serve.mock.faker.stateless_faker import StatelessFaker
 from meeshkan.serve.mock.matcher import valid_schema
 from meeshkan.serve.mock.specs import OpenAPISpecification
-from tests.util import spec
 
 
 def test_faker_1():

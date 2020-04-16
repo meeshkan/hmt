@@ -1,7 +1,8 @@
-from openapi_typed_2 import Schema, Reference
+import enum
 from dataclasses import dataclass, field
 from typing import Sequence, Union
-import enum
+
+from openapi_typed_2 import Reference, Schema
 
 ####################################
 #### does a diff on two schemas

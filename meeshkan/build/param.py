@@ -1,18 +1,14 @@
 """Code for working with parameters."""
 
+from dataclasses import replace
 from functools import reduce
+from typing import List, Mapping, Sequence, Union, cast
+
+from genson import SchemaBuilder  # type: ignore
+from openapi_typed_2 import Parameter, Reference, Schema, convert_to_Schema
+
 from meeshkan.build.json_schema import to_const
 from meeshkan.build.update_mode import UpdateMode
-from openapi_typed_2 import (
-    convert_to_Schema,
-    Parameter,
-    Reference,
-    Schema,
-    convert_to_Schema,
-)
-from typing import Sequence, Union, cast, Sequence, List, Mapping
-from genson import SchemaBuilder  # type: ignore
-from dataclasses import replace
 
 SchemaParameters = Sequence[Parameter]
 

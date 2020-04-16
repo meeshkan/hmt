@@ -1,15 +1,17 @@
 """Code for working with OpenAPI paths, e.g., matching request path to an OpenAPI endpoint with parameter."""
-import typing
-from meeshkan.build.schemadiff import make_schema_diff
-import re
 import random
+import re
 import string
+import typing
 from dataclasses import dataclass
-from typing import Pattern, Optional, Tuple, Mapping, Any
-from typing_extensions import TypedDict
-from .operation import operation_from_string
+from typing import Any, Mapping, Optional, Pattern, Tuple
 
-from openapi_typed_2 import PathItem, Paths, Operation, Response, Schema
+from openapi_typed_2 import Operation, PathItem, Paths, Response, Schema
+from typing_extensions import TypedDict
+
+from meeshkan.build.schemadiff import make_schema_diff
+
+from .operation import operation_from_string
 
 # Pattern to match to in the escaped path string
 # Search for occurrences such as "{id}" or "{key-name}"
