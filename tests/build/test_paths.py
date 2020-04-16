@@ -64,8 +64,3 @@ def test_match_paths_reference():
 
     parameters = _match_to_path(request_path, path)
     assert_that(parameters, has_entry('petId', '32'))
-
-def test_opbank():
-    print(_match_to_path(
-        request_path='/accounts/v3/accounts/QzrOahpa9Zgt2fY2TolZmNLByr8NTRfvKO_o_VW7Wdw.L6LDuKIA8VpuQMG2v61fzQ.RwV84ZrPFfCEJEBBrWFz6Q',
-        path='/accounts/v3/accounts/{lrikubto}'))
