@@ -1,29 +1,15 @@
 import pytest
 from tornado.httpclient import HTTPClientError, HTTPRequest
 
-from meeshkan.serve.mock.log import AbstractSink, Log
+from meeshkan.serve.mock.log import Log
 from meeshkan.serve.mock.scope import Scope
-from meeshkan.serve.mock.server import make_mocking_app
 from meeshkan.serve.mock.specs import load_specs
 from meeshkan.serve.utils.routing import HeaderRouting
 
 
-class MockSink(AbstractSink):
-    def __init__(self):
-        self.interactions = []
-
-    def write(self, interactions):
-        self.interactions = interactions
-
-
 @pytest.fixture
-def test_sink():
-    return MockSink()
-
-
-@pytest.fixture
-def app(test_sink):
-    return make_mocking_app(
+def app(mocking_app, test_sink):
+    return mocking_app(
         "tests/serve/mock/callbacks",
         load_specs("tests/serve/mock/schemas/fails"),
         HeaderRouting(),

@@ -41,6 +41,7 @@ REQUIRED = [
     "pyfiglet",
     "progress",
     "psutil>=5.6.3",
+    "jsonpath-rw>=1.4.0",
 ]
 
 BUNDLES = {}
@@ -122,8 +123,9 @@ LINT_COMMAND = "flake8 --exclude .git,.venv,__pycache__,build,dist"
 
 BLACK_FORMAT_COMMAND = "black ."
 ISORT_FORMAT_COMMAND = "isort -y"
+
 BLACK_CHECK_COMMAND = "black --check ."
-ISORT_CHECK_COMMAND = "isort --check-only"
+ISORT_CHECK_COMMAND = "pipenv run isort --check-only"
 
 
 def build():

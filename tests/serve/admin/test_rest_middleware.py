@@ -4,19 +4,18 @@ import pytest
 from tornado.httpclient import HTTPRequest
 
 from meeshkan.serve.admin import make_admin_app
-from meeshkan.serve.mock.rest import rest_middleware_manager
 from meeshkan.serve.mock.scope import Scope
 
 scope = Scope()
 
 
 @pytest.fixture
-def app():
-    return make_admin_app(scope)
+def app(mock_data_store, rest_middleware_manager):
+    return make_admin_app(scope, mock_data_store, rest_middleware_manager)
 
 
 @pytest.fixture(autouse=True)
-def setup():
+def setup(rest_middleware_manager):
     yield True
     rest_middleware_manager.clear()
 

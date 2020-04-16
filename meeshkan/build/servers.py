@@ -4,7 +4,9 @@ from typing import List, Optional, Sequence
 from urllib.parse import urlparse
 
 
-def normalize_path_if_matches(request: Request, servers: Sequence[Server]) -> Optional[str]:
+def normalize_path_if_matches(
+    request: Request, servers: Sequence[Server]
+) -> Optional[str]:
     """Check if a request matches a list of mock definitions.
     If matches, return the request path normalized by the mock URL's basepath.
 
@@ -30,6 +32,6 @@ def normalize_path_if_matches(request: Request, servers: Sequence[Server]) -> Op
         if not request.pathname.startswith(server_url.path):
             continue
 
-        return request.pathname[len(server_url.path):]
+        return request.pathname[len(server_url.path) :]
 
     return None

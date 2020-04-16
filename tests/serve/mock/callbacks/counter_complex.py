@@ -14,11 +14,11 @@ def counter_callback_post(request_body, response_body, storage):
 @callback("api.com", "get", "/text_counter", format="text")
 def counter_callback_get(query, response_body, storage, response_headers):
     if "set" in query:
-        storage["called"] = query["set"]
+        storage.default["called"] = query["set"]
     else:
-        storage["called"] = storage.get("called", 0) + 1
-    response_headers["x-meeshkan-counter"] = storage["called"]
-    return "{} {} times".format(response_body, storage["called"])
+        storage.default["called"] = storage.default.get("called", 0) + 1
+    response_headers["x-meeshkan-counter"] = storage.default["called"]
+    return "{} {} times".format(response_body, storage.default["called"])
 
 
 @callback("petstore.swagger.io", "post", "/v1/pets", format="text")
