@@ -814,6 +814,16 @@ def match_request_to_openapi(
                 [
                     keep_method_if_required_header_parameters_are_present(req, oai),
                     keep_method_if_required_query_parameters_are_present(req, oai),
+                    ##### keep_method_if_required_request_body_is_present
+                    ##### should be uncommented in a separate PR
+                    ##### it breaks the logic in the new schemabuilder
+                    ##### but it should be reimplemented
+                    ##### now, the issue is that API requests will not
+                    ##### have their body validated
+                    ##### as there are so few API requests that require body
+                    ##### validation for mocking, this is a small loss
+                    ##### but should still be acknowledged and fixed when
+                    ##### someone has time
                     # keep_method_if_required_request_body_is_present(req, oai),
                 ],
                 get_path_item_with_method(req.method.value, path_item),
