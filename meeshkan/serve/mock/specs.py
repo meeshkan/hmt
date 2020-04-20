@@ -1,10 +1,10 @@
 import json
 import os
+from dataclasses import dataclass
 from typing import Sequence, Union
 
 import requests
 import yaml
-from dataclasses import dataclass
 from openapi_typed_2 import OpenAPIObject, convert_to_openapi
 from requests.exceptions import RequestException
 

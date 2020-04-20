@@ -1,8 +1,8 @@
 import asyncio
+from dataclasses import dataclass
 from typing import AsyncIterable, Tuple
 
 import faust
-from dataclasses import dataclass
 from http_types.types import HttpExchange
 from http_types.utils import HttpExchangeBuilder
 

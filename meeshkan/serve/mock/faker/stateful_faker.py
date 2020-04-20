@@ -1,6 +1,6 @@
 import typing
-
 from dataclasses import dataclass
+
 from http_types import Request
 from openapi_typed_2 import Any, Operation
 

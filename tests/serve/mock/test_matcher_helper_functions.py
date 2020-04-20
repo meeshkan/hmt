@@ -1,4 +1,5 @@
 from dataclasses import replace
+
 from openapi_typed_2 import (
     OpenAPIObject,
     PathItem,

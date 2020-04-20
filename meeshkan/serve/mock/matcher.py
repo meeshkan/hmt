@@ -1,5 +1,6 @@
 import json
 import re
+from dataclasses import replace
 from functools import reduce
 from typing import (
     Any,
@@ -16,7 +17,6 @@ from urllib.parse import urlparse
 
 import jsonschema
 import lenses
-from dataclasses import replace
 from http_types import Request
 from lenses import lens
 from openapi_typed_2 import (

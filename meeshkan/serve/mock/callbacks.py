@@ -4,8 +4,8 @@ import inspect
 import json
 import logging
 import os
-
 from dataclasses import asdict
+
 from http_types.utils import ResponseBuilder
 
 logger = logging.getLogger(__name__)

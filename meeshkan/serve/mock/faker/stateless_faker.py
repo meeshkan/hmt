@@ -1,10 +1,10 @@
 import json
 import random
 import typing
+from dataclasses import dataclass
 from functools import reduce
 from typing import Any, Mapping, Sequence, Union, cast
 
-from dataclasses import dataclass
 from faker import Faker
 from http_types import Request, Response
 from openapi_typed_2 import (
