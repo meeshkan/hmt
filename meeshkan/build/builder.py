@@ -272,7 +272,7 @@ def update_operation(operation: Operation, exchange: HttpExchange, mode: UpdateM
     else:
         response = build_response(exchange, mode)
 
-    request_body: RequestBody = operation.requestBody
+    request_body: Optional[RequestBody] = operation.requestBody
     if exchange.request.body:
         if request_body is not None:
             request_body = update_request_body(request_body, mode, exchange)
