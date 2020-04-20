@@ -186,12 +186,12 @@ def update_request_body(request_body: RequestBody, mode: UpdateMode, exchange: H
         Request -- Updated RequestBody object.
     """
     # TODO Update headers and links
-    exchange_body = exchange.request.body
-
-    if exchange_body == '':
+    if exchange.request.body is None or exchange.request.body == '':
         # No body, do not do anything
         # TODO How to mark empty body as a possible response if non-empty responses exist
         return request_body
+
+    exchange_body: str = exchange.request.body
 
     media_type_key = infer_media_type_from_nonempty(exchange_body)
 
