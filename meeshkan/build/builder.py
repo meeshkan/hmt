@@ -26,7 +26,7 @@ logger = getLogger(__name__)
 __all__ = ['build_schema_batch', 'build_schema_online', 'update_openapi']
 
 
-def build_content(body: str, mode: UpdateMode) -> Optional[Tuple[MediaTypeKey, MediaType]]:
+def build_content(body: Optional[str], mode: UpdateMode) -> Optional[Tuple[MediaTypeKey, MediaType]]:
     """Build response content schema from body.
 
     Arguments:
@@ -36,7 +36,7 @@ def build_content(body: str, mode: UpdateMode) -> Optional[Tuple[MediaTypeKey, M
     Returns:
         Optional[Tuple[str, MediaType]] -- None for empty body, tuple of media-type key and media-type otherwise.
     """
-    if body == '':
+    if body is None or body == '':
         return None
 
     media_type_key = infer_media_type_from_nonempty(body)
@@ -96,6 +96,7 @@ def build_request_body(exchange: HttpExchange, mode: UpdateMode) -> Optional[Req
     Returns:
         RequestBody -- OpenAPI RequestBody object.
     """
+
     # TODO Headers and links
     content_or_none = build_content(exchange.request.body, mode)
 
