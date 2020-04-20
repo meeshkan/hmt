@@ -1,56 +1,53 @@
-import copy
-import json
-from collections import defaultdict
-from dataclasses import replace
 from functools import reduce
-from sys import path
+
 from typing import (
     Any,
-    AsyncIterable,
-    Iterable,
     List,
-    Mapping,
-    Optional,
     Sequence,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
+    Iterable,
+    AsyncIterable,
     cast,
+    Tuple,
+    Optional,
+    Union,
+    TypeVar,
+    Type,
+    Mapping,
 )
 from urllib.parse import urlunsplit
 
+from dataclasses import replace
 from http_types import HttpExchange as HttpExchange
 from openapi_typed_2 import (
-    Header,
     Info,
+    Paths,
     MediaType,
+    Header,
     OpenAPIObject,
+    PathItem,
+    Response,
     Operation,
     Parameter,
-    PathItem,
-    Paths,
     Reference,
-    Response,
-    Responses,
     Server,
+    Responses,
+    RequestBody,
 )
-from typeguard import check_type  # type: ignore
 
-from ..logger import get as getLogger
 from .media_types import (
-    MediaTypeKey,
-    build_media_type,
     infer_media_type_from_nonempty,
+    build_media_type,
     update_media_type,
+    MediaTypeKey,
     update_text_schema,
 )
-from .operation import new_path_item_at_operation, operation_from_string
+from .operation import operation_from_string, new_path_item_at_operation
 from .param import ParamBuilder
-from .paths import RequestPathParameters, find_matching_path
+from .paths import find_matching_path
 from .result import BuildResult
 from .servers import normalize_path_if_matches
 from .update_mode import UpdateMode
+from ..logger import get as getLogger
 
 _DEFAULT_PATH_ITEM = {
     "servers": None,
@@ -72,42 +69,42 @@ logger = getLogger(__name__)
 __all__ = ["build_schema_batch", "build_schema_online", "update_openapi"]
 
 
-def build_response_content(
-    exchange: HttpExchange, mode: UpdateMode
+def build_content(
+    body: Optional[str], mode: UpdateMode
 ) -> Optional[Tuple[MediaTypeKey, MediaType]]:
-    """Build response content schema from exchange.
+    """Build response content schema from body.
 
     Arguments:
-        request {HttpExchange} -- Http exchange.
+        body {str} -- Body.
+        mode {UpdateMode} -- Schema update mode
 
     Returns:
         Optional[Tuple[str, MediaType]] -- None for empty body, tuple of media-type key and media-type otherwise.
     """
-    body = exchange.response.body
-
-    if body == "":
+    if body is None or body == "":
         return None
 
     media_type_key = infer_media_type_from_nonempty(body)
 
-    media_type = build_media_type(exchange, mode, type_key=media_type_key)
+    media_type = build_media_type(body, mode, type_key=media_type_key)
 
     return (media_type_key, media_type)
 
 
-def build_response(request: HttpExchange, mode: UpdateMode) -> Response:
+def build_response(exchange: HttpExchange, mode: UpdateMode) -> Response:
     """Build new response object from request response pair.
 
     Response reference: https://swagger.io/specification/#responseObject
 
     Arguments:
-        request {HttpExchange} -- Request-response pair.
+        exchange {HttpExchange} -- Request-response pair.
+        mode {UpdateMode} -- Schema update mode
 
     Returns:
         Response -- OpenAPI response object.
     """
     # TODO Headers and links
-    content_or_none = build_response_content(request, mode)
+    content_or_none = build_content(exchange.response.body, mode)
 
     if content_or_none is None:
         return Response(
@@ -130,6 +127,33 @@ def build_response(request: HttpExchange, mode: UpdateMode) -> Response:
     )
 
 
+def build_request_body(
+    exchange: HttpExchange, mode: UpdateMode
+) -> Optional[RequestBody]:
+    """Build new request body object from request response pair.
+
+    RequestBody reference: https://swagger.io/specification/#requestBodyObject
+
+    Arguments:
+        exchange {HttpExchange} -- Request-response pair.
+        mode {UpdateMode} -- Schema update mode
+
+    Returns:
+        RequestBody -- OpenAPI RequestBody object.
+    """
+
+    # TODO Headers and links
+    content_or_none = build_content(exchange.request.body, mode)
+
+    if content_or_none is None:
+        return None
+
+    media_type_key, media_type = content_or_none
+    content = {media_type_key: media_type}
+
+    return RequestBody(description="Response description", content=content, _x=None)
+
+
 def update_response(
     response: Response, mode: UpdateMode, exchange: HttpExchange
 ) -> Response:
@@ -139,6 +163,7 @@ def update_response(
 
     Arguments:
         response {Response} -- Existing response object.
+        mode {UpdateMode} -- Schema update mode
         exchange {HttpExchange} -- Request-response pair.
 
     Returns:
@@ -183,19 +208,67 @@ def update_response(
         # Need to update existing media type
         existing_media_type = response_content[media_type_key]
         media_type = update_media_type(
-            exchange=exchange,
+            body=exchange.response.body,
             mode=mode,
             type_key=media_type_key,
             media_type=existing_media_type,
         )
     else:
         media_type = build_media_type(
-            exchange=exchange, mode=mode, type_key=media_type_key
+            body=exchange.response.body, mode=mode, type_key=media_type_key
         )
 
     new_content: Mapping[str, MediaType] = {media_type_key: media_type}
     response_content = {**response_content, **new_content}
     return replace(response, headers=new_headers, content=response_content)
+
+
+def update_request_body(
+    request_body: RequestBody, mode: UpdateMode, exchange: HttpExchange
+) -> RequestBody:
+    """Update request body object.
+
+    RequestBody reference: https://swagger.io/specification/#requestBodyObject
+
+    Arguments:
+        request_body {RequestBody} -- Existing request object.
+        mode {UpdateMode} -- Schema update mode
+        exchange {HttpExchange} -- Request-response pair.
+
+    Returns:
+        Request -- Updated RequestBody object.
+    """
+    # TODO Update headers and links
+    if exchange.request.body is None or exchange.request.body == "":
+        # No body, do not do anything
+        # TODO How to mark empty body as a possible response if non-empty responses exist
+        return request_body
+
+    exchange_body: str = exchange.request.body
+
+    media_type_key = infer_media_type_from_nonempty(exchange_body)
+
+    #############
+    ### CONTENT
+    #############
+    request_content = request_body.content
+    if request_content is not None and media_type_key in request_content:
+        # Need to update existing media type
+        existing_media_type = request_content[media_type_key]
+        media_type = update_media_type(
+            body=exchange.request.body,
+            mode=mode,
+            type_key=media_type_key,
+            media_type=existing_media_type,
+        )
+    else:
+        media_type = build_media_type(
+            body=exchange.request.body, mode=mode, type_key=media_type_key
+        )
+
+    new_content: Mapping[str, MediaType] = {media_type_key: media_type}
+    request_content = {**request_content, **new_content}
+    return replace(request_body, content=request_content)
 
 
 def build_operation(exchange: HttpExchange, mode: UpdateMode) -> Operation:
@@ -204,12 +277,14 @@ def build_operation(exchange: HttpExchange, mode: UpdateMode) -> Operation:
     Operation reference: https://swagger.io/specification/#operationObject
 
     Arguments:
-        request {HttpExchange} -- Request-response pair
+        exchange {HttpExchange} -- Request-response pair
+        mode {UpdateMode} -- Schema update mode
 
     Returns:
         Operation -- Operation object.
     """
     response = build_response(exchange, mode)
+    request = build_request_body(exchange, mode)
     code = str(exchange.response.statusCode)
 
     request_query_params = exchange.request.query
@@ -222,13 +297,14 @@ def build_operation(exchange: HttpExchange, mode: UpdateMode) -> Operation:
         description="Operation description",
         operationId="id",
         responses={code: response},
+        requestBody=request,
         parameters=[*schema_query_params, *schema_header_params],
     )
     return operation
 
 
 def update_operation(
-    operation: Operation, request: HttpExchange, mode: UpdateMode
+    operation: Operation, exchange: HttpExchange, mode: UpdateMode
 ) -> Operation:
     """Update OpenAPI operation object.
 
@@ -236,26 +312,36 @@ def update_operation(
 
     Arguments:
         operation {Operation} -- Existing Operation object.
-        request {HttpExchange} -- Request-response pair
+        exchange {HttpExchange} -- Request-response pair
+        mode {UpdateMode} -- Schema update mode
 
     Returns:
         Operation -- Updated operation
     """
     responses = operation.responses  # type: Responses
-    response_code = str(request.response.statusCode)
+    response_code = str(exchange.response.statusCode)
     response: Response
     if response_code in responses:
         # Response exists
         existing_response = responses[response_code]
         # TODO: why do we have this reference check?
         if not isinstance(existing_response, Reference):
-            response = update_response(existing_response, mode, request)
+            response = update_response(existing_response, mode, exchange)
         else:
             raise ValueError(
                 "Meeshkan is not smart enough to build responses from references yet. Coming soon!"
             )
     else:
-        response = build_response(request, mode)
+        response = build_response(exchange, mode)
+
+    request_body = operation.requestBody
+    if exchange.request.body:
+        if request_body is not None:
+            request_body = update_request_body(
+                cast(RequestBody, request_body), mode, exchange
+            )
+        else:
+            request_body = build_request_body(exchange, mode)
 
     # TODO: this is not right, we need to grab the references at some point!
     existing_parameters: Sequence[Parameter] = [
@@ -263,10 +349,10 @@ def update_operation(
     ] if operation.parameters is not None else []
     request_query_params: Mapping[
         str, Union[str, Sequence[str]]
-    ] = request.request.query
+    ] = exchange.request.query
     request_header_params: Mapping[
         str, Union[str, Sequence[str]]
-    ] = request.request.headers
+    ] = exchange.request.headers
     _updated_parameters = [
         *ParamBuilder("query").update(request_query_params, mode, existing_parameters),
         # TODO: can we avoid the cast below? it is pretty hackish
@@ -292,6 +378,7 @@ def update_operation(
         operation,
         responses={**operation.responses, **new_responses},
         parameters=updated_parameters,
+        requestBody=request_body,
     )
 
 

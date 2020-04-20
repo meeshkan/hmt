@@ -1,14 +1,12 @@
 """Code for building and inferring media types (application/json, text/plain, etc.) from HTTP exchanges."""
-import json
-from typing import Any, Optional, Sequence, cast
-
-from http_types import HttpExchange as HttpExchange
-from openapi_typed_2 import MediaType, Schema, convert_to_Schema
-from typing_extensions import Literal
-
-from ..logger import get as getLogger
-from .json_schema import to_openapi_json_schema
 from .update_mode import UpdateMode
+from ..logger import get as getLogger
+from typing import Any, Sequence, cast, Optional
+from openapi_typed_2 import MediaType, Schema, convert_to_Schema
+import json
+from typing_extensions import Literal
+from .json_schema import to_openapi_json_schema
+
 
 logger = getLogger(__name__)
 
@@ -81,15 +79,16 @@ def infer_media_type_from_nonempty(body: str) -> MediaTypeKey:
 
 
 def update_media_type(
-    exchange: HttpExchange,
+    body: str,
     mode: UpdateMode,
     type_key: MediaTypeKey,
     media_type: Optional[MediaType] = None,
+    strict: bool = True,
 ) -> MediaType:
     """Update media type.
 
     Arguments:
-        exchange {HttpExchange} -- Http exchange
+        body {str} -- body
         type_key {MediaTypeKey} -- MediaType such as "application/json"
 
     Keyword Arguments:
@@ -101,7 +100,6 @@ def update_media_type(
     Returns:
         MediaType -- Updated media type object.
     """
-    body = exchange.response.body
     existing_schema = media_type.schema if media_type is not None else None
 
     if type_key == "application/json":
@@ -116,9 +114,5 @@ def update_media_type(
     return media_type
 
 
-def build_media_type(
-    exchange: HttpExchange, mode: UpdateMode, type_key: MediaTypeKey
-) -> MediaType:
-    return update_media_type(
-        exchange=exchange, mode=mode, type_key=type_key, media_type=None
-    )
+def build_media_type(body: str, mode: UpdateMode, type_key: MediaTypeKey) -> MediaType:
+    return update_media_type(body=body, mode=mode, type_key=type_key, media_type=None)

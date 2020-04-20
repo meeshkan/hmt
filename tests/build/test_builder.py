@@ -1,29 +1,24 @@
-import copy
 import json
-import re
-import time
-from dataclasses import replace
 
 import pytest
+from dataclasses import replace
 from hamcrest import *
-from http_types import (
-    HttpExchange,
-    HttpExchangeBuilder,
-    Request,
-    RequestBuilder,
-    Response,
+from http_types import HttpExchange, Response, RequestBuilder, HttpExchangeBuilder
+from meeshkan.build import build_schema_batch, update_openapi, build_schema_online
+from meeshkan.build.builder import BASE_SCHEMA
+from meeshkan.build.update_mode import UpdateMode
+from openapi_typed_2 import (
+    OpenAPIObject,
+    Operation,
+    PathItem,
+    Schema,
+    Response as _Response,
 )
-from openapi_typed_2 import OpenAPIObject, Operation, PathItem
-from openapi_typed_2 import Response as _Response
-from openapi_typed_2 import Schema, convert_to_openapi
+from openapi_typed_2 import convert_to_openapi
 from typeguard import check_type
 from yaml import safe_load
 
-from meeshkan.build import build_schema_batch, build_schema_online, update_openapi
-from meeshkan.build.builder import BASE_SCHEMA
-from meeshkan.build.update_mode import UpdateMode
-
-from ..util import POKEAPI_RECORDINGS_PATH, read_recordings_as_request_response
+from ..util import read_recordings_as_request_response, POKEAPI_RECORDINGS_PATH
 
 requests = read_recordings_as_request_response()
 pokeapi_requests = read_recordings_as_request_response(POKEAPI_RECORDINGS_PATH)
@@ -293,6 +288,12 @@ def test_schema_in_replay_mode():
     )
 
 
+# TODO
+# this sullies the structure of the repo a bit as
+# we are reading from an odd loation
+# given where this test lives
+import time
+
 ACCEPTABLE_TIME = 10  # 10 seconds
 
 
@@ -306,3 +307,57 @@ def test_builder_speed():
         ]
         build_schema_online(iter(http_exchanges), mode=UpdateMode.REPLAY)
     assert (time.time() - now) < ACCEPTABLE_TIME
+
+
+def test_build_request_body():
+    exchange = (
+        {
+            "request": {
+                "method": "post",
+                "host": "api.com",
+                "pathname": "/api",
+                "body": json.dumps({"foo": "hello", "bar": "bye", "zaz": "baz"}),
+                "query": {},
+                "protocol": "http",
+                "headers": {},
+            },
+            "response": {
+                "statusCode": 200,
+                "body": json.dumps({"message": "hello"}),
+                "headers": {},
+            },
+        },
+        {
+            "request": {
+                "method": "post",
+                "host": "api.com",
+                "pathname": "/api",
+                "body": json.dumps({"foo": "hello", "bar": "bye", "baz": "zaz"}),
+                "query": {},
+                "protocol": "http",
+                "headers": {},
+            },
+            "response": {
+                "statusCode": 200,
+                "body": json.dumps({"message": "hello"}),
+                "headers": {},
+            },
+        },
+    )
+
+    exchange = [HttpExchangeBuilder.from_dict(x) for x in exchange]
+    schema = build_schema_batch(exchange, UpdateMode.GEN)
+    request_content = schema.paths["/api"].post.requestBody.content
+
+    assert_that(request_content, has_key("application/json"))
+
+    schema = request_content["application/json"].schema
+
+    assert "foo" in schema.properties
+    assert "bar" in schema.properties
+    assert "baz" in schema.properties
+    assert "zaz" in schema.properties
+
+    assert len(schema.required) == 2
+    assert "foo" in schema.required
+    assert "bar" in schema.required
