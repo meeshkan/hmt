@@ -1,8 +1,9 @@
 import os
 import sys
+from distutils import errors
 from shutil import rmtree
 
-from setuptools import Command, errors, find_packages, setup
+from setuptools import Command, find_packages, setup
 
 # Package meta-data.
 NAME = "meeshkan"
@@ -54,9 +55,10 @@ DEV = BUNDLE_REQUIREMENTS + [
     "flake8",
     "isort",
     "mypy",
+    "pre-commit",
     "pyhamcrest",
     "pylint",
-    "pytest",
+    "pytest>=5.4.1",
     "pytest-asyncio",
     "pytest-testmon",
     "pytest-tornado",
