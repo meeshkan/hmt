@@ -275,7 +275,7 @@ def update_operation(operation: Operation, exchange: HttpExchange, mode: UpdateM
     request_body = operation.requestBody
     if exchange.request.body:
         if request_body is not None:
-            request_body = update_request_body(request_body, mode, exchange)
+            request_body = update_request_body(cast(RequestBody, request_body), mode, exchange)
         else:
             request_body = build_request_body(exchange, mode)
 
