@@ -1,8 +1,9 @@
 import os
 import sys
+from distutils import errors
 from shutil import rmtree
 
-from setuptools import Command, errors, find_packages, setup
+from setuptools import Command, find_packages, setup
 
 # Package meta-data.
 NAME = "mem"
@@ -35,7 +36,7 @@ REQUIRED = [
     # mock
     "tornado==5.1.1",
     "urllib3==1.25.6",
-    "mem-daemonocle",
+    "meeshkan-daemonocle",
     # tutorial
     "clint",
     "pyfiglet",
@@ -54,9 +55,11 @@ DEV = BUNDLE_REQUIREMENTS + [
     "flake8",
     "isort",
     "mypy",
+    "pipenv",
+    "pre-commit",
     "pyhamcrest",
     "pylint",
-    "pytest",
+    "pytest>=5.4.1",
     "pytest-asyncio",
     "pytest-testmon",
     "pytest-tornado",
@@ -121,7 +124,7 @@ TEST_COMMAND = "pytest"
 LINT_COMMAND = "flake8 --exclude .git,.venv,__pycache__,build,dist"
 
 BLACK_FORMAT_COMMAND = "black ."
-ISORT_FORMAT_COMMAND = "isort -y"
+ISORT_FORMAT_COMMAND = "pipenv run isort -y"
 
 BLACK_CHECK_COMMAND = "black --check ."
 ISORT_CHECK_COMMAND = "pipenv run isort --check-only"

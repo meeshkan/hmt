@@ -212,9 +212,7 @@ class CLI:
                 self.m_print("")
                 res = subprocess.call("python __mem__/api_calls.py", shell=True)
                 if self.throw_on_non_zero_exit and (res != 0):
-                    raise ValueError(
-                        "Test failed at `python __mem__/api_calls.py`"
-                    )
+                    raise ValueError("Test failed at `python __mem__/api_calls.py`")
                 self.m_print("")
                 self.m_input(
                     "Now, if you check out `__mem__/pokeapi.co.jsonl`, you'll see all of the recorded server traffic. Press ENTER to continue."
@@ -327,7 +325,9 @@ class CLI:
         self.m_print("")
         self.m_print("Hang tight, we're building your spec!")
         self.m_print("")
-        command = "mem build -i __mem__/pokeapi.co-recordings.jsonl -o __mem__/gen -m gen"
+        command = (
+            "mem build -i __mem__/pokeapi.co-recordings.jsonl -o __mem__/gen -m gen"
+        )
         print("$ {}".format(command))
         self.m_print("")
         res = subprocess.call(

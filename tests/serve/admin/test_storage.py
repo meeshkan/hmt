@@ -1,11 +1,11 @@
 import pytest
 from openapi_typed_2 import convert_to_OpenAPIObject
+from tests.util import spec_dict
 from tornado.httpclient import HTTPClientError, HTTPRequest
 
 from mem.serve.admin import make_admin_app
 from mem.serve.mock.scope import Scope
 from mem.serve.mock.specs import OpenAPISpecification
-from tests.util import spec_dict
 
 scope = Scope()
 

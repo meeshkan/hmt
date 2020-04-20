@@ -2,6 +2,7 @@ import logging
 from typing import Optional, Sequence
 
 import pytest
+from tests.util import MockSink
 from tornado.web import Application
 
 from mem.serve.mock.callbacks import callback_manager
@@ -12,7 +13,6 @@ from mem.serve.mock.specs import OpenAPISpecification
 from mem.serve.mock.storage.mock_data_store import MockDataStore
 from mem.serve.mock.views import MockServerView
 from mem.serve.utils.routing import Routing
-from tests.util import MockSink
 
 
 @pytest.fixture()
