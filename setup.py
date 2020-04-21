@@ -122,11 +122,7 @@ TEST_COMMAND = "pytest"
 
 LINT_COMMAND = "flake8 --exclude .git,.venv,__pycache__,build,dist"
 
-BLACK_FORMAT_COMMAND = "black ."
-ISORT_FORMAT_COMMAND = "isort -y"
-
-BLACK_CHECK_COMMAND = "black --check ."
-ISORT_CHECK_COMMAND = "pipenv run isort --check-only"
+PRECOMMIT_COMMAND = "pre-commit run --all-files"
 
 
 def build():
@@ -146,13 +142,11 @@ def check_style():
 
 
 def enforce_formatting():
-    run_sys_command(ISORT_FORMAT_COMMAND, "Formatting with isort failed")
-    run_sys_command(BLACK_FORMAT_COMMAND, "Formatting with black failed")
+    run_sys_command(PRECOMMIT_COMMAND, "Formatting with precommit failed")
 
 
 def check_formatting():
-    run_sys_command(ISORT_CHECK_COMMAND, "Checking with isort failed")
-    run_sys_command(BLACK_CHECK_COMMAND, "Checking with black failed")
+    run_sys_command(PRECOMMIT_COMMAND, "Formatting with precommit failed")
 
 
 class BuildDistCommand(SetupCommand):
@@ -191,12 +185,6 @@ class TestCommand(SetupCommand):
     description = "Run tests, formatting, type-checks, and linting"
 
     def run(self):
-        self.status("Checking formatting...")
-        check_formatting()
-
-        self.status("Checking style...")
-        check_style()
-
         self.status("Checking types...")
         type_check()
 

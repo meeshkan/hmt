@@ -6,6 +6,17 @@ workflows:
       - test-3.6
       - test-3.7
       - test-3.8
+      - check-formatting-3.7
+
+install-venv: &install-venv
+  run:
+    name: Create virtual environment
+    command: |
+      python -m venv venv
+      . venv/bin/activate
+      pip install -e .[dev]
+      echo '. venv/bin/activate' >> $BASH_ENV
+
 jobs: # A basic unit of work in a run
   test-3.6: &test-template # directory where steps are run
     working_directory: ~/meeshkan
@@ -13,7 +24,8 @@ jobs: # A basic unit of work in a run
       # CircleCI Python images available at: https://hub.docker.com/r/circleci/python/
       - image: circleci/python:3.6.4-stretch
     steps: # steps that comprise the `build` job
-      - checkout # check out source code to working directory
+      - checkout
+      - *install-venv
       - run:
           name: Install Node.js and yarn
           command: |
@@ -23,26 +35,29 @@ jobs: # A basic unit of work in a run
             echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
             sudo apt update && sudo apt install yarn
       - run:
-          name: Create virtual environment
-          command: |
-            python3 -m virtualenv venv
-            . venv/bin/activate
-            pip install -e .[dev]
-            echo '. venv/bin/activate' >> $BASH_ENV
-      - run:
-          name: Install pyright and run all checks
+          name: Install pyright and run tests
           command: |
             set +e
             echo 'export PATH=$(yarn global bin):$PATH' >> $BASH_ENV
             source $BASH_ENV
             yarn global add pyright
-            black --check .
-            pytest
+            python setup.py test
       - run:
-          name: Run integretion tests
+          name: Run integration tests
           command: |
             git clone https://github.com/meeshkan/meeshkan-examples.git  ../meeshkan-examples
             cd ../meeshkan-examples && python run_all.py
+  check-formatting-3.7:
+    working_directory: ~/meeshkan
+    docker:
+      - image: circleci/python:3.7.6-stretch
+    steps:
+      - checkout
+      - *install-venv
+      - run:
+          command: |
+            set -eu -o pipefail
+            python setup.py format
   test-3.7:
     <<: *test-template
     docker:
