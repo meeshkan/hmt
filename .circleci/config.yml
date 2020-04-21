@@ -6,6 +6,7 @@ workflows:
       - test-3.6
       - test-3.7
       - test-3.8
+      - check-formatting-3.7
 
 install-venv: &install-venv
   run:
@@ -46,7 +47,7 @@ jobs: # A basic unit of work in a run
           command: |
             git clone https://github.com/meeshkan/meeshkan-examples.git  ../meeshkan-examples
             cd ../meeshkan-examples && python run_all.py
-  format-3.7:
+  check-formatting-3.7:
     working_directory: ~/meeshkan
     docker:
       - image: circleci/python:3.7.6-stretch
@@ -55,6 +56,7 @@ jobs: # A basic unit of work in a run
       - *install-venv
       - run:
           command: |
+            set -eu -o pipefail
             python setup.py format
   test-3.7:
     <<: *test-template
