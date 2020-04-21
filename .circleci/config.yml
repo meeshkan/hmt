@@ -7,15 +7,13 @@ workflows:
       - test-3.7
       - test-3.8
 
-prepare: &prepare
-  - checkout # check out source code to working directory
-  - run:
-    name: Create virtualenvironment
-    command: |
-      python -m venv venv
-      . venv/bin/activate
-      pip install -e .[dev]
-      echo '. venv/bin/activate' >> $BASH_ENV
+install-venv: &install-venv
+  name: Create virtual environment
+  command: |
+    python -m venv venv
+    . venv/bin/activate
+    pip install -e .[dev]
+    echo '. venv/bin/activate' >> $BASH_ENV
 
 jobs: # A basic unit of work in a run
   test-3.6: &test-template # directory where steps are run
@@ -23,10 +21,10 @@ jobs: # A basic unit of work in a run
     docker: # run the steps with Docker
       # CircleCI Python images available at: https://hub.docker.com/r/circleci/python/
       - image: circleci/python:3.6.4-stretch
-        environment: # environment variables for primary container
-          PIPENV_VENV_IN_PROJECT: "true"
     steps: # steps that comprise the `build` job
-      - *prepare
+      - checkout
+      - run:
+          <<: *install-venv
       - run:
           name: Install Node.js and yarn
           command: |
