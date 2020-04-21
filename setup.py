@@ -45,7 +45,9 @@ REQUIRED = [
     "jsonpath-rw>=1.4.0",
 ]
 
-BUNDLES = {"nlp": ["git+ssh://github.com/meeshkan/meeshkan-nlp.git@master#egg=meeshkan-nlp"]}
+BUNDLES = {"nlp": ["meeshkan-nlp"]}
+
+DEPENDENCY_LINKS = ["https://github.com/meeshkan/meeshkan-nlp.git@master#egg=meeshkan-nlp"]
 
 # Requirements of all bundles
 BUNDLE_REQUIREMENTS = [dep for _, bundle_dep in BUNDLES.items() for dep in bundle_dep]
@@ -242,6 +244,7 @@ setup(
     include_package_data=True,
     install_requires=REQUIRED,
     extras_require=EXTRAS,
+    dependency_links=DEPENDENCY_LINKS,
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
