@@ -29,6 +29,7 @@ jobs: # A basic unit of work in a run
           command: |
             sudo pip install pipenv
             pipenv install -e .[dev]
+            pipenv install -e .[nlp]
             pipenv update
             echo 'export VENV_HOME_DIR=$(pipenv --venv)' >> $BASH_ENV
             echo 'source $VENV_HOME_DIR/bin/activate' >> $BASH_ENV

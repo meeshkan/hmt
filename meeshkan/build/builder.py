@@ -401,6 +401,10 @@ def update_openapi(
     Returns:
         OpenAPI -- Updated schema
     """
+
+    transform_components = mode == UpdateMode.NLP
+    mode = UpdateMode.GEN if mode == UpdateMode.NLP else mode
+
     request_method = exchange.request.method.value
     request_path = exchange.request.pathname
 
@@ -511,13 +515,18 @@ def update_openapi(
             [str(exchange.request.protocol.value), exchange.request.host, "", "", ""]
         )
     )
-    return replace(
+    res = replace(
         schema,
         paths={**schema_paths, **new_paths},
         servers=serverz
         if (new_server.url in [x.url for x in serverz])
         else [*serverz, new_server],
     )
+
+    # if transform_components:
+    #     spec_transformer = SpecTransormer()
+
+    return res
 
 
 BASE_SCHEMA = OpenAPIObject(
