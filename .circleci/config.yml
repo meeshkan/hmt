@@ -36,7 +36,8 @@ jobs: # A basic unit of work in a run
             echo 'export PATH=$(yarn global bin):$PATH' >> $BASH_ENV
             source $BASH_ENV
             yarn global add pyright
-            python setup.py test
+            black --check .
+            pytest
       - run:
           name: Run integretion tests
           command: |
