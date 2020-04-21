@@ -45,7 +45,7 @@ REQUIRED = [
     "jsonpath-rw>=1.4.0",
 ]
 
-BUNDLES = {"nlp": ["https://github.com/meeshkan/meeshkan-nlp.git@master#egg=meeshkan-nlp"]}
+BUNDLES = {"nlp": ["git+ssh://github.com/meeshkan/meeshkan-nlp.git@master#egg=meeshkan-nlp"]}
 
 # Requirements of all bundles
 BUNDLE_REQUIREMENTS = [dep for _, bundle_dep in BUNDLES.items() for dep in bundle_dep]
