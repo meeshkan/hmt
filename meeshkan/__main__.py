@@ -1,8 +1,10 @@
 import asyncio
+import json
 from typing import Sequence
 
 import click
-from openapi_typed_2 import OpenAPIObject, convert_to_openapi
+from http_types import HttpExchangeReader
+from openapi_typed_2 import OpenAPIObject, convert_to_openapi, convert_from_openapi
 from yaml import safe_load
 
 from .build.builder import BASE_SCHEMA, build_schema_async
@@ -161,6 +163,44 @@ def tutorial():
     Run the Meeshkan tutorial.
     """
     run_tutorial()
+
+
+@click.command()
+@click.option(
+    "-s",
+    "--spec-file",
+    required=True,
+    type=click.File("r"),
+    help="Initial OpenAPI spec.",
+)
+@click.option(
+    "-r",
+    "--recordings",
+    required=True,
+    type=click.File("r"),
+    help="Initial recordings.",
+)
+@click.option(
+    "-o",
+    "--out",
+    required=True,
+    default=DEFAULT_SPECS_DIR,
+    type=click.Path(exists=False, file_okay=False, writable=True, readable=True),
+    help="Output spec file.",
+)
+def build_ext(spec_file, recordings, out):
+    try:
+        from meeshkan_nlp import spec_transformer
+        spec_transformer = spec_transformer.instance()
+        res = spec_transformer.optimize_spec(convert_to_openapi(safe_load(spec_file.read())), list(HttpExchangeReader.from_jsonl(recordings)))
+        with open(out, "w") as f:
+            spec = convert_from_openapi(res)
+            json.dump(spec, f)
+            f.flush()
+    except ModuleNotFoundError as e:
+        print('Meeshkan NLP extension is not installed')
+        print("Run 'pip install meeshkan[nlp]' to install it")
+
 
 
 cli.add_command(build)  # type: ignore
