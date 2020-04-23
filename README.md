@@ -58,13 +58,13 @@ The basic Meeshkan flow is **collect, build and mock.**
 
 ### Tutorial
 
-The quickest way to get an overview of Meeshkan is to complete our [interactive tutorial](https://github.com/meeshkan/meeshkan-tutorial). It walks you through the collect, build, and mock flow - while also covering the concepts necessary for development.
+The quickest way to get an overview of Meeshkan is to complete our interactive tutorial. It walks you through the collect, build, and mock flow - while also covering the concepts necessary for development.
 
-First, install `meeshkan-tutorial` via [pip](https://pip.pypa.io/en/stable/installing/):
+First, install `meeshkan` via [pip](https://pip.pypa.io/en/stable/installing/):
 
 ```bash
-$ pip install meeshkan-tutorial
-$ meeshkan-tutorial
+$ pip install meeshkan
+$ meeshkan tutorial
 ```
 
 _Note: This tutorial has been tested on Python 3.6, 3.7, and 3.8._
@@ -72,7 +72,7 @@ _Note: This tutorial has been tested on Python 3.6, 3.7, and 3.8._
 After installing, you can begin the tutorial by invoking from the command line:
 
 ```bash
-$ meeshkan-tutorial
+$ meeshkan tutorial
 ```
 
 Once you've run this, you should see:
@@ -88,8 +88,6 @@ Once you've run this, you should see:
 The tutorial!!
 Press ENTER to continue...
 ```
-
-If not, it's probably our fault. Please let us know by [filing an issue on the meeshkan-tutorial repo](https://github.com/meeshkan/meeshkan-tutorial/issues).
 
 ## Collect recordings of API traffic
 
