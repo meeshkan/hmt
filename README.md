@@ -69,7 +69,7 @@ $ meeshkan tutorial
 
 _Note: This tutorial has been tested on Python 3.6, 3.7, and 3.8._
 
-After installing, you can begin the tutorial by invoking from the command line:
+After installing Meeshkan, you can begin the tutorial by invoking from the command line:
 
 ```bash
 $ meeshkan tutorial
