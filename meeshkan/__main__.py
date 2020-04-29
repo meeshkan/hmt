@@ -188,8 +188,10 @@ def tutorial():
     type=click.Path(exists=False, file_okay=False, writable=True, readable=True),
     help="Output spec file.",
 )
-def build_ext(spec_file, recordings, out):
+def enhance(spec_file, recordings, out):
     try:
+        LOGGER.info("Warning! Enhance function is experimental. Use it on your own risk.")
+
         from meeshkan_nlp import spec_transformer
         spec_transformer = spec_transformer.instance()
         res = spec_transformer.optimize_spec(convert_to_openapi(safe_load(spec_file.read())), list(HttpExchangeReader.from_jsonl(recordings)))
@@ -197,12 +199,14 @@ def build_ext(spec_file, recordings, out):
             spec = convert_from_openapi(res)
             json.dump(spec, f)
             f.flush()
-    except ModuleNotFoundError as e:
-        print('Meeshkan NLP extension is not installed')
-        print("Run 'pip install meeshkan[nlp]' to install it")
+        LOGGER.info("Spec enhancement is done.")
+
+    except ModuleNotFoundError:
+        LOGGER.info('Meeshkan NLP extension is not installed')
+        LOGGER.info("Run 'pip install meeshkan[nlp]' to install it")
 
 
-
+cli.add_command(enhance)  # type: ignore
 cli.add_command(build)  # type: ignore
 cli.add_command(record)  # type: ignore
 cli.add_command(mock)  # type: ignore
