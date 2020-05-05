@@ -8,8 +8,8 @@ from yaml import safe_load
 from .build.builder import BASE_SCHEMA, build_schema_async
 from .build.update_mode import UpdateMode
 from .config import DEFAULT_SPECS_DIR, setup
-from .logger import get as getLogger
 from .hmt_types import BuildResultStream
+from .logger import get as getLogger
 from .prepare import ignore_warnings
 from .serve.commands import mock, record
 from .sinks import AbstractSink, FileSystemSink
