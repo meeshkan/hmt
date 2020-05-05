@@ -11,9 +11,9 @@ from openapi_typed_2 import Schema, convert_to_openapi
 from typeguard import check_type
 from yaml import safe_load
 
-from meeshkan.build import build_schema_batch, build_schema_online, update_openapi
-from meeshkan.build.builder import BASE_SCHEMA
-from meeshkan.build.update_mode import UpdateMode
+from hmt.build import build_schema_batch, build_schema_online, update_openapi
+from hmt.build.builder import BASE_SCHEMA
+from hmt.build.update_mode import UpdateMode
 
 from ..util import POKEAPI_RECORDINGS_PATH, read_recordings_as_request_response
 

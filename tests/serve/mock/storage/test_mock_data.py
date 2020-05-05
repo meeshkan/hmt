@@ -1,7 +1,7 @@
 from openapi_typed_2 import convert_to_OpenAPIObject
 
-from meeshkan.serve.mock.storage.entity import Entity
-from meeshkan.serve.mock.storage.mock_data import MockData
+from hmt.serve.mock.storage.entity import Entity
+from hmt.serve.mock.storage.mock_data import MockData
 from tests.util import spec_dict
 
 
@@ -13,7 +13,7 @@ def test_add():
             "item": {
                 "type": "object",
                 "required": ["foo", "baz"],
-                "x-meeshkan-id-path": "itemId",
+                "x-hmt-id-path": "itemId",
                 "properties": {
                     "foo": {"type": "number"},
                     "bar": {"type": "string"},
@@ -26,8 +26,8 @@ def test_add():
     spec = spec_dict(
         path="/items/{id}", response_schema=schema, components=components, method="get"
     )
-    spec["paths"]["/items/{id}"]["x-meeshkan-entity"] = "item"
-    spec["paths"]["/items/{id}"]["get"]["x-meeshkan-operation"] = "read"
+    spec["paths"]["/items/{id}"]["x-hmt-entity"] = "item"
+    spec["paths"]["/items/{id}"]["get"]["x-hmt-operation"] = "read"
 
     spec = convert_to_OpenAPIObject(spec)
 
@@ -54,7 +54,7 @@ def test_clear():
             "item": {
                 "type": "object",
                 "required": ["foo", "baz"],
-                "x-meeshkan-id-path": "itemId",
+                "x-hmt-id-path": "itemId",
                 "properties": {
                     "foo": {"type": "number"},
                     "bar": {"type": "string"},
@@ -67,8 +67,8 @@ def test_clear():
     spec = spec_dict(
         path="/items/{id}", response_schema=schema, components=components, method="get"
     )
-    spec["paths"]["/items/{id}"]["x-meeshkan-entity"] = "item"
-    spec["paths"]["/items/{id}"]["get"]["x-meeshkan-operation"] = "read"
+    spec["paths"]["/items/{id}"]["x-hmt-entity"] = "item"
+    spec["paths"]["/items/{id}"]["get"]["x-hmt-operation"] = "read"
 
     spec = convert_to_OpenAPIObject(spec)
 

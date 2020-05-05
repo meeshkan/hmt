@@ -2,8 +2,8 @@ import json
 
 from hamcrest import *
 
-from meeshkan.build.json_schema import to_json_schema, to_openapi_json_schema
-from meeshkan.build.update_mode import UpdateMode
+from hmt.build.json_schema import to_json_schema, to_openapi_json_schema
+from hmt.build.update_mode import UpdateMode
 
 from ..util import read_recordings_as_dict
 

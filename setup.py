@@ -6,10 +6,10 @@ from shutil import rmtree
 from setuptools import Command, find_packages, setup
 
 # Package meta-data.
-NAME = "meeshkan"
+NAME = "hmt"
 DESCRIPTION = "Reverse engineer services with style"
-URL = "http://github.com/meeshkan/meeshkan"
-EMAIL = "dev@meeshkan.com"
+URL = "http://github.com/hmt/hmt"
+EMAIL = "dev@hmt.com"
 AUTHOR = "Meeshkan Dev Team"
 REQUIRES_PYTHON = ">=3.6.0"
 
@@ -71,7 +71,7 @@ DEV = BUNDLE_REQUIREMENTS + [
 
 VERSION = "0.2.25"
 
-ENTRY_POINTS = ["meeshkan = meeshkan.__main__:cli"]
+ENTRY_POINTS = ["hmt = hmt.__main__:cli"]
 
 EXTRAS = dict(**BUNDLES, dev=DEV)
 

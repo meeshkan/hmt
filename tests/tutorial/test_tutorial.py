@@ -1,6 +1,6 @@
 import pytest
 
-from meeshkan.tutorial import CLI
+from hmt.tutorial import CLI
 
 
 @pytest.mark.asyncio()

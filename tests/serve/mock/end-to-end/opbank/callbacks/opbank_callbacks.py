@@ -1,6 +1,6 @@
 import copy
 
-from meeshkan.serve.mock.callbacks import callback
+from hmt.serve.mock.callbacks import callback
 
 
 @callback("sandbox.apis.op-palvelut.fi", "post", "/v1/payments/initiate", format="json")
