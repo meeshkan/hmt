@@ -19,7 +19,7 @@ install-venv: &install-venv
 
 jobs: # A basic unit of work in a run
   test-3.6: &test-template # directory where steps are run
-    working_directory: ~/meeshkan
+    working_directory: ~/hmt
     docker: # run the steps with Docker
       # CircleCI Python images available at: https://hub.docker.com/r/circleci/python/
       - image: circleci/python:3.6.4-stretch
@@ -45,10 +45,10 @@ jobs: # A basic unit of work in a run
       - run:
           name: Run integration tests
           command: |
-            git clone https://github.com/meeshkan/meeshkan-examples.git  ../meeshkan-examples
-            cd ../meeshkan-examples && python run_all.py
+            git clone https://github.com/meeshkan/hmt-examples.git  ../hmt-examples
+            cd ../hmt-examples && python run_all.py
   check-formatting-3.7:
-    working_directory: ~/meeshkan
+    working_directory: ~/hmt
     docker:
       - image: circleci/python:3.7.6-stretch
     steps:

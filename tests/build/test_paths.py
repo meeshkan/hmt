@@ -3,7 +3,7 @@ from hamcrest import *
 from openapi_typed_2 import convert_to_openapi, convert_to_Operation
 from yaml import safe_load
 
-from meeshkan.build.paths import _match_to_path, find_matching_path, path_to_regex
+from hmt.build.paths import _match_to_path, find_matching_path, path_to_regex
 
 
 @pytest.fixture

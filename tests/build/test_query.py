@@ -4,8 +4,8 @@ from hamcrest import *
 from http_types import RequestBuilder
 from openapi_typed_2 import Parameter, Schema
 
-from meeshkan.build.param import ParamBuilder, SchemaParameters
-from meeshkan.build.update_mode import UpdateMode
+from hmt.build.param import ParamBuilder, SchemaParameters
+from hmt.build.update_mode import UpdateMode
 
 req = RequestBuilder.from_url("https://petstore.swagger.io/v1/pets?id=32&car=ferrari")
 

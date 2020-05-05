@@ -2,10 +2,10 @@ import json
 
 import pytest
 
-from meeshkan.serve.mock.log import Log
-from meeshkan.serve.mock.scope import Scope
-from meeshkan.serve.mock.specs import load_specs
-from meeshkan.serve.utils.routing import PathRouting
+from hmt.serve.mock.log import Log
+from hmt.serve.mock.scope import Scope
+from hmt.serve.mock.specs import load_specs
+from hmt.serve.utils.routing import PathRouting
 
 
 @pytest.fixture

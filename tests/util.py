@@ -4,7 +4,7 @@ from typing import Any, Dict, List
 from http_types import HttpExchange, HttpExchangeBuilder
 from openapi_typed_2 import convert_to_OpenAPIObject
 
-from meeshkan.serve.mock.log import AbstractSink
+from hmt.serve.mock.log import AbstractSink
 
 SAMPLE_RECORDINGS_PATH = "resources/github.jsonl"
 POKEAPI_RECORDINGS_PATH = "resources/pokeapi.jsonl"

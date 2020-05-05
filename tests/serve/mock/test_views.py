@@ -6,10 +6,10 @@ from http_types import HttpMethod, Protocol
 from http_types.utils import ResponseBuilder
 from tornado.httpclient import HTTPRequest
 
-from meeshkan.serve.mock.log import Log
-from meeshkan.serve.mock.scope import Scope
-from meeshkan.serve.mock.specs import load_specs
-from meeshkan.serve.utils.routing import HeaderRouting
+from hmt.serve.mock.log import Log
+from hmt.serve.mock.scope import Scope
+from hmt.serve.mock.specs import load_specs
+from hmt.serve.utils.routing import HeaderRouting
 
 response = ResponseBuilder.from_dict(
     dict(

@@ -1,4 +1,4 @@
-from meeshkan.serve.mock.callbacks import callback
+from hmt.serve.mock.callbacks import callback
 
 
 @callback("api.imgur.com", "post", "/counter")

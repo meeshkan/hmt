@@ -4,7 +4,7 @@ from hamcrest import *
 from http_types import RequestBuilder
 from openapi_typed_2 import Server
 
-from meeshkan.build.servers import normalize_path_if_matches
+from hmt.build.servers import normalize_path_if_matches
 
 petstore_req = RequestBuilder.from_url("https://petstore.swagger.io/v1/pets")
 

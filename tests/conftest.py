@@ -4,14 +4,14 @@ from typing import Optional, Sequence
 import pytest
 from tornado.web import Application
 
-from meeshkan.serve.mock.callbacks import callback_manager
-from meeshkan.serve.mock.log import Log
-from meeshkan.serve.mock.request_processor import RequestProcessor
-from meeshkan.serve.mock.rest import RestMiddlewareManager
-from meeshkan.serve.mock.specs import OpenAPISpecification
-from meeshkan.serve.mock.storage.mock_data_store import MockDataStore
-from meeshkan.serve.mock.views import MockServerView
-from meeshkan.serve.utils.routing import Routing
+from hmt.serve.mock.callbacks import callback_manager
+from hmt.serve.mock.log import Log
+from hmt.serve.mock.request_processor import RequestProcessor
+from hmt.serve.mock.rest import RestMiddlewareManager
+from hmt.serve.mock.specs import OpenAPISpecification
+from hmt.serve.mock.storage.mock_data_store import MockDataStore
+from hmt.serve.mock.views import MockServerView
+from hmt.serve.utils.routing import Routing
 from tests.util import MockSink
 
 
