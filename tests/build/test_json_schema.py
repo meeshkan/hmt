@@ -42,7 +42,7 @@ def test_updating_schema_removes_required():
     schema = to_json_schema(test_objects[1], UpdateMode.GEN, schema=schema)
     items = schema["items"]
     assert isinstance(items, dict)  # typeguard
-    assert_that(items, has_entry("required", []))
+    assert_that(items, any_of(is_not(has_key("required")), has_entry("required", [])))
     assert_that(items, has_entry("properties", has_key("fork")))
 
 
