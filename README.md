@@ -1,6 +1,6 @@
 # HMT
 
-[![CircleCI](https://circleci.com/gh/hmt/hmt.svg?style=shield)](https://circleci.com/gh/hmt/hmt)
+[![CircleCI](https://circleci.com/gh/hmt/hmt.svg?style=shield)](https://circleci.com/gh/meeshkan/hmt)
 [![PyPI](https://img.shields.io/pypi/dm/hmt.svg)](https://pypi.org/project/hmt/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://black.readthedocs.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
@@ -82,7 +82,7 @@ The tutorial!!
 Press ENTER to continue...
 ```
 
-If not, it's probably our fault. Please let us know by [filing an issue on this repo](https://github.com/hmt/hmt/issues).
+If not, it's probably our fault. Please let us know by [filing an issue on this repo](https://github.com/meeshkan/hmt/issues).
 
 ## Collect recordings of API traffic
 
@@ -102,7 +102,7 @@ With [curl](https://curl.haxx.se/), for example, you can use HMT as a proxy like
 $ curl http://localhost:8000/http://api.example.com
 ```
 
-By default, the recording proxy treats the path as the target URL. It then writes a [`.jsonl`](https://jsonlines.org) file containing logs of all server traffic to the `logs` directory.  All logs are created in the [`http-types`](https://github.com/hmt/http-types) format. This is because HMT's `build` tool expects all recordings to be represented in a `.jsonl` file containing recordings represented in the `http-types` format.
+By default, the recording proxy treats the path as the target URL. It then writes a [`.jsonl`](https://jsonlines.org) file containing logs of all server traffic to the `logs` directory.  All logs are created in the [`http-types`](https://github.com/meeshkan/http-types) format. This is because HMT's `build` tool expects all recordings to be represented in a `.jsonl` file containing recordings represented in the `http-types` format.
 
 For more information about recording, including direct file writing and kafka streaming, see the [recording documentation](./docs/RECORD.md).
 
@@ -156,7 +156,7 @@ If you run into any issues, please [reach out to our team on Gitter](https://git
 
 ### Getting started
 
-1. Clone this repository: `git clone https://github.com/hmt/hmt`
+1. Clone this repository: `git clone https://github.com/meeshkan/hmt`
 1. Create a virtual environment: `python3 -m venv .venv && source .venv/bin/activate`
 1. Install dependencies: `pip install --upgrade -e '.[dev]'`
 1. Install [`pre-commit`](https://pre-commit.com/) hooks to automatically format code as a git hook: `pre-commit install`
@@ -171,7 +171,7 @@ $ python setup.py test
 
 #### `pytest`
 
-Run [tests/](https://github.com/HMT/hmt/tree/master/tests/) with `pytest`:
+Run [tests/](https://github.com/meeshkan/hmt/tree/master/tests/) with `pytest`:
 
 ```bash
 pytest
@@ -179,7 +179,7 @@ pytest
 python setup.py test
 ```
 
-Configuration for `pytest` is found in [pytest.ini](https://github.com/HMT/hmt/tree/master/pytest.ini).
+Configuration for `pytest` is found in [pytest.ini](https://github.com/meeshkan/hmt/tree/master/pytest.ini).
 
 #### Formatting
 
@@ -219,22 +219,22 @@ Using the [Pyright extension](https://marketplace.visualstudio.com/items?itemNam
 
 ### Automated builds
 
-Configuration for CircleCI [build pipeline](https://app.circleci.com/github/HMT/hmt/pipelines) can be found in [.circleci/config.yml](https://github.com/HMT/hmt/tree/master/.circleci/config.yml).
+Configuration for CircleCI [build pipeline](https://app.circleci.com/github/HMT/hmt/pipelines) can be found in [.circleci/config.yml](https://github.com/meeshkan/hmt/tree/master/.circleci/config.yml).
 
 ### Publishing HMT as a PyPi package
 
 To publish HMT as a PyPi package, complete the following steps:
 
-1. Bump the version in [setup.py](https://github.com/HMT/hmt/tree/master/setup.py) if the version is the same as in the published [package](https://pypi.org/project/hmt/). Commit and push.
+1. Bump the version in [setup.py](https://github.com/meeshkan/hmt/tree/master/setup.py) if the version is the same as in the published [package](https://pypi.org/project/hmt/). Commit and push.
 1. Run `python setup.py test` to check that everything works
 1. To build and upload the package, run `python setup.py upload`. Insert PyPI credentials to upload the package to `PyPI`. The command will also run `git tag` to tag the commit as a release and push the tags to remote.
 
-> To see what the different commands do, see `Command` classes in [setup.py](https://github.com/HMT/hmt/tree/master/setup.py).
+> To see what the different commands do, see `Command` classes in [setup.py](https://github.com/meeshkan/hmt/tree/master/setup.py).
 
 ## Contributing
 
-Thanks for your interest in contributing! Please take a look at our [development guide](#development) for notes on how to develop the package locally.  A great way to start contributing is to [file an issue](https://github.com/hmt/hmt/issue) or [make a pull request](https://github.com/hmt/hmt/pulls).
+Thanks for your interest in contributing! Please take a look at our [development guide](#development) for notes on how to develop the package locally.  A great way to start contributing is to [file an issue](https://github.com/meeshkan/hmt/issue) or [make a pull request](https://github.com/meeshkan/hmt/pulls).
 
 ### Code of Conduct
 
-Please note that this project is governed by the [HMT Community Code of Conduct](https://github.com/HMT/code-of-conduct). By participating, you agree to abide by its terms.
+Please note that this project is governed by the [HMT Community Code of Conduct](https://github.com/meeshkan/code-of-conduct). By participating, you agree to abide by its terms.
