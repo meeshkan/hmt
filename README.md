@@ -44,7 +44,7 @@ brew install hmt
 Debian and Ubuntu users can install HMT with `apt`:
 
 ```sh
-echo "deb [trusted=yes] https://dl.bintray.com/hmt/apt all main" | tee -a /etc/apt/sources.list
+echo "deb [trusted=yes] https://dl.bintray.com/meeshkan/apt all main" | tee -a /etc/apt/sources.list
 apt-get -qq update && apt-get install hmt
 ```
 
