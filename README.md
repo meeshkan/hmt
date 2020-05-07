@@ -37,7 +37,7 @@ pip install hmt
 macOS users can install HMT with [Homebrew](https://brew.sh/):
 
 ```sh
-brew tap hmt/tap
+brew tap meeshkan/tap
 brew install hmt
 ```
 
