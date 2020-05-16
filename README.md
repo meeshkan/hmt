@@ -7,7 +7,7 @@
 
 The HTTP Mocking Toolkit (HMT) is a tool that mocks HTTP APIs for use in sandboxes as well as for automated and exploratory testing. It uses a combination of API definitions, recorded traffic and code in order to make crafting mocks as enjoyable as possible.
 
-[Chat with us on Gitter](https://gitter.im/hmt/community) to let us know about questions, problems or ideas!
+[Chat with us on Gitter](https://gitter.im/Meeshkan/community) to let us know about questions, problems or ideas!
 
 ## What's in this document
 
