@@ -21,7 +21,7 @@ In case one only has an OpenAPI spec and no server recodings, it is not necessar
 
 ⚠️ Before getting started, you should make sure that any recorded HTTP API traffic that you'll use is in the correct format. The `hmt build` command expects that recordings are in a single [JSON Lines](http://jsonlines.org/) file and every line should be in the [http-types](https://hmt.github.io/http-types/) JSON format.
 
-For an example input file, see [recordings.jsonl](https://github.com/HMT/hmt/blob/master/resources/recordings.jsonl). The libraries listed at [http-types](https://hmt.github.io/http-types/) can be used to generate input files in your language of choice.
+For an example input file, see [pokeapi.jsonl](https://github.com/meeshkan/hmt/blob/master/resources/pokeapi.jsonl). The libraries listed at [http-types](https://hmt.github.io/http-types/) can be used to generate input files in your language of choice.
 
 ### Building a spec from recorded HTTP API traffic
 
