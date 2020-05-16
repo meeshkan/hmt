@@ -116,7 +116,7 @@ HMT will build a schema that contains the exact response received as a `200` res
 
 Because HMT writes specs in the OpenAPI format, you can use an OpenAPI manipulation tool or library to edit and blend OpenAPI specs. 
 
-Let's look at one example using [`openapi_typed_2`](https://github.com/hmt/openapi_typed_2) to blend together the paths from two different API specs and then write a new spec.
+Let's look at one example using [`openapi_typed_2`](https://github.com/meeshkan/openapi-typed-2) to blend together the paths from two different API specs and then write a new spec.
 
 ```python
 from openapi_typed_2 import convert_to_openapi, convert_from_openapi
