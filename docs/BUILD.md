@@ -1,27 +1,29 @@
 # Building with HMT
 
 HMT builds OpenAPI specs from two possible sources:
-- Recordings of HTTP API traffic serialized in the [`http-types`](https://github.com/hmt/http-types) format and written to a [`.jsonl`](https://jsonlines.org) file
+- Recordings of HTTP API traffic serialized in the [`http-types`](https://github.com/Meeshkan/http-types) format and written to a [`.jsonl`](http://jsonlines.org) file
 - Other OpenAPI specs
 
 In case one only has an OpenAPI spec and no server recodings, it is not necessary to run HMT build and you can go directly to the [`hmt mock`](./MOCK.md) command.
 
 ## What's in this document
 
-- [The `hmt build` command](#the-hmt-build-command)
+- [Building with HMT](#building-with-hmt)
+  - [What's in this document](#whats-in-this-document)
+  - [The `hmt build` command](#the-hmt-build-command)
     - [Building a spec from recorded HTTP API traffic](#building-a-spec-from-recorded-http-api-traffic)
     - [Building a spec from both recorded traffic and other OpenAPI specs](#building-a-spec-from-both-recorded-traffic-and-other-openapi-specs)
-- [`gen` vs. `replay` mode](#gen-vs-replay-mode)
+  - [`gen` vs. `replay` mode](#gen-vs-replay-mode)
     - [`gen` mode](#gen-mode)
     - [`replay` mode](#replay-mode)
-- [Editing and merging specs](#editing-and-merging-specs)
-- [Next up: Mocking with HMT](#next-up-mocking-with-hmt)
+  - [Editing and merging specs](#editing-and-merging-specs)
+  - [Next up: Mocking with HMT](#next-up-mocking-with-hmt)
 
 ## The `hmt build` command
 
-⚠️ Before getting started, you should make sure that any recorded HTTP API traffic that you'll use is in the correct format. The `hmt build` command expects that recordings are in a single [JSON Lines](http://jsonlines.org/) file and every line should be in the [http-types](https://hmt.github.io/http-types/) JSON format.
+⚠️ Before getting started, you should make sure that any recorded HTTP API traffic that you'll use is in the correct format. The `hmt build` command expects that recordings are in a single [JSON Lines](http://jsonlines.org/) file and every line should be in the [http-types](https://meeshkan.github.io/http-types/) JSON format.
 
-For an example input file, see [recordings.jsonl](https://github.com/HMT/hmt/blob/master/resources/recordings.jsonl). The libraries listed at [http-types](https://hmt.github.io/http-types/) can be used to generate input files in your language of choice.
+For an example input file, see [pokeapi.jsonl](https://github.com/meeshkan/hmt/blob/master/resources/pokeapi.jsonl). The libraries listed at [http-types](https://meeshkan.github.io/http-types/) can be used to generate input files in your language of choice.
 
 ### Building a spec from recorded HTTP API traffic
 
@@ -116,7 +118,7 @@ HMT will build a schema that contains the exact response received as a `200` res
 
 Because HMT writes specs in the OpenAPI format, you can use an OpenAPI manipulation tool or library to edit and blend OpenAPI specs. 
 
-Let's look at one example using [`openapi_typed_2`](https://github.com/hmt/openapi_typed_2) to blend together the paths from two different API specs and then write a new spec.
+Let's look at one example using [`openapi_typed_2`](https://github.com/meeshkan/openapi-typed-2) to blend together the paths from two different API specs and then write a new spec.
 
 ```python
 from openapi_typed_2 import convert_to_openapi, convert_from_openapi
@@ -140,4 +142,4 @@ with open('replay/openapi.json', 'r') as replay_file:
 
 Once you've generated an OpenAPI specification with `hmt build`, you can use that spec to create a mock server using HMT.
 
-To learn how, visit our [mocking documentation](./docs/MOCK.md).
+To learn how, visit our [mocking documentation](./MOCK.md).
