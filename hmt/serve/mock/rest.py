@@ -2,6 +2,7 @@ import logging
 from typing import Sequence
 
 import requests
+from hmt.serve.mock.refs import make_definitions_from_spec
 from http_types import Request
 from http_types.utils import HttpExchangeWriter
 from openapi_typed_2 import convert_from_openapi, convert_to_openapi
@@ -42,10 +43,10 @@ class RestMiddlewareManager:
             res = requests.post(endpoint, json={"request": req, "schemas": cs})
             cs = res.json()
 
-        out = [
-            OpenAPISpecification(convert_to_openapi(dict_spec), name)
-            for name, dict_spec in cs.items()
-        ]
+        out = []
+        for name, dict_spec in cs.items():
+            spec = convert_to_openapi(dict_spec)
+            out.append(OpenAPISpecification(spec, name, definitions=make_definitions_from_spec(spec)))
 
         for spec in out:
             self._mock_data_store.add_mock(spec)

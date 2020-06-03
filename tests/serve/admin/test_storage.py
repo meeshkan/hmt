@@ -48,7 +48,7 @@ def test_storage(mock_data_store, http_client, base_url):
     spec["x-hmt-data"] = {"item": [{"foo": 10, "bar": "val", "itemId": "id123"}]}
     spec = convert_to_OpenAPIObject(spec)
 
-    mock_data_store.add_mock(OpenAPISpecification(spec, "items"))
+    mock_data_store.add_mock(OpenAPISpecification(spec, "items", {"definitions": {}}))
 
     req = HTTPRequest(base_url + "/admin/storage", method="DELETE")
     response = yield http_client.fetch(req)

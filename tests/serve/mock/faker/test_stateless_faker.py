@@ -26,7 +26,7 @@ def test_faker_1():
         },
     }
     res = faker.process(
-        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        OpenAPISpecification(source="default", api=spec(response_schema=schema), definitions={"definitions": {}}),
         request,
     )
     assert valid_schema(res.bodyAsJson, schema)
@@ -55,7 +55,7 @@ def test_faker_2():
         },
     }
     res = faker.process(
-        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        OpenAPISpecification(source="default", api=spec(response_schema=schema), definitions={"definitions": {}}),
         request,
     )
 
@@ -82,7 +82,7 @@ def test_faker_3():
         },
     }
     res = faker.process(
-        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        OpenAPISpecification(source="default", api=spec(response_schema=schema), definitions={"definitions": {}}),
         request,
     )
 
@@ -129,7 +129,7 @@ def test_faker_4():
     }
     res = faker.process(
         OpenAPISpecification(
-            source="default", api=spec(response_schema=schema, components=components)
+            source="default", api=spec(response_schema=schema, components=components), definitions={"definitions": {}}
         ),
         request,
     )

@@ -266,7 +266,7 @@ class StatelessFaker(FakerBase):
 
     # TODO - make this not suck
     
-    def _fake_string(self, faker_data: FakerData, schema: Any, depth: int) -> str:
+    def _fake_string(self, schema: Any) -> str:
         return (
             random.choice(schema["enum"])
             if "enum" in schema
@@ -274,7 +274,7 @@ class StatelessFaker(FakerBase):
         )
 
     
-    def _fake_boolean(self, faker_data: FakerData, schema: Any, depth: int) -> bool:
+    def _fake_boolean(self, schema: Any) -> bool:
         return (
             random.choice(schema["enum"])
             if "enum" in schema
@@ -285,7 +285,7 @@ class StatelessFaker(FakerBase):
 
     # TODO: add exclusiveMinimum and exclusiveMaximum
     
-    def _fake_integer(self, faker_data: FakerData, schema: Any, depth: int) -> int:
+    def _fake_integer(self, schema: Any) -> int:
         mn = self._LO if "minimum" not in schema else schema["minimum"]
         mx = self._HI if "maximum" not in schema else schema["maximum"]
         return (
@@ -309,11 +309,11 @@ class StatelessFaker(FakerBase):
             for _ in range(count)
         ]
 
-    def _fake_null(self, faker_data: FakerData, schema: Any, depth: int) -> None:
+    def _fake_null(self) -> None:
         return None
 
     
-    def _fake_number(self, faker_data: FakerData, schema) -> float:
+    def _fake_number(self, schema: Any) -> float:
         mn = self._LO if "minimum" not in schema else schema["minimum"]
         mx = self._HI if "maximum" not in schema else schema["maximum"]
         return (
@@ -340,15 +340,15 @@ class StatelessFaker(FakerBase):
             if "$ref" in schema
             else self._fake_object(faker_data, schema, depth)
             if ("type" not in schema) or (schema["type"] == "object")
-            else self._fake_string(faker_data, schema, depth)
+            else self._fake_string(schema)
             if schema["type"] == "string"
-            else self._fake_integer(faker_data, schema, depth)
+            else self._fake_integer(schema)
             if schema["type"] == "integer"
-            else self._fake_boolean(faker_data, schema, depth)
+            else self._fake_boolean(schema)
             if schema["type"] == "boolean"
-            else self._fake_null(faker_data, schema, depth)
+            else self._fake_null()
             if schema["type"] == "null"
-            else self._fake_number(faker_data, schema, depth)
+            else self._fake_number(schema)
             if schema["type"] == "number"
             else {}
         )

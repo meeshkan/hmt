@@ -38,18 +38,18 @@ def test_fake_array(mock_data_store):
     spec["paths"]["/items"]["get"]["x-hmt-operation"] = "read"
 
     spec = convert_to_OpenAPIObject(spec)
-    mock_data_store.add_mock(OpenAPISpecification(spec, "default"))
+    mock_data_store.add_mock(OpenAPISpecification(spec, "default", {"definitions": {}}))
 
     schema["components"] = components
-    spec = OpenAPISpecification(source="default", api=spec)
+    spec = OpenAPISpecification(source="default", api=spec, definitions={"definitions": {}})
 
-    res = faker.process(spec, request)
+    res = faker.process("/items", spec, request)
 
     assert valid_schema(res.bodyAsJson, schema)
     assert 0 == len(res.bodyAsJson)
 
     mock_data_store["default"].item.insert({"foo": 10, "bar": "val", "itemId": "id123"})
-    res = faker.process(spec, request)
+    res = faker.process("/items", spec, request)
 
     assert valid_schema(res.bodyAsJson, schema)
     assert 1 == len(res.bodyAsJson)
@@ -57,7 +57,7 @@ def test_fake_array(mock_data_store):
     mock_data_store["default"].item.insert(
         {"foo": 10, "bar": "val", "itemId": "id1234"}
     )
-    res = faker.process(spec, request)
+    res = faker.process("/items", spec, request)
 
     assert valid_schema(res.bodyAsJson, schema)
     assert 2 == len(res.bodyAsJson)
@@ -100,11 +100,11 @@ def test_insert(mock_data_store):
     spec["paths"]["/items"]["post"]["x-hmt-operation"] = "insert"
 
     spec = convert_to_OpenAPIObject(spec)
-    mock_data_store.add_mock(OpenAPISpecification(spec, "default"))
+    mock_data_store.add_mock(OpenAPISpecification(spec, "default", definitions={"definitions": {}}))
 
     schema = response_schema
     schema["components"] = components
-    spec = OpenAPISpecification(source="default", api=spec)
+    spec = OpenAPISpecification(source="default", api=spec, definitions={"definitions": {}})
 
     request = RequestBuilder.from_dict(
         dict(
@@ -200,7 +200,7 @@ def test_upsert(mock_data_store):
 
     schema = response_schema
     schema["components"] = components
-    spec = OpenAPISpecification(source="default", api=spec)
+    spec = OpenAPISpecification(source="default", api=spec, definitions={"definitions": {}})
 
     request = RequestBuilder.from_dict(
         dict(
@@ -285,7 +285,7 @@ def test_sateless_faker_1(mock_data_store):
         },
     }
     res = faker.process(
-        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        OpenAPISpecification(source="default", api=spec(response_schema=schema), definitions={"definitions": {}}),
         request,
     )
 
@@ -315,7 +315,7 @@ def test_sateless_faker_2(mock_data_store):
         },
     }
     res = faker.process(
-        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        OpenAPISpecification(source="default", api=spec(response_schema=schema), definitions={"definitions": {}}),
         request,
     )
 
@@ -342,7 +342,7 @@ def test_sateless_faker_3(mock_data_store):
         },
     }
     res = faker.process(
-        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        OpenAPISpecification(source="default", api=spec(response_schema=schema), definitions={"definitions": {}}),
         request,
     )
 
@@ -389,7 +389,7 @@ def test_sateless_faker_4(mock_data_store):
     }
     res = faker.process(
         OpenAPISpecification(
-            source="default", api=spec(response_schema=schema, components=components)
+            source="default", api=spec(response_schema=schema, components=components), definitions={"definitions": {}}
         ),
         request,
     )
@@ -407,7 +407,7 @@ def test_sateless_faker_5(mock_data_store):
 
     schema = {"type": "array"}
     res = faker.process(
-        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        OpenAPISpecification(source="default", api=spec(response_schema=schema), definitions={"definitions": {}}),
         request,
     )
 

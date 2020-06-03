@@ -4,7 +4,7 @@ from typing import Sequence
 from http_types import RequestBuilder
 from openapi_typed_2 import convert_to_openapi
 
-from hmt.serve.mock.request_validation import match_request_to_openapi
+from hmt.serve.mock.matcher import match_request_to_openapi
 from hmt.serve.mock.specs import OpenAPISpecification
 
 store: Sequence[OpenAPISpecification] = [
@@ -44,7 +44,7 @@ store: Sequence[OpenAPISpecification] = [
                 },
             }
         ),
-        "foo",
+        "foo", {"definitions": {}}
     ),
     OpenAPISpecification(
         convert_to_openapi(
@@ -75,7 +75,7 @@ store: Sequence[OpenAPISpecification] = [
                 },
             }
         ),
-        "bar",
+        "bar", {"definitions": {}}
     ),
     OpenAPISpecification(
         convert_to_openapi(
@@ -171,7 +171,7 @@ store: Sequence[OpenAPISpecification] = [
                 },
             }
         ),
-        "baz",
+        "baz", {"definitions": {}}
     ),
 ]
 
@@ -205,7 +205,7 @@ def test_matcher_1():
                     },
                 }
             ),
-            "foo",
+            "foo", definitions={"definitions": {}}
         )
     ]
 
@@ -265,7 +265,7 @@ def test_matcher_3():
                     "paths": {},
                 }
             ),
-            "foo",
+            "foo", definitions={"definitions": {}}
         )
     ]
 
@@ -306,7 +306,7 @@ def test_matcher_4():
                     },
                 }
             ),
-            "foo",
+            "foo", definitions={"definitions": {}}
         ),
     ]
 
@@ -335,7 +335,7 @@ def test_matcher_5():
                     "paths": {},
                 }
             ),
-            "foo",
+            "foo", definitions={"definitions": {}}
         )
     ]
 
@@ -364,7 +364,7 @@ def test_matcher_6():
                     "paths": {"/user": {"description": ""}},
                 }
             ),
-            "foo",
+            "foo", definitions={"definitions": {}}
         )
     ]
 
@@ -587,6 +587,6 @@ def test_matcher_15():
                     },
                 }
             ),
-            "baz",
+            "baz", definitions={"definitions": {}}
         )
     ]

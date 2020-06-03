@@ -1,4 +1,6 @@
 from dataclasses import replace
+from hmt.serve.mock.refs import ref_name
+from hmt.serve.mock.request_validation import get_path_item_with_method, use_if_header
 
 from openapi_typed_2 import (
     OpenAPIObject,
@@ -11,12 +13,9 @@ from openapi_typed_2 import (
     convert_to_Schema,
 )
 
-from hmt.serve.mock.request_validation import (
-    get_path_item_with_method,
+from hmt.serve.mock.matcher import (
     match_urls,
-    matches,
-    ref_name,
-    use_if_header,
+    matches
 )
 
 
