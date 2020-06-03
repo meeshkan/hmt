@@ -1,7 +1,7 @@
 from http_types import RequestBuilder
 
 from hmt.serve.mock.faker.stateless_faker import StatelessFaker
-from hmt.serve.mock.matcher import valid_schema
+from hmt.serve.mock.request_validation import valid_schema
 from hmt.serve.mock.specs import OpenAPISpecification
 from tests.util import spec
 

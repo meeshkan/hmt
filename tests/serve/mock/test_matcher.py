@@ -4,7 +4,7 @@ from typing import Sequence
 from http_types import RequestBuilder
 from openapi_typed_2 import convert_to_openapi
 
-from hmt.serve.mock.matcher import match_request_to_openapi
+from hmt.serve.mock.request_validation import match_request_to_openapi
 from hmt.serve.mock.specs import OpenAPISpecification
 
 store: Sequence[OpenAPISpecification] = [

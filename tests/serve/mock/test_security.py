@@ -1,7 +1,7 @@
 from hamcrest import assert_that, has_entry, instance_of, is_, matches_regexp
 from http_types import RequestBuilder, Response
 
-from hmt.serve.mock.matcher import truncate_path
+from hmt.serve.mock.request_validation import truncate_path
 from hmt.serve.mock.security import (
     match_request_to_security_scheme,
     match_to_security_schemes,

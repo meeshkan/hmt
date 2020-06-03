@@ -2,7 +2,7 @@ from http_types import RequestBuilder
 from openapi_typed_2 import convert_to_OpenAPIObject
 
 from hmt.serve.mock.faker.stateful_faker import StatefulFaker
-from hmt.serve.mock.matcher import valid_schema
+from hmt.serve.mock.request_validation import valid_schema
 from hmt.serve.mock.specs import OpenAPISpecification
 from tests.util import spec, spec_dict
 

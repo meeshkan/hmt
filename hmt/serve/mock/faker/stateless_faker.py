@@ -1,23 +1,14 @@
 import json
 import random
 import typing
-from dataclasses import dataclass
 from functools import reduce
 from typing import Any, Mapping, Sequence, Union, cast
 
+from dataclasses import dataclass
 from faker import Faker
-from http_types import Request, Response
-from openapi_typed_2 import (
-    OpenAPIObject,
-    Operation,
-    Reference,
-    Schema,
-    convert_from_openapi,
-)
-
 from hmt.serve.mock.faker.faker_base import FakerBase
 from hmt.serve.mock.faker.faker_exception import FakerException
-from hmt.serve.mock.matcher import (
+from hmt.serve.mock.request_validation import (
     change_ref,
     change_refs,
     get_response_from_ref,
@@ -25,6 +16,13 @@ from hmt.serve.mock.matcher import (
 )
 from hmt.serve.mock.specs import OpenAPISpecification
 from hmt.serve.utils.timers import timed
+from http_types import Request, Response
+from openapi_typed_2 import (
+    Operation,
+    Reference,
+    Schema,
+    convert_from_openapi,
+)
 
 
 @dataclass(frozen=True)
@@ -77,9 +75,9 @@ class StatelessFaker(FakerBase):
     def __init__(self):
         self._text_faker = Faker()
 
-    @timed
-    def process(self, spec: OpenAPISpecification, request: Request) -> Any:
-        path_item, path_candidate = random.choice([x for x in spec.api.paths.items()])
+    
+    def process(self, pathname: str, spec: OpenAPISpecification, request: Request) -> Any:
+        path_candidate = spec.api.paths[pathname]
 
         method = getattr(path_candidate, request.method.value, None)
 
@@ -120,9 +118,9 @@ class StatelessFaker(FakerBase):
 
             faker_data = FakerData(
                 spec=spec,
-                path_item=path_item,
+                path_item=pathname,
                 method=method,
-                schema=self._build_full_schema(content.schema, spec.api),
+                schema=self._build_full_schema(content.schema, spec.definitions),
                 request=request,
             )
 
@@ -159,7 +157,7 @@ class StatelessFaker(FakerBase):
         )
 
     def _fake_json(
-        self, status_code: int, headers: typing.Mapping[str, str], faker_data: FakerData
+            self, status_code: int, headers: typing.Mapping[str, str], faker_data: FakerData
     ):
         bodyAsJson = self._fake_it(faker_data, faker_data.schema, 0)
 
@@ -171,9 +169,9 @@ class StatelessFaker(FakerBase):
             timestamp=None,
         )
 
-    @timed
+    
     def _build_full_schema(
-        self, schema: typing.Union[Schema, Reference], spec: OpenAPIObject
+            self, schema: typing.Union[Schema, Reference], definitions: typing.Any
     ) -> typing.Dict:
         return {
             **convert_from_openapi(
@@ -181,26 +179,13 @@ class StatelessFaker(FakerBase):
                 if isinstance(schema, Reference)
                 else change_refs(schema)
             ),
-            "definitions": self._definitions(spec),
-        }
-
-    @timed
-    def _definitions(self, spec):
-        return {
-            k: convert_from_openapi(
-                change_ref(v) if isinstance(v, Reference) else change_refs(v)
-            )
-            for k, v in (
-            spec.components.schemas.items()
-            if (spec.components is not None)
-               and (spec.components.schemas is not None)
-            else []
-        )
+            "definitions": definitions,
         }
 
     def _optional_threshold(self, properties_count, required_count):
         return 0.6
 
+    
     def _fake_object(self, faker_data: FakerData, schema: Any, depth: int) -> Any:
         addls = (
             {}
@@ -212,7 +197,7 @@ class StatelessFaker(FakerBase):
                         self._text_faker.name(),
                         random.random()
                         if (isinstance(schema["additionalProperties"], bool))
-                        and (schema["additionalProperties"] is True)
+                           and (schema["additionalProperties"] is True)
                         else self._fake_it(
                             faker_data, schema["additionalProperties"], depth
                         ),
@@ -224,7 +209,8 @@ class StatelessFaker(FakerBase):
         properties = []
         required = set(schema.get("required", []))
         thresh = self._optional_threshold(len(properties), len(required))
-        properties = [prop for prop in schema.get("properties", {}).keys() if prop in required or random.random() > thresh]
+        properties = [prop for prop in schema.get("properties", {}).keys() if
+                      prop in required or random.random() > thresh]
         random.shuffle(properties)
 
         return {
@@ -238,6 +224,7 @@ class StatelessFaker(FakerBase):
             },
         }
 
+    
     def _fake_array(self, faker_data: FakerData, schema: Any, depth: int) -> Any:
         mn = 0 if "minItems" not in schema else schema["minItems"]
         mx = 100 if "maxItems" not in schema else schema["maxItems"]
@@ -257,9 +244,11 @@ class StatelessFaker(FakerBase):
                     for _ in range(count)
                 ]
 
+    
     def _fake_any_of(self, faker_data: FakerData, schema: Any, depth: int) -> Any:
         return self._fake_it(faker_data, random.choice(schema["anyOf"]), depth)
 
+    
     def _fake_all_of(self, faker_data: FakerData, schema: Any, depth: int) -> Any:
         return reduce(
             lambda a, b: {**a, **b},
@@ -267,6 +256,7 @@ class StatelessFaker(FakerBase):
             {},
         )
 
+    
     def _fake_one_of(self, faker_data: FakerData, schema: Any, depth: int) -> Any:
         return self._fake_it(faker_data, random.choice(schema["oneOf"]), depth)
 
@@ -275,14 +265,16 @@ class StatelessFaker(FakerBase):
         return {}
 
     # TODO - make this not suck
-    def _fake_string(self, schema: Any) -> str:
+    
+    def _fake_string(self, faker_data: FakerData, schema: Any, depth: int) -> str:
         return (
             random.choice(schema["enum"])
             if "enum" in schema
             else self._text_faker.name()
         )
 
-    def _fake_boolean(self, schema: Any) -> bool:
+    
+    def _fake_boolean(self, faker_data: FakerData, schema: Any, depth: int) -> bool:
         return (
             random.choice(schema["enum"])
             if "enum" in schema
@@ -292,7 +284,8 @@ class StatelessFaker(FakerBase):
         )
 
     # TODO: add exclusiveMinimum and exclusiveMaximum
-    def _fake_integer(self, schema: Any) -> int:
+    
+    def _fake_integer(self, faker_data: FakerData, schema: Any, depth: int) -> int:
         mn = self._LO if "minimum" not in schema else schema["minimum"]
         mx = self._HI if "maximum" not in schema else schema["maximum"]
         return (
@@ -301,12 +294,14 @@ class StatelessFaker(FakerBase):
             else random.randint(mn, mx)
         )
 
+    
     def _fake_ref(self, faker_data: FakerData, schema: Any, depth: int):
         name = schema["$ref"].split("/")[2]
         return self._fake_it(faker_data, faker_data.schema["definitions"][name], depth)
 
+    
     def _fake_ref_array(
-        self, faker_data: FakerData, schema: Any, depth: int, count: int
+            self, faker_data: FakerData, schema: Any, depth: int, count: int
     ):
         name = schema["$ref"].split("/")[2]
         return [
@@ -314,10 +309,11 @@ class StatelessFaker(FakerBase):
             for _ in range(count)
         ]
 
-    def _fake_null(self, schema: Any) -> None:
+    def _fake_null(self, faker_data: FakerData, schema: Any, depth: int) -> None:
         return None
 
-    def _fake_number(self, schema: Any) -> float:
+    
+    def _fake_number(self, faker_data: FakerData, schema) -> float:
         mn = self._LO if "minimum" not in schema else schema["minimum"]
         mx = self._HI if "maximum" not in schema else schema["maximum"]
         return (
@@ -326,6 +322,7 @@ class StatelessFaker(FakerBase):
             else (random.random() * (mx - mn)) + mn
         )
 
+    
     def _fake_it(self, faker_data: FakerData, schema: Any, depth: int) -> Any:
         depth += 1
         return (
@@ -343,15 +340,16 @@ class StatelessFaker(FakerBase):
             if "$ref" in schema
             else self._fake_object(faker_data, schema, depth)
             if ("type" not in schema) or (schema["type"] == "object")
-            else self._fake_string(schema)
+            else self._fake_string(faker_data, schema, depth)
             if schema["type"] == "string"
-            else self._fake_integer(schema)
+            else self._fake_integer(faker_data, schema, depth)
             if schema["type"] == "integer"
-            else self._fake_boolean(schema)
+            else self._fake_boolean(faker_data, schema, depth)
             if schema["type"] == "boolean"
-            else self._fake_null(schema)
+            else self._fake_null(faker_data, schema, depth)
             if schema["type"] == "null"
-            else self._fake_number(schema)
+            else self._fake_number(faker_data, schema, depth)
             if schema["type"] == "number"
             else {}
         )
+
