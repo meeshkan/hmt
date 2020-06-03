@@ -24,6 +24,7 @@ from hmt.serve.mock.matcher import (
     ref_name,
 )
 from hmt.serve.mock.specs import OpenAPISpecification
+from hmt.serve.utils.timers import timed
 
 
 @dataclass(frozen=True)
@@ -76,6 +77,7 @@ class StatelessFaker(FakerBase):
     def __init__(self):
         self._text_faker = Faker()
 
+    @timed
     def process(self, spec: OpenAPISpecification, request: Request) -> Any:
         path_item, path_candidate = random.choice([x for x in spec.api.paths.items()])
 
@@ -169,6 +171,7 @@ class StatelessFaker(FakerBase):
             timestamp=None,
         )
 
+    @timed
     def _build_full_schema(
         self, schema: typing.Union[Schema, Reference], spec: OpenAPIObject
     ) -> typing.Dict:
@@ -178,22 +181,25 @@ class StatelessFaker(FakerBase):
                 if isinstance(schema, Reference)
                 else change_refs(schema)
             ),
-            "definitions": {
-                k: convert_from_openapi(
-                    change_ref(v) if isinstance(v, Reference) else change_refs(v)
-                )
-                for k, v in (
-                    spec.components.schemas.items()
-                    if (spec.components is not None)
-                    and (spec.components.schemas is not None)
-                    else []
-                )
-            },
+            "definitions": self._definitions(spec),
         }
 
-    # to prevent too-nested objects
-    def _sane_depth(self, n):
-        return max([0, 3 - n])
+    @timed
+    def _definitions(self, spec):
+        return {
+            k: convert_from_openapi(
+                change_ref(v) if isinstance(v, Reference) else change_refs(v)
+            )
+            for k, v in (
+            spec.components.schemas.items()
+            if (spec.components is not None)
+               and (spec.components.schemas is not None)
+            else []
+        )
+        }
+
+    def _optional_threshold(self, properties_count, required_count):
+        return 0.6
 
     def _fake_object(self, faker_data: FakerData, schema: Any, depth: int) -> Any:
         addls = (
@@ -211,22 +217,16 @@ class StatelessFaker(FakerBase):
                             faker_data, schema["additionalProperties"], depth
                         ),
                     )
-                    for x in range(random.randint(0, 4))
+                    for x in range(random.randint(0, 10))
                 ]
             }
         )
-        properties = list(schema.get("properties", {}).keys())
+        properties = []
+        required = set(schema.get("required", []))
+        thresh = self._optional_threshold(len(properties), len(required))
+        properties = [prop for prop in schema.get("properties", {}).keys() if prop in required or random.random() > thresh]
         random.shuffle(properties)
-        properties = (
-            []
-            if len(properties) == 0
-            else properties[
-                : min([self._sane_depth(depth), random.randint(0, len(properties) - 1)])
-            ]
-        )
-        properties = list(
-            set(([] if "required" not in schema else schema["required"]) + properties)
-        )
+
         return {
             **addls,
             **{

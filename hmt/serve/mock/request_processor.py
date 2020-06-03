@@ -72,7 +72,9 @@ class RequestProcessor:
             logger.debug("Matched to security scheme, returning response.")
             return maybe_security_response
 
+        logger.debug("Matching to openapi")
         match = match_request_to_openapi(request, specs)
+        logger.debug("Finished matching to openapi")
 
         if len(match) == 0:
             return self._callback_manager(

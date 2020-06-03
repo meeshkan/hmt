@@ -3,6 +3,7 @@ from typing import Optional, Sequence
 from http_types import Request, Response
 from openapi_typed_2.openapi import OAuth2SecurityScheme, OpenAPIObject
 
+from hmt.serve.utils.timers import timed
 from .matcher import truncate_path
 
 
@@ -75,6 +76,7 @@ def match_request_to_security_scheme(
     return None
 
 
+@timed
 def match_to_security_schemes(
     req: Request, specs: Sequence[OpenAPIObject]
 ) -> Optional[Response]:

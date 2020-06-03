@@ -1,5 +1,6 @@
+import datetime
 import json
-import re
+import logging
 from dataclasses import replace
 from functools import reduce
 from typing import (
@@ -11,8 +12,7 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
-    cast,
-)
+    cast)
 from urllib.parse import urlparse
 
 import jsonschema
@@ -64,6 +64,8 @@ all_methods: Sequence[str] = [
     "patch",
     "trace",
 ]
+
+logger = logging.getLogger(__name__)
 
 
 def omit_method_from_path_item(p: PathItem, a: str) -> PathItem:
@@ -481,75 +483,6 @@ def valid_schema(to_validate: Any, schema: Any) -> bool:
     except Exception:
         return False
 
-
-def keep_method_if_required_request_body_is_present(
-    req: Request, oai: OpenAPIObject,
-) -> Callable[[PathItem], PathItem]:
-    def _keep_method_if_required_request_body_is_present(p: PathItem) -> PathItem:
-        out = (
-            p
-            if (operation_from_string(p, req.method.value) is None)
-            or (
-                len(
-                    [
-                        s
-                        for s in get_required_request_body_schemas(req, oai, p)
-                        if not valid_schema(
-                            req.bodyAsJson
-                            if req.bodyAsJson is not None
-                            else json.loads(req.body)
-                            if req.body is not None
-                            else "",
-                            {
-                                # TODO: this line is different than the TS implementation
-                                # because I think there is a logic bug there
-                                # it should look like this line as we are not sure
-                                # if the schema will be a reference or not
-                                # perhaps I'm wrong in the assumption... only testing will tell...
-                                # otherwise, change the TS implementation in unmock-js and delete this comment.
-                                **convert_from_openapi(
-                                    change_ref(s)
-                                    if isinstance(s, Reference)
-                                    else change_refs(s)
-                                ),
-                                "definitions": make_definitions_from_schema(oai),
-                            },
-                        )
-                    ]
-                )
-                == 0
-            )
-            else omit_method_from_path_item(p, req.method.value)
-        )
-        return out
-
-    return _keep_method_if_required_request_body_is_present
-
-
-def keep_method_if_required_header_parameters_are_present(
-    req: Request, oai: OpenAPIObject,
-) -> Callable[[PathItem], PathItem]:
-    def _keep_method_if_required_header_parameters_are_present(p: PathItem) -> PathItem:
-        out = keep_method_if_required_query_or_header_parameters_are_present(
-            True, req, oai, p
-        )
-        return out
-
-    return _keep_method_if_required_header_parameters_are_present
-
-
-def keep_method_if_required_query_parameters_are_present(
-    req: Request, oai: OpenAPIObject,
-) -> Callable[[PathItem], PathItem]:
-    def _keep_method_if_required_query_parameters_are_present(p: PathItem) -> PathItem:
-        out = keep_method_if_required_query_or_header_parameters_are_present(
-            False, req, oai, p
-        )
-        return out
-
-    return _keep_method_if_required_query_parameters_are_present
-
-
 def _json_schema_from_required_parameters(
     parameters: Sequence[Parameter], oai: OpenAPIObject
 ) -> Any:
@@ -679,46 +612,24 @@ def path_parameter_match(
     )
 
 
-path_param_regex = re.compile(r"^\{[^}]+\}")
-
-
-# TODO: this is a boolean nightmare
-# what we want is
-# lengths_are_equal AND (empty OR ((first_elt_equal OR (matches_regex AND matches_schema)) AND recursion))
-def matches_internal(
-    path: Sequence[str],
-    path_item_key: Sequence[str],
-    path_item: PathItem,
-    operation: str,
-    o: OpenAPIObject,
-) -> bool:
-    return (len(path) == len(path_item_key)) and (
-        (len(path) == 0)
-        or (
-            (
-                (path[0] == path_item_key[0])
-                or (
-                    (path_param_regex.match(path_item_key[0]) is not None)
-                    and path_parameter_match(
-                        path[0], path_item_key[0][1:-1], path_item, operation, o,
-                    )
-                )
-            )
-            and matches_internal(path[1:], path_item_key[1:], path_item, operation, o,)
-        )
-    )
-
-
 def matches(
-    path: str, path_item_key: str, path_item: PathItem, method: str, oas: OpenAPIObject,
-) -> bool:
-    return matches_internal(
-        [x for x in path.split("/") if x != ""],
-        [x for x in path_item_key.split("/") if x != ""],
-        path_item,
-        method,
-        oas,
-    )
+    path: Sequence[str], path_item_key: str, path_item: PathItem, method: str) -> int:
+    if not hasattr(path_item, method):
+        return 0
+
+    path_item_key = [x for x in path_item_key.split("/") if x != ""]
+    score = 1
+    if len(path) != len(path_item_key):
+        return 0
+    for path_el, path_item_key_el in zip(path, path_item_key):
+
+        if path_item_key_el[0]=='{' and path_item_key_el[-1]=='}':
+            continue
+        elif path_el == path_item_key_el:
+            score += 1
+        else:
+            return 0
+    return score
 
 
 def get_first_method_internal_2(
@@ -807,47 +718,24 @@ def truncate_path(path: str, o: OpenAPIObject, i: Request,) -> str:
 def match_request_to_openapi(
     req: Request, specs: Sequence[OpenAPISpecification]
 ) -> Sequence[OpenAPISpecification]:
-    def _path_item_modifier(oai: OpenAPIObject) -> Callable[[PathItem], PathItem]:
-        def __path_item_modifier(path_item: PathItem) -> PathItem:
-            return reduce(
-                lambda a, b: b(a),
-                [
-                    keep_method_if_required_header_parameters_are_present(req, oai),
-                    keep_method_if_required_query_parameters_are_present(req, oai),
-                    ##### keep_method_if_required_request_body_is_present
-                    ##### should be uncommented in a separate PR
-                    ##### it breaks the logic in the new schemabuilder
-                    ##### but it should be reimplemented
-                    ##### now, the issue is that API requests will not
-                    ##### have their body validated
-                    ##### as there are so few API requests that require body
-                    ##### validation for mocking, this is a small loss
-                    ##### but should still be acknowledged and fixed when
-                    ##### someone has time
-                    # keep_method_if_required_request_body_is_present(req, oai),
-                ],
-                get_path_item_with_method(req.method.value, path_item),
-            )
-
-        return __path_item_modifier
-
+    start = datetime.datetime.now()
     def _oai_modifier(oai: OpenAPIObject) -> OpenAPIObject:
-        return paths_o.Values().modify(_path_item_modifier(oai))(
-            replace(
-                oai,
-                paths={
-                    n: o
-                    for n, o in oai.paths.items()
-                    if matches(
-                        truncate_path(req.pathname, oai, req),
-                        n,
-                        o,
-                        req.method.value,
-                        oai,
-                    )
-                },
-            )
-        )
+        path = [x for x in truncate_path(req.pathname, oai, req).split("/") if x != ""]
+        best_path = None
+        best_score = 0
+
+        for pathname, path_item in oai.paths.items():
+            score = matches(path, pathname, path_item, req.method.value)
+            if score > 0 and score > best_score:
+                    best_path = (pathname, path_item)
+                    best_score = score
+
+
+        modified = replace(
+                    oai,
+                    paths = {best_path[0]: best_path[1]} if best_path is not None else {})
+        return modified
+
 
     specs_with_matching_urls = {
         spec.source: spec.api
@@ -856,5 +744,7 @@ def match_request_to_openapi(
     }
 
     filtered = {k: _oai_modifier(v) for k, v in specs_with_matching_urls.items()}
+
+    print("Matching took took {}".format((datetime.datetime.now() - start).total_seconds()))
 
     return [OpenAPISpecification(api, source) for (source, api) in filtered.items()]

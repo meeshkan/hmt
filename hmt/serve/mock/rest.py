@@ -7,6 +7,7 @@ from http_types.utils import HttpExchangeWriter
 from openapi_typed_2 import convert_from_openapi, convert_to_openapi
 
 from hmt.serve.mock.specs import OpenAPISpecification
+from hmt.serve.utils.timers import timed
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,7 @@ class RestMiddlewareManager:
     def add(self, url):
         self._endpoints.add(url)
 
+    @timed
     def spew(
         self, request: Request, specs: Sequence[OpenAPISpecification]
     ) -> Sequence[OpenAPISpecification]:

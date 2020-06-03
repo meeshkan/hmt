@@ -1,3 +1,4 @@
+import datetime
 import logging
 from dataclasses import asdict
 from urllib import parse
@@ -84,9 +85,11 @@ class MockServerView(RequestHandler):
             }
         )
 
+        start = datetime.datetime.now()
         logger.debug("Processing request: %s", asdict(request))
         response = self._request_processor.process(request)
         logger.debug("Resolved response: %s", asdict(response))
+        print("Process took {}".format((datetime.datetime.now() - start).total_seconds()))
 
         for header, value in response.headers.items():
             self.set_header(header, value)

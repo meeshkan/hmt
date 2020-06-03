@@ -1,7 +1,7 @@
 import json
 import os
 from dataclasses import dataclass
-from typing import Sequence, Union
+from typing import Sequence, Union, Any
 
 import requests
 import yaml
