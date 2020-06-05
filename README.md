@@ -114,7 +114,7 @@ Using the HMT CLI, you can **build** an OpenAPI schema from a single `.jsonl` fi
 $ hmt build --input-file path/to/recordings.jsonl 
 ```
 
-_Note: The input file should be in [JSON Lines](http://jsonlines.org/) format and every line should be in [http-types](https://hmt.github.io/http-types/) JSON format. For an example input file, see [recordings.jsonl](./resources/recordings.jsonl)._
+_Note: The input file should be in [JSON Lines](http://jsonlines.org/) format and every line should be in [http-types](https://github.com/meeshkan/http-types) JSON format. For an example input file, see [recordings.jsonl](./resources/recordings.jsonl)._
 
 Optionally, you can also specify an output directory using the `--out` flag followed by the path to this directory. By default, HMT will build the new OpenAPI specifications in the `specs` directory. 
 
@@ -152,7 +152,7 @@ For more information about mocking, including adding custom middleware and modif
 
 Here are some useful tips for building and running HMT from source. 
 
-If you run into any issues, please [reach out to our team on Gitter](https://gitter.im/HMT/community).
+If you run into any issues, please [reach out to our team on Gitter](https://gitter.im/meeshkan/community).
 
 ### Getting started
 
@@ -219,13 +219,13 @@ Using the [Pyright extension](https://marketplace.visualstudio.com/items?itemNam
 
 ### Automated builds
 
-Configuration for CircleCI [build pipeline](https://app.circleci.com/github/HMT/hmt/pipelines) can be found in [.circleci/config.yml](https://github.com/meeshkan/hmt/tree/master/.circleci/config.yml).
+Configuration for CircleCI [build pipeline](https://app.circleci.com/pipelines/github/meeshkan/hmt) can be found in [.circleci/config.yml](./.circleci/config.yml).
 
 ### Publishing HMT as a PyPi package
 
 To publish HMT as a PyPi package, complete the following steps:
 
-1. Bump the version in [setup.py](https://github.com/meeshkan/hmt/tree/master/setup.py) if the version is the same as in the published [package](https://pypi.org/project/hmt/). Commit and push.
+1. Bump the version in [setup.py](./setup.py) if the version is the same as in the published [package](https://pypi.org/project/hmt/). Commit and push.
 1. Run `python setup.py test` to check that everything works
 1. To build and upload the package, run `python setup.py upload`. Insert PyPI credentials to upload the package to `PyPI`. The command will also run `git tag` to tag the commit as a release and push the tags to remote.
 
@@ -233,8 +233,8 @@ To publish HMT as a PyPi package, complete the following steps:
 
 ## Contributing
 
-Thanks for your interest in contributing! Please take a look at our [development guide](#development) for notes on how to develop the package locally.  A great way to start contributing is to [file an issue](https://github.com/meeshkan/hmt/issue) or [make a pull request](https://github.com/meeshkan/hmt/pulls).
+Thanks for your interest in contributing! Please take a look at our [development guide](#development) for notes on how to develop the package locally.  A great way to start contributing is to [file an issue](https://github.com/meeshkan/hmt/issues/new/choose) or [make a pull request](https://github.com/meeshkan/hmt/pulls).
 
 ### Code of Conduct
 
-Please note that this project is governed by the [HMT Community Code of Conduct](https://github.com/meeshkan/code-of-conduct). By participating, you agree to abide by its terms.
+Please note that this project is governed by the [Meeshkan Community Code of Conduct](https://github.com/meeshkan/code-of-conduct). By participating, you agree to abide by its terms.
