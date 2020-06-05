@@ -4,8 +4,6 @@ HMT can be used to create a mock server from OpenAPI specifications and optional
 
 ## What's in this document
 
-- [Mocking with HMT](#mocking-with-hmt)
-  - [What's in this document](#whats-in-this-document)
   - [The `hmt mock` command](#the-hmt-mock-command)
     - [Making requests](#making-requests)
   - [Daemon mode](#daemon-mode)

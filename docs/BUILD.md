@@ -8,8 +8,6 @@ In case one only has an OpenAPI spec and no server recodings, it is not necessar
 
 ## What's in this document
 
-- [Building with HMT](#building-with-hmt)
-  - [What's in this document](#whats-in-this-document)
   - [The `hmt build` command](#the-hmt-build-command)
     - [Building a spec from recorded HTTP API traffic](#building-a-spec-from-recorded-http-api-traffic)
     - [Building a spec from both recorded traffic and other OpenAPI specs](#building-a-spec-from-both-recorded-traffic-and-other-openapi-specs)
@@ -23,7 +21,7 @@ In case one only has an OpenAPI spec and no server recodings, it is not necessar
 
 ⚠️ Before getting started, you should make sure that any recorded HTTP API traffic that you'll use is in the correct format. The `hmt build` command expects that recordings are in a single [JSON Lines](http://jsonlines.org/) file and every line should be in the [http-types](https://meeshkan.github.io/http-types/) JSON format.
 
-For an example input file, see [pokeapi.jsonl](https://github.com/meeshkan/hmt/blob/master/resources/pokeapi.jsonl). The libraries listed at [http-types](https://meeshkan.github.io/http-types/) can be used to generate input files in your language of choice.
+For an example input file, see [pokeapi.jsonl](https://github.com/meeshkan/hmt/blob/master/resources/pokeapi.jsonl). The libraries listed on [`http-types`](https://github.com/meeshkan/http-types#libraries) can be used to generate input files in your language of choice.
 
 ### Building a spec from recorded HTTP API traffic
 

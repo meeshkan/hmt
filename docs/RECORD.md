@@ -4,8 +4,6 @@ HMT can be used to record HTTP API traffic in a format that `hmt build` can unde
 
 ## What's in this document
 
-- [Recording with HMT](#recording-with-hmt)
-  - [What's in this document](#whats-in-this-document)
   - [The `hmt record` command](#the-hmt-record-command)
   - [Path vs. header routing](#path-vs-header-routing)
     - [Path routing](#path-routing)
