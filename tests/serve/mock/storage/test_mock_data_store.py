@@ -1,5 +1,6 @@
 from openapi_typed_2 import convert_to_OpenAPIObject
 
+from hmt.serve.mock.refs import make_definitions_from_spec
 from hmt.serve.mock.specs import OpenAPISpecification
 from hmt.serve.mock.storage.mock_data_store import MockDataStore
 from tests.util import spec, spec_dict
@@ -32,7 +33,9 @@ def test_add_mock_no_data():
     spec = convert_to_OpenAPIObject(spec)
 
     store = MockDataStore()
-    store.add_mock(OpenAPISpecification(spec, "items"))
+    store.add_mock(
+        OpenAPISpecification(spec, "items", make_definitions_from_spec(spec))
+    )
 
     assert 0 == len(store["items"].item)
 
@@ -73,7 +76,9 @@ def test_add_mock_data():
     spec = convert_to_OpenAPIObject(spec)
 
     store = MockDataStore()
-    store.add_mock(OpenAPISpecification(spec, "items"))
+    store.add_mock(
+        OpenAPISpecification(spec, "items", make_definitions_from_spec(spec))
+    )
 
     assert 2 == len(store["items"].item)
     assert "val1" == store["items"].item["id1234"]["bar"]
@@ -82,8 +87,8 @@ def test_add_mock_data():
 def test_clear():
     store = MockDataStore()
 
-    store.add_mock(OpenAPISpecification(spec(), "pokemon"))
-    store.add_mock(OpenAPISpecification(spec(), "another"))
+    store.add_mock(OpenAPISpecification(spec(), "pokemon", {"definitions": {}}))
+    store.add_mock(OpenAPISpecification(spec(), "another", {"definitions": {}}))
 
     store["pokemon"]["x"] = "foo"
     store["another"]["y"] = "bar"
@@ -124,7 +129,9 @@ def test_reset():
     spec = convert_to_OpenAPIObject(spec)
 
     store = MockDataStore()
-    store.add_mock(OpenAPISpecification(spec, "items"))
+    store.add_mock(
+        OpenAPISpecification(spec, "items", make_definitions_from_spec(spec))
+    )
 
     assert 1 == len(store["items"].item)
 

@@ -46,7 +46,9 @@ class RequestProcessor:
             timestamp=None,
         )
 
-    def _match_response(self, pathname: str, spec: OpenAPISpecification, request: Request):
+    def _match_response(
+        self, pathname: str, spec: OpenAPISpecification, request: Request
+    ):
         try:
             return self._faker.process(pathname, spec, request)
         except FakerException as e:
@@ -80,7 +82,9 @@ class RequestProcessor:
             return self._callback_manager(
                 request,
                 self.match_error(
-                    "Could not find an open API schema for the host {} and the path {}".format(request.host, request.path),
+                    "Could not find an open API schema for the host {} and the path {}".format(
+                        request.host, request.path
+                    ),
                     request,
                 ),
                 self._mock_data_store.default,

@@ -44,7 +44,8 @@ store: Sequence[OpenAPISpecification] = [
                 },
             }
         ),
-        "foo", {"definitions": {}}
+        "foo",
+        {"definitions": {}},
     ),
     OpenAPISpecification(
         convert_to_openapi(
@@ -75,7 +76,8 @@ store: Sequence[OpenAPISpecification] = [
                 },
             }
         ),
-        "bar", {"definitions": {}}
+        "bar",
+        {"definitions": {}},
     ),
     OpenAPISpecification(
         convert_to_openapi(
@@ -171,7 +173,8 @@ store: Sequence[OpenAPISpecification] = [
                 },
             }
         ),
-        "baz", {"definitions": {}}
+        "baz",
+        {"definitions": {}},
     ),
 ]
 
@@ -190,28 +193,11 @@ def test_matcher_1():
             }
         ),
         store,
-    ) == [
-        OpenAPISpecification(
-            convert_to_openapi(
-                {
-                    "openapi": "",
-                    "servers": [{"url": "api.foo.com"}],
-                    "info": {"title": "", "version": ""},
-                    "paths": {
-                        "/user": {
-                            "get": {"responses": {"200": {"description": "userget"}}},
-                            "description": "",
-                        },
-                    },
-                }
-            ),
-            "foo", definitions={"definitions": {}}
-        )
-    ]
+    ) == ("/user", store[0])
 
 
 def test_matcher_2():
-    match_request_to_openapi(
+    assert match_request_to_openapi(
         RequestBuilder.from_dict(
             {
                 "headers": {},
@@ -224,21 +210,7 @@ def test_matcher_2():
             }
         ),
         store,
-    ) == {
-        "bar": convert_to_openapi(
-            {
-                "openapi": "",
-                "servers": [{"url": "https://api.bar.com/v1"}],
-                "info": {"title": "", "version": ""},
-                "paths": {
-                    "/guest/{id}": {
-                        "post": {"responses": {"201": {"description": "guestidpost"}}},
-                        "description": "",
-                    },
-                },
-            }
-        )
-    }
+    ) == ("/guest/{id}", store[1])
 
 
 def test_matcher_3():
@@ -255,19 +227,7 @@ def test_matcher_3():
             }
         ),
         store,
-    ) == [
-        OpenAPISpecification(
-            convert_to_openapi(
-                {
-                    "openapi": "",
-                    "servers": [{"url": "api.foo.com"}],
-                    "info": {"title": "", "version": ""},
-                    "paths": {},
-                }
-            ),
-            "foo", definitions={"definitions": {}}
-        )
-    ]
+    ) == (None, None)
 
 
 def test_matcher_4():
@@ -284,31 +244,7 @@ def test_matcher_4():
             }
         ),
         store,
-    ) == [
-        OpenAPISpecification(
-            convert_to_openapi(
-                {
-                    "openapi": "",
-                    "servers": [{"url": "api.foo.com"}],
-                    "info": {"title": "", "version": ""},
-                    "paths": {
-                        "/user/{id}": {
-                            "parameters": [
-                                {
-                                    "name": "id",
-                                    "in": "path",
-                                    "required": True,
-                                    "schema": {"type": "integer"},
-                                },
-                            ],
-                            "get": {"responses": {"200": {"description": "useridget"}}},
-                        },
-                    },
-                }
-            ),
-            "foo", definitions={"definitions": {}}
-        ),
-    ]
+    ) == ("/user/{id}", store[0])
 
 
 def test_matcher_5():
@@ -317,27 +253,15 @@ def test_matcher_5():
             {
                 "headers": {},
                 "host": "api.foo.com",
-                "path": "/user/fdsfsfwef",  # correctly rejects non-number
-                "pathname": "/user/fdsfsfwef",  # correcly rejects non-number
+                "path": "/user/fdsfsfwef",  # no validation on path params
+                "pathname": "/user/fdsfsfwef",  # no validation on path params
                 "protocol": "https",
                 "method": "get",
                 "query": {},
             }
         ),
         store,
-    ) == [
-        OpenAPISpecification(
-            convert_to_openapi(
-                {
-                    "openapi": "",
-                    "servers": [{"url": "api.foo.com"}],
-                    "info": {"title": "", "version": ""},
-                    "paths": {},
-                }
-            ),
-            "foo", definitions={"definitions": {}}
-        )
-    ]
+    ) == ("/user/{id}", store[0])
 
 
 def test_matcher_6():
@@ -354,84 +278,24 @@ def test_matcher_6():
             }
         ),
         store,
-    ) == [
-        OpenAPISpecification(
-            convert_to_openapi(
-                {
-                    "openapi": "",
-                    "servers": [{"url": "api.foo.com"}],
-                    "info": {"title": "", "version": ""},
-                    "paths": {"/user": {"description": ""}},
-                }
-            ),
-            "foo", definitions={"definitions": {}}
-        )
-    ]
+    ) == (None, None)
 
 
 def test_matcher_7():
-    assert (
-        match_request_to_openapi(
-            RequestBuilder.from_dict(
-                {
-                    "headers": {},
-                    "host": "api.foo.commmm",  # does not exist
-                    "path": "/user",
-                    "pathname": "/user",
-                    "protocol": "https",
-                    "method": "get",
-                    "query": {},
-                }
-            ),
-            store,
-        )
-        == []
-    )
-
-
-def test_matcher_8():
-    (baz_spec,) = (spec for spec in store if spec.source == "baz")
-    (matched_spec,) = (
-        spec
-        for spec in match_request_to_openapi(
-            RequestBuilder.from_dict(
-                {
-                    "headers": {},
-                    "host": "api.baz.com",
-                    "path": "/guest",
-                    "pathname": "/guest",
-                    "protocol": "https",
-                    "method": "get",
-                    "query": {"hello": "0"},  # query param must be integer
-                }
-            ),
-            store,
-        )
-        if spec.source == "baz"
-    )
-    assert matched_spec.api.paths["/guest"].get == baz_spec.api.paths["/guest"].get
-
-
-def test_matcher_9():
-    (matched_spec,) = (
-        spec
-        for spec in match_request_to_openapi(
-            RequestBuilder.from_dict(
-                {
-                    "headers": {},
-                    "host": "api.baz.com",
-                    "path": "/guest",
-                    "pathname": "/guest",
-                    "protocol": "https",
-                    "method": "get",
-                    "query": {"hello": "b"},  # query param intentionally off as string
-                }
-            ),
-            store,
-        )
-        if spec.source == "baz"
-    )
-    assert matched_spec.api.paths["/guest"].get is None
+    assert match_request_to_openapi(
+        RequestBuilder.from_dict(
+            {
+                "headers": {},
+                "host": "api.foo.commmm",  # does not exist
+                "path": "/user",
+                "pathname": "/user",
+                "protocol": "https",
+                "method": "get",
+                "query": {},
+            }
+        ),
+        store,
+    ) == (None, None)
 
 
 def test_matcher_10():
@@ -445,42 +309,12 @@ def test_matcher_10():
                     "pathname": "/guest",
                     "protocol": "https",
                     "method": "get",
-                    "query": {},  # as query is required, this should fail
+                    "query": {},  # query is not validated here
                 }
             ),
             store,
         )[0]
-        .api.paths["/guest"]
-        .get
-        is None
-    )
-
-
-def test_matcher_11():
-    (baz_spec,) = (spec for spec in store if spec.source == "baz")
-    (matched_spec,) = (
-        spec
-        for spec in match_request_to_openapi(
-            RequestBuilder.from_dict(
-                {
-                    "headers": {},
-                    "host": "api.baz.com",
-                    "path": "/guest/3/name",
-                    "pathname": "/guest/3/name",
-                    "protocol": "https",
-                    "method": "post",
-                    "query": {},
-                    "bodyAsJson": {"age": 42},
-                    "body": json.dumps({"age": 42}),
-                }
-            ),
-            store,
-        )
-        if spec.source == "baz"
-    )
-    assert (
-        matched_spec.api.paths["/guest/{id}/name"].post
-        == baz_spec.api.paths["/guest/{id}/name"].post
+        == "/guest"
     )
 
 
@@ -502,35 +336,7 @@ def test_matcher_12():
             ),
             store,
         )[0]
-        .api.paths["/guest/{id}/name"]
-        .post
-        is not None
-    )
-
-
-def test_matcher_13():
-    (baz_spec,) = (spec for spec in store if spec.source == "baz")
-    (matched_spec,) = (
-        spec
-        for spec in match_request_to_openapi(
-            RequestBuilder.from_dict(
-                {
-                    "headers": {"zz": "top"},
-                    "host": "api.baz.com",
-                    "path": "/guest/4",
-                    "pathname": "/guest/4",
-                    "protocol": "https",
-                    "method": "post",
-                    "query": {"zzz": "aaa", "a": "foo", "b": "baz"},
-                }
-            ),
-            store,
-        )
-        if spec.source == "baz"
-    )
-    assert (
-        matched_spec.api.paths["/guest/{id}"].post
-        == baz_spec.api.paths["/guest/{id}"].post
+        == "/guest/{id}/name"
     )
 
 
@@ -550,43 +356,5 @@ def test_matcher_14():
             ),
             store,
         )[0]
-        .api.paths["/guest/{id}"]
-        .post
-        is None
+        == "/guest/{id}"
     )
-
-
-def test_matcher_15():
-    match_request_to_openapi(
-        RequestBuilder.from_dict(
-            {
-                "headers": {"X-Meeshkan-Scheme": "https", "Host": "api.bar.com"},
-                "host": "api.bar.com",
-                "path": "/v1/guest/{id}",
-                "pathname": "/v1/guest/{id}",
-                "protocol": "http",
-                "method": "post",
-                "query": {},
-            }
-        ),
-        store,
-    ) == [
-        OpenAPISpecification(
-            convert_to_openapi(
-                {
-                    "openapi": "",
-                    "servers": [{"url": "https://api.bar.com/v1"}],
-                    "info": {"title": "", "version": ""},
-                    "paths": {
-                        "/guest/{id}": {
-                            "post": {
-                                "responses": {"201": {"description": "guestidpost"}}
-                            },
-                            "description": "",
-                        },
-                    },
-                }
-            ),
-            "baz", definitions={"definitions": {}}
-        )
-    ]

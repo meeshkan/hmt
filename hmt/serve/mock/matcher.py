@@ -1,15 +1,17 @@
 import datetime
-from typing import Tuple, Optional, Sequence
+from typing import Optional, Sequence, Tuple
 from urllib.parse import urlparse
 
-from hmt.serve.mock.specs import OpenAPISpecification
 from http_types import Request
 from openapi_typed_2 import OpenAPIObject, PathItem
 
+from hmt.serve.mock.specs import OpenAPISpecification
+
 
 def matches(
-    path: Sequence[str], path_item_key: str, path_item: PathItem, method: str) -> int:
-    if not hasattr(path_item, method):
+    path: Sequence[str], path_item_key: str, path_item: PathItem, method: str
+) -> int:
+    if getattr(path_item, method, None) is None:
         return 0
 
     path_item_key = [x for x in path_item_key.split("/") if x != ""]
@@ -18,13 +20,14 @@ def matches(
         return 0
     for path_el, path_item_key_el in zip(path, path_item_key):
 
-        if path_item_key_el[0]=='{' and path_item_key_el[-1]=='}':
+        if path_item_key_el[0] == "{" and path_item_key_el[-1] == "}":
             continue
         elif path_el == path_item_key_el:
             score += 1
         else:
             return 0
     return score
+
 
 def match_urls(protocol: str, host: str, o: OpenAPIObject) -> Sequence[str]:
     """Finds mock URLs that match a given protocol and host.
@@ -56,6 +59,7 @@ def match_urls(protocol: str, host: str, o: OpenAPIObject) -> Sequence[str]:
         )
     ]
 
+
 def cut_path(paths: Sequence[str], path: str) -> str:
     return (
         path
@@ -68,8 +72,6 @@ def cut_path(paths: Sequence[str], path: str) -> str:
 
 def remove_trailing_slash(s: str) -> str:
     return s if len(s) == 0 else s[:-1] if s[-1] == "/" else s
-
-
 
 
 def truncate_path(path: str, o: OpenAPIObject, i: Request,) -> str:
@@ -86,6 +88,7 @@ def match_request_to_openapi(
     req: Request, specs: Sequence[OpenAPISpecification]
 ) -> Tuple[Optional[str], Optional[OpenAPISpecification]]:
     start = datetime.datetime.now()
+
     def _match_path(oai: OpenAPIObject) -> Optional[str]:
         path = [x for x in truncate_path(req.pathname, oai, req).split("/") if x != ""]
         best_path: Optional[str] = None
@@ -94,17 +97,24 @@ def match_request_to_openapi(
         for pathname, path_item in oai.paths.items():
             score = matches(path, pathname, path_item, req.method.value)
             if score > 0 and score > best_score:
-                    best_path = pathname
-                    best_score = score
+                best_path = pathname
+                best_score = score
 
         return best_path
 
-
-    specs_with_matching_urls = (spec for spec in specs if len(match_urls(req.protocol.value, req.host, spec.api)) > 0)
+    specs_with_matching_urls = (
+        spec
+        for spec in specs
+        if len(match_urls(req.protocol.value, req.host, spec.api)) > 0
+    )
     for spec in specs_with_matching_urls:
         path = _match_path(spec.api)
         if path is not None:
-            print("Matching took {}".format((datetime.datetime.now() - start).total_seconds()))
+            print(
+                "Matching took {}".format(
+                    (datetime.datetime.now() - start).total_seconds()
+                )
+            )
             return path, spec
 
     return None, None

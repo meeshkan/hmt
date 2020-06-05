@@ -1,13 +1,14 @@
 import json
 import os
 from dataclasses import dataclass
-from typing import Sequence, Union, Any
+from typing import Any, Sequence, Union
 
 import requests
 import yaml
-from hmt.serve.mock.refs import make_definitions_from_spec
 from openapi_typed_2 import OpenAPIObject, convert_to_openapi
 from requests.exceptions import RequestException
+
+from hmt.serve.mock.refs import make_definitions_from_spec
 
 
 @dataclass
@@ -17,6 +18,7 @@ class OpenAPISpecification:
     api: OpenAPIObject
     source: str
     definitions: Any
+
 
 def load_spec(spec_source: str, is_http: bool) -> OpenAPISpecification:
     spec_text: str
@@ -30,13 +32,10 @@ def load_spec(spec_source: str, is_http: bool) -> OpenAPISpecification:
         with open(spec_source, encoding="utf8") as spec_file:
             spec_text = spec_file.read()
 
-    spec =  convert_to_openapi(
-            (json.loads if spec_source.endswith("json") else yaml.safe_load)(spec_text)
-        )
-    return OpenAPISpecification(
-        spec,
-        spec_source, make_definitions_from_spec(spec)
+    spec = convert_to_openapi(
+        (json.loads if spec_source.endswith("json") else yaml.safe_load)(spec_text)
     )
+    return OpenAPISpecification(spec, spec_source, make_definitions_from_spec(spec))
 
 
 def load_specs(specs: Union[str, Sequence[str]]) -> Sequence[OpenAPISpecification]:

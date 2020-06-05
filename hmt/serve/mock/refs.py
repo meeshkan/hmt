@@ -1,5 +1,13 @@
 from dataclasses import replace
-from openapi_typed_2 import Reference, Schema, OpenAPIObject, Mapping, Any, convert_from_openapi
+
+from openapi_typed_2 import (
+    Any,
+    Mapping,
+    OpenAPIObject,
+    Reference,
+    Schema,
+    convert_from_openapi,
+)
 
 
 def ref_name(r: Reference) -> str:
@@ -7,7 +15,7 @@ def ref_name(r: Reference) -> str:
 
 
 def change_ref(j: Reference) -> Reference:
-    return Reference(_x=None, _ref="#/definitions/%s" % ref_name(j), )
+    return Reference(_x=None, _ref="#/definitions/%s" % ref_name(j),)
 
 
 def change_refs(j: Schema) -> Schema:

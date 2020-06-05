@@ -4,6 +4,7 @@ from http_types import Request, Response
 from openapi_typed_2.openapi import OAuth2SecurityScheme, OpenAPIObject
 
 from hmt.serve.utils.timers import timed
+
 from .matcher import truncate_path
 
 

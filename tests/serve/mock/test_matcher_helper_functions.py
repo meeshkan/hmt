@@ -1,6 +1,4 @@
 from dataclasses import replace
-from hmt.serve.mock.refs import ref_name
-from hmt.serve.mock.request_validation import get_path_item_with_method, use_if_header
 
 from openapi_typed_2 import (
     OpenAPIObject,
@@ -13,10 +11,9 @@ from openapi_typed_2 import (
     convert_to_Schema,
 )
 
-from hmt.serve.mock.matcher import (
-    match_urls,
-    matches
-)
+from hmt.serve.mock.matcher import match_urls, matches
+from hmt.serve.mock.refs import ref_name
+from hmt.serve.mock.request_validation import get_path_item_with_method, use_if_header
 
 
 def test_match_urls():
@@ -96,6 +93,11 @@ def test_matcher():
                 "schema": {"type": "string", "pattern": "^[abc]+$"},
             },
         ],
+        "get": {
+            "responses": {
+                "200": {"description": "some", "content": {"application/json": {}},}
+            }
+        },
     }
     bfoo = convert_to_PathItem(_bfoo)
     oai: OpenAPIObject = convert_to_openapi(
@@ -105,12 +107,13 @@ def test_matcher():
             "paths": {"/b/{foo}": _bfoo},
         }
     )
-    assert matches("/a/b", "/a/b", bfoo, "get", oai)
-    assert not matches("/a/", "/a/b", bfoo, "get", oai)
-    assert not matches("/a/b", "/a", bfoo, "get", oai)
-    assert matches("/a/b/c", "/a/{fewfwef}/c", bfoo, "get", oai)
-    assert matches("/b/ccaaca", "/b/{foo}", bfoo, "get", oai)
-    assert not matches("/b/ccaacda", "/b/{foo}", bfoo, "get", oai)
+    assert matches(["a", "b"], "/a/b", bfoo, "get")
+    assert not matches(["a"], "/a/b", bfoo, "get")
+    assert not matches(["a", "b"], "/a", bfoo, "get")
+    assert matches(["a", "b", "c"], "/a/{fewfwef}/c", bfoo, "get")
+    assert matches(["b", "ccaaca"], "/b/{foo}", bfoo, "get")
+    assert matches(["b", "ccaaca"], "/b/{foo}", bfoo, "get")
+    assert not matches(["a", "b", "c"], "/a/{fewfwef}/c", bfoo, "post")
 
 
 def test_ref_name():

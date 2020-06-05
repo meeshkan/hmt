@@ -2,6 +2,7 @@ from http_types import RequestBuilder
 from openapi_typed_2 import convert_to_OpenAPIObject
 
 from hmt.serve.mock.faker.stateful_faker import StatefulFaker
+from hmt.serve.mock.refs import make_definitions_from_spec
 from hmt.serve.mock.request_validation import valid_schema
 from hmt.serve.mock.specs import OpenAPISpecification
 from tests.util import spec, spec_dict
@@ -41,7 +42,9 @@ def test_fake_array(mock_data_store):
     mock_data_store.add_mock(OpenAPISpecification(spec, "default", {"definitions": {}}))
 
     schema["components"] = components
-    spec = OpenAPISpecification(source="default", api=spec, definitions={"definitions": {}})
+    spec = OpenAPISpecification(
+        source="default", api=spec, definitions={"definitions": {}}
+    )
 
     res = faker.process("/items", spec, request)
 
@@ -100,11 +103,15 @@ def test_insert(mock_data_store):
     spec["paths"]["/items"]["post"]["x-hmt-operation"] = "insert"
 
     spec = convert_to_OpenAPIObject(spec)
-    mock_data_store.add_mock(OpenAPISpecification(spec, "default", definitions={"definitions": {}}))
+    mock_data_store.add_mock(
+        OpenAPISpecification(spec, "default", definitions={"definitions": {}})
+    )
 
     schema = response_schema
     schema["components"] = components
-    spec = OpenAPISpecification(source="default", api=spec, definitions={"definitions": {}})
+    spec = OpenAPISpecification(
+        source="default", api=spec, definitions={"definitions": {}}
+    )
 
     request = RequestBuilder.from_dict(
         dict(
@@ -115,7 +122,7 @@ def test_insert(mock_data_store):
             bodyAsJson={"item": {"foo": 10, "bar": "val"}},
         )
     )
-    res = faker.process(spec, request)
+    res = faker.process("/items", spec, request)
 
     assert valid_schema(res.bodyAsJson, schema)
     assert res.bodyAsJson["itemId"] is not None
@@ -133,7 +140,7 @@ def test_insert(mock_data_store):
             bodyAsJson={"item": {"foo": 20, "bar": "val1", "itemId": "id123"}},
         )
     )
-    res = faker.process(spec, request)
+    res = faker.process("/items", spec, request)
 
     assert valid_schema(res.bodyAsJson, schema)
     assert "id123" == res.bodyAsJson["itemId"]
@@ -151,7 +158,7 @@ def test_insert(mock_data_store):
             bodyAsJson={"item": {"foo": 30, "itemId": "id123"}},
         )
     )
-    res = faker.process(spec, request)
+    res = faker.process("/items", spec, request)
 
     assert 2 == len(mock_data_store["default"].item)
     assert "bar" not in mock_data_store["default"].item[res.bodyAsJson["itemId"]]
@@ -196,11 +203,15 @@ def test_upsert(mock_data_store):
     spec["paths"]["/items"]["put"]["x-hmt-operation"] = "upsert"
 
     spec = convert_to_OpenAPIObject(spec)
-    mock_data_store.add_mock(OpenAPISpecification(spec, "default"))
+    mock_data_store.add_mock(
+        OpenAPISpecification(spec, "default", definitions={"definitions": {}})
+    )
 
     schema = response_schema
     schema["components"] = components
-    spec = OpenAPISpecification(source="default", api=spec, definitions={"definitions": {}})
+    spec = OpenAPISpecification(
+        source="default", api=spec, definitions={"definitions": {}}
+    )
 
     request = RequestBuilder.from_dict(
         dict(
@@ -211,7 +222,7 @@ def test_upsert(mock_data_store):
             bodyAsJson={"foo": 10, "bar": "val"},
         )
     )
-    res = faker.process(spec, request)
+    res = faker.process("/items", spec, request)
 
     assert valid_schema(res.bodyAsJson, schema)
     assert res.bodyAsJson["item"]["itemId"] is not None
@@ -232,7 +243,7 @@ def test_upsert(mock_data_store):
             bodyAsJson={"foo": 20, "bar": "val1", "itemId": "id123"},
         )
     )
-    res = faker.process(spec, request)
+    res = faker.process("/items", spec, request)
 
     assert valid_schema(res.bodyAsJson, schema)
     assert "id123" == res.bodyAsJson["item"]["itemId"]
@@ -253,7 +264,7 @@ def test_upsert(mock_data_store):
             bodyAsJson={"foo": 30, "itemId": "id123"},
         )
     )
-    res = faker.process(spec, request)
+    res = faker.process("/items", spec, request)
 
     assert 2 == len(mock_data_store["default"].item)
     assert (
@@ -285,7 +296,12 @@ def test_sateless_faker_1(mock_data_store):
         },
     }
     res = faker.process(
-        OpenAPISpecification(source="default", api=spec(response_schema=schema), definitions={"definitions": {}}),
+        "/",
+        OpenAPISpecification(
+            source="default",
+            api=spec(response_schema=schema),
+            definitions={"definitions": {}},
+        ),
         request,
     )
 
@@ -315,7 +331,12 @@ def test_sateless_faker_2(mock_data_store):
         },
     }
     res = faker.process(
-        OpenAPISpecification(source="default", api=spec(response_schema=schema), definitions={"definitions": {}}),
+        "/",
+        OpenAPISpecification(
+            source="default",
+            api=spec(response_schema=schema),
+            definitions={"definitions": {}},
+        ),
         request,
     )
 
@@ -342,7 +363,12 @@ def test_sateless_faker_3(mock_data_store):
         },
     }
     res = faker.process(
-        OpenAPISpecification(source="default", api=spec(response_schema=schema), definitions={"definitions": {}}),
+        "/",
+        OpenAPISpecification(
+            source="default",
+            api=spec(response_schema=schema),
+            definitions={"definitions": {}},
+        ),
         request,
     )
 
@@ -387,9 +413,11 @@ def test_sateless_faker_4(mock_data_store):
             }
         }
     }
+    oai = spec(response_schema=schema, components=components)
     res = faker.process(
+        "/",
         OpenAPISpecification(
-            source="default", api=spec(response_schema=schema, components=components), definitions={"definitions": {}}
+            source="default", api=oai, definitions=make_definitions_from_spec(oai)
         ),
         request,
     )
@@ -407,7 +435,12 @@ def test_sateless_faker_5(mock_data_store):
 
     schema = {"type": "array"}
     res = faker.process(
-        OpenAPISpecification(source="default", api=spec(response_schema=schema), definitions={"definitions": {}}),
+        "/",
+        OpenAPISpecification(
+            source="default",
+            api=spec(response_schema=schema),
+            definitions={"definitions": {}},
+        ),
         request,
     )
 

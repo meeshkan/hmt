@@ -12,7 +12,9 @@ class FakerBase(ABC):
     """
 
     @abstractmethod
-    def process(self, pathname: str, spec: OpenAPISpecification, request: Request) -> Any:
+    def process(
+        self, pathname: str, spec: OpenAPISpecification, request: Request
+    ) -> Any:
         """
         Produces a fake response according to a spec and a request.
         May produce side effects, i.e. modify internal states according to specific requests.
