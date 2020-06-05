@@ -1,18 +1,18 @@
 # Recording with HMT
 
-HMT can be used to record HTTP API traffic in a format that `hmt build` can understand.  This format serializes JSON objects in the [`http-types`](https://github.com/hmt/http-types) format written to a [`.jsonl`](https://jsonlines.org) file. By default, this file will be called `{hostname}-recordings.jsonl` with `{hostname}` referring to your API's host URL. 
+HMT can be used to record HTTP API traffic in a format that `hmt build` can understand.  This format serializes JSON objects in the [`http-types`](https://github.com/meeshkan/http-types) format written to a [`.jsonl`](http://jsonlines.org) file. By default, this file will be called `{hostname}-recordings.jsonl` with `{hostname}` referring to your API's host URL.
 
 ## What's in this document
 
-- [The `hmt record` command](#the-hmt-record-command)
-- [Path vs. header routing](#path-vs-header-routing)
+  - [The `hmt record` command](#the-hmt-record-command)
+  - [Path vs. header routing](#path-vs-header-routing)
     - [Path routing](#path-routing)
     - [Header routing](#header-routing)
-- [Daemon mode](#daemon-mode)
-- [Ecosystem](#ecosystem)
+  - [Daemon mode](#daemon-mode)
+  - [Ecosystem](#ecosystem)
     - [Client libraries](#client-libraries)
     - [Integrations](#integrations)
-- [Next up: Building with HMT](#next-up-building-with-hmt)
+  - [Next up: Building with HMT](#next-up-building-with-hmt)
 
 ## The `hmt record` command
 
@@ -61,7 +61,7 @@ Keep this running. Then, in another terminal window, run:
 $ curl http://localhost:8000/api/v2/pokemon/ditto -H "Host: pokeapi.co" -H "X-HMT-Scheme: https"
 ```
 
-This instructs hmt to call the [Pokemon API](pokeapi.co) and use the HTTPS protocol.
+This instructs hmt to call the [Pokemon API](https://pokeapi.co/) and use the HTTPS protocol.
 
 ## Daemon mode
 
@@ -81,19 +81,19 @@ $ hmt record stop
 
 ## Ecosystem
 
-In addition to using HMT to record, there is a growing ecosystem of projects that one can use to create `.jsonl` files in the [`http-types`](https://github.com/hmt/http-types).  
+In addition to using HMT to record, there is a growing ecosystem of projects that one can use to create `.jsonl` files in the [`http-types`](https://github.com/meeshkan/http-types).
 
 Here are some other ways that you can create `.jsonl` files of server recordings that are consumable by `hmt build`.
 
 ### Client libraries
 
-You can use one of the [`http-types`](https://github.com/hmt/http-types) client libraries to write recorded traffic as `.jsonl` files. 
+You can use one of the [`http-types`](https://github.com/meeshkan/http-types) client libraries to write recorded traffic as `.jsonl` files. 
 
 Here are the libraries that currently exist:
 
-- [js-http-types](https://github.com/hmt/js-http-types) 
-- [java-http-types](https://github.com/hmt/java-http-types) 
-- [py-http-types](https://github.com/hmt/py-http-types) 
+- [ts-http-types](https://github.com/meeshkan/ts-http-types)
+- [java-http-types](https://github.com/meeshkan/java-http-types)
+- [py-http-types](https://github.com/meeshkan/py-http-types)
 
 In the future, we hope to build client libraries in C#, C++, Go, Rust, Brainfuck, Haskell and OCaml.
 
@@ -130,7 +130,7 @@ Here is a list of integrations that exist or are in development:
 
 | Integration | Description | Status |
 | ----------- | ----------- | ------ |
-| [`express-middleware`](https://github.com/hmt/express-middleware) | Log files from express apps using a variety of transport layers, including the file system and Apache Kafka. | Stable |
+| [`express-middleware`](https://github.com/meeshkan/express-middleware) | Log files from express apps using a variety of transport layers, including the file system and Apache Kafka. | Stable |
 | `wireshark` | Convert a Wireshark `.pcap` file to `http-types` format. | Stable |
 | Kong plugin | Log requests and responses to the Kong API Gateway using a variety of transport layers, including the file system and Apache Kafka. | In development |
 | AWS API Gateway Plugin | Log requests and responses to the AWS API Gateway using a variety of transport layers, including the file system and Apache Kafka. | In development |
@@ -140,4 +140,4 @@ Here is a list of integrations that exist or are in development:
 
 After you've recorded your API traffic with `hmt record`, you can use that data to to build an OpenAPI specification via the HMT CLI. 
 
-To learn how, visit our [building documentation](./docs/BUILD.md).
+To learn how, visit our [building documentation](./BUILD.md).

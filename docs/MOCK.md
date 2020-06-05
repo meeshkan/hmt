@@ -4,15 +4,15 @@ HMT can be used to create a mock server from OpenAPI specifications and optional
 
 ## What's in this document
 
-- [The `hmt mock` command](#the-hmt-mock-command)
+  - [The `hmt mock` command](#the-hmt-mock-command)
     - [Making requests](#making-requests)
-- [Daemon mode](#daemon-mode)
-- [Callbacks](#callbacks)
+  - [Daemon mode](#daemon-mode)
+  - [Callbacks](#callbacks)
     - [Function arguments](#function-arguments)
     - [Formats](#formats)
     - [Response types](#response-types)
-- [Admin server](#admin-server)
-- [JIT OpenAPI schema manipulations](#jit-openapi-schema-manipulations)
+  - [Admin server](#admin-server)
+  - [JIT OpenAPI schema manipulations](#jit-openapi-schema-manipulations)
 
 ## The `hmt mock` command
 
@@ -137,7 +137,7 @@ Sometimes, this type of unpredictability is what you want. For instance, when do
 
 However, other times, you would like to mock a more specific scenario. For example, you may want an endpoint to _only_ serve 403, or _always_ omit an optional field in a `200` response.
 
-To achieve this, HMT provides a webhook API that will send the incoming request represented using the [`http-types`](https://github.com/hmt/http-types/) format and the OpenAPI scheams in dictionary format to an endpoint. Then, it will use the response from the endpoint as the final schema for mocking. 
+To achieve this, HMT provides a webhook API that will send the incoming request represented using the [`http-types`](https://github.com/meeshkan/http-types/) format and the OpenAPI scheams in dictionary format to an endpoint. Then, it will use the response from the endpoint as the final schema for mocking.
 
 Here is the API for getting, setting, and deleting webhooks:
 
