@@ -1,20 +1,8 @@
-import datetime
 import json
 import logging
 from dataclasses import replace
 from functools import reduce
-from typing import (
-    Any,
-    Callable,
-    Mapping,
-    Optional,
-    Sequence,
-    Tuple,
-    TypeVar,
-    Union,
-    cast,
-)
-from urllib.parse import urlparse
+from typing import Any, Callable, Mapping, Optional, Sequence, TypeVar, Union, cast
 
 import jsonschema
 import lenses
@@ -36,7 +24,6 @@ from openapi_typed_2 import (
     convert_from_openapi,
 )
 
-from hmt.build.operation import operation_from_string
 from hmt.serve.mock.refs import (
     change_ref,
     change_refs,
@@ -44,7 +31,6 @@ from hmt.serve.mock.refs import (
     ref_name,
 )
 from hmt.serve.mock.specs import OpenAPISpecification
-from hmt.serve.utils.timers import timed
 
 C = TypeVar("C")
 D = TypeVar("D")
@@ -54,7 +40,6 @@ W = TypeVar("W")
 X = TypeVar("X")
 Y = TypeVar("Y")
 Z = TypeVar("Z")
-
 
 # def pp(s, c: C) -> C:
 #    print(s, c)
@@ -72,27 +57,6 @@ all_methods: Sequence[str] = [
 ]
 
 logger = logging.getLogger(__name__)
-
-
-def omit_method_from_path_item(p: PathItem, a: str) -> PathItem:
-    return (
-        replace(p, get=None)
-        if a == "get"
-        else replace(p, post=None)
-        if a == "post"
-        else replace(p, put=None)
-        if a == "put"
-        else replace(p, delete=None)
-        if a == "delete"
-        else replace(p, patch=None)
-        if a == "patch"
-        else replace(p, trace=None)
-        if a == "trace"
-        else replace(p, options=None)
-        if a == "options"
-        else replace(p, head=None)
-    )
-
 
 _prism_o = (lambda a: a, lambda b: b)
 
@@ -287,18 +251,20 @@ def schema_prism(oai: OpenAPIObject) -> lenses.ui.BaseUiLens[S, T, X, Y]:
     )
 
 
-def find_relevant_path(m: str, a: Sequence[str], p: PathItem) -> PathItem:
-    return (
-        p
-        if len(a) == 0
-        else find_relevant_path(
-            m, a[1:], p if a[0] == m else omit_method_from_path_item(p, a[0]),
-        )
-    )
+#
+# def find_relevant_path(m: str, a: Sequence[str], p: PathItem) -> PathItem:
+#     return (
+#         p
+#         if len(a) == 0
+#         else find_relevant_path(
+#             m, a[1:], p if a[0] == m else omit_method_from_path_item(p, a[0]),
+#         )
+#     )
 
 
-def get_path_item_with_method(m: str, p: PathItem) -> PathItem:
-    return find_relevant_path(m, all_methods, p)
+# def get_path_item_with_method(m: str, p: PathItem) -> PathItem:
+#     return find_relevant_path(m, all_methods, p)
+#
 
 
 def get_required_request_query_or_header_parameters_internal(
@@ -353,36 +319,11 @@ def get_required_request_query_or_header_parameters(
     ]
 
 
-def get_required_request_body_schemas(
-    req: Request, oai: OpenAPIObject, p: PathItem,
-) -> Sequence[Union[Reference, Schema]]:
-    return (
-        operation_o(req.method.value)
-        .add_lens(request_body_o)
-        .Prism(
-            lambda s: get_request_body_from_ref(oai, ref_name(s))
-            if isinstance(s, Reference)
-            else s,
-            lambda a: a,
-            ignore_none=True,
-        )
-        # automatically ignore not required for now
-        .Prism(
-            lambda s: None if s.required is False else s, lambda a: a, ignore_none=True
-        )
-        .add_lens(content_o)
-        .Values()
-        .add_lens(schema_o)
-        .add_lens(schema_prism(oai))
-        .collect()(p)
-    )
-
-
 def valid_schema(to_validate: Any, schema: Any) -> bool:
     try:
         jsonschema.validate(to_validate, schema)
         return True
-    except Exception:
+    except Exception as e:
         return False
 
 
@@ -398,23 +339,6 @@ def _json_schema_from_required_parameters(
         "additionalProperties": True,
         "definitions": make_definitions_from_spec(oai),
     }
-
-
-def keep_method_if_required_query_or_header_parameters_are_present(
-    header: bool, req: Request, oai: OpenAPIObject, p: PathItem
-) -> PathItem:
-    return (
-        p
-        if (operation_from_string(p, req.method.value) is None)
-        or valid_schema(
-            {k.lower(): v for k, v in req.headers.items()} if header else req.query,
-            _json_schema_from_required_parameters(
-                get_required_request_query_or_header_parameters(header, req, oai, p),
-                oai,
-            ),
-        )
-        else omit_method_from_path_item(p, req.method.value)
-    )
 
 
 def maybe_add_string_schema(
@@ -515,132 +439,45 @@ def path_parameter_match(
     )
 
 
-def get_first_method_internal_2(
-    p: PathItem, n: str, m: Sequence[str], o: Optional[Operation],
-) -> Optional[Tuple[str, Operation]]:
-    return (n, o) if o is not None else get_first_method_internal(m, p)
-
-
-def get_first_method_internal(
-    m: Sequence[str], p: PathItem,
-) -> Optional[Tuple[str, Operation]]:
-    return (
-        None
-        if len(m) == 0
-        else get_first_method_internal_2(p, m[0], m[1:], operation_from_string(p, m[0]))
+def validate_params(
+    header: bool, req: Request, oai: OpenAPIObject, p: PathItem
+) -> bool:
+    return valid_schema(
+        {k.lower(): v for k, v in req.headers.items()} if header else req.query,
+        _json_schema_from_required_parameters(
+            get_required_request_query_or_header_parameters(header, req, oai, p), oai,
+        ),
     )
 
 
-def get_first_method(p: PathItem) -> Optional[Tuple[str, Operation]]:
-    return get_first_method_internal(all_methods, p)
+def validate_query_params(req: Request, oai: OpenAPIObject, p: PathItem) -> bool:
+    return validate_params(False, req, oai, p)
 
 
-def get_header_from_ref(o: OpenAPIObject, d: str) -> Optional[Header]:
-    out = get_component_from_ref(
-        o, d, lambda a: a.headers, internal_get_header_from_ref,
-    )
-    return None if out is None else cast(Header, out)
+def validate_header_params(req: Request, oai: OpenAPIObject, p: PathItem) -> bool:
+    return validate_params(True, req, oai, p)
 
 
-internal_get_header_from_ref = internal_get_component(get_header_from_ref)
-
-
-def use_if_header_last_mile(
-    p: Parameter, r: Optional[Schema],
-) -> Optional[Tuple[str, Schema]]:
-    return (
-        None if r is None else (p.name, r if r is not None else Schema(_type="string"))
-    )
-
-
-def use_if_header(o: OpenAPIObject, p: Parameter,) -> Optional[Tuple[str, Schema]]:
-    return (
-        None
-        if p._in != "header"
-        else use_if_header_last_mile(
-            p,
-            Schema(_type="string")
-            if p.schema is None
-            else get_schema_from_ref(o, ref_name(p.schema))
-            if isinstance(p.schema, Reference)
-            else p.schema,
+def validate_body(
+    req: Request, spec: Optional[OpenAPISpecification], op: Operation
+) -> bool:
+    if (
+        getattr(op, "requestBody")
+        and getattr(op.requestBody, "content")
+        and "application/json" in op.requestBody.content
+        and getattr(op.requestBody.content["application/json"], "schema")
+    ):
+        schema = op.requestBody.content["application/json"].schema
+        return valid_schema(
+            req.bodyAsJson,
+            {
+                **convert_from_openapi(
+                    change_ref(schema)
+                    if isinstance(schema, Reference)
+                    else change_refs(schema)
+                ),
+                "definitions": spec.definitions,
+            },
         )
-    )
 
-
-def parameter_schema(o: OpenAPIObject) -> lenses.ui.BaseUiLens[S, T, X, Y]:
-    return lens.Iso(lambda a: (use_if_header(o, a), a), lambda b: b[1])[0].Prism(
-        *_prism_o, ignore_none=True
-    )
-
-
-def keep_method_if_required_request_body_is_present(
-    req: Request, spec: OpenAPISpecification,
-) -> Callable[[PathItem], PathItem]:
-    def _keep_method_if_required_request_body_is_present(p: PathItem) -> PathItem:
-        out = (
-            p
-            if (operation_from_string(p, req.method.value) is None)
-            or (
-                len(
-                    [
-                        s
-                        for s in get_required_request_body_schemas(req, spec.api, p)
-                        if not valid_schema(
-                            req.bodyAsJson
-                            if req.bodyAsJson is not None
-                            else json.loads(req.body)
-                            if req.body is not None
-                            else "",
-                            {
-                                # TODO: this line is different than the TS implementation
-                                # because I think there is a logic bug there
-                                # it should look like this line as we are not sure
-                                # if the schema will be a reference or not
-                                # perhaps I'm wrong in the assumption... only testing will tell...
-                                # otherwise, change the TS implementation in unmock-js and delete this comment.
-                                **convert_from_openapi(
-                                    change_ref(s)
-                                    if isinstance(s, Reference)
-                                    else change_refs(s)
-                                ),
-                                "definitions": spec.definitions,
-                            },
-                        )
-                    ]
-                )
-                == 0
-            )
-            else omit_method_from_path_item(p, req.method.value)
-        )
-        return out
-
-    return _keep_method_if_required_request_body_is_present
-
-
-@timed
-def keep_method_if_required_header_parameters_are_present(
-    req: Request, oai: OpenAPIObject,
-) -> Callable[[PathItem], PathItem]:
-    def _keep_method_if_required_header_parameters_are_present(p: PathItem) -> PathItem:
-        out = keep_method_if_required_query_or_header_parameters_are_present(
-            True, req, oai, p
-        )
-        logger.info("Headers matched")
-        return out
-
-    return _keep_method_if_required_header_parameters_are_present
-
-
-@timed
-def keep_method_if_required_query_parameters_are_present(
-    req: Request, oai: OpenAPIObject,
-) -> Callable[[PathItem], PathItem]:
-    def _keep_method_if_required_query_parameters_are_present(p: PathItem) -> PathItem:
-        out = keep_method_if_required_query_or_header_parameters_are_present(
-            False, req, oai, p
-        )
-        logger.info("Query matched")
-        return out
-
-    return _keep_method_if_required_query_parameters_are_present
+    return True

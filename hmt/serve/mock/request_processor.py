@@ -1,6 +1,6 @@
 import json
 import logging
-import random
+import typing
 from typing import Sequence
 
 from http_types import Request, Response
@@ -47,7 +47,10 @@ class RequestProcessor:
         )
 
     def _match_response(
-        self, pathname: str, spec: OpenAPISpecification, request: Request
+        self,
+        pathname: str,
+        spec: typing.Optional[OpenAPISpecification],
+        request: Request,
     ):
         try:
             return self._faker.process(pathname, spec, request)
@@ -71,12 +74,9 @@ class RequestProcessor:
         )
 
         if maybe_security_response is not None:
-            logger.debug("Matched to security scheme, returning response.")
             return maybe_security_response
 
-        logger.debug("Matching to openapi")
         pathname, spec = match_request_to_openapi(request, specs)
-        logger.debug("Finished matching to openapi")
 
         if pathname is None:
             return self._callback_manager(

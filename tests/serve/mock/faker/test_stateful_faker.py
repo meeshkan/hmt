@@ -104,13 +104,13 @@ def test_insert(mock_data_store):
 
     spec = convert_to_OpenAPIObject(spec)
     mock_data_store.add_mock(
-        OpenAPISpecification(spec, "default", definitions={"definitions": {}})
+        OpenAPISpecification(spec, "default", definitions=components["schemas"])
     )
 
     schema = response_schema
     schema["components"] = components
     spec = OpenAPISpecification(
-        source="default", api=spec, definitions={"definitions": {}}
+        source="default", api=spec, definitions=components["schemas"]
     )
 
     request = RequestBuilder.from_dict(
@@ -204,13 +204,13 @@ def test_upsert(mock_data_store):
 
     spec = convert_to_OpenAPIObject(spec)
     mock_data_store.add_mock(
-        OpenAPISpecification(spec, "default", definitions={"definitions": {}})
+        OpenAPISpecification(spec, "default", definitions=components["schemas"])
     )
 
     schema = response_schema
     schema["components"] = components
     spec = OpenAPISpecification(
-        source="default", api=spec, definitions={"definitions": {}}
+        source="default", api=spec, definitions=components["schemas"]
     )
 
     request = RequestBuilder.from_dict(

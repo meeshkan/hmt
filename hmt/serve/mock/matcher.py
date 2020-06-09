@@ -14,11 +14,11 @@ def matches(
     if getattr(path_item, method, None) is None:
         return 0
 
-    path_item_key = [x for x in path_item_key.split("/") if x != ""]
+    path_item_key_list = [x for x in path_item_key.split("/") if x != ""]
     score = 1
-    if len(path) != len(path_item_key):
+    if len(path) != len(path_item_key_list):
         return 0
-    for path_el, path_item_key_el in zip(path, path_item_key):
+    for path_el, path_item_key_el in zip(path, path_item_key_list):
 
         if path_item_key_el[0] == "{" and path_item_key_el[-1] == "}":
             continue

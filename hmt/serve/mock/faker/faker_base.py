@@ -1,3 +1,4 @@
+import typing
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -13,7 +14,10 @@ class FakerBase(ABC):
 
     @abstractmethod
     def process(
-        self, pathname: str, spec: OpenAPISpecification, request: Request
+        self,
+        pathname: str,
+        spec: typing.Optional[OpenAPISpecification],
+        request: Request,
     ) -> Any:
         """
         Produces a fake response according to a spec and a request.
