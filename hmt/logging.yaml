@@ -2,7 +2,7 @@ version: 1
 disable_existing_loggers: False
 formatters:
     simple:
-        format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        format: "%(message)s"
     complete:
         format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
@@ -10,7 +10,7 @@ handlers:
     console_handler:
         class: logging.StreamHandler
         formatter: simple
-        level: DEBUG
+        level: INFO
         stream: ext://sys.stdout
 
     debug_file_handler:

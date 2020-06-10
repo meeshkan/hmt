@@ -180,7 +180,8 @@ class CLI:
         self.m_print("##############################")
         self.m_print("")
         self.m_print(
-            "Let's record a bit of server traffic.  We've written a file to `__hmt__/api_calls.py` to make our recordings.  Meeshkan expects recordings to be in the http-types format (github.com/hmt/http-types), so we'll use that."
+            "Let's"
+            " record a bit of server traffic.  We've written a file to `__hmt__/api_calls.py` to make our recordings.  Meeshkan expects recordings to be in the http-types format (github.com/hmt/http-types), so we'll use that."
         )
         self.m_print("")
         self.m_print(
