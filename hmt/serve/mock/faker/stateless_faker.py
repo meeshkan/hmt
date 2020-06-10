@@ -390,5 +390,5 @@ class StatelessFaker(FakerBase):
         return (
             validate_query_params(request, spec.api, p)
             and validate_header_params(request, spec.api, p)
-            and validate_body(request, spec, op)
+            #and validate_body(request, spec, op)
         )
