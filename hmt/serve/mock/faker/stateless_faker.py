@@ -17,9 +17,6 @@ from hmt.serve.mock.refs import get_response_body
 from hmt.serve.mock.request_validation import (
     change_ref,
     change_refs,
-    get_response_from_ref,
-    ref_name,
-    validate_body,
     validate_header_params,
     validate_query_params,
 )
@@ -390,5 +387,5 @@ class StatelessFaker(FakerBase):
         return (
             validate_query_params(request, spec.api, p)
             and validate_header_params(request, spec.api, p)
-            #and validate_body(request, spec, op)
+            # and validate_body(request, spec, op)
         )
