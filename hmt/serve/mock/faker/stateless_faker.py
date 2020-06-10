@@ -24,7 +24,6 @@ from hmt.serve.mock.request_validation import (
     validate_query_params,
 )
 from hmt.serve.mock.specs import OpenAPISpecification
-from hmt.serve.utils.timers import timed
 
 
 @dataclass(frozen=True)

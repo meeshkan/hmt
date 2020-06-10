@@ -25,7 +25,6 @@ Y = TypeVar("Y")
 Z = TypeVar("Z")
 
 
-
 def get_component_from_ref(
     o: OpenAPIObject,
     d: str,

@@ -87,8 +87,6 @@ def truncate_path(path: str, o: OpenAPIObject, i: Request,) -> str:
 def match_request_to_openapi(
     req: Request, specs: Sequence[OpenAPISpecification]
 ) -> Tuple[Optional[str], Optional[OpenAPISpecification]]:
-    start = datetime.datetime.now()
-
     def _match_path(oai: OpenAPIObject) -> Optional[str]:
         path = [x for x in truncate_path(req.pathname, oai, req).split("/") if x != ""]
         best_path: Optional[str] = None
@@ -110,11 +108,6 @@ def match_request_to_openapi(
     for spec in specs_with_matching_urls:
         path = _match_path(spec.api)
         if path is not None:
-            print(
-                "Matching took {}".format(
-                    (datetime.datetime.now() - start).total_seconds()
-                )
-            )
             return path, spec
 
     return None, None
