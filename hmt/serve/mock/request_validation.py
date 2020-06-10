@@ -27,6 +27,7 @@ from openapi_typed_2 import (
 from hmt.serve.mock.refs import (
     change_ref,
     change_refs,
+    get_request_body,
     make_definitions_from_spec,
     ref_name,
 )
@@ -458,16 +459,16 @@ def validate_header_params(req: Request, oai: OpenAPIObject, p: PathItem) -> boo
     return validate_params(True, req, oai, p)
 
 
-def validate_body(
-    req: Request, spec: Optional[OpenAPISpecification], op: Operation
-) -> bool:
+def validate_body(req: Request, spec: OpenAPISpecification, op: Operation) -> bool:
+    request_body = get_request_body(spec.api, op.requestBody)
     if (
-        getattr(op, "requestBody")
-        and getattr(op.requestBody, "content")
-        and "application/json" in op.requestBody.content
-        and getattr(op.requestBody.content["application/json"], "schema")
+        request_body is not None
+        and "application/json" in request_body.content
+        and request_body.content["application/json"].schema
     ):
-        schema = op.requestBody.content["application/json"].schema
+        schema = cast(
+            Union[Schema, Reference], request_body.content["application/json"].schema
+        )
         return valid_schema(
             req.bodyAsJson,
             {

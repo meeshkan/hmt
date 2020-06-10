@@ -13,6 +13,7 @@ from openapi_typed_2 import Operation, PathItem, Reference, Schema, convert_from
 
 from hmt.serve.mock.faker.faker_base import FakerBase
 from hmt.serve.mock.faker.faker_exception import FakerException
+from hmt.serve.mock.refs import get_response_body
 from hmt.serve.mock.request_validation import (
     change_ref,
     change_refs,
@@ -143,30 +144,30 @@ class StatelessFaker(FakerBase):
         spec: typing.Optional[OpenAPISpecification],
         method: Operation,
         path_candidate: PathItem,
-    ) -> typing.Tuple[typing.Optional[int], typing.Optional[openapi_typed_2.Response]]:
-        if self._validate_request(request, spec, method, path_candidate):
+    ) -> typing.Tuple[int, typing.Optional[openapi_typed_2.Response]]:
+        if self._validate_request(
+            request, cast(OpenAPISpecification, spec), method, path_candidate
+        ):
             for i in range(200, 209):
                 code = str(i)
                 if code in method.responses:
-                    return i, method.responses[code]
+                    return i, get_response_body(spec.api, method.responses[code])
 
             status_code, response = random.choice([r for r in method.responses.items()])
             status_code = 400 if status_code == "default" else int(status_code)
-            return status_code, response
+            return status_code, get_response_body(spec.api, response)
 
         else:
             if "default" in method.responses:
-                return 400, method.responses["default"]
+                return 400, get_response_body(spec.api, method.responses["default"])
             for i in range(400, 500):
                 code = str(i)
                 if code in method.responses:
-                    return i, method.responses[code]
+                    return i, get_response_body(spec.api, method.responses[code])
 
-        return None, None
+        return 500, None
 
-    def _empty_response(
-        self, status_code: typing.Optional[int], headers: typing.Mapping[str, str]
-    ):
+    def _empty_response(self, status_code: int, headers: typing.Mapping[str, str]):
         return Response(
             statusCode=status_code,
             body="",
@@ -175,9 +176,7 @@ class StatelessFaker(FakerBase):
             timestamp=None,
         )
 
-    def _fake_text_response(
-        self, status_code: typing.Optional[int], headers: typing.Mapping[str, str]
-    ):
+    def _fake_text_response(self, status_code: int, headers: typing.Mapping[str, str]):
         return Response(
             statusCode=status_code,
             body=self._text_faker.sentence(),
@@ -192,7 +191,7 @@ class StatelessFaker(FakerBase):
 
     def _fake_json(
         self,
-        status_code: typing.Optional[int],
+        status_code: int,
         headers: typing.Mapping[str, str],
         faker_data: FakerData,
     ):
@@ -387,11 +386,7 @@ class StatelessFaker(FakerBase):
         )
 
     def _validate_request(
-        self,
-        request: Request,
-        spec: typing.Optional[OpenAPISpecification],
-        op: Operation,
-        p: PathItem,
+        self, request: Request, spec: OpenAPISpecification, op: Operation, p: PathItem,
     ):
         return (
             validate_query_params(request, spec.api, p)

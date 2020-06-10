@@ -1,17 +1,129 @@
 from dataclasses import replace
+from typing import Callable, Optional, TypeVar, Union, cast
 
+from lenses import lens
 from openapi_typed_2 import (
     Any,
+    Components,
     Mapping,
     OpenAPIObject,
+    Parameter,
     Reference,
+    RequestBody,
+    Response,
     Schema,
     convert_from_openapi,
 )
 
+C = TypeVar("C")
+D = TypeVar("D")
+S = TypeVar("S")
+T = TypeVar("T")
+W = TypeVar("W")
+X = TypeVar("X")
+Y = TypeVar("Y")
+Z = TypeVar("Z")
+
+
+
+def get_component_from_ref(
+    o: OpenAPIObject,
+    d: str,
+    accessor: Callable[[Components], Optional[Mapping[str, Union[Reference, C]]]],
+    getter: Callable[[OpenAPIObject, Union[C, Reference]], Optional[C]],
+) -> Optional[C]:
+    return (
+        lens.F(lambda a: a.components)
+        .F(lambda a: a if a is None else accessor(a))
+        .F(lambda a: a if a is None else getter(o, a[d]))
+        .get()(o)
+    )
+
 
 def ref_name(r: Reference) -> str:
     return r._ref.split("/")[3]
+
+
+def internal_get_component(
+    f: Callable[[OpenAPIObject, str], Optional[C]]
+) -> Callable[[OpenAPIObject, Union[C, Reference]], Optional[C]]:
+    def _internal_get_component(
+        o: OpenAPIObject, i: Union[C, Reference]
+    ) -> Optional[C]:
+        return (
+            (f(o, ref_name(i)) if isinstance(i, Reference) else i)
+            if i is not None
+            else None
+        )
+
+    return _internal_get_component
+
+
+# TODO: it seems that there is a bug in pyright that makes get_component_from_ref return a Union[Reference, Schema] instead of Schema
+# need to do a cast of the output value to Schema (instead of the union) to fix that
+# same for functions below
+def get_schema_from_ref(o: OpenAPIObject, d: str) -> Optional[Schema]:
+    out = get_component_from_ref(
+        o, d, lambda a: a.schemas, internal_get_schema_from_ref
+    )
+    return None if out is None else cast(Schema, out)
+
+
+internal_get_schema_from_ref = internal_get_component(get_schema_from_ref)
+
+
+def get_parameter_from_ref(o: OpenAPIObject, d: str) -> Optional[Parameter]:
+    out = get_component_from_ref(
+        o, d, lambda a: a.parameters, internal_get_parameter_from_ref
+    )
+    return None if out is None else cast(Parameter, out)
+
+
+internal_get_parameter_from_ref = internal_get_component(get_parameter_from_ref)
+
+
+def get_request_body_from_ref(o: OpenAPIObject, d: str) -> Optional[RequestBody]:
+    out = get_component_from_ref(
+        o, d, lambda a: a.requestBodies, internal_get_request_body_from_ref
+    )
+    return None if out is None else cast(RequestBody, out)
+
+
+internal_get_request_body_from_ref = internal_get_component(get_request_body_from_ref)
+
+
+def get_response_from_ref(o: OpenAPIObject, d: str) -> Optional[Response]:
+    out = get_component_from_ref(
+        o, d, lambda a: a.responses, internal_get_response_from_ref
+    )
+    return None if out is None else cast(Response, out)
+
+
+def get_response_body(o: OpenAPIObject, response):
+    return (
+        get_response_from_ref(o, ref_name(response))
+        if isinstance(response, Reference)
+        else response
+    )
+
+
+def get_request_body(o: OpenAPIObject, request):
+    return (
+        get_request_body_from_ref(o, ref_name(request))
+        if isinstance(request, Reference)
+        else request
+    )
+
+
+def get_parameter(o: OpenAPIObject, parameter):
+    return (
+        get_parameter_from_ref(o, ref_name(parameter))
+        if isinstance(parameter, Reference)
+        else parameter
+    )
+
+
+internal_get_response_from_ref = internal_get_component(get_response_from_ref)
 
 
 def change_ref(j: Reference) -> Reference:
