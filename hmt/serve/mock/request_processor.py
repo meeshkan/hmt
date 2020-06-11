@@ -49,7 +49,7 @@ class RequestProcessor:
     def _match_response(
         self,
         pathname: str,
-        spec: typing.Optional[OpenAPISpecification],
+        spec: OpenAPISpecification,
         request: Request,
     ):
         try:
@@ -91,5 +91,5 @@ class RequestProcessor:
             )
 
         storage = self._mock_data_store[spec.source]
-        response = self._match_response(pathname, spec, request)
+        response = self._match_response(pathname, typing.cast(OpenAPISpecification, spec), request)
         return self._callback_manager(request, response, storage)

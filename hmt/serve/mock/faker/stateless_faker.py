@@ -78,7 +78,7 @@ class StatelessFaker(FakerBase):
     def process(
         self,
         pathname: str,
-        spec: typing.Optional[OpenAPISpecification],
+        spec: OpenAPISpecification,
         request: Request,
     ) -> Any:
         path_candidate = spec.api.paths[pathname]
@@ -117,7 +117,7 @@ class StatelessFaker(FakerBase):
                 return self._empty_response(status_code, new_headers)
 
             faker_data = FakerData(
-                spec=cast(OpenAPISpecification, spec),
+                spec=spec,
                 path_item=pathname,
                 method=method,
                 schema=self._build_full_schema(content.schema, spec.definitions),
