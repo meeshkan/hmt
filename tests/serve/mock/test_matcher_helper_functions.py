@@ -11,13 +11,10 @@ from openapi_typed_2 import (
     convert_to_Schema,
 )
 
-from hmt.serve.mock.matcher import (
-    get_path_item_with_method,
-    match_urls,
-    matches,
-    ref_name,
-    use_if_header,
-)
+from hmt.serve.mock.matcher import match_urls, matches
+from hmt.serve.mock.refs import ref_name
+
+# from hmt.serve.mock.request_validation import use_if_header
 
 
 def test_match_urls():
@@ -68,26 +65,6 @@ def test_match_urls():
     )
 
 
-def test_get_path_item_with_method():
-    o: PathItem = convert_to_PathItem(
-        {
-            "get": {"responses": {"100": {"description": "hello"}}},
-            "post": {"responses": {"101": {"description": "hello"}}},
-            "delete": {"responses": {"102": {"description": "hello"}}},
-            "description": "foo",
-        }
-    )
-    assert get_path_item_with_method("get", o) == convert_to_PathItem(
-        {"get": {"responses": {"100": {"description": "hello"}}}, "description": "foo"}
-    )
-    assert get_path_item_with_method("post", o) == convert_to_PathItem(
-        {
-            "post": {"responses": {"101": {"description": "hello"}}},
-            "description": "foo",
-        }
-    )
-
-
 def test_matcher():
     _bfoo = {
         "parameters": [
@@ -97,6 +74,11 @@ def test_matcher():
                 "schema": {"type": "string", "pattern": "^[abc]+$"},
             },
         ],
+        "get": {
+            "responses": {
+                "200": {"description": "some", "content": {"application/json": {}},}
+            }
+        },
     }
     bfoo = convert_to_PathItem(_bfoo)
     oai: OpenAPIObject = convert_to_openapi(
@@ -106,12 +88,13 @@ def test_matcher():
             "paths": {"/b/{foo}": _bfoo},
         }
     )
-    assert matches("/a/b", "/a/b", bfoo, "get", oai)
-    assert not matches("/a/", "/a/b", bfoo, "get", oai)
-    assert not matches("/a/b", "/a", bfoo, "get", oai)
-    assert matches("/a/b/c", "/a/{fewfwef}/c", bfoo, "get", oai)
-    assert matches("/b/ccaaca", "/b/{foo}", bfoo, "get", oai)
-    assert not matches("/b/ccaacda", "/b/{foo}", bfoo, "get", oai)
+    assert matches(["a", "b"], "/a/b", bfoo, "get")
+    assert not matches(["a"], "/a/b", bfoo, "get")
+    assert not matches(["a", "b"], "/a", bfoo, "get")
+    assert matches(["a", "b", "c"], "/a/{fewfwef}/c", bfoo, "get")
+    assert matches(["b", "ccaaca"], "/b/{foo}", bfoo, "get")
+    assert matches(["b", "ccaaca"], "/b/{foo}", bfoo, "get")
+    assert not matches(["a", "b", "c"], "/a/{fewfwef}/c", bfoo, "post")
 
 
 def test_ref_name():
@@ -128,30 +111,30 @@ baseO: OpenAPIObject = convert_to_openapi(
 )
 
 
-def test_use_if_header():
-    assert (
-        use_if_header(baseO, convert_to_Parameter({"name": "foo", "in": "query"}))
-        is None
-    )
-    assert use_if_header(
-        baseO, convert_to_Parameter({"name": "foo", "in": "header"})
-    ) == ("foo", convert_to_Schema({"type": "string"}))
-    assert use_if_header(
-        baseO,
-        convert_to_Parameter(
-            {"name": "foo", "in": "header", "schema": {"type": "number"}}
-        ),
-    ) == ("foo", convert_to_Schema({"type": "number"}))
-    assert use_if_header(
-        replace(
-            baseO,
-            components=convert_to_Components({"schemas": {"Foo": {"type": "boolean"}}}),
-        ),
-        convert_to_Parameter(
-            {
-                "name": "foo",
-                "in": "header",
-                "schema": {"$ref": "#/components/schemas/Foo"},
-            }
-        ),
-    ) == ("foo", convert_to_Schema({"type": "boolean"}))
+# def test_use_if_header():
+#     assert (
+#         use_if_header(baseO, convert_to_Parameter({"name": "foo", "in": "query"}))
+#         is None
+#     )
+#     assert use_if_header(
+#         baseO, convert_to_Parameter({"name": "foo", "in": "header"})
+#     ) == ("foo", convert_to_Schema({"type": "string"}))
+#     assert use_if_header(
+#         baseO,
+#         convert_to_Parameter(
+#             {"name": "foo", "in": "header", "schema": {"type": "number"}}
+#         ),
+#     ) == ("foo", convert_to_Schema({"type": "number"}))
+#     assert use_if_header(
+#         replace(
+#             baseO,
+#             components=convert_to_Components({"schemas": {"Foo": {"type": "boolean"}}}),
+#         ),
+#         convert_to_Parameter(
+#             {
+#                 "name": "foo",
+#                 "in": "header",
+#                 "schema": {"$ref": "#/components/schemas/Foo"},
+#             }
+#         ),
+#     ) == ("foo", convert_to_Schema({"type": "boolean"}))

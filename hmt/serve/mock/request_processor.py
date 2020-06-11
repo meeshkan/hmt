@@ -1,6 +1,6 @@
 import json
 import logging
-import random
+import typing
 from typing import Sequence
 
 from http_types import Request, Response
@@ -46,9 +46,11 @@ class RequestProcessor:
             timestamp=None,
         )
 
-    def _match_response(self, spec: OpenAPISpecification, request: Request):
+    def _match_response(
+        self, pathname: str, spec: OpenAPISpecification, request: Request,
+    ):
         try:
-            return self._faker.process(spec, request)
+            return self._faker.process(pathname, spec, request)
         except FakerException as e:
             return self.match_error(str(e), request)
 
@@ -69,29 +71,24 @@ class RequestProcessor:
         )
 
         if maybe_security_response is not None:
-            logger.debug("Matched to security scheme, returning response.")
             return maybe_security_response
 
-        match = match_request_to_openapi(request, specs)
+        pathname, spec = match_request_to_openapi(request, specs)
 
-        if len(match) == 0:
+        if pathname is None:
             return self._callback_manager(
                 request,
                 self.match_error(
-                    "Could not find an open API schema for the host %s." % request.host,
+                    "Could not find an open API schema for the host {} and the path {}".format(
+                        request.host, request.path
+                    ),
                     request,
                 ),
                 self._mock_data_store.default,
             )
 
-        spec = random.choice(match)
-        if spec.api.paths is None or len(spec.api.paths.items()) == 0:
-            path_error = "Could not find a path %s on hostname %s." % (
-                request.path,
-                request.host,
-            )
-            return self.match_error(path_error, request)
-
         storage = self._mock_data_store[spec.source]
-        response = self._match_response(spec, request)
+        response = self._match_response(
+            pathname, typing.cast(OpenAPISpecification, spec), request
+        )
         return self._callback_manager(request, response, storage)

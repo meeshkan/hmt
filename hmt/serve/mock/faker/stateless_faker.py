@@ -1,27 +1,24 @@
 import json
+import math
 import random
 import typing
 from dataclasses import dataclass
 from functools import reduce
 from typing import Any, Mapping, Sequence, Union, cast
 
+import openapi_typed_2
 from faker import Faker
 from http_types import Request, Response
-from openapi_typed_2 import (
-    OpenAPIObject,
-    Operation,
-    Reference,
-    Schema,
-    convert_from_openapi,
-)
+from openapi_typed_2 import Operation, PathItem, Reference, Schema, convert_from_openapi
 
 from hmt.serve.mock.faker.faker_base import FakerBase
 from hmt.serve.mock.faker.faker_exception import FakerException
-from hmt.serve.mock.matcher import (
+from hmt.serve.mock.refs import get_response_body
+from hmt.serve.mock.request_validation import (
     change_ref,
     change_refs,
-    get_response_from_ref,
-    ref_name,
+    validate_header_params,
+    validate_query_params,
 )
 from hmt.serve.mock.specs import OpenAPISpecification
 
@@ -67,6 +64,8 @@ class StatelessFaker(FakerBase):
     _LO = -99999999
     _HI = 99999999
 
+    max_depth = 10
+
     responses_error = (
         "While a stub for a specification exists for this endpoint, it contains no responses. "
         "That usually means the schema is corrupt or it has been constrained too much "
@@ -76,8 +75,10 @@ class StatelessFaker(FakerBase):
     def __init__(self):
         self._text_faker = Faker()
 
-    def process(self, spec: OpenAPISpecification, request: Request) -> Any:
-        path_item, path_candidate = random.choice([x for x in spec.api.paths.items()])
+    def process(
+        self, pathname: str, spec: OpenAPISpecification, request: Request,
+    ) -> Any:
+        path_candidate = spec.api.paths[pathname]
 
         method = getattr(path_candidate, request.method.value, None)
 
@@ -87,16 +88,12 @@ class StatelessFaker(FakerBase):
         if method.responses is None or len(method.responses) == 0:
             raise FakerException(self.responses_error)
 
-        status_code, response = random.choice([r for r in method.responses.items()])
-        status_code = int(status_code if status_code != "default" else 400)
-
-        response = (
-            get_response_from_ref(spec.api, ref_name(response))
-            if isinstance(response, Reference)
-            else response
+        status_code, response = self._get_response(
+            request, spec, method, path_candidate
         )
         if response is None:
             raise FakerException(self.responses_error)
+
         headers: Mapping[str, str] = {}
         if response.headers is not None:
             # TODO: can't handle references yet, need to fix
@@ -118,9 +115,9 @@ class StatelessFaker(FakerBase):
 
             faker_data = FakerData(
                 spec=spec,
-                path_item=path_item,
+                path_item=pathname,
                 method=method,
-                schema=self._build_full_schema(content.schema, spec.api),
+                schema=self._build_full_schema(content.schema, spec.definitions),
                 request=request,
             )
 
@@ -133,6 +130,35 @@ class StatelessFaker(FakerBase):
                 "Could not produce content for these mime types %s"
                 % str(response.content.keys())
             )
+
+    def _get_response(
+        self,
+        request: Request,
+        spec: typing.Optional[OpenAPISpecification],
+        method: Operation,
+        path_candidate: PathItem,
+    ) -> typing.Tuple[int, typing.Optional[openapi_typed_2.Response]]:
+        if self._validate_request(
+            request, cast(OpenAPISpecification, spec), method, path_candidate
+        ):
+            for i in range(200, 209):
+                code = str(i)
+                if code in method.responses:
+                    return i, get_response_body(spec.api, method.responses[code])
+
+            status_code, response = random.choice([r for r in method.responses.items()])
+            status_code = 400 if status_code == "default" else int(status_code)
+            return status_code, get_response_body(spec.api, response)
+
+        else:
+            if "default" in method.responses:
+                return 400, get_response_body(spec.api, method.responses["default"])
+            for i in range(400, 500):
+                code = str(i)
+                if code in method.responses:
+                    return i, get_response_body(spec.api, method.responses[code])
+
+        return 500, None
 
     def _empty_response(self, status_code: int, headers: typing.Mapping[str, str]):
         return Response(
@@ -157,7 +183,10 @@ class StatelessFaker(FakerBase):
         )
 
     def _fake_json(
-        self, status_code: int, headers: typing.Mapping[str, str], faker_data: FakerData
+        self,
+        status_code: int,
+        headers: typing.Mapping[str, str],
+        faker_data: FakerData,
     ):
         bodyAsJson = self._fake_it(faker_data, faker_data.schema, 0)
 
@@ -170,7 +199,7 @@ class StatelessFaker(FakerBase):
         )
 
     def _build_full_schema(
-        self, schema: typing.Union[Schema, Reference], spec: OpenAPIObject
+        self, schema: typing.Union[Schema, Reference], definitions: typing.Any
     ) -> typing.Dict:
         return {
             **convert_from_openapi(
@@ -178,22 +207,11 @@ class StatelessFaker(FakerBase):
                 if isinstance(schema, Reference)
                 else change_refs(schema)
             ),
-            "definitions": {
-                k: convert_from_openapi(
-                    change_ref(v) if isinstance(v, Reference) else change_refs(v)
-                )
-                for k, v in (
-                    spec.components.schemas.items()
-                    if (spec.components is not None)
-                    and (spec.components.schemas is not None)
-                    else []
-                )
-            },
+            "definitions": definitions,
         }
 
-    # to prevent too-nested objects
-    def _sane_depth(self, n):
-        return max([0, 3 - n])
+    def _optional_threshold(self, properties_count, required_count, depth):
+        return 0.4 if depth < 3 else 0.4 / math.exp(depth - 2) if depth < 10 else 0
 
     def _fake_object(self, faker_data: FakerData, schema: Any, depth: int) -> Any:
         addls = (
@@ -211,22 +229,20 @@ class StatelessFaker(FakerBase):
                             faker_data, schema["additionalProperties"], depth
                         ),
                     )
-                    for x in range(random.randint(0, 4))
+                    for x in range(random.randint(0, 10))
                 ]
             }
         )
-        properties = list(schema.get("properties", {}).keys())
+        properties = []
+        required = set(schema.get("required", []))
+        thresh = self._optional_threshold(len(properties), len(required), depth)
+        properties = [
+            prop
+            for prop in schema.get("properties", {}).keys()
+            if prop in required or random.random() < thresh
+        ]
         random.shuffle(properties)
-        properties = (
-            []
-            if len(properties) == 0
-            else properties[
-                : min([self._sane_depth(depth), random.randint(0, len(properties) - 1)])
-            ]
-        )
-        properties = list(
-            set(([] if "required" not in schema else schema["required"]) + properties)
-        )
+
         return {
             **addls,
             **{
@@ -240,7 +256,11 @@ class StatelessFaker(FakerBase):
 
     def _fake_array(self, faker_data: FakerData, schema: Any, depth: int) -> Any:
         mn = 0 if "minItems" not in schema else schema["minItems"]
-        mx = 100 if "maxItems" not in schema else schema["maxItems"]
+        mx = (
+            int(100 / math.exp(depth - 1))
+            if "maxItems" not in schema
+            else schema["maxItems"]
+        )
         count = random.randint(mn, mx)
 
         if "items" not in schema:
@@ -275,6 +295,7 @@ class StatelessFaker(FakerBase):
         return {}
 
     # TODO - make this not suck
+
     def _fake_string(self, schema: Any) -> str:
         return (
             random.choice(schema["enum"])
@@ -292,6 +313,7 @@ class StatelessFaker(FakerBase):
         )
 
     # TODO: add exclusiveMinimum and exclusiveMaximum
+
     def _fake_integer(self, schema: Any) -> int:
         mn = self._LO if "minimum" not in schema else schema["minimum"]
         mx = self._HI if "maximum" not in schema else schema["maximum"]
@@ -314,7 +336,7 @@ class StatelessFaker(FakerBase):
             for _ in range(count)
         ]
 
-    def _fake_null(self, schema: Any) -> None:
+    def _fake_null(self) -> None:
         return None
 
     def _fake_number(self, schema: Any) -> float:
@@ -349,9 +371,18 @@ class StatelessFaker(FakerBase):
             if schema["type"] == "integer"
             else self._fake_boolean(schema)
             if schema["type"] == "boolean"
-            else self._fake_null(schema)
+            else self._fake_null()
             if schema["type"] == "null"
             else self._fake_number(schema)
             if schema["type"] == "number"
             else {}
+        )
+
+    def _validate_request(
+        self, request: Request, spec: OpenAPISpecification, op: Operation, p: PathItem,
+    ):
+        return (
+            validate_query_params(request, spec.api, p)
+            and validate_header_params(request, spec.api, p)
+            # and validate_body(request, spec, op)
         )

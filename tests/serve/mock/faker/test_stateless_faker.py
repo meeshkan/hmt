@@ -1,7 +1,8 @@
 from http_types import RequestBuilder
 
 from hmt.serve.mock.faker.stateless_faker import StatelessFaker
-from hmt.serve.mock.matcher import valid_schema
+from hmt.serve.mock.refs import make_definitions_from_spec
+from hmt.serve.mock.request_validation import valid_schema
 from hmt.serve.mock.specs import OpenAPISpecification
 from tests.util import spec
 
@@ -26,7 +27,12 @@ def test_faker_1():
         },
     }
     res = faker.process(
-        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        "/",
+        OpenAPISpecification(
+            source="default",
+            api=spec(response_schema=schema),
+            definitions={"definitions": {}},
+        ),
         request,
     )
     assert valid_schema(res.bodyAsJson, schema)
@@ -55,7 +61,12 @@ def test_faker_2():
         },
     }
     res = faker.process(
-        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        "/",
+        OpenAPISpecification(
+            source="default",
+            api=spec(response_schema=schema),
+            definitions={"definitions": {}},
+        ),
         request,
     )
 
@@ -82,7 +93,12 @@ def test_faker_3():
         },
     }
     res = faker.process(
-        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        "/",
+        OpenAPISpecification(
+            source="default",
+            api=spec(response_schema=schema),
+            definitions={"definitions": {}},
+        ),
         request,
     )
 
@@ -127,9 +143,11 @@ def test_faker_4():
             }
         }
     }
+    oai = spec(response_schema=schema, components=components)
     res = faker.process(
+        "/",
         OpenAPISpecification(
-            source="default", api=spec(response_schema=schema, components=components)
+            source="default", api=oai, definitions=make_definitions_from_spec(oai)
         ),
         request,
     )
@@ -147,7 +165,12 @@ def test_faker_5():
 
     schema = {"type": "array"}
     res = faker.process(
-        OpenAPISpecification(source="default", api=spec(response_schema=schema)),
+        "/",
+        OpenAPISpecification(
+            source="default",
+            api=spec(response_schema=schema),
+            definitions={"definitions": {}},
+        ),
         request,
     )
 
