@@ -69,7 +69,7 @@ DEV = BUNDLE_REQUIREMENTS + [
     "wheel",
 ]
 
-VERSION = "0.3.1"
+VERSION = "0.3.2"
 
 ENTRY_POINTS = ["hmt = hmt.__main__:cli"]
 
