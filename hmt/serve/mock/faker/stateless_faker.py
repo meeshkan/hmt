@@ -76,10 +76,7 @@ class StatelessFaker(FakerBase):
         self._text_faker = Faker()
 
     def process(
-        self,
-        pathname: str,
-        spec: OpenAPISpecification,
-        request: Request,
+        self, pathname: str, spec: OpenAPISpecification, request: Request,
     ) -> Any:
         path_candidate = spec.api.paths[pathname]
 

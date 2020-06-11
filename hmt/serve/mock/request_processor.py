@@ -47,10 +47,7 @@ class RequestProcessor:
         )
 
     def _match_response(
-        self,
-        pathname: str,
-        spec: OpenAPISpecification,
-        request: Request,
+        self, pathname: str, spec: OpenAPISpecification, request: Request,
     ):
         try:
             return self._faker.process(pathname, spec, request)
@@ -91,5 +88,7 @@ class RequestProcessor:
             )
 
         storage = self._mock_data_store[spec.source]
-        response = self._match_response(pathname, typing.cast(OpenAPISpecification, spec), request)
+        response = self._match_response(
+            pathname, typing.cast(OpenAPISpecification, spec), request
+        )
         return self._callback_manager(request, response, storage)
