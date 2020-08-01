@@ -138,6 +138,6 @@ Here is a list of integrations that exist or are in development:
 
 ## Next up: Building with HMT
 
-After you've recorded your API traffic with `hmt record`, you can use that data to to build an OpenAPI specification via the HMT CLI. 
+After you've recorded your API traffic with `hmt record`, you can use that data to build an OpenAPI specification via the HMT CLI. 
 
 To learn how, visit our [building documentation](./BUILD.md).

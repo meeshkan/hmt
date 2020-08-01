@@ -328,7 +328,7 @@ def update_operation(
             response = update_response(existing_response, mode, exchange)
         else:
             raise ValueError(
-                "Meeshkan is not smart enough to build responses from references yet. Coming soon!"
+                "HMT is not smart enough to build responses from references yet. Coming soon!"
             )
     else:
         response = build_response(exchange, mode)
