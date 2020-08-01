@@ -92,7 +92,7 @@ async def read_stream(p, server_started):
     try:
         while p.poll() is None:
             line = p.stdout.readline()
-            if "Meeshkan is running" in line:
+            if "HMT is running" in line:
                 server_started.set_result(0)
             await asyncio.sleep(0.1)
     finally:
