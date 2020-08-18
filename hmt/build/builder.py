@@ -384,11 +384,6 @@ def update_operation(
 T = TypeVar("T")
 
 
-def verify_not_ref(item: Union[Reference, Any], expected_type: Type[T]) -> T:
-    assert not "$ref" in item, "Did not expect a reference"
-    return cast(T, item)
-
-
 def update_openapi(
     schema: OpenAPIObject, exchange: HttpExchange, mode: UpdateMode
 ) -> OpenAPIObject:
