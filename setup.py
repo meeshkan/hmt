@@ -35,7 +35,7 @@ REQUIRED = [
     "faust",
     # mock
     "tornado==5.1.1",
-    "urllib3==1.25.10",
+    "urllib3==1.26.5",
     "meeshkan-daemonocle",
     # tutorial
     "clint",
