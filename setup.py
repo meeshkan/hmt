@@ -8,7 +8,7 @@ from setuptools import Command, find_packages, setup
 # Package meta-data.
 NAME = "hmt"
 DESCRIPTION = "Reverse engineer services with style"
-URL = "http://github.com/hmt/hmt"
+URL = "https://github.com/meeshkan/hmt"
 EMAIL = "dev@hmt.com"
 AUTHOR = "Meeshkan Dev Team"
 REQUIRES_PYTHON = ">=3.6.0"
